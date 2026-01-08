@@ -102,7 +102,7 @@ changelog:
 release:
   github:
     owner: kevinelliott
-    name: agentmgr
+    name: agentmanager
   draft: false
   prerelease: auto
   name_template: "{{.ProjectName}} v{{.Version}}"
@@ -113,7 +113,7 @@ release:
 
     **macOS (Homebrew)**
     ```bash
-    brew install kevinelliott/tap/agentmgr
+    brew install kevinelliott/tap/agentmanager
     ```
 
     **Download Binary**
@@ -121,11 +121,11 @@ release:
 
     **Go Install**
     ```bash
-    go install github.com/kevinelliott/agentmgr/cmd/agentmgr@v{{.Version}}
+    go install github.com/kevinelliott/agentmanager/cmd/agentmgr@v{{.Version}}
     ```
 
 brews:
-  - name: agentmgr
+  - name: agentmanager
     repository:
       owner: kevinelliott
       name: homebrew-tap
@@ -134,7 +134,7 @@ brews:
       name: goreleaserbot
       email: bot@goreleaser.com
     directory: Formula
-    homepage: "https://github.com/kevinelliott/agentmgr"
+    homepage: "https://github.com/kevinelliott/agentmanager"
     description: "CLI tool for managing AI development agents"
     license: "MIT"
     skip_upload: auto
@@ -146,9 +146,9 @@ brews:
 
 nfpms:
   - id: packages
-    package_name: agentmgr
+    package_name: agentmanager
     vendor: Kevin Elliott
-    homepage: https://github.com/kevinelliott/agentmgr
+    homepage: https://github.com/kevinelliott/agentmanager
     maintainer: Kevin Elliott <kevin@kevinelliott.com>
     description: CLI tool for managing AI development agents
     license: MIT
