@@ -1,0 +1,166 @@
+# GoReleaser configuration for AgentManager
+# Documentation: https://goreleaser.com
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  # CLI binary
+  - id: agentmgr
+    main: ./cmd/agentmgr
+    binary: agentmgr
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  # Helper binary
+  - id: agentmgr-helper
+    main: ./cmd/agentmgr-helper
+    binary: agentmgr-helper
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - LICENSE*
+      - README*
+      - catalog.json
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - Merge pull request
+      - Merge branch
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
+      order: 0
+    - title: Bug Fixes
+      regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
+      order: 1
+    - title: Performance
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 2
+    - title: Other
+      order: 999
+
+release:
+  github:
+    owner: kevinelliott
+    name: agentmgr
+  draft: false
+  prerelease: auto
+  name_template: "{{.ProjectName}} v{{.Version}}"
+  header: |
+    ## AgentManager v{{.Version}}
+
+    ### Installation
+
+    **macOS (Homebrew)**
+    ```bash
+    brew install kevinelliott/tap/agentmgr
+    ```
+
+    **Download Binary**
+    Download the appropriate binary for your platform from the assets below.
+
+    **Go Install**
+    ```bash
+    go install github.com/kevinelliott/agentmgr/cmd/agentmgr@v{{.Version}}
+    ```
+
+brews:
+  - name: agentmgr
+    repository:
+      owner: kevinelliott
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    directory: Formula
+    homepage: "https://github.com/kevinelliott/agentmgr"
+    description: "CLI tool for managing AI development agents"
+    license: "MIT"
+    skip_upload: auto
+    test: |
+      system "#{bin}/agentmgr", "version"
+    install: |
+      bin.install "agentmgr"
+      bin.install "agentmgr-helper"
+
+nfpms:
+  - id: packages
+    package_name: agentmgr
+    vendor: Kevin Elliott
+    homepage: https://github.com/kevinelliott/agentmgr
+    maintainer: Kevin Elliott <kevin@kevinelliott.com>
+    description: CLI tool for managing AI development agents
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    contents:
+      - src: ./catalog.json
+        dst: /usr/share/agentmgr/catalog.json
+        type: config
+
+announce:
+  skip: true

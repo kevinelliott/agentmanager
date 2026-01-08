@@ -1,0 +1,237 @@
+syntax = "proto3";
+
+package agentmgr.v1;
+
+option go_package = "github.com/kevinelliott/agentmgr/pkg/api/grpc/pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// AgentManagerService provides agent management capabilities.
+service AgentManagerService {
+  // Agent operations
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
+  rpc GetAgent(GetAgentRequest) returns (GetAgentResponse);
+  rpc InstallAgent(InstallAgentRequest) returns (InstallAgentResponse);
+  rpc UpdateAgent(UpdateAgentRequest) returns (UpdateAgentResponse);
+  rpc UninstallAgent(UninstallAgentRequest) returns (UninstallAgentResponse);
+
+  // Catalog operations
+  rpc ListCatalog(ListCatalogRequest) returns (ListCatalogResponse);
+  rpc GetCatalogAgent(GetCatalogAgentRequest) returns (GetCatalogAgentResponse);
+  rpc RefreshCatalog(google.protobuf.Empty) returns (RefreshCatalogResponse);
+  rpc SearchCatalog(SearchCatalogRequest) returns (SearchCatalogResponse);
+
+  // Update operations
+  rpc CheckUpdates(google.protobuf.Empty) returns (CheckUpdatesResponse);
+  rpc GetChangelog(GetChangelogRequest) returns (GetChangelogResponse);
+
+  // Status operations
+  rpc GetStatus(google.protobuf.Empty) returns (StatusResponse);
+
+  // Streaming operations
+  rpc WatchAgents(google.protobuf.Empty) returns (stream AgentEvent);
+}
+
+// Installation represents an installed agent.
+message Installation {
+  string key = 1;
+  string agent_id = 2;
+  string agent_name = 3;
+  string install_method = 4;
+  string installed_version = 5;
+  string latest_version = 6;
+  string executable_path = 7;
+  string install_path = 8;
+  bool is_global = 9;
+  google.protobuf.Timestamp detected_at = 10;
+  google.protobuf.Timestamp last_checked = 11;
+  map<string, string> metadata = 12;
+  bool has_update = 13;
+  string status = 14;
+}
+
+// CatalogAgent represents an agent in the catalog.
+message CatalogAgent {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string homepage = 4;
+  string repository = 5;
+  repeated InstallMethodDef install_methods = 6;
+}
+
+// InstallMethodDef defines an installation method.
+message InstallMethodDef {
+  string method = 1;
+  string package = 2;
+  string command = 3;
+  repeated string platforms = 4;
+}
+
+// Filter for listing agents.
+message AgentFilter {
+  repeated string agent_ids = 1;
+  repeated string methods = 2;
+  bool has_update = 3;
+  bool is_global = 4;
+  string query = 5;
+}
+
+// ListAgentsRequest requests a list of agents.
+message ListAgentsRequest {
+  AgentFilter filter = 1;
+  string sort_by = 2;
+  string sort_order = 3;
+  int32 limit = 4;
+  int32 offset = 5;
+}
+
+// ListAgentsResponse contains the list of agents.
+message ListAgentsResponse {
+  repeated Installation agents = 1;
+  int32 total = 2;
+}
+
+// GetAgentRequest requests a specific agent.
+message GetAgentRequest {
+  string key = 1;
+}
+
+// GetAgentResponse contains the agent details.
+message GetAgentResponse {
+  Installation agent = 1;
+}
+
+// InstallAgentRequest requests agent installation.
+message InstallAgentRequest {
+  string agent_id = 1;
+  string method = 2;
+  bool global = 3;
+}
+
+// InstallAgentResponse contains the installation result.
+message InstallAgentResponse {
+  Installation installation = 1;
+  bool success = 2;
+  string message = 3;
+}
+
+// UpdateAgentRequest requests an agent update.
+message UpdateAgentRequest {
+  string key = 1;
+}
+
+// UpdateAgentResponse contains the update result.
+message UpdateAgentResponse {
+  Installation installation = 1;
+  string from_version = 2;
+  string to_version = 3;
+  bool success = 4;
+  string message = 5;
+}
+
+// UninstallAgentRequest requests agent uninstallation.
+message UninstallAgentRequest {
+  string key = 1;
+}
+
+// UninstallAgentResponse contains the uninstallation result.
+message UninstallAgentResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ListCatalogRequest requests the catalog list.
+message ListCatalogRequest {
+  string platform = 1;
+}
+
+// ListCatalogResponse contains the catalog list.
+message ListCatalogResponse {
+  repeated CatalogAgent agents = 1;
+  int32 total = 2;
+}
+
+// GetCatalogAgentRequest requests a catalog agent.
+message GetCatalogAgentRequest {
+  string agent_id = 1;
+}
+
+// GetCatalogAgentResponse contains the catalog agent.
+message GetCatalogAgentResponse {
+  CatalogAgent agent = 1;
+}
+
+// RefreshCatalogResponse contains the refresh result.
+message RefreshCatalogResponse {
+  bool success = 1;
+  string message = 2;
+  int32 agent_count = 3;
+}
+
+// SearchCatalogRequest requests a catalog search.
+message SearchCatalogRequest {
+  string query = 1;
+  string platform = 2;
+}
+
+// SearchCatalogResponse contains the search results.
+message SearchCatalogResponse {
+  repeated CatalogAgent agents = 1;
+  int32 total = 2;
+}
+
+// CheckUpdatesResponse contains update check results.
+message CheckUpdatesResponse {
+  repeated UpdateInfo updates = 1;
+  int32 total = 2;
+}
+
+// UpdateInfo contains information about an available update.
+message UpdateInfo {
+  Installation installation = 1;
+  string from_version = 2;
+  string to_version = 3;
+}
+
+// GetChangelogRequest requests a changelog.
+message GetChangelogRequest {
+  string agent_id = 1;
+  string from_version = 2;
+  string to_version = 3;
+}
+
+// GetChangelogResponse contains the changelog.
+message GetChangelogResponse {
+  string changelog = 1;
+  repeated Release releases = 2;
+}
+
+// Release represents a single release.
+message Release {
+  string version = 1;
+  string title = 2;
+  string body = 3;
+  repeated string highlights = 4;
+  google.protobuf.Timestamp published_at = 5;
+  string url = 6;
+}
+
+// StatusResponse contains the service status.
+message StatusResponse {
+  bool running = 1;
+  int64 uptime_seconds = 2;
+  int32 agent_count = 3;
+  int32 updates_available = 4;
+  google.protobuf.Timestamp last_catalog_refresh = 5;
+  google.protobuf.Timestamp last_update_check = 6;
+  string version = 7;
+}
+
+// AgentEvent represents an agent-related event.
+message AgentEvent {
+  string type = 1; // "added", "updated", "removed", "update_available"
+  Installation installation = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}

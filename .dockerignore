@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+bin/
+dist/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*_test.go
+testdata/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.goreleaser.yml
+
+# Local development
+.env
+.env.local
+*.log

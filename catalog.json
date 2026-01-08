@@ -1,0 +1,392 @@
+{
+  "version": "1.0.0",
+  "schema_version": 1,
+  "last_updated": "2025-01-07T00:00:00Z",
+  "agents": {
+    "claude-code": {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "description": "Anthropic's official CLI for Claude AI pair programming",
+      "homepage": "https://claude.ai/claude-code",
+      "repository": "https://github.com/anthropics/claude-code",
+      "documentation": "https://docs.anthropic.com/claude-code",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@anthropic-ai/claude-code",
+          "command": "npm install -g @anthropic-ai/claude-code",
+          "update_cmd": "npm update -g @anthropic-ai/claude-code",
+          "uninstall_cmd": "npm uninstall -g @anthropic-ai/claude-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=18"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://claude.ai/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["claude", "claude-code"],
+        "version_cmd": "claude --version",
+        "version_regex": "claude-code version ([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @anthropic-ai/claude-code --json"
+          },
+          "native": {
+            "paths": ["~/.claude/bin/claude", "/usr/local/bin/claude"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/anthropics/claude-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Anthropic",
+        "license": "Proprietary"
+      }
+    },
+    "aider": {
+      "id": "aider",
+      "name": "Aider",
+      "description": "AI pair programming in your terminal",
+      "homepage": "https://aider.chat",
+      "repository": "https://github.com/Aider-AI/aider",
+      "documentation": "https://aider.chat/docs/",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "aider-chat",
+          "command": "pip install aider-chat",
+          "update_cmd": "pip install --upgrade aider-chat",
+          "uninstall_cmd": "pip uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.9"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "aider-chat",
+          "command": "pipx install aider-chat",
+          "update_cmd": "pipx upgrade aider-chat",
+          "uninstall_cmd": "pipx uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "aider-chat",
+          "command": "uv tool install aider-chat",
+          "update_cmd": "uv tool upgrade aider-chat",
+          "uninstall_cmd": "uv tool uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv"]
+        }
+      },
+      "detection": {
+        "executables": ["aider"],
+        "version_cmd": "aider --version",
+        "version_regex": "aider ([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Aider-AI/aider/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Paul Gauthier",
+        "license": "Apache-2.0"
+      }
+    },
+    "copilot-cli": {
+      "id": "copilot-cli",
+      "name": "GitHub Copilot CLI",
+      "description": "GitHub Copilot in the command line",
+      "homepage": "https://github.com/features/copilot/cli",
+      "repository": "https://github.com/github/copilot-cli",
+      "documentation": "https://docs.github.com/en/copilot/github-copilot-in-the-cli",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@github/copilot",
+          "command": "npm install -g @github/copilot",
+          "update_cmd": "npm update -g @github/copilot",
+          "uninstall_cmd": "npm uninstall -g @github/copilot",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=22"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "copilot-cli@prerelease",
+          "command": "brew install copilot-cli@prerelease",
+          "update_cmd": "brew upgrade copilot-cli@prerelease",
+          "uninstall_cmd": "brew uninstall copilot-cli@prerelease",
+          "platforms": ["darwin", "linux"]
+        },
+        "winget": {
+          "method": "winget",
+          "package": "GitHub.Copilot",
+          "command": "winget install GitHub.Copilot",
+          "update_cmd": "winget upgrade GitHub.Copilot",
+          "uninstall_cmd": "winget uninstall GitHub.Copilot",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["copilot", "github-copilot-cli"],
+        "version_cmd": "copilot --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/github/copilot-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "GitHub",
+        "license": "Proprietary"
+      }
+    },
+    "gemini-cli": {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "description": "Google's Gemini AI in your terminal",
+      "homepage": "https://developers.google.com/gemini-code-assist/docs/gemini-cli",
+      "repository": "https://github.com/google-gemini/gemini-cli",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@google-gemini/gemini-cli",
+          "command": "npm install -g @google-gemini/gemini-cli",
+          "update_cmd": "npm update -g @google-gemini/gemini-cli",
+          "uninstall_cmd": "npm uninstall -g @google-gemini/gemini-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["gemini", "gemini-cli"],
+        "version_cmd": "gemini --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/google-gemini/gemini-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Google",
+        "license": "Apache-2.0"
+      }
+    },
+    "continue-cli": {
+      "id": "continue-cli",
+      "name": "Continue CLI",
+      "description": "Open-source AI code assistant CLI",
+      "homepage": "https://continue.dev",
+      "repository": "https://github.com/continuedev/continue",
+      "documentation": "https://docs.continue.dev/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@continuedev/cli",
+          "command": "npm install -g @continuedev/cli",
+          "update_cmd": "npm update -g @continuedev/cli",
+          "uninstall_cmd": "npm uninstall -g @continuedev/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["cn", "continue"],
+        "version_cmd": "cn --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/continuedev/continue/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Continue",
+        "license": "Apache-2.0"
+      }
+    },
+    "opencode": {
+      "id": "opencode",
+      "name": "OpenCode",
+      "description": "The open source AI coding agent for your terminal",
+      "homepage": "https://opencode.ai",
+      "repository": "https://github.com/opencode-ai/opencode",
+      "documentation": "https://opencode.ai/docs/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "opencode-ai",
+          "command": "npm install -g opencode-ai",
+          "update_cmd": "npm update -g opencode-ai",
+          "uninstall_cmd": "npm uninstall -g opencode-ai",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "anomalyco/tap/opencode",
+          "command": "brew install anomalyco/tap/opencode",
+          "update_cmd": "brew upgrade opencode",
+          "uninstall_cmd": "brew uninstall opencode",
+          "platforms": ["darwin", "linux"]
+        },
+        "scoop": {
+          "method": "scoop",
+          "package": "opencode",
+          "command": "scoop bucket add extras && scoop install extras/opencode",
+          "update_cmd": "scoop update opencode",
+          "uninstall_cmd": "scoop uninstall opencode",
+          "platforms": ["windows"]
+        },
+        "chocolatey": {
+          "method": "chocolatey",
+          "package": "opencode",
+          "command": "choco install opencode",
+          "update_cmd": "choco upgrade opencode",
+          "uninstall_cmd": "choco uninstall opencode",
+          "platforms": ["windows"]
+        },
+        "curl": {
+          "method": "curl",
+          "command": "curl -fsSL https://opencode.ai/install | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["opencode"],
+        "version_cmd": "opencode --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/opencode-ai/opencode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Anomaly",
+        "license": "MIT"
+      }
+    },
+    "cursor-cli": {
+      "id": "cursor-cli",
+      "name": "Cursor CLI",
+      "description": "Cursor AI editor CLI agent",
+      "homepage": "https://cursor.com",
+      "documentation": "https://cursor.com/docs/cli/overview",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl https://cursor.com/install -fsSL | bash",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["cursor-agent", "cursor"],
+        "version_cmd": "cursor-agent --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://cursor.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Cursor",
+        "license": "Proprietary"
+      }
+    },
+    "qoder-cli": {
+      "id": "qoder-cli",
+      "name": "Qoder CLI",
+      "description": "Qoder AI coding assistant CLI",
+      "homepage": "https://qoder.com",
+      "documentation": "https://docs.qoder.com",
+      "install_methods": {
+        "binary": {
+          "method": "binary",
+          "command": "Download from https://qoder.com/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://qoder.com/cli",
+            "binary_name": "qoder"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["qoder"],
+        "version_cmd": "qoder --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://qoder.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Alibaba",
+        "license": "Proprietary"
+      }
+    },
+    "amazon-q": {
+      "id": "amazon-q",
+      "name": "Amazon Q Developer CLI",
+      "description": "Amazon's AI-powered developer assistant",
+      "homepage": "https://aws.amazon.com/q/developer",
+      "repository": "https://github.com/aws/amazon-q-developer-cli",
+      "documentation": "https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "amazon-q",
+          "command": "brew install --cask amazon-q",
+          "update_cmd": "brew upgrade --cask amazon-q",
+          "uninstall_cmd": "brew uninstall --cask amazon-q",
+          "platforms": ["darwin"]
+        },
+        "native": {
+          "method": "native",
+          "command": "Download from https://aws.amazon.com/q/developer",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "installer_type": "pkg",
+            "manual": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["q", "amazon-q"],
+        "version_cmd": "q --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/aws/amazon-q-developer-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Amazon Web Services",
+        "license": "Apache-2.0"
+      }
+    }
+  }
+}

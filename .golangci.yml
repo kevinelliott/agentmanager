@@ -1,0 +1,229 @@
+# golangci-lint configuration
+# https://golangci-lint.run/usage/configuration/
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+output:
+  formats:
+    - format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+
+linters:
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - errcheck
+    # - exhaustive  # Disabled: default case is often cleaner than listing all enum values
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    # - goprintffuncname  # Disabled: prefer readable names like printSuccess over printSuccessf
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - prealloc
+    - revive
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    # - unparam  # Disabled: many intentionally unused params for API consistency
+    - unused
+    - whitespace
+
+  disable:
+    - depguard
+    - funlen
+    - gochecknoglobals
+    - gochecknoinits
+    - godot
+    - godox
+    - err113  # renamed from goerr113
+    - mnd     # renamed from gomnd (magic number detector)
+    - lll
+    - nlreturn
+    - testpackage
+    - wrapcheck
+    - wsl
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - hugeParam         # Allow value receivers for better API ergonomics
+      - paramTypeCombine
+      - regexpSimplify
+      - rangeValCopy      # Allow range by value for readability
+      - emptyStringTest   # len(s) > 0 is acceptable
+      - httpNoBody        # nil body is fine for GET requests
+      - nestingReduce     # Style preference
+      - sprintfQuotedString
+      - unnamedResult     # Style preference - explicit returns can be clearer
+      - stringXbytes
+
+  gocyclo:
+    min-complexity: 25  # Allow slightly complex test functions
+
+  goimports:
+    local-prefixes: github.com/kevinelliott/agentmgr
+
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+      - shadow
+
+  misspell:
+    locale: US
+
+  nakedret:
+    max-func-lines: 30
+
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: true
+
+  revive:
+    ignore-generated-header: true
+    severity: warning
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - dupl
+        - goconst
+        - gosec
+        - govet       # Allow unused writes in test data setup
+        - prealloc
+        - staticcheck
+
+    # Exclude known false positives
+    - path: pkg/platform/
+      linters:
+        - dupl
+
+    # Allow dot imports in test files
+    - path: _test\.go
+      text: "dot-imports"
+
+    # Version parsing errors intentionally ignored in detection (returns zero version)
+    - path: pkg/detector/strategies/
+      linters:
+        - errcheck
+      text: "ParseVersion"
+
+    # IPC intentionally ignores some send errors (fire-and-forget)
+    - path: pkg/ipc/
+      linters:
+        - errcheck
+
+    # Platform code intentionally ignores some errors
+    - path: pkg/platform/
+      linters:
+        - errcheck
+      text: "Run"
+
+    # Installer providers can ignore version parse errors
+    - path: pkg/installer/providers/
+      linters:
+        - errcheck
+      text: "ParseVersion"
+
+    # API servers have some intentional fire-and-forget patterns
+    - path: pkg/api/
+      linters:
+        - errcheck
+
+    # CLI has some intentional ignores (user prompts, etc.)
+    - path: internal/cli/
+      linters:
+        - errcheck
+      text: "Scanln|Encode"
+
+    # Systray has async patterns where errors are logged separately
+    - path: internal/systray/
+      linters:
+        - errcheck
+
+    # Installer has intentional string constants for clarity
+    - path: pkg/installer/
+      linters:
+        - goconst
+
+    # Storage uses "cancelled" as intentional spelling (British English for status values)
+    - path: pkg/storage/
+      text: "cancelled"
+      linters:
+        - misspell
+
+    # Allow prealloc suggestions in main code
+    - linters:
+        - prealloc
+      text: "Consider pre-allocating"
+
+    # Allow empty branches for error logging
+    - linters:
+        - staticcheck
+      text: "SA9003"
+
+    # Allow G306 for config files
+    - linters:
+        - gosec
+      text: "G306"
+
+    # Version vars set by ldflags
+    - path: cmd/
+      linters:
+        - unused
+      text: "version|commit|date"
+
+    # Detection strategies have intentional string constants
+    - path: pkg/detector/strategies/
+      linters:
+        - goconst
+
+    # G204 in detection is intentional (executing version commands)
+    - path: pkg/detector/strategies/
+      linters:
+        - gosec
+      text: "G204"
+
+  exclude-dirs:
+    - vendor
+    - third_party
+    - testdata
+
+  max-issues-per-linter: 50
+  max-same-issues: 10
