@@ -31,13 +31,13 @@ make install
 ### Homebrew (macOS)
 
 ```bash
-brew install kevinelliott/tap/agentmgr
+brew install kevinelliott/tap/agentmanager
 ```
 
 ### Go Install
 
 ```bash
-go install github.com/kevinelliott/agentmgr/cmd/agentmgr@latest
+go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest
 ```
 
 ## Quick Start
@@ -124,9 +124,9 @@ AgentManager can be used as a Go library:
 
 ```go
 import (
-    "github.com/kevinelliott/agentmgr/pkg/detector"
-    "github.com/kevinelliott/agentmgr/pkg/catalog"
-    "github.com/kevinelliott/agentmgr/pkg/installer"
+    "github.com/kevinelliott/agentmanager/pkg/detector"
+    "github.com/kevinelliott/agentmanager/pkg/catalog"
+    "github.com/kevinelliott/agentmanager/pkg/installer"
 )
 
 // Create a detector
@@ -195,7 +195,7 @@ make test-coverage
 ### Project Structure
 
 ```
-agentmgr/
+agentmanager/
 ├── cmd/
 │   ├── agentmgr/           # CLI/TUI binary
 │   └── agentmgr-helper/    # Systray binary
