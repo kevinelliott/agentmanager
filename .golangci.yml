@@ -182,6 +182,11 @@ issues:
       linters:
         - goconst
 
+    # CLI has intentional string constants for output formats
+    - path: internal/cli/
+      linters:
+        - goconst
+
     # Storage uses "cancelled" as intentional spelling (British English for status values)
     - path: pkg/storage/
       text: "cancelled"
