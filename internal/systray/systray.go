@@ -4,6 +4,9 @@ package systray
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -480,13 +483,58 @@ func (a *App) handleAgentUpdate(item *agentMenuItem) {
 		case <-a.ctx.Done():
 			return
 		case <-item.updateItem.ClickedCh:
-			// In a real implementation, this would trigger the update
-			a.platform.ShowNotification(
-				"Update Started",
-				fmt.Sprintf("Updating %s...", item.installation.AgentName),
-			)
+			go a.updateSingleAgent(item.installation)
 		}
 	}
+}
+
+// updateSingleAgent updates a single agent installation.
+func (a *App) updateSingleAgent(inst agent.Installation) {
+	a.platform.ShowNotification(
+		"Update Started",
+		fmt.Sprintf("Updating %s...", inst.AgentName),
+	)
+
+	ctx, cancel := context.WithTimeout(a.ctx, 10*time.Minute)
+	defer cancel()
+
+	// Get agent definition from catalog
+	agentDef, err := a.catalog.GetAgent(ctx, inst.AgentID)
+	if err != nil {
+		a.platform.ShowNotification(
+			"Update Failed",
+			fmt.Sprintf("Failed to find %s in catalog: %v", inst.AgentName, err),
+		)
+		return
+	}
+
+	// Find the install method
+	methodDef, ok := agentDef.GetInstallMethod(string(inst.Method))
+	if !ok {
+		a.platform.ShowNotification(
+			"Update Failed",
+			fmt.Sprintf("Install method %s not available for %s", inst.Method, inst.AgentName),
+		)
+		return
+	}
+
+	// Perform the update
+	result, err := a.installer.Update(ctx, &inst, *agentDef, methodDef)
+	if err != nil {
+		a.platform.ShowNotification(
+			"Update Failed",
+			fmt.Sprintf("Failed to update %s: %v", inst.AgentName, err),
+		)
+		return
+	}
+
+	a.platform.ShowNotification(
+		"Update Complete",
+		fmt.Sprintf("%s updated to %s", inst.AgentName, result.Version.String()),
+	)
+
+	// Refresh agent list
+	a.refreshAgents(ctx)
 }
 
 // handleAgentInfo handles info clicks for an agent.
@@ -537,13 +585,154 @@ func (a *App) updateAllAgents(ctx context.Context) {
 		fmt.Sprintf("Updating %d agents...", len(toUpdate)),
 	)
 
-	// In a real implementation, this would trigger updates via the installer
+	// Update each agent sequentially
+	var succeeded, failed int
+	for _, inst := range toUpdate {
+		updateCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
+
+		// Get agent definition from catalog
+		agentDef, err := a.catalog.GetAgent(updateCtx, inst.AgentID)
+		if err != nil {
+			failed++
+			cancel()
+			continue
+		}
+
+		// Find the install method
+		methodDef, ok := agentDef.GetInstallMethod(string(inst.Method))
+		if !ok {
+			failed++
+			cancel()
+			continue
+		}
+
+		// Perform the update
+		_, err = a.installer.Update(updateCtx, &inst, *agentDef, methodDef)
+		if err != nil {
+			failed++
+		} else {
+			succeeded++
+		}
+		cancel()
+	}
+
+	// Show completion notification
+	if failed == 0 {
+		a.platform.ShowNotification(
+			"Updates Complete",
+			fmt.Sprintf("Successfully updated %d agents", succeeded),
+		)
+	} else {
+		a.platform.ShowNotification(
+			"Updates Complete",
+			fmt.Sprintf("Updated %d agents, %d failed", succeeded, failed),
+		)
+	}
+
+	// Refresh agent list
+	a.refreshAgents(ctx)
 }
 
-// openTUI launches the TUI application.
+// openTUI launches the TUI application in a new terminal window.
 func (a *App) openTUI() {
-	// This would launch the TUI in a new terminal window
-	// Platform-specific implementation
+	// Find the agentmgr binary
+	agentmgrPath, err := findAgentMgrBinary()
+	if err != nil {
+		a.platform.ShowNotification("Error", "Could not find agentmgr binary")
+		return
+	}
+
+	// Launch TUI based on platform
+	var cmd *exec.Cmd
+	switch a.platform.ID() {
+	case platform.Darwin:
+		// Use osascript to open Terminal with the TUI command
+		script := fmt.Sprintf(`tell application "Terminal"
+			activate
+			do script "%s tui"
+		end tell`, agentmgrPath)
+		cmd = exec.Command("osascript", "-e", script)
+	case platform.Linux:
+		// Try common terminal emulators in order of preference
+		terminals := []struct {
+			name string
+			args []string
+		}{
+			{"gnome-terminal", []string{"--", agentmgrPath, "tui"}},
+			{"konsole", []string{"-e", agentmgrPath, "tui"}},
+			{"xfce4-terminal", []string{"-e", agentmgrPath + " tui"}},
+			{"xterm", []string{"-e", agentmgrPath, "tui"}},
+		}
+		for _, term := range terminals {
+			if _, err := exec.LookPath(term.name); err == nil {
+				cmd = exec.Command(term.name, term.args...) //nolint:gosec // Safe: iterating hardcoded terminal list
+				break
+			}
+		}
+		if cmd == nil {
+			a.platform.ShowNotification("Error", "No supported terminal emulator found")
+			return
+		}
+	case platform.Windows:
+		// Use cmd.exe to open a new window with the TUI
+		cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", agentmgrPath, "tui")
+	default:
+		a.platform.ShowNotification("Error", "Unsupported platform")
+		return
+	}
+
+	// Start the command (don't wait for it)
+	if err := cmd.Start(); err != nil {
+		a.platform.ShowNotification("Error", fmt.Sprintf("Failed to launch TUI: %v", err))
+		return
+	}
+
+	// Release the process so it runs independently
+	if cmd.Process != nil {
+		cmd.Process.Release()
+	}
+}
+
+// findAgentMgrBinary locates the agentmgr binary.
+func findAgentMgrBinary() (string, error) {
+	// First check PATH
+	if path, err := exec.LookPath("agentmgr"); err == nil {
+		return path, nil
+	}
+
+	// Check same directory as current executable (for helper binary)
+	if exe, err := os.Executable(); err == nil {
+		dir := filepath.Dir(exe)
+		agentmgrPath := filepath.Join(dir, "agentmgr")
+		if platform.IsWindows() {
+			agentmgrPath += ".exe"
+		}
+		if _, err := os.Stat(agentmgrPath); err == nil {
+			return agentmgrPath, nil
+		}
+	}
+
+	// Check common paths
+	paths := []string{
+		"/usr/local/bin/agentmgr",
+		"/usr/bin/agentmgr",
+	}
+
+	// Add home directory paths
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths,
+			filepath.Join(home, ".local", "bin", "agentmgr"),
+			filepath.Join(home, "go", "bin", "agentmgr"),
+		)
+	}
+
+	for _, path := range paths {
+		if _, err := os.Stat(path); err == nil {
+			return path, nil
+		}
+	}
+
+	return "", fmt.Errorf("agentmgr not found in PATH or common locations")
 }
 
 // toggleAutoStart toggles the auto-start setting.

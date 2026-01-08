@@ -2,12 +2,14 @@ package grpc
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/kevinelliott/agentmgr/pkg/agent"
@@ -83,7 +85,18 @@ func (s *Server) Start(ctx context.Context, cfg ServerConfig) error {
 	// Create gRPC server with options
 	opts := []grpc.ServerOption{}
 
-	// TODO: Add TLS support if configured
+	// Add TLS support if configured
+	if cfg.TLS && cfg.CertFile != "" && cfg.KeyFile != "" {
+		cert, err := tls.LoadX509KeyPair(cfg.CertFile, cfg.KeyFile)
+		if err != nil {
+			return fmt.Errorf("failed to load TLS credentials: %w", err)
+		}
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			MinVersion:   tls.VersionTLS12,
+		}
+		opts = append(opts, grpc.Creds(credentials.NewTLS(tlsConfig)))
+	}
 
 	s.grpcServer = grpc.NewServer(opts...)
 
