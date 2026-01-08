@@ -1,15 +1,23 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmgr/pkg/catalog"
 	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmgr/pkg/detector"
+	"github.com/kevinelliott/agentmgr/pkg/installer"
+	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmgr/pkg/storage"
 )
 
 // NewAgentCommand creates the agent management command group.
@@ -38,10 +46,11 @@ detailed information about agents.`,
 
 func newAgentListCommand(cfg *config.Config) *cobra.Command {
 	var (
-		showAll    bool
-		showHidden bool
-		format     string
-		hasUpdate  bool
+		showAll      bool
+		showHidden   bool
+		format       string
+		updatesOnly  bool
+		checkUpdates bool
 	)
 
 	cmd := &cobra.Command{
@@ -54,21 +63,87 @@ native installers, etc.) and displays their current version, installation
 method, and update status.`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: Implement actual detection
-			// For now, show a placeholder message
+			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			defer cancel()
 
-			if format == "json" {
-				return outputAgentsJSON([]AgentListItem{})
+			// Get current platform
+			plat := platform.Current()
+
+			// Load catalog
+			store, err := storage.NewSQLiteStore(plat.GetDataDir())
+			if err != nil {
+				return fmt.Errorf("failed to create storage: %w", err)
+			}
+			defer store.Close()
+
+			if err := store.Initialize(ctx); err != nil {
+				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
-			return outputAgentsTable([]AgentListItem{}, cfg)
+			catMgr := catalog.NewManager(cfg, store)
+
+			// Get agents for current platform
+			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
+			if err != nil {
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
+
+			// Create detector and detect agents
+			det := detector.New(plat)
+			installations, err := det.DetectAll(ctx, agentDefs)
+			if err != nil {
+				return fmt.Errorf("detection failed: %w", err)
+			}
+
+			// Apply filters
+			var filtered []*agent.Installation
+			for _, inst := range installations {
+				// Skip hidden agents unless --hidden flag
+				if !showHidden && cfg.IsAgentHidden(inst.AgentID) {
+					continue
+				}
+
+				// Filter for updates only if requested
+				if updatesOnly && !inst.HasUpdate() {
+					continue
+				}
+
+				filtered = append(filtered, inst)
+			}
+
+			// Convert to list items
+			items := make([]AgentListItem, 0, len(filtered))
+			for _, inst := range filtered {
+				latestVer := ""
+				if inst.LatestVersion != nil {
+					latestVer = inst.LatestVersion.String()
+				}
+
+				items = append(items, AgentListItem{
+					ID:            inst.AgentID,
+					Name:          inst.AgentName,
+					Method:        string(inst.Method),
+					Version:       inst.InstalledVersion.String(),
+					LatestVersion: latestVer,
+					HasUpdate:     inst.HasUpdate(),
+					Path:          inst.ExecutablePath,
+					Status:        string(inst.GetStatus()),
+				})
+			}
+
+			if format == "json" {
+				return outputAgentsJSON(items)
+			}
+
+			return outputAgentsTable(items, cfg)
 		},
 	}
 
 	cmd.Flags().BoolVarP(&showAll, "all", "a", false, "show all installations")
 	cmd.Flags().BoolVar(&showHidden, "hidden", false, "show hidden agents")
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "output format (table, json)")
-	cmd.Flags().BoolVarP(&hasUpdate, "updates", "u", false, "show only agents with updates")
+	cmd.Flags().BoolVarP(&updatesOnly, "updates", "u", false, "show only agents with updates")
+	cmd.Flags().BoolVar(&checkUpdates, "check-updates", false, "check for available updates")
 
 	return cmd
 }
@@ -90,16 +165,67 @@ If no method is specified, the preferred method from the catalog or config
 will be used.`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			agentName := args[0]
+			agentID := args[0]
 
-			fmt.Printf("Installing %s", agentName)
-			if method != "" {
-				fmt.Printf(" via %s", method)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+			defer cancel()
+
+			// Get current platform
+			plat := platform.Current()
+
+			// Load catalog
+			store, err := storage.NewSQLiteStore(plat.GetDataDir())
+			if err != nil {
+				return fmt.Errorf("failed to create storage: %w", err)
 			}
-			fmt.Println("...")
+			defer store.Close()
 
-			// TODO: Implement actual installation
-			printSuccess("Installed %s successfully", agentName)
+			if err := store.Initialize(ctx); err != nil {
+				return fmt.Errorf("failed to initialize storage: %w", err)
+			}
+
+			catMgr := catalog.NewManager(cfg, store)
+			cat, err := catMgr.Get(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
+
+			// Find agent in catalog
+			agentDef, ok := cat.GetAgent(agentID)
+			if !ok {
+				return fmt.Errorf("agent %q not found in catalog", agentID)
+			}
+
+			// Determine installation method
+			if method == "" {
+				// Use preferred method from config or first available
+				if preferred := cfg.GetAgentConfig(agentID).PreferredMethod; preferred != "" {
+					method = preferred
+				} else {
+					methods := agentDef.GetSupportedMethods(string(plat.ID()))
+					if len(methods) == 0 {
+						return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
+					}
+					method = methods[0].Method
+				}
+			}
+
+			// Get method definition
+			methodDef, ok := agentDef.GetInstallMethod(method)
+			if !ok {
+				return fmt.Errorf("installation method %q not available for %q", method, agentID)
+			}
+
+			fmt.Printf("Installing %s via %s...\n", agentDef.Name, method)
+
+			// Create installer and install
+			inst := installer.NewManager(plat)
+			result, err := inst.Install(ctx, agentDef, methodDef, force)
+			if err != nil {
+				return fmt.Errorf("installation failed: %w", err)
+			}
+
+			printSuccess("Installed %s %s successfully", agentDef.Name, result.Version.String())
 			return nil
 		},
 	}

@@ -1,14 +1,20 @@
 package cli
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/kevinelliott/agentmgr/pkg/catalog"
 	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmgr/pkg/storage"
 )
 
 // NewCatalogCommand creates the catalog management command group.
@@ -36,8 +42,8 @@ sources.`,
 
 func newCatalogListCommand(cfg *config.Config) *cobra.Command {
 	var (
-		format   string
-		platform string
+		format     string
+		platformID string
 	)
 
 	cmd := &cobra.Command{
@@ -47,17 +53,51 @@ func newCatalogListCommand(cfg *config.Config) *cobra.Command {
 by platform compatibility.`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO: Load actual catalog
-			agents := []CatalogListItem{
-				{ID: "claude-code", Name: "Claude Code", Description: "Anthropic's official CLI for Claude AI pair programming", Methods: []string{"npm", "native"}},
-				{ID: "aider", Name: "Aider", Description: "AI pair programming in your terminal", Methods: []string{"pip", "pipx", "uv"}},
-				{ID: "copilot-cli", Name: "GitHub Copilot CLI", Description: "GitHub Copilot in the command line", Methods: []string{"npm", "brew", "winget"}},
-				{ID: "gemini-cli", Name: "Gemini CLI", Description: "Google's Gemini AI in your terminal", Methods: []string{"npm"}},
-				{ID: "continue-cli", Name: "Continue CLI", Description: "Open-source AI code assistant CLI", Methods: []string{"npm"}},
-				{ID: "opencode", Name: "OpenCode", Description: "The open source AI coding agent", Methods: []string{"npm", "brew", "scoop", "chocolatey", "curl"}},
-				{ID: "cursor-cli", Name: "Cursor CLI", Description: "Cursor AI editor CLI agent", Methods: []string{"native"}},
-				{ID: "qoder-cli", Name: "Qoder CLI", Description: "Qoder AI coding assistant CLI", Methods: []string{"binary"}},
-				{ID: "amazon-q", Name: "Amazon Q Developer", Description: "Amazon's AI-powered developer assistant", Methods: []string{"brew", "native"}},
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			// Get current platform
+			plat := platform.Current()
+			if platformID == "" {
+				platformID = string(plat.ID())
+			}
+
+			// Load catalog
+			store, err := storage.NewSQLiteStore(plat.GetDataDir())
+			if err != nil {
+				return fmt.Errorf("failed to create storage: %w", err)
+			}
+			defer store.Close()
+
+			if err := store.Initialize(ctx); err != nil {
+				return fmt.Errorf("failed to initialize storage: %w", err)
+			}
+
+			catMgr := catalog.NewManager(cfg, store)
+			cat, err := catMgr.Get(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
+
+			// Get agents for platform
+			var agents []CatalogListItem
+			for _, agentDef := range cat.Agents {
+				if !agentDef.IsSupported(platformID) {
+					continue
+				}
+
+				methods := agentDef.GetSupportedMethods(platformID)
+				methodNames := make([]string, 0, len(methods))
+				for _, m := range methods {
+					methodNames = append(methodNames, m.Method)
+				}
+
+				agents = append(agents, CatalogListItem{
+					ID:          agentDef.ID,
+					Name:        agentDef.Name,
+					Description: agentDef.Description,
+					Methods:     methodNames,
+				})
 			}
 
 			if format == "json" {
@@ -69,7 +109,7 @@ by platform compatibility.`,
 	}
 
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "output format (table, json)")
-	cmd.Flags().StringVarP(&platform, "platform", "p", "", "filter by platform (darwin, linux, windows)")
+	cmd.Flags().StringVarP(&platformID, "platform", "p", "", "filter by platform (darwin, linux, windows)")
 
 	return cmd
 }
@@ -108,11 +148,59 @@ func newCatalogSearchCommand(cfg *config.Config) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			query := args[0]
-			fmt.Printf("Searching for: %s\n\n", query)
 
-			// TODO: Implement actual search
-			fmt.Println("No results found.")
-			return nil
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			// Get current platform
+			plat := platform.Current()
+
+			// Load catalog
+			store, err := storage.NewSQLiteStore(plat.GetDataDir())
+			if err != nil {
+				return fmt.Errorf("failed to create storage: %w", err)
+			}
+			defer store.Close()
+
+			if err := store.Initialize(ctx); err != nil {
+				return fmt.Errorf("failed to initialize storage: %w", err)
+			}
+
+			catMgr := catalog.NewManager(cfg, store)
+			cat, err := catMgr.Get(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
+
+			// Search agents
+			results := cat.Search(query)
+			if len(results) == 0 {
+				fmt.Printf("No results found for %q\n", query)
+				return nil
+			}
+
+			// Convert to list items
+			var agents []CatalogListItem
+			for _, agentDef := range results {
+				methods := agentDef.GetSupportedMethods(string(plat.ID()))
+				methodNames := make([]string, 0, len(methods))
+				for _, m := range methods {
+					methodNames = append(methodNames, m.Method)
+				}
+
+				agents = append(agents, CatalogListItem{
+					ID:          agentDef.ID,
+					Name:        agentDef.Name,
+					Description: agentDef.Description,
+					Methods:     methodNames,
+				})
+			}
+
+			if format == "json" {
+				return outputCatalogJSON(agents)
+			}
+
+			return outputCatalogTable(agents)
 		},
 	}
 
