@@ -84,17 +84,17 @@ func CurrentArch() string {
 
 // IsDarwin returns true if running on macOS.
 func IsDarwin() bool {
-	return runtime.GOOS == "darwin"
+	return runtime.GOOS == string(Darwin)
 }
 
 // IsLinux returns true if running on Linux.
 func IsLinux() bool {
-	return runtime.GOOS == "linux"
+	return runtime.GOOS == string(Linux)
 }
 
 // IsWindows returns true if running on Windows.
 func IsWindows() bool {
-	return runtime.GOOS == "windows"
+	return runtime.GOOS == string(Windows)
 }
 
 // Supports returns true if the given platform ID is supported.
