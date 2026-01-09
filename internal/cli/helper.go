@@ -81,12 +81,15 @@ to agent status and updates.`,
 				return fmt.Errorf("failed to start helper: %w", err)
 			}
 
+			// Save PID before releasing (Release invalidates the Process)
+			pid := c.Process.Pid
+
 			// Detach from parent
 			if err := c.Process.Release(); err != nil {
 				return fmt.Errorf("failed to detach helper: %w", err)
 			}
 
-			printSuccess("Helper started (PID: %d)", c.Process.Pid)
+			printSuccess("Helper started (PID: %d)", pid)
 			return nil
 		},
 	}
