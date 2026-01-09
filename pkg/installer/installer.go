@@ -16,6 +16,7 @@ type Manager struct {
 	npm    *providers.NPMProvider
 	pip    *providers.PipProvider
 	brew   *providers.BrewProvider
+	winget *providers.WingetProvider
 	native *providers.NativeProvider
 	plat   platform.Platform
 }
@@ -26,6 +27,7 @@ func NewManager(p platform.Platform) *Manager {
 		npm:    providers.NewNPMProvider(p),
 		pip:    providers.NewPipProvider(p),
 		brew:   providers.NewBrewProvider(p),
+		winget: providers.NewWingetProvider(p),
 		native: providers.NewNativeProvider(p),
 		plat:   p,
 	}
@@ -51,6 +53,12 @@ func (m *Manager) Install(ctx context.Context, agentDef catalog.AgentDef, method
 			return nil, fmt.Errorf("brew is not available")
 		}
 		return m.brew.Install(ctx, agentDef, method, force)
+
+	case "winget":
+		if !m.winget.IsAvailable() {
+			return nil, fmt.Errorf("winget is not available")
+		}
+		return m.winget.Install(ctx, agentDef, method, force)
 
 	case "native", "curl", "binary":
 		return m.native.Install(ctx, agentDef, method, force)
@@ -81,6 +89,12 @@ func (m *Manager) Update(ctx context.Context, inst *agent.Installation, agentDef
 		}
 		return m.brew.Update(ctx, inst, agentDef, method)
 
+	case "winget":
+		if !m.winget.IsAvailable() {
+			return nil, fmt.Errorf("winget is not available")
+		}
+		return m.winget.Update(ctx, inst, agentDef, method)
+
 	case "native", "curl", "binary":
 		return m.native.Update(ctx, inst, agentDef, method)
 
@@ -109,6 +123,12 @@ func (m *Manager) Uninstall(ctx context.Context, inst *agent.Installation, metho
 			return fmt.Errorf("brew is not available")
 		}
 		return m.brew.Uninstall(ctx, inst, method)
+
+	case "winget":
+		if !m.winget.IsAvailable() {
+			return fmt.Errorf("winget is not available")
+		}
+		return m.winget.Uninstall(ctx, inst, method)
 
 	case "native", "curl", "binary":
 		return m.native.Uninstall(ctx, inst, method)
@@ -145,6 +165,8 @@ func (m *Manager) GetAvailableMethods(agentDef catalog.AgentDef) []catalog.Insta
 			available = m.pip.IsAvailable()
 		case "brew":
 			available = m.brew.IsAvailable()
+		case "winget":
+			available = m.winget.IsAvailable()
 		case "native", "curl", "binary":
 			available = true
 		}
@@ -166,6 +188,8 @@ func (m *Manager) IsMethodAvailable(method string) bool {
 		return m.pip.IsAvailable()
 	case "brew":
 		return m.brew.IsAvailable()
+	case "winget":
+		return m.winget.IsAvailable()
 	case "native", "curl", "binary":
 		return true
 	default:

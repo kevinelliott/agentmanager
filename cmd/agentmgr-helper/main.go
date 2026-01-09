@@ -26,6 +26,12 @@ var (
 )
 
 func main() {
+	// Check for native Windows (not supported)
+	if msg := platform.CheckWindowsSupport(); msg != "" {
+		fmt.Fprintln(os.Stderr, msg)
+		os.Exit(1)
+	}
+
 	// Get current platform
 	plat := platform.Current()
 

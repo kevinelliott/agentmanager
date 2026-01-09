@@ -3,6 +3,7 @@ package platform
 
 import (
 	"context"
+	"os"
 	"runtime"
 )
 
@@ -132,4 +133,37 @@ func TempDir() string {
 		return "C:\\Windows\\Temp"
 	}
 	return "/tmp"
+}
+
+// IsWSL returns true if running inside Windows Subsystem for Linux.
+func IsWSL() bool {
+	// Check for WSL-specific environment variables
+	if os.Getenv("WSL_DISTRO_NAME") != "" || os.Getenv("WSL_INTEROP") != "" {
+		return true
+	}
+	return false
+}
+
+// IsNativeWindows returns true if running on native Windows (not WSL).
+func IsNativeWindows() bool {
+	return IsWindows() && !IsWSL()
+}
+
+// CheckWindowsSupport checks if the current platform is supported and returns an error message if not.
+// Returns empty string if the platform is supported.
+func CheckWindowsSupport() string {
+	if IsNativeWindows() {
+		return `AgentManager does not currently support native Windows.
+
+Please use one of the following alternatives:
+  - Windows Subsystem for Linux (WSL): https://docs.microsoft.com/en-us/windows/wsl/install
+  - Docker with a Linux container
+  - A Linux virtual machine
+
+To install WSL, run this command in PowerShell as Administrator:
+  wsl --install
+
+After WSL is installed, you can run AgentManager inside your Linux distribution.`
+	}
+	return ""
 }

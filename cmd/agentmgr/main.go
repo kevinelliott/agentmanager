@@ -7,6 +7,7 @@ import (
 
 	"github.com/kevinelliott/agentmgr/internal/cli"
 	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmgr/pkg/platform"
 )
 
 // Version information (set by build flags)
@@ -17,6 +18,12 @@ var (
 )
 
 func main() {
+	// Check for native Windows (not supported)
+	if msg := platform.CheckWindowsSupport(); msg != "" {
+		fmt.Fprintln(os.Stderr, msg)
+		os.Exit(1)
+	}
+
 	// Load configuration
 	loader := config.NewLoader()
 	cfg, err := loader.Load("")
