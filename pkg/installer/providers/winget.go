@@ -165,8 +165,9 @@ func (p *WingetProvider) getInstalledVersion(ctx context.Context, packageName st
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
 		if strings.Contains(line, packageName) {
-			// Extract version using regex for version-like patterns
-			versionRegex := regexp.MustCompile(`\d+\.\d+[\.\d]*`)
+			// Extract version using regex that captures semantic version format
+			// Matches: 1.2.3, 1.2.3-beta, 1.2.3-rc.1, 1.2.3+build.123, 1.2.3-beta+build
+			versionRegex := regexp.MustCompile(`\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z\-\.]+)?(?:\+[0-9A-Za-z\-\.]+)?`)
 			matches := versionRegex.FindAllString(line, -1)
 			if len(matches) > 0 {
 				// First version match is typically the installed version
