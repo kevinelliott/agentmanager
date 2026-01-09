@@ -111,15 +111,28 @@ agentmgr helper status           # Check helper status
 
 | Agent | Installation Methods |
 |-------|---------------------|
-| Claude Code | npm, native installer |
+| Agent Deck | brew, go, native |
 | Aider | pip, pipx, uv |
-| GitHub Copilot CLI | npm, brew, winget |
-| Gemini CLI | npm |
+| Amazon Q Developer CLI | brew, native, dmg |
+| Blackbox CLI | npm, native, powershell |
+| Claude Code | npm, native |
+| Claude Squad | brew, native |
 | Continue CLI | npm |
+| Crush | brew, npm, go, winget, scoop |
+| Cursor CLI | native |
+| DeepSeek CLI | npm |
+| Gemini CLI | npm |
+| GitHub Copilot CLI | npm, brew, winget |
+| Kilocode CLI | npm |
+| kubectl-ai | native, krew, nix |
+| Nanocoder | npm, brew |
 | OpenCode | npm, brew, scoop, chocolatey, curl |
-| Cursor CLI | native installer |
-| Qoder CLI | native binary |
-| Amazon Q Developer | brew, native |
+| OpenHands CLI | uv, pip, pipx, native |
+| Plandex | native |
+| Qoder CLI | binary |
+| Qwen Code | npm, brew |
+| Rallies CLI | pip, pipx |
+| Tokscale | bun, npm |
 
 ## Architecture
 
