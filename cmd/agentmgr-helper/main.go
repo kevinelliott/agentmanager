@@ -41,10 +41,16 @@ func main() {
 	dataDir := plat.GetDataDir()
 	store, err := storage.NewSQLiteStore(dataDir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to initialize storage: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Failed to create storage: %v\n", err)
 		os.Exit(1)
 	}
 	defer store.Close()
+
+	ctx := context.Background()
+	if err := store.Initialize(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to initialize storage: %v\n", err)
+		os.Exit(1)
+	}
 
 	// Initialize detector with strategies
 	det := detector.New(plat)
