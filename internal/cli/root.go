@@ -112,10 +112,3 @@ func printInfo(format string, args ...interface{}) {
 func printWarning(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "⚠ "+format+"\n", args...)
 }
-
-// printError prints an error message.
-//
-// Deprecated: Use output.Printer.Error instead.
-func printError(format string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, "✗ "+format+"\n", args...)
-}

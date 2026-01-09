@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -853,20 +852,18 @@ func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 	}
 
 	styles := printer.Styles()
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	defer w.Flush()
+	table := output.NewTable()
 
-	// Print header
-	fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+	// Set headers
+	table.SetHeaders(
 		styles.FormatHeader("AGENT"),
 		styles.FormatHeader("METHOD"),
 		styles.FormatHeader("VERSION"),
 		styles.FormatHeader("LATEST"),
 		styles.FormatHeader("STATUS"),
 	)
-	fmt.Fprintln(w, "-----\t------\t-------\t------\t------")
 
-	// Print rows
+	// Add rows
 	for _, agent := range agents {
 		var statusIcon string
 		if agent.HasUpdate {
@@ -882,7 +879,7 @@ func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 			latest = styles.FormatVersion(latest, false)
 		}
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+		table.AddRow(
 			styles.FormatAgentName(agent.Name),
 			styles.FormatMethod(agent.Method),
 			styles.FormatVersion(agent.Version, agent.HasUpdate),
@@ -891,6 +888,7 @@ func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 		)
 	}
 
+	table.Render()
 	return nil
 }
 

@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"text/tabwriter"
 	"time"
 
 	"github.com/spf13/cobra"
 
+	"github.com/kevinelliott/agentmgr/internal/cli/output"
 	"github.com/kevinelliott/agentmgr/pkg/catalog"
 	"github.com/kevinelliott/agentmgr/pkg/config"
 	"github.com/kevinelliott/agentmgr/pkg/platform"
@@ -55,28 +55,43 @@ by platform compatibility.`,
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
+			// Create printer for colored output
+			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+
 			// Get current platform
 			plat := platform.Current()
 			if platformID == "" {
 				platformID = string(plat.ID())
 			}
 
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Loading catalog..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
+
 			// Load catalog
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
+
+			spinner.Stop()
 
 			// Get agents for platform
 			var agents []CatalogListItem
@@ -103,7 +118,7 @@ by platform compatibility.`,
 				return outputCatalogJSON(agents)
 			}
 
-			return outputCatalogTable(agents)
+			return outputCatalogTable(agents, printer)
 		},
 	}
 
@@ -123,10 +138,15 @@ func newCatalogRefreshCommand(cfg *config.Config) *cobra.Command {
 the local cache. This is done automatically on startup if enabled
 in configuration.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Println("Refreshing catalog from GitHub...")
-
 			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 			defer cancel()
+
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Refreshing catalog from GitHub..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
 
 			// Get current platform
 			plat := platform.Current()
@@ -134,11 +154,13 @@ in configuration.`,
 			// Load storage
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
@@ -146,17 +168,18 @@ in configuration.`,
 
 			// Refresh catalog from remote
 			if err := catMgr.Refresh(ctx); err != nil {
+				spinner.Error("Failed to refresh catalog")
 				return fmt.Errorf("failed to refresh catalog: %w", err)
 			}
 
 			// Get refreshed catalog to show stats
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
+				spinner.Error("Failed to get catalog")
 				return fmt.Errorf("failed to get catalog: %w", err)
 			}
 
-			printSuccess("Catalog refreshed successfully")
-			printInfo("%d agents available (version %s)", len(cat.Agents), cat.Version)
+			spinner.Success(fmt.Sprintf("Catalog refreshed - %d agents available (version %s)", len(cat.Agents), cat.Version))
 			return nil
 		},
 	}
@@ -180,30 +203,45 @@ func newCatalogSearchCommand(cfg *config.Config) *cobra.Command {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
+			// Create printer for colored output
+			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+
 			// Get current platform
 			plat := platform.Current()
+
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Searching catalog..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
 
 			// Load catalog
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
 			// Search agents
 			results := cat.Search(query)
+			spinner.Stop()
+
 			if len(results) == 0 {
-				fmt.Printf("No results found for %q\n", query)
+				printer.Info("No results found for %q", query)
 				return nil
 			}
 
@@ -228,7 +266,7 @@ func newCatalogSearchCommand(cfg *config.Config) *cobra.Command {
 				return outputCatalogJSON(agents)
 			}
 
-			return outputCatalogTable(agents)
+			return outputCatalogTable(agents, printer)
 		},
 	}
 
@@ -334,18 +372,24 @@ type CatalogListItem struct {
 	Methods     []string `json:"methods"`
 }
 
-func outputCatalogTable(agents []CatalogListItem) error {
+func outputCatalogTable(agents []CatalogListItem, printer *output.Printer) error {
 	if len(agents) == 0 {
-		fmt.Println("No agents in catalog.")
+		printer.Info("No agents in catalog.")
 		return nil
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	defer w.Flush()
+	styles := printer.Styles()
+	table := output.NewTable()
 
-	fmt.Fprintln(w, "ID\tNAME\tMETHODS\tDESCRIPTION")
-	fmt.Fprintln(w, "--\t----\t-------\t-----------")
+	// Set headers
+	table.SetHeaders(
+		styles.FormatHeader("ID"),
+		styles.FormatHeader("NAME"),
+		styles.FormatHeader("METHODS"),
+		styles.FormatHeader("DESCRIPTION"),
+	)
 
+	// Add rows
 	for _, agent := range agents {
 		methods := ""
 		if len(agent.Methods) > 0 {
@@ -360,15 +404,17 @@ func outputCatalogTable(agents []CatalogListItem) error {
 			desc = desc[:37] + "..."
 		}
 
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n",
-			agent.ID,
-			agent.Name,
-			methods,
-			desc,
+		table.AddRow(
+			styles.Info.Render(agent.ID),
+			styles.FormatAgentName(agent.Name),
+			styles.FormatMethod(methods),
+			styles.Muted.Render(desc),
 		)
 	}
 
-	fmt.Printf("\n%d agents available\n", len(agents))
+	table.Render()
+	printer.Print("")
+	printer.Print("%s agents available", styles.Bold.Render(fmt.Sprintf("%d", len(agents))))
 	return nil
 }
 

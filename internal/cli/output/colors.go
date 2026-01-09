@@ -115,14 +115,14 @@ type Styles struct {
 	renderer *lipgloss.Renderer
 
 	// Colors
-	Purple   lipgloss.Color
-	Green    lipgloss.Color
-	Orange   lipgloss.Color
-	Red      lipgloss.Color
-	Cyan     lipgloss.Color
-	Yellow   lipgloss.Color
-	Gray     lipgloss.Color
-	White    lipgloss.Color
+	Purple lipgloss.Color
+	Green  lipgloss.Color
+	Orange lipgloss.Color
+	Red    lipgloss.Color
+	Cyan   lipgloss.Color
+	Yellow lipgloss.Color
+	Gray   lipgloss.Color
+	White  lipgloss.Color
 
 	// Text styles
 	Success lipgloss.Style

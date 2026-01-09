@@ -221,17 +221,17 @@ func clearLine() string {
 
 // SpinnerFrames contains predefined spinner frame sets.
 var SpinnerFrames = struct {
-	Dots     []string
-	Line     []string
-	Arrow    []string
-	Pulse    []string
-	Binary   []string
-	Circle   []string
+	Dots   []string
+	Line   []string
+	Arrow  []string
+	Pulse  []string
+	Binary []string
+	Circle []string
 }{
-	Dots:     []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"},
-	Line:     []string{"-", "\\", "|", "/"},
-	Arrow:    []string{"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"},
-	Pulse:    []string{"◐", "◓", "◑", "◒"},
-	Binary:   []string{"010010", "001001", "100100", "010010", "001001"},
-	Circle:   []string{"◜", "◠", "◝", "◞", "◡", "◟"},
+	Dots:   []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"},
+	Line:   []string{"-", "\\", "|", "/"},
+	Arrow:  []string{"←", "↖", "↑", "↗", "→", "↘", "↓", "↙"},
+	Pulse:  []string{"◐", "◓", "◑", "◒"},
+	Binary: []string{"010010", "001001", "100100", "010010", "001001"},
+	Circle: []string{"◜", "◠", "◝", "◞", "◡", "◟"},
 }
