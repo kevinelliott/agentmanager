@@ -298,14 +298,6 @@
           "metadata": {
             "installer_type": "shell_script"
           }
-        },
-        "winget": {
-          "method": "winget",
-          "package": "Anysphere.Cursor",
-          "command": "winget install Anysphere.Cursor",
-          "update_cmd": "winget upgrade Anysphere.Cursor",
-          "uninstall_cmd": "winget uninstall Anysphere.Cursor",
-          "platforms": ["windows"]
         }
       },
       "detection": {
