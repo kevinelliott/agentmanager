@@ -57,7 +57,12 @@ func (p *NativeProvider) Install(ctx context.Context, agentDef catalog.AgentDef,
 	// Find executable to verify installation succeeded
 	execPath := p.findExecutable(agentDef)
 	if execPath == "" {
-		return nil, fmt.Errorf("installation command completed but executable not found in PATH (looked for: %v)", agentDef.Detection.Executables)
+		errMsg := fmt.Sprintf("installation command completed but executable not found in PATH (looked for: %v)", agentDef.Detection.Executables)
+		if output != "" {
+			errMsg += fmt.Sprintf("\n\nInstall script output:\n%s", output)
+		}
+		errMsg += "\n\nThe binary may have been installed to a directory not in your PATH (e.g., ~/.local/bin).\nTry: export PATH=\"$HOME/.local/bin:$PATH\" and run 'agent list' again."
+		return nil, fmt.Errorf("%s", errMsg)
 	}
 
 	// Get installed version
