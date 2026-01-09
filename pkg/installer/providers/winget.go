@@ -14,6 +14,10 @@ import (
 	"github.com/kevinelliott/agentmgr/pkg/platform"
 )
 
+// semverRegex matches semantic version strings including pre-release and build metadata.
+// Matches: 1.2.3, 1.2.3-beta, 1.2.3-rc.1, 1.2.3+build.123, 1.2.3-beta+build
+var semverRegex = regexp.MustCompile(`\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z\-\.]+)?(?:\+[0-9A-Za-z\-\.]+)?`)
+
 // WingetProvider handles winget-based installations on Windows.
 type WingetProvider struct {
 	platform platform.Platform
@@ -165,10 +169,8 @@ func (p *WingetProvider) getInstalledVersion(ctx context.Context, packageName st
 	lines := strings.Split(string(output), "\n")
 	for _, line := range lines {
 		if strings.Contains(line, packageName) {
-			// Extract version using regex that captures semantic version format
-			// Matches: 1.2.3, 1.2.3-beta, 1.2.3-rc.1, 1.2.3+build.123, 1.2.3-beta+build
-			versionRegex := regexp.MustCompile(`\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z\-\.]+)?(?:\+[0-9A-Za-z\-\.]+)?`)
-			matches := versionRegex.FindAllString(line, -1)
+			// Extract version using semantic version regex
+			matches := semverRegex.FindAllString(line, -1)
 			if len(matches) > 0 {
 				// First version match is typically the installed version
 				version, _ := agent.ParseVersion(matches[0])
