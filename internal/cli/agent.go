@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/kevinelliott/agentmgr/internal/cli/output"
 	"github.com/kevinelliott/agentmgr/pkg/agent"
 	"github.com/kevinelliott/agentmgr/pkg/catalog"
 	"github.com/kevinelliott/agentmgr/pkg/config"
@@ -66,17 +67,29 @@ method, and update status.`,
 			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 			defer cancel()
 
+			// Create printer for colored output
+			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+
 			// Get current platform
 			plat := platform.Current()
+
+			// Create spinner for loading
+			spinner := output.NewSpinner(
+				output.WithMessage("Loading catalog..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
 
 			// Load catalog
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
@@ -85,6 +98,7 @@ method, and update status.`,
 			// Get agents for current platform
 			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
@@ -94,15 +108,22 @@ method, and update status.`,
 				agentDefMap[def.ID] = def
 			}
 
+			// Update spinner message
+			spinner.UpdateMessage("Detecting agents...")
+
 			// Create detector and detect agents
 			det := detector.New(plat)
 			installations, err := det.DetectAll(ctx, agentDefs)
 			if err != nil {
+				spinner.Error("Agent detection failed")
 				return fmt.Errorf("detection failed: %w", err)
 			}
 
 			// Create installer manager for version checking
 			instMgr := installer.NewManager(plat)
+
+			// Update spinner for version checking
+			spinner.UpdateMessage("Checking for updates...")
 
 			// Check for latest versions (always check, show update indicator)
 			for _, inst := range installations {
@@ -118,6 +139,9 @@ method, and update status.`,
 					}
 				}
 			}
+
+			// Stop spinner
+			spinner.Stop()
 
 			// Apply filters
 			var filtered []*agent.Installation
@@ -159,7 +183,7 @@ method, and update status.`,
 				return outputAgentsJSON(items)
 			}
 
-			return outputAgentsTable(items, cfg)
+			return outputAgentsTable(items, printer)
 		},
 	}
 
@@ -197,26 +221,37 @@ will be used.`,
 			// Get current platform
 			plat := platform.Current()
 
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Loading catalog..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
+
 			// Load catalog
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
 			// Find agent in catalog
 			agentDef, ok := cat.GetAgent(agentID)
 			if !ok {
+				spinner.Error(fmt.Sprintf("Agent %q not found in catalog", agentID))
 				return fmt.Errorf("agent %q not found in catalog", agentID)
 			}
 
@@ -228,6 +263,7 @@ will be used.`,
 				} else {
 					methods := agentDef.GetSupportedMethods(string(plat.ID()))
 					if len(methods) == 0 {
+						spinner.Error("No installation methods available")
 						return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
 					}
 					method = methods[0].Method
@@ -237,19 +273,21 @@ will be used.`,
 			// Get method definition
 			methodDef, ok := agentDef.GetInstallMethod(method)
 			if !ok {
+				spinner.Error(fmt.Sprintf("Installation method %q not available", method))
 				return fmt.Errorf("installation method %q not available for %q", method, agentID)
 			}
 
-			fmt.Printf("Installing %s via %s...\n", agentDef.Name, method)
+			spinner.UpdateMessage(fmt.Sprintf("Installing %s via %s...", agentDef.Name, method))
 
 			// Create installer and install
 			inst := installer.NewManager(plat)
 			result, err := inst.Install(ctx, agentDef, methodDef, force)
 			if err != nil {
+				spinner.Error(fmt.Sprintf("Failed to install %s", agentDef.Name))
 				return fmt.Errorf("installation failed: %w", err)
 			}
 
-			printSuccess("Installed %s %s successfully", agentDef.Name, result.Version.String())
+			spinner.Success(fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String()))
 			return nil
 		},
 	}
@@ -281,45 +319,65 @@ Use --all to update all agents at once.`,
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
+			// Create printer for colored output
+			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+
 			plat := platform.Current()
+
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Loading catalog..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
 
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
+				spinner.Error("Failed to create storage")
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
 
 			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
 			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
+
+			spinner.UpdateMessage("Detecting agents...")
 
 			det := detector.New(plat)
 			installations, err := det.DetectAll(ctx, agentDefs)
 			if err != nil {
+				spinner.Error("Detection failed")
 				return fmt.Errorf("detection failed: %w", err)
 			}
 
 			inst := installer.NewManager(plat)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
+				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
+			spinner.Stop()
+
 			if all {
-				return updateAllAgents(ctx, installations, cat, inst, dryRun)
+				return updateAllAgents(ctx, installations, cat, inst, dryRun, printer)
 			}
 
 			if len(args) == 0 {
+				printer.Error("agent name required (or use --all)")
 				return fmt.Errorf("agent name required (or use --all)")
 			}
 
-			return updateSingleAgent(ctx, args[0], installations, cat, inst, force, dryRun)
+			return updateSingleAgent(ctx, args[0], installations, cat, inst, force, dryRun, printer)
 		},
 	}
 
@@ -331,8 +389,14 @@ Use --all to update all agents at once.`,
 }
 
 // updateAllAgents handles the --all flag to update all agents with available updates.
-func updateAllAgents(ctx context.Context, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, dryRun bool) error {
-	fmt.Println("Checking for updates...")
+func updateAllAgents(ctx context.Context, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, dryRun bool, printer *output.Printer) error {
+	styles := printer.Styles()
+
+	spinner := output.NewSpinner(
+		output.WithMessage("Checking for updates..."),
+		output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+	)
+	spinner.Start()
 
 	var toUpdate []*agent.Installation
 	for _, installation := range installations {
@@ -341,55 +405,66 @@ func updateAllAgents(ctx context.Context, installations []*agent.Installation, c
 		}
 	}
 
+	spinner.Stop()
+
 	if len(toUpdate) == 0 {
-		printInfo("No updates available")
+		printer.Info("No updates available")
 		return nil
 	}
 
-	fmt.Printf("Found %d agent(s) with updates:\n", len(toUpdate))
+	printer.Print("\nFound %s with updates:", styles.Bold.Render(fmt.Sprintf("%d agent(s)", len(toUpdate))))
 	for _, installation := range toUpdate {
 		latestVer := "unknown"
 		if installation.LatestVersion != nil {
 			latestVer = installation.LatestVersion.String()
 		}
-		fmt.Printf("  - %s: %s -> %s\n",
-			installation.AgentName,
-			installation.InstalledVersion.String(),
-			latestVer)
+		printer.Print("  - %s: %s -> %s",
+			styles.FormatAgentName(installation.AgentName),
+			styles.FormatVersion(installation.InstalledVersion.String(), true),
+			styles.FormatVersion(latestVer, false))
 	}
 
 	if dryRun {
-		printInfo("Dry run - no changes made")
+		printer.Info("\nDry run - no changes made")
 		return nil
 	}
+
+	printer.Print("")
 
 	for _, installation := range toUpdate {
 		agentDef, ok := cat.GetAgent(installation.AgentID)
 		if !ok {
-			printWarning("Skipping %s: not found in catalog", installation.AgentName)
+			printer.Warning("Skipping %s: not found in catalog", installation.AgentName)
 			continue
 		}
 
 		methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
 		if !ok {
-			printWarning("Skipping %s: install method %s not found", installation.AgentName, installation.Method)
+			printer.Warning("Skipping %s: install method %s not found", installation.AgentName, installation.Method)
 			continue
 		}
 
-		fmt.Printf("Updating %s via %s...\n", installation.AgentName, installation.Method)
+		spinner := output.NewSpinner(
+			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
+			output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+		)
+		spinner.Start()
+
 		result, err := inst.Update(ctx, installation, agentDef, methodDef)
 		if err != nil {
-			printError("Failed to update %s: %v", installation.AgentName, err)
+			spinner.Error(fmt.Sprintf("Failed to update %s: %v", installation.AgentName, err))
 			continue
 		}
-		printSuccess("Updated %s to %s", installation.AgentName, result.Version.String())
+		spinner.Success(fmt.Sprintf("Updated %s to %s", installation.AgentName, result.Version.String()))
 	}
 
 	return nil
 }
 
 // updateSingleAgent handles updating a specific agent by ID.
-func updateSingleAgent(ctx context.Context, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool) error {
+func updateSingleAgent(ctx context.Context, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
+	styles := printer.Styles()
+
 	var agentInstallations []*agent.Installation
 	for _, installation := range installations {
 		if installation.AgentID == agentID {
@@ -398,11 +473,13 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 	}
 
 	if len(agentInstallations) == 0 {
+		printer.Error("Agent %q not installed", agentID)
 		return fmt.Errorf("agent %q not installed", agentID)
 	}
 
 	agentDef, ok := cat.GetAgent(agentID)
 	if !ok {
+		printer.Error("Agent %q not found in catalog", agentID)
 		return fmt.Errorf("agent %q not found in catalog", agentID)
 	}
 
@@ -415,23 +492,23 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 	}
 
 	if !hasUpdate {
-		printInfo("%s is already up to date", agentDef.Name)
+		printer.Info("%s is already up to date", agentDef.Name)
 		return nil
 	}
 
 	if dryRun {
-		fmt.Printf("Would update %s (dry run)\n", agentDef.Name)
+		printer.Info("Would update %s (dry run)", agentDef.Name)
 		for _, installation := range agentInstallations {
 			if installation.HasUpdate() || force {
 				latestVer := "latest"
 				if installation.LatestVersion != nil {
 					latestVer = installation.LatestVersion.String()
 				}
-				fmt.Printf("  - %s via %s: %s -> %s\n",
-					installation.AgentName,
-					installation.Method,
-					installation.InstalledVersion.String(),
-					latestVer)
+				printer.Print("  - %s via %s: %s -> %s",
+					styles.FormatAgentName(installation.AgentName),
+					styles.FormatMethod(string(installation.Method)),
+					styles.FormatVersion(installation.InstalledVersion.String(), true),
+					styles.FormatVersion(latestVer, false))
 			}
 		}
 		return nil
@@ -444,16 +521,22 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 
 		methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
 		if !ok {
-			printWarning("Skipping %s via %s: method not in catalog", installation.AgentName, installation.Method)
+			printer.Warning("Skipping %s via %s: method not in catalog", installation.AgentName, installation.Method)
 			continue
 		}
 
-		fmt.Printf("Updating %s via %s...\n", installation.AgentName, installation.Method)
+		spinner := output.NewSpinner(
+			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
+			output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+		)
+		spinner.Start()
+
 		result, err := inst.Update(ctx, installation, agentDef, methodDef)
 		if err != nil {
+			spinner.Error(fmt.Sprintf("Failed to update %s", agentDef.Name))
 			return fmt.Errorf("update failed: %w", err)
 		}
-		printSuccess("Updated %s to %s", agentDef.Name, result.Version.String())
+		spinner.Success(fmt.Sprintf("Updated %s to %s", agentDef.Name, result.Version.String()))
 	}
 
 	return nil
@@ -761,36 +844,50 @@ type AgentListItem struct {
 	Status        string `json:"status"`
 }
 
-func outputAgentsTable(agents []AgentListItem, cfg *config.Config) error {
+func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 	if len(agents) == 0 {
-		fmt.Println("No agents detected.")
-		fmt.Println("\nRun 'agentmgr catalog list' to see available agents.")
+		printer.Info("No agents detected")
+		printer.Print("")
+		printer.Print("Run 'agentmgr catalog list' to see available agents.")
 		return nil
 	}
 
+	styles := printer.Styles()
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	defer w.Flush()
 
-	fmt.Fprintln(w, "AGENT\tMETHOD\tVERSION\tLATEST\tSTATUS")
+	// Print header
+	fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+		styles.FormatHeader("AGENT"),
+		styles.FormatHeader("METHOD"),
+		styles.FormatHeader("VERSION"),
+		styles.FormatHeader("LATEST"),
+		styles.FormatHeader("STATUS"),
+	)
 	fmt.Fprintln(w, "-----\t------\t-------\t------\t------")
 
+	// Print rows
 	for _, agent := range agents {
-		status := "✓"
+		var statusIcon string
 		if agent.HasUpdate {
-			status = "⬆"
+			statusIcon = styles.UpdateIcon()
+		} else {
+			statusIcon = styles.InstalledIcon()
 		}
 
 		latest := agent.LatestVersion
 		if latest == "" {
 			latest = "-"
+		} else {
+			latest = styles.FormatVersion(latest, false)
 		}
 
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
-			agent.Name,
-			agent.Method,
-			agent.Version,
+			styles.FormatAgentName(agent.Name),
+			styles.FormatMethod(agent.Method),
+			styles.FormatVersion(agent.Version, agent.HasUpdate),
 			latest,
-			status,
+			statusIcon,
 		)
 	}
 

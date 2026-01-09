@@ -16,6 +16,7 @@ func NewRootCommand(cfg *config.Config, version, commit, date string) *cobra.Com
 		configFile string
 		verbose    bool
 		format     string
+		noColor    bool
 	)
 
 	root := &cobra.Command{
@@ -50,6 +51,11 @@ Examples:
 				cfg.Logging.Level = "debug"
 			}
 
+			// Override color config with flag if set
+			if noColor {
+				cfg.UI.UseColors = false
+			}
+
 			return nil
 		},
 	}
@@ -58,6 +64,7 @@ Examples:
 	root.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file path")
 	root.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	root.PersistentFlags().StringVarP(&format, "format", "f", "table", "output format (table, json, yaml)")
+	root.PersistentFlags().BoolVar(&noColor, "no-color", false, "disable colored output")
 
 	// Add subcommands
 	root.AddCommand(
@@ -72,6 +79,9 @@ Examples:
 	return root
 }
 
+// These helper functions are deprecated in favor of using output.Printer.
+// They are kept for backwards compatibility with existing code.
+
 // checkError prints an error message and exits if err is not nil.
 //
 //nolint:unused // Reserved for future use in command implementations
@@ -83,21 +93,29 @@ func checkError(err error) {
 }
 
 // printSuccess prints a success message with a checkmark.
+//
+// Deprecated: Use output.Printer.Success instead.
 func printSuccess(format string, args ...interface{}) {
 	fmt.Printf("✓ "+format+"\n", args...)
 }
 
 // printInfo prints an info message.
+//
+// Deprecated: Use output.Printer.Info instead.
 func printInfo(format string, args ...interface{}) {
 	fmt.Printf("ℹ "+format+"\n", args...)
 }
 
 // printWarning prints a warning message.
+//
+// Deprecated: Use output.Printer.Warning instead.
 func printWarning(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "⚠ "+format+"\n", args...)
 }
 
 // printError prints an error message.
+//
+// Deprecated: Use output.Printer.Error instead.
 func printError(format string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "✗ "+format+"\n", args...)
 }
