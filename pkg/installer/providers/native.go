@@ -54,11 +54,14 @@ func (p *NativeProvider) Install(ctx context.Context, agentDef catalog.AgentDef,
 		return nil, fmt.Errorf("native install failed: %w", err)
 	}
 
+	// Find executable to verify installation succeeded
+	execPath := p.findExecutable(agentDef)
+	if execPath == "" {
+		return nil, fmt.Errorf("installation command completed but executable not found in PATH (looked for: %v)", agentDef.Detection.Executables)
+	}
+
 	// Get installed version
 	version := p.getInstalledVersion(ctx, agentDef)
-
-	// Find executable
-	execPath := p.findExecutable(agentDef)
 
 	return &Result{
 		AgentID:        agentDef.ID,
