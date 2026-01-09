@@ -196,15 +196,19 @@ will be used.`,
 				return fmt.Errorf("agent %q not found in catalog", agentID)
 			}
 
+			// Create installer manager
+			inst := installer.NewManager(plat)
+
 			// Determine installation method
 			if method == "" {
 				// Use preferred method from config or first available
 				if preferred := cfg.GetAgentConfig(agentID).PreferredMethod; preferred != "" {
 					method = preferred
 				} else {
-					methods := agentDef.GetSupportedMethods(string(plat.ID()))
+					// Get methods that are both supported on this platform AND have available tools
+					methods := inst.GetAvailableMethods(agentDef)
 					if len(methods) == 0 {
-						return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
+						return fmt.Errorf("no installation methods available for %q on %s (tools like npm, brew, pip may not be installed)", agentID, plat.ID())
 					}
 					method = methods[0].Method
 				}
@@ -218,8 +222,7 @@ will be used.`,
 
 			fmt.Printf("Installing %s via %s...\n", agentDef.Name, method)
 
-			// Create installer and install
-			inst := installer.NewManager(plat)
+			// Install
 			result, err := inst.Install(ctx, agentDef, methodDef, force)
 			if err != nil {
 				return fmt.Errorf("installation failed: %w", err)
