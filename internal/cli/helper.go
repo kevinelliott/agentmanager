@@ -91,7 +91,7 @@ to agent status and updates.`,
 		},
 	}
 
-	cmd.Flags().BoolVarP(&foreground, "foreground", "f", false, "run in foreground (don't daemonize)")
+	cmd.Flags().BoolVarP(&foreground, "foreground", "F", false, "run in foreground (don't daemonize)")
 
 	return cmd
 }

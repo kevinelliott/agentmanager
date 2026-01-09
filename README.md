@@ -5,8 +5,9 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 ## Features
 
 - **Agent Detection**: Automatically detect installed AI CLI agents (Claude Code, Aider, GitHub Copilot CLI, Gemini CLI, and more)
-- **Version Management**: Check for updates and manage agent versions
+- **Version Management**: Check for updates from package registries (npm, PyPI, Homebrew) and manage agent versions
 - **Multiple Installation Methods**: Support for npm, pip, pipx, uv, Homebrew, native installers, and more
+- **Beautiful CLI Output**: Colored output with animated spinners and properly aligned tables
 - **Beautiful TUI**: Interactive terminal interface built with Bubble Tea
 - **Background Helper**: System tray application with notifications for available updates
 - **REST & gRPC APIs**: Expose agent management via HTTP and gRPC for integration
@@ -43,11 +44,8 @@ go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest
 ## Quick Start
 
 ```bash
-# List all detected agents
+# List all detected agents (shows installed version and latest available)
 agentmgr agent list
-
-# Check for updates
-agentmgr agent list --check-updates
 
 # Install a new agent
 agentmgr agent install claude-code
@@ -57,6 +55,9 @@ agentmgr agent update --all
 
 # Launch the interactive TUI
 agentmgr tui
+
+# Disable colored output
+agentmgr --no-color agent list
 ```
 
 ## Commands
@@ -95,6 +96,15 @@ agentmgr config path             # Show config file path
 agentmgr helper start            # Start systray helper
 agentmgr helper stop             # Stop systray helper
 agentmgr helper status           # Check helper status
+```
+
+### Global Options
+
+```bash
+--no-color        # Disable colored output (also respects NO_COLOR env var)
+--config, -c      # Specify custom config file path
+--verbose, -v     # Enable verbose output
+--format, -f      # Output format (table, json, yaml)
 ```
 
 ## Supported Agents
@@ -162,6 +172,7 @@ updates:
 ui:
   theme: auto
   compact: false
+  use_colors: true  # Set to false to disable colored output
 
 logging:
   level: info
