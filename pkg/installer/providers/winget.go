@@ -69,7 +69,7 @@ func (p *WingetProvider) Install(ctx context.Context, agentDef catalog.AgentDef,
 	// Get installed version
 	version := p.getInstalledVersion(ctx, packageName)
 
-	// Find executable
+	// Find executable (platform's FindExecutable now searches winget packages too)
 	execPath := p.findExecutable(agentDef)
 
 	return &Result{

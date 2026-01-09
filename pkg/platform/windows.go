@@ -141,11 +141,59 @@ func (w *windowsPlatform) FindExecutable(name string) (string, error) {
 		name = name + ".exe"
 	}
 
+	// First try standard PATH lookup
 	path, err := exec.LookPath(name)
-	if err != nil {
-		return "", fmt.Errorf("executable %q not found: %w", name, err)
+	if err == nil {
+		return path, nil
 	}
-	return path, nil
+
+	// Winget portable installs don't add to PATH, search the packages directory
+	if found := w.findInWingetPackages(name); found != "" {
+		return found, nil
+	}
+
+	return "", fmt.Errorf("executable %q not found: %w", name, err)
+}
+
+// findInWingetPackages searches for an executable in the winget packages directory.
+func (w *windowsPlatform) findInWingetPackages(name string) string {
+	localAppData := os.Getenv("LOCALAPPDATA")
+	if localAppData == "" {
+		return ""
+	}
+
+	packagesDir := filepath.Join(localAppData, "Microsoft", "WinGet", "Packages")
+	entries, err := os.ReadDir(packagesDir)
+	if err != nil {
+		return ""
+	}
+
+	// Search all package directories for the executable
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		packageDir := filepath.Join(packagesDir, entry.Name())
+		var found string
+
+		filepath.WalkDir(packageDir, func(path string, d os.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			if strings.EqualFold(filepath.Base(path), name) {
+				found = path
+				return filepath.SkipAll
+			}
+			return nil
+		})
+
+		if found != "" {
+			return found
+		}
+	}
+
+	return ""
 }
 
 func (w *windowsPlatform) FindExecutables(name string) ([]string, error) {
@@ -162,6 +210,11 @@ func (w *windowsPlatform) FindExecutables(name string) ([]string, error) {
 		if info, err := os.Stat(fullPath); err == nil && !info.IsDir() {
 			paths = append(paths, fullPath)
 		}
+	}
+
+	// Also check winget packages directory
+	if found := w.findInWingetPackages(name); found != "" {
+		paths = append(paths, found)
 	}
 
 	if len(paths) == 0 {
