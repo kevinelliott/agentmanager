@@ -15,6 +15,8 @@ import (
 )
 
 // semverRegex matches semantic version strings including pre-release and build metadata.
+// This pattern is designed to extract versions from within text (e.g., winget output).
+// Unlike pkg/agent/version.go's pattern, this doesn't use anchors (^$) to allow extraction.
 // Matches: 1.2.3, 1.2.3-beta, 1.2.3-rc.1, 1.2.3+build.123, 1.2.3-beta+build
 var semverRegex = regexp.MustCompile(`\d+\.\d+(?:\.\d+)?(?:-[0-9A-Za-z\-\.]+)?(?:\+[0-9A-Za-z\-\.]+)?`)
 
