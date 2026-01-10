@@ -182,9 +182,42 @@ After researching, indicate confidence for each finding:
 2. Fetch and analyze the provided URL
 3. Conduct additional research using web search and package registry checks
 4. Compile findings with confidence levels
-5. Present a summary and ask for confirmation
-6. Add the entry to `catalog.json` in alphabetical order by agent ID
-7. Validate JSON syntax after editing
+5. Present a summary of the proposed catalog entry
+6. **Use the `AskUserQuestion` tool** to ask the user to approve adding the agent:
+   - Question: "Add this agent to the catalog?"
+   - Options: "Yes, add it" / "No, needs changes"
+7. If approved, add the entry to `catalog.json` in alphabetical order by agent ID
+8. Validate JSON syntax after editing
+9. **Use the `AskUserQuestion` tool** to ask about version bump:
+   - Question: "Bump the catalog version?"
+   - Options: "Yes, bump patch version" / "Yes, bump minor version" / "No, keep current version"
+10. If version bump requested, update the `"version"` field in `catalog.json` accordingly:
+    - Patch bump: `1.0.0` → `1.0.1`
+    - Minor bump: `1.0.0` → `1.1.0`
+11. Also update the `"last_updated"` field to the current date
+
+## Using AskUserQuestion Tool
+
+When asking for user confirmation, use the `AskUserQuestion` tool with appropriate options. Examples:
+
+**For agent approval:**
+```
+Question: "Does this catalog entry look correct for <agent-name>?"
+Header: "Add agent"
+Options:
+  - "Yes, add to catalog" - Add the agent entry as shown
+  - "No, needs changes" - I'll describe what needs to be modified
+```
+
+**For version bump:**
+```
+Question: "Would you like to bump the catalog version?"
+Header: "Version"
+Options:
+  - "Patch bump (x.x.X)" - Increment patch version for additions
+  - "Minor bump (x.X.0)" - Increment minor version for significant changes
+  - "No change" - Keep the current version
+```
 
 ---
 
