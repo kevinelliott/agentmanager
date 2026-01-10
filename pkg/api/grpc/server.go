@@ -431,7 +431,8 @@ func (s *Server) GetCatalogAgent(ctx context.Context, req *GetCatalogAgentReques
 
 // RefreshCatalog refreshes the catalog.
 func (s *Server) RefreshCatalog(ctx context.Context) (*RefreshCatalogResponse, error) {
-	if err := s.catalog.Refresh(ctx); err != nil {
+	result, err := s.catalog.Refresh(ctx)
+	if err != nil {
 		return &RefreshCatalogResponse{
 			Success: false,
 			Message: err.Error(),
@@ -442,13 +443,21 @@ func (s *Server) RefreshCatalog(ctx context.Context) (*RefreshCatalogResponse, e
 	if err != nil {
 		return &RefreshCatalogResponse{
 			Success: true,
+			Updated: result.Updated,
 			Message: "Refreshed but failed to get count",
 		}, nil
 	}
 
+	message := "Catalog already up to date"
+	if result.Updated {
+		message = "Catalog updated successfully"
+	}
+
 	return &RefreshCatalogResponse{
 		Success:    true,
-		Message:    "Catalog refreshed successfully",
+		Updated:    result.Updated,
+		Message:    message,
+		Version:    cat.Version,
 		AgentCount: len(cat.Agents),
 	}, nil
 }

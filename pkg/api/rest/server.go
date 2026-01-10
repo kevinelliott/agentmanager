@@ -498,7 +498,8 @@ func (s *Server) handleGetCatalogAgent(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleRefreshCatalog(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if err := s.catalog.Refresh(ctx); err != nil {
+	result, err := s.catalog.Refresh(ctx)
+	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to refresh catalog", err)
 		return
 	}
@@ -507,14 +508,22 @@ func (s *Server) handleRefreshCatalog(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.respondJSON(w, http.StatusOK, map[string]interface{}{
 			"success": true,
+			"updated": result.Updated,
 			"message": "Catalog refreshed",
 		})
 		return
 	}
 
+	message := "Catalog already up to date"
+	if result.Updated {
+		message = "Catalog updated successfully"
+	}
+
 	s.respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success":     true,
-		"message":     "Catalog refreshed successfully",
+		"updated":     result.Updated,
+		"message":     message,
+		"version":     cat.Version,
 		"agent_count": len(cat.Agents),
 	})
 }

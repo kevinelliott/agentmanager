@@ -19,6 +19,7 @@ import (
 	"github.com/kevinelliott/agentmgr/pkg/catalog"
 	"github.com/kevinelliott/agentmgr/pkg/config"
 	"github.com/kevinelliott/agentmgr/pkg/detector"
+	"github.com/kevinelliott/agentmgr/pkg/installer"
 	"github.com/kevinelliott/agentmgr/pkg/platform"
 	"github.com/kevinelliott/agentmgr/pkg/storage"
 )
@@ -171,8 +172,13 @@ func (m Model) Init() tea.Cmd {
 	)
 }
 
-// loadData loads initial data from storage and detector.
+// loadData loads initial data from storage and detector (uses cache if available).
 func (m Model) loadData() tea.Msg {
+	return m.loadDataWithRefresh(false)
+}
+
+// loadDataWithRefresh loads data, optionally bypassing the cache.
+func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -200,11 +206,76 @@ func (m Model) loadData() tea.Msg {
 		return dataLoadedMsg{err: fmt.Errorf("failed to get agents for platform: %w", err)}
 	}
 
-	// Detect installed agents
-	det := detector.New(m.platform)
-	installations, err := det.DetectAll(ctx, agentDefs)
-	if err != nil {
-		return dataLoadedMsg{err: fmt.Errorf("detection failed: %w", err)}
+	// Build a map of agent ID -> AgentDef for quick lookup
+	agentDefMap := make(map[string]catalog.AgentDef)
+	for _, def := range agentDefs {
+		agentDefMap[def.ID] = def
+	}
+
+	var installations []*agent.Installation
+	var usedDetectionCache bool
+	var needUpdateCheck bool
+
+	// Check if we can use cached detection results
+	if m.config.Detection.CacheEnabled && !forceRefresh {
+		cachedInstallations, cachedAt, err := store.GetDetectionCache(ctx)
+		if err == nil && cachedInstallations != nil {
+			// Check if detection cache is still valid
+			if time.Since(cachedAt) < m.config.Detection.CacheDuration {
+				installations = cachedInstallations
+				usedDetectionCache = true
+
+				// Check if we need to refresh update check
+				lastUpdateCheck, err := store.GetLastUpdateCheckTime(ctx)
+				if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= m.config.Detection.UpdateCheckCacheDuration {
+					needUpdateCheck = true
+				}
+			}
+		}
+	}
+
+	// If no cache or cache expired, detect agents
+	if !usedDetectionCache {
+		// Clear cache if forcing refresh
+		if forceRefresh {
+			_ = store.ClearDetectionCache(ctx)
+		}
+
+		// Detect installed agents
+		det := detector.New(m.platform)
+		installations, err = det.DetectAll(ctx, agentDefs)
+		if err != nil {
+			return dataLoadedMsg{err: fmt.Errorf("detection failed: %w", err)}
+		}
+
+		// Always check for updates on fresh detection
+		needUpdateCheck = true
+	}
+
+	// Check for updates if needed
+	if needUpdateCheck {
+		instMgr := installer.NewManager(m.platform)
+
+		// Check for latest versions
+		for _, inst := range installations {
+			if agentDef, ok := agentDefMap[inst.AgentID]; ok {
+				methodStr := string(inst.Method)
+				if method, ok := agentDef.InstallMethods[methodStr]; ok {
+					latestVer, err := instMgr.GetLatestVersion(ctx, method)
+					if err == nil {
+						inst.LatestVersion = &latestVer
+					}
+				}
+			}
+		}
+
+		// Save last update check time
+		_ = store.SetLastUpdateCheckTime(ctx, time.Now())
+
+		// Save to cache if enabled (with updated version info)
+		if m.config.Detection.CacheEnabled {
+			_ = store.SaveDetectionCache(ctx, installations)
+		}
 	}
 
 	return dataLoadedMsg{
@@ -240,7 +311,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Refresh):
 			m.loading = true
-			return m, m.loadData
+			return m, func() tea.Msg {
+				return m.loadDataWithRefresh(true) // Force refresh, bypass cache
+			}
 
 		case key.Matches(msg, m.keys.Enter):
 			if m.currentView == ViewAgentList && len(m.agents) > 0 {

@@ -10,6 +10,9 @@ type Config struct {
 	// Catalog settings
 	Catalog CatalogConfig `yaml:"catalog" json:"catalog" mapstructure:"catalog"`
 
+	// Detection settings
+	Detection DetectionConfig `yaml:"detection" json:"detection" mapstructure:"detection"`
+
 	// Update settings
 	Updates UpdateConfig `yaml:"updates" json:"updates" mapstructure:"updates"`
 
@@ -27,6 +30,18 @@ type Config struct {
 
 	// Agent-specific overrides
 	Agents map[string]AgentConfig `yaml:"agents" json:"agents" mapstructure:"agents"`
+}
+
+// DetectionConfig contains agent detection settings.
+type DetectionConfig struct {
+	// CacheDuration is how long to cache detected agents before re-detecting
+	CacheDuration time.Duration `yaml:"cache_duration" json:"cache_duration" mapstructure:"cache_duration"`
+
+	// UpdateCheckCacheDuration is how long to cache update check results
+	UpdateCheckCacheDuration time.Duration `yaml:"update_check_cache_duration" json:"update_check_cache_duration" mapstructure:"update_check_cache_duration"`
+
+	// CacheEnabled enables caching of detected agents
+	CacheEnabled bool `yaml:"cache_enabled" json:"cache_enabled" mapstructure:"cache_enabled"`
 }
 
 // CatalogConfig contains catalog-related settings.
@@ -161,6 +176,11 @@ func Default() *Config {
 			RefreshOnStart:  true,
 			GitHubToken:     "",
 		},
+		Detection: DetectionConfig{
+			CacheDuration:            time.Hour,
+			UpdateCheckCacheDuration: 15 * time.Minute,
+			CacheEnabled:             true,
+		},
 		Updates: UpdateConfig{
 			AutoCheck:     true,
 			CheckInterval: 6 * time.Hour,
@@ -204,6 +224,12 @@ func Default() *Config {
 func (c *Config) Validate() error {
 	if c.Catalog.RefreshInterval < time.Minute {
 		c.Catalog.RefreshInterval = time.Minute
+	}
+	if c.Detection.CacheDuration < time.Minute {
+		c.Detection.CacheDuration = time.Minute
+	}
+	if c.Detection.UpdateCheckCacheDuration < time.Minute {
+		c.Detection.UpdateCheckCacheDuration = time.Minute
 	}
 	if c.Updates.CheckInterval < time.Minute {
 		c.Updates.CheckInterval = time.Minute

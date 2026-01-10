@@ -372,7 +372,7 @@ func (a *App) handleMenuClicks() {
 		case <-a.mManageAgents.ClickedCh:
 			go a.showManageAgentsWindow()
 		case <-a.mRefresh.ClickedCh:
-			go a.refreshAgents(a.ctx)
+			go a.forceRefreshAgents(a.ctx) // Manual refresh bypasses cache
 		case <-a.mUpdateAll.ClickedCh:
 			go a.updateAllAgents(a.ctx)
 		case <-a.mOpenTUI.ClickedCh:
@@ -412,8 +412,18 @@ func (a *App) backgroundLoop() {
 	}
 }
 
-// refreshAgents refreshes the list of detected agents.
+// refreshAgents refreshes the list of detected agents (uses cache if available).
 func (a *App) refreshAgents(ctx context.Context) error {
+	return a.refreshAgentsWithCache(ctx, false)
+}
+
+// forceRefreshAgents forces a refresh, bypassing the cache.
+func (a *App) forceRefreshAgents(ctx context.Context) error {
+	return a.refreshAgentsWithCache(ctx, true)
+}
+
+// refreshAgentsWithCache refreshes agents, optionally bypassing the cache.
+func (a *App) refreshAgentsWithCache(ctx context.Context, forceRefresh bool) error {
 	// Get agent definitions from catalog
 	agentDefs, err := a.catalog.GetAgentsForPlatform(ctx, string(a.platform.ID()))
 	if err != nil {
@@ -421,10 +431,73 @@ func (a *App) refreshAgents(ctx context.Context) error {
 		agentDefs = nil
 	}
 
-	// Detect agents
-	detected, err := a.detector.DetectAll(ctx, agentDefs)
-	if err != nil {
-		return err
+	// Build a map of agent ID -> AgentDef for quick lookup
+	agentDefMap := make(map[string]catalog.AgentDef)
+	for _, def := range agentDefs {
+		agentDefMap[def.ID] = def
+	}
+
+	var detected []*agent.Installation
+	var usedDetectionCache bool
+	var needUpdateCheck bool
+
+	// Check if we can use cached detection results
+	if a.config.Detection.CacheEnabled && !forceRefresh {
+		cachedInstallations, cachedAt, err := a.store.GetDetectionCache(ctx)
+		if err == nil && cachedInstallations != nil {
+			// Check if detection cache is still valid
+			if time.Since(cachedAt) < a.config.Detection.CacheDuration {
+				detected = cachedInstallations
+				usedDetectionCache = true
+
+				// Check if we need to refresh update check
+				lastUpdateCheck, err := a.store.GetLastUpdateCheckTime(ctx)
+				if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= a.config.Detection.UpdateCheckCacheDuration {
+					needUpdateCheck = true
+				}
+			}
+		}
+	}
+
+	// If no cache or cache expired, detect agents
+	if !usedDetectionCache {
+		// Clear cache if forcing refresh
+		if forceRefresh {
+			_ = a.store.ClearDetectionCache(ctx)
+		}
+
+		// Detect agents
+		detected, err = a.detector.DetectAll(ctx, agentDefs)
+		if err != nil {
+			return err
+		}
+
+		// Always check for updates on fresh detection
+		needUpdateCheck = true
+	}
+
+	// Check for updates if needed
+	if needUpdateCheck {
+		// Check for latest versions
+		for _, inst := range detected {
+			if agentDef, ok := agentDefMap[inst.AgentID]; ok {
+				methodStr := string(inst.Method)
+				if method, ok := agentDef.InstallMethods[methodStr]; ok {
+					latestVer, err := a.installer.GetLatestVersion(ctx, method)
+					if err == nil {
+						inst.LatestVersion = &latestVer
+					}
+				}
+			}
+		}
+
+		// Save last update check time
+		_ = a.store.SetLastUpdateCheckTime(ctx, time.Now())
+
+		// Save to cache if enabled (with updated version info)
+		if a.config.Detection.CacheEnabled {
+			_ = a.store.SaveDetectionCache(ctx, detected)
+		}
 	}
 
 	// Convert []*agent.Installation to []agent.Installation

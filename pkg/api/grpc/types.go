@@ -196,7 +196,9 @@ type GetCatalogAgentResponse struct {
 // RefreshCatalogResponse contains the refresh result.
 type RefreshCatalogResponse struct {
 	Success    bool   `json:"success"`
+	Updated    bool   `json:"updated"`
 	Message    string `json:"message,omitempty"`
+	Version    string `json:"version,omitempty"`
 	AgentCount int    `json:"agent_count"`
 }
 

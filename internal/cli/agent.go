@@ -40,6 +40,7 @@ detailed information about agents.`,
 		newAgentUpdateCommand(cfg),
 		newAgentInfoCommand(cfg),
 		newAgentRemoveCommand(cfg),
+		newAgentRefreshCommand(cfg),
 	)
 
 	return cmd
@@ -52,6 +53,7 @@ func newAgentListCommand(cfg *config.Config) *cobra.Command {
 		format       string
 		updatesOnly  bool
 		checkUpdates bool
+		refresh      bool
 	)
 
 	cmd := &cobra.Command{
@@ -61,7 +63,9 @@ func newAgentListCommand(cfg *config.Config) *cobra.Command {
 
 This command scans for agents installed via various methods (npm, pip, brew,
 native installers, etc.) and displays their current version, installation
-method, and update status.`,
+method, and update status.
+
+Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 		Aliases: []string{"ls"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
@@ -75,12 +79,12 @@ method, and update status.`,
 
 			// Create spinner for loading
 			spinner := output.NewSpinner(
-				output.WithMessage("Loading catalog..."),
+				output.WithMessage("Loading..."),
 				output.WithNoColor(!cfg.UI.UseColors),
 			)
 			spinner.Start()
 
-			// Load catalog
+			// Load storage
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
 				spinner.Error("Failed to create storage")
@@ -108,34 +112,76 @@ method, and update status.`,
 				agentDefMap[def.ID] = def
 			}
 
-			// Update spinner message
-			spinner.UpdateMessage("Detecting agents...")
+			var installations []*agent.Installation
+			var usedDetectionCache bool
+			var needUpdateCheck bool
 
-			// Create detector and detect agents
-			det := detector.New(plat)
-			installations, err := det.DetectAll(ctx, agentDefs)
-			if err != nil {
-				spinner.Error("Agent detection failed")
-				return fmt.Errorf("detection failed: %w", err)
+			// Check if we can use cached detection results
+			if cfg.Detection.CacheEnabled && !refresh {
+				cachedInstallations, cachedAt, err := store.GetDetectionCache(ctx)
+				if err == nil && cachedInstallations != nil {
+					// Check if detection cache is still valid
+					if time.Since(cachedAt) < cfg.Detection.CacheDuration {
+						installations = cachedInstallations
+						usedDetectionCache = true
+						spinner.UpdateMessage("Loading from cache...")
+
+						// Check if we need to refresh update check
+						lastUpdateCheck, err := store.GetLastUpdateCheckTime(ctx)
+						if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= cfg.Detection.UpdateCheckCacheDuration {
+							needUpdateCheck = true
+						}
+					}
+				}
 			}
 
-			// Create installer manager for version checking
-			instMgr := installer.NewManager(plat)
+			// If no cache or cache expired, detect agents
+			if !usedDetectionCache {
+				spinner.UpdateMessage("Detecting agents...")
 
-			// Update spinner for version checking
-			spinner.UpdateMessage("Checking for updates...")
+				// Create detector and detect agents
+				det := detector.New(plat)
+				installations, err = det.DetectAll(ctx, agentDefs)
+				if err != nil {
+					spinner.Error("Agent detection failed")
+					return fmt.Errorf("detection failed: %w", err)
+				}
 
-			// Check for latest versions (always check, show update indicator)
-			for _, inst := range installations {
-				if agentDef, ok := agentDefMap[inst.AgentID]; ok {
-					// Find the matching install method
-					methodStr := string(inst.Method)
-					if method, ok := agentDef.InstallMethods[methodStr]; ok {
-						// Get latest version from package registry
-						latestVer, err := instMgr.GetLatestVersion(ctx, method)
-						if err == nil {
-							inst.LatestVersion = &latestVer
+				// Always check for updates on fresh detection
+				needUpdateCheck = true
+			}
+
+			// Check for updates if needed
+			if needUpdateCheck {
+				// Create installer manager for version checking
+				instMgr := installer.NewManager(plat)
+
+				// Update spinner for version checking
+				spinner.UpdateMessage("Checking for updates...")
+
+				// Check for latest versions
+				for _, inst := range installations {
+					if agentDef, ok := agentDefMap[inst.AgentID]; ok {
+						// Find the matching install method
+						methodStr := string(inst.Method)
+						if method, ok := agentDef.InstallMethods[methodStr]; ok {
+							// Get latest version from package registry
+							latestVer, err := instMgr.GetLatestVersion(ctx, method)
+							if err == nil {
+								inst.LatestVersion = &latestVer
+							}
 						}
+					}
+				}
+
+				// Save last update check time
+				_ = store.SetLastUpdateCheckTime(ctx, time.Now())
+
+				// Save to cache if enabled (with updated version info)
+				if cfg.Detection.CacheEnabled {
+					if err := store.SaveDetectionCache(ctx, installations); err != nil {
+						// Log but don't fail
+						_ = err
 					}
 				}
 			}
@@ -197,6 +243,7 @@ method, and update status.`,
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "output format (table, json)")
 	cmd.Flags().BoolVarP(&updatesOnly, "updates", "u", false, "show only agents with updates")
 	cmd.Flags().BoolVar(&checkUpdates, "check-updates", false, "check for available updates")
+	cmd.Flags().BoolVarP(&refresh, "refresh", "r", false, "force re-detection (ignore cache)")
 
 	return cmd
 }
@@ -833,6 +880,114 @@ Use --method to specify which installation to remove if multiple exist.`,
 
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "skip confirmation")
 	cmd.Flags().StringVarP(&method, "method", "m", "", "specific installation method to remove")
+
+	return cmd
+}
+
+func newAgentRefreshCommand(cfg *config.Config) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "refresh",
+		Short: "Force re-detection of all agents",
+		Long: `Clear the agent detection cache and re-detect all installed agents.
+
+This command forces a fresh scan of installed agents, ignoring any cached
+results. The new detection results are then cached for future use.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+			defer cancel()
+
+			// Get current platform
+			plat := platform.Current()
+
+			// Create spinner
+			spinner := output.NewSpinner(
+				output.WithMessage("Clearing cache..."),
+				output.WithNoColor(!cfg.UI.UseColors),
+			)
+			spinner.Start()
+
+			// Load storage
+			store, err := storage.NewSQLiteStore(plat.GetDataDir())
+			if err != nil {
+				spinner.Error("Failed to create storage")
+				return fmt.Errorf("failed to create storage: %w", err)
+			}
+			defer store.Close()
+
+			if err := store.Initialize(ctx); err != nil {
+				spinner.Error("Failed to initialize storage")
+				return fmt.Errorf("failed to initialize storage: %w", err)
+			}
+
+			// Clear the detection cache
+			if err := store.ClearDetectionCache(ctx); err != nil {
+				spinner.Error("Failed to clear cache")
+				return fmt.Errorf("failed to clear cache: %w", err)
+			}
+
+			catMgr := catalog.NewManager(cfg, store)
+
+			// Get agents for current platform
+			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
+			if err != nil {
+				spinner.Error("Failed to load catalog")
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
+
+			// Build a map of agent ID -> AgentDef for quick lookup
+			agentDefMap := make(map[string]catalog.AgentDef)
+			for _, def := range agentDefs {
+				agentDefMap[def.ID] = def
+			}
+
+			spinner.UpdateMessage("Detecting agents...")
+
+			// Create detector and detect agents
+			det := detector.New(plat)
+			installations, err := det.DetectAll(ctx, agentDefs)
+			if err != nil {
+				spinner.Error("Agent detection failed")
+				return fmt.Errorf("detection failed: %w", err)
+			}
+
+			// Create installer manager for version checking
+			instMgr := installer.NewManager(plat)
+
+			spinner.UpdateMessage("Checking for updates...")
+
+			// Check for latest versions
+			for _, inst := range installations {
+				if agentDef, ok := agentDefMap[inst.AgentID]; ok {
+					methodStr := string(inst.Method)
+					if method, ok := agentDef.InstallMethods[methodStr]; ok {
+						latestVer, err := instMgr.GetLatestVersion(ctx, method)
+						if err == nil {
+							inst.LatestVersion = &latestVer
+						}
+					}
+				}
+			}
+
+			// Save to cache
+			if cfg.Detection.CacheEnabled {
+				if err := store.SaveDetectionCache(ctx, installations); err != nil {
+					spinner.Error("Failed to save cache")
+					return fmt.Errorf("failed to save cache: %w", err)
+				}
+			}
+
+			// Count agents with updates
+			updateCount := 0
+			for _, inst := range installations {
+				if inst.HasUpdate() {
+					updateCount++
+				}
+			}
+
+			spinner.Success(fmt.Sprintf("Detected %d agents (%d with updates available)", len(installations), updateCount))
+			return nil
+		},
+	}
 
 	return cmd
 }

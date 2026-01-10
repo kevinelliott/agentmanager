@@ -174,7 +174,8 @@ in configuration.`,
 			catMgr := catalog.NewManager(cfg, store)
 
 			// Refresh catalog from remote
-			if err := catMgr.Refresh(ctx); err != nil {
+			result, err := catMgr.Refresh(ctx)
+			if err != nil {
 				spinner.Error("Failed to refresh catalog")
 				return fmt.Errorf("failed to refresh catalog: %w", err)
 			}
@@ -186,7 +187,11 @@ in configuration.`,
 				return fmt.Errorf("failed to get catalog: %w", err)
 			}
 
-			spinner.Success(fmt.Sprintf("Catalog refreshed - %d agents available (version %s)", len(cat.Agents), cat.Version))
+			if result.Updated {
+				spinner.Success(fmt.Sprintf("Catalog updated to version %s - %d agents available", cat.Version, len(cat.Agents)))
+			} else {
+				spinner.Success(fmt.Sprintf("Catalog already up to date (version %s) - %d agents available", cat.Version, len(cat.Agents)))
+			}
 			return nil
 		},
 	}

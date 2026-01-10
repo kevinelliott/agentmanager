@@ -3,6 +3,7 @@ package catalog
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
@@ -83,7 +84,36 @@ func (a AgentDef) GetInstallMethod(method string) (InstallMethodDef, bool) {
 	return m, ok
 }
 
+// methodPriority returns a sort priority for installation methods.
+// Lower values are preferred. Package managers (npm, pip, brew) are preferred
+// over native installers for easier management and updates.
+func methodPriority(method string) int {
+	priorities := map[string]int{
+		"npm":        1,
+		"pip":        2,
+		"pipx":       3,
+		"uv":         4,
+		"brew":       5,
+		"bun":        6,
+		"go":         7,
+		"scoop":      8,
+		"winget":     9,
+		"chocolatey": 10,
+		"krew":       11,
+		"binary":     12,
+		"native":     20, // Native installers are less preferred
+		"powershell": 21,
+		"dmg":        22,
+	}
+	if p, ok := priorities[method]; ok {
+		return p
+	}
+	return 15 // Unknown methods get medium priority
+}
+
 // GetSupportedMethods returns all installation methods supported on the given platform.
+// Methods are sorted by preference, with package managers (npm, pip, brew) preferred
+// over native installers for easier management and updates.
 func (a AgentDef) GetSupportedMethods(platformID string) []InstallMethodDef {
 	var methods []InstallMethodDef
 	for _, method := range a.InstallMethods {
@@ -94,6 +124,12 @@ func (a AgentDef) GetSupportedMethods(platformID string) []InstallMethodDef {
 			}
 		}
 	}
+
+	// Sort methods by priority (prefer package managers over native)
+	sort.Slice(methods, func(i, j int) bool {
+		return methodPriority(methods[i].Method) < methodPriority(methods[j].Method)
+	})
+
 	return methods
 }
 

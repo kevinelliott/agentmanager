@@ -30,6 +30,14 @@ type Store interface {
 	SaveCatalogCache(ctx context.Context, data []byte, etag string) error
 	GetCatalogCache(ctx context.Context) ([]byte, string, time.Time, error)
 
+	// Detection cache operations
+	SaveDetectionCache(ctx context.Context, installations []*agent.Installation) error
+	GetDetectionCache(ctx context.Context) ([]*agent.Installation, time.Time, error)
+	ClearDetectionCache(ctx context.Context) error
+	GetDetectionCacheTime(ctx context.Context) (time.Time, error)
+	SetLastUpdateCheckTime(ctx context.Context, t time.Time) error
+	GetLastUpdateCheckTime(ctx context.Context) (time.Time, error)
+
 	// Settings operations
 	GetSetting(ctx context.Context, key string) (string, error)
 	SetSetting(ctx context.Context, key, value string) error

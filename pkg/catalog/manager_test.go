@@ -257,7 +257,7 @@ func TestManagerRefresh(t *testing.T) {
 	mgr := NewManager(cfg, store)
 
 	ctx := context.Background()
-	err := mgr.Refresh(ctx)
+	_, err := mgr.Refresh(ctx)
 	if err != nil {
 		t.Fatalf("Refresh() error = %v", err)
 	}
@@ -291,7 +291,7 @@ func TestManagerRefreshInvalidCatalog(t *testing.T) {
 	mgr := NewManager(cfg, store)
 
 	ctx := context.Background()
-	err := mgr.Refresh(ctx)
+	_, err := mgr.Refresh(ctx)
 	if err == nil {
 		t.Error("Refresh() should return error for invalid catalog")
 	}
@@ -310,7 +310,7 @@ func TestManagerRefreshHTTPError(t *testing.T) {
 	mgr := NewManager(cfg, store)
 
 	ctx := context.Background()
-	err := mgr.Refresh(ctx)
+	_, err := mgr.Refresh(ctx)
 	if err == nil {
 		t.Error("Refresh() should return error on HTTP error")
 	}
@@ -478,7 +478,7 @@ func TestManagerWithGitHubToken(t *testing.T) {
 	mgr := NewManager(cfg, store)
 
 	ctx := context.Background()
-	err := mgr.Refresh(ctx)
+	_, err := mgr.Refresh(ctx)
 	if err != nil {
 		t.Fatalf("Refresh() error = %v", err)
 	}

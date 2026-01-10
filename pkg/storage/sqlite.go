@@ -119,6 +119,15 @@ func (s *SQLiteStore) migrate(ctx context.Context) error {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)`,
+
+		// Detection cache table
+		`CREATE TABLE IF NOT EXISTS detection_cache (
+			id INTEGER PRIMARY KEY CHECK (id = 1),
+			data BLOB NOT NULL,
+			cached_at TIMESTAMP NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
 	}
 
 	for _, migration := range migrations {
@@ -472,4 +481,104 @@ func (s *SQLiteStore) DeleteSetting(ctx context.Context, key string) error {
 		return fmt.Errorf("failed to delete setting: %w", err)
 	}
 	return nil
+}
+
+// SaveDetectionCache stores the detected agents cache.
+func (s *SQLiteStore) SaveDetectionCache(ctx context.Context, installations []*agent.Installation) error {
+	// Convert installations to records for JSON serialization
+	records := make([]*InstallationRecord, 0, len(installations))
+	for _, inst := range installations {
+		records = append(records, FromInstallation(inst))
+	}
+
+	data, err := json.Marshal(records)
+	if err != nil {
+		return fmt.Errorf("failed to marshal detection cache: %w", err)
+	}
+
+	query := `
+		INSERT INTO detection_cache (id, data, cached_at)
+		VALUES (1, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			data = excluded.data,
+			cached_at = excluded.cached_at,
+			updated_at = CURRENT_TIMESTAMP
+	`
+
+	_, err = s.db.ExecContext(ctx, query, data, time.Now())
+	if err != nil {
+		return fmt.Errorf("failed to save detection cache: %w", err)
+	}
+
+	return nil
+}
+
+// GetDetectionCache retrieves the cached detected agents.
+func (s *SQLiteStore) GetDetectionCache(ctx context.Context) ([]*agent.Installation, time.Time, error) {
+	query := "SELECT data, cached_at FROM detection_cache WHERE id = 1"
+
+	var data []byte
+	var cachedAt time.Time
+
+	err := s.db.QueryRowContext(ctx, query).Scan(&data, &cachedAt)
+	if err == sql.ErrNoRows {
+		return nil, time.Time{}, nil
+	}
+	if err != nil {
+		return nil, time.Time{}, fmt.Errorf("failed to get detection cache: %w", err)
+	}
+
+	var records []*InstallationRecord
+	if err := json.Unmarshal(data, &records); err != nil {
+		return nil, time.Time{}, fmt.Errorf("failed to unmarshal detection cache: %w", err)
+	}
+
+	installations := make([]*agent.Installation, 0, len(records))
+	for _, record := range records {
+		installations = append(installations, record.ToInstallation())
+	}
+
+	return installations, cachedAt, nil
+}
+
+// ClearDetectionCache removes the detection cache.
+func (s *SQLiteStore) ClearDetectionCache(ctx context.Context) error {
+	_, err := s.db.ExecContext(ctx, "DELETE FROM detection_cache WHERE id = 1")
+	if err != nil {
+		return fmt.Errorf("failed to clear detection cache: %w", err)
+	}
+	return nil
+}
+
+// GetDetectionCacheTime returns when the detection cache was last updated.
+func (s *SQLiteStore) GetDetectionCacheTime(ctx context.Context) (time.Time, error) {
+	query := "SELECT cached_at FROM detection_cache WHERE id = 1"
+
+	var cachedAt time.Time
+	err := s.db.QueryRowContext(ctx, query).Scan(&cachedAt)
+	if err == sql.ErrNoRows {
+		return time.Time{}, nil
+	}
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to get detection cache time: %w", err)
+	}
+
+	return cachedAt, nil
+}
+
+// SetLastUpdateCheckTime stores when updates were last checked.
+func (s *SQLiteStore) SetLastUpdateCheckTime(ctx context.Context, t time.Time) error {
+	return s.SetSetting(ctx, "last_update_check_time", t.Format(time.RFC3339))
+}
+
+// GetLastUpdateCheckTime returns when updates were last checked.
+func (s *SQLiteStore) GetLastUpdateCheckTime(ctx context.Context) (time.Time, error) {
+	val, err := s.GetSetting(ctx, "last_update_check_time")
+	if err != nil {
+		return time.Time{}, err
+	}
+	if val == "" {
+		return time.Time{}, nil
+	}
+	return time.Parse(time.RFC3339, val)
 }

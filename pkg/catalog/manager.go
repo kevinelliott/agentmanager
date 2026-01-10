@@ -70,28 +70,63 @@ func (m *Manager) Get(ctx context.Context) (*Catalog, error) {
 	return nil, fmt.Errorf("no catalog available")
 }
 
+// RefreshResult contains the result of a catalog refresh operation.
+type RefreshResult struct {
+	Updated        bool   // Whether the catalog was updated
+	CurrentVersion string // The current catalog version after refresh
+	RemoteVersion  string // The remote catalog version that was fetched
+}
+
 // Refresh fetches the latest catalog from the remote source.
-func (m *Manager) Refresh(ctx context.Context) error {
-	catalog, err := m.fetchRemote(ctx)
+// It only updates if the remote version is newer than the current version.
+// Returns a RefreshResult indicating whether an update occurred.
+func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
+	remoteCatalog, err := m.fetchRemote(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to fetch remote catalog: %w", err)
+		return nil, fmt.Errorf("failed to fetch remote catalog: %w", err)
 	}
 
-	// Validate the catalog
-	if err := catalog.Validate(); err != nil {
-		return fmt.Errorf("invalid catalog: %w", err)
+	// Validate the remote catalog
+	if err := remoteCatalog.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid remote catalog: %w", err)
+	}
+
+	result := &RefreshResult{
+		RemoteVersion: remoteCatalog.Version,
+	}
+
+	// Get current catalog (if available) and compare versions
+	currentCatalog, _ := m.Get(ctx)
+	if currentCatalog != nil {
+		result.CurrentVersion = currentCatalog.Version
+
+		if currentCatalog.Version != "" && remoteCatalog.Version != "" {
+			currentVersion, currentErr := agent.ParseVersion(currentCatalog.Version)
+			remoteVersion, remoteErr := agent.ParseVersion(remoteCatalog.Version)
+
+			// Only skip update if both versions parse successfully and current is >= remote
+			if currentErr == nil && remoteErr == nil {
+				if !remoteVersion.IsNewerThan(currentVersion) {
+					// Remote is not newer, no update needed
+					result.Updated = false
+					return result, nil
+				}
+			}
+		}
 	}
 
 	// Save to cache
-	if err := m.saveToCache(ctx, catalog); err != nil {
+	if err := m.saveToCache(ctx, remoteCatalog); err != nil {
 		// Log but don't fail - we have the catalog in memory
 	}
 
 	m.mu.Lock()
-	m.catalog = catalog
+	m.catalog = remoteCatalog
 	m.mu.Unlock()
 
-	return nil
+	result.Updated = true
+	result.CurrentVersion = remoteCatalog.Version
+	return result, nil
 }
 
 // GetAgent returns a specific agent definition.

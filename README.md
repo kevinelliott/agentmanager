@@ -74,16 +74,18 @@ $ agentmgr catalog list
 
 ID            NAME                    METHODS    DESCRIPTION
 ------------  ----------------------  ---------  ----------------------------------------
-agent-deck    Agent Deck              brew +2    Terminal session manager for AI codin...
+agent-deck    Agent Deck              go +2      Terminal session manager for AI codin...
 aider         Aider                   pip +2     AI pair programming in your terminal
 amazon-q      Amazon Q Developer CLI  brew +1    Agentic chat experience in your termi...
-blackbox-cli  Blackbox CLI            npm +1     AI-powered CLI for natural language c...
+blackbox-cli  Blackbox CLI            native +1  AI-powered CLI for natural language c...
 claude-code   Claude Code             npm +1     Anthropic's official CLI for Claude A...
 claude-squad  Claude Squad            brew +1    Terminal application for managing mul...
+codex         Codex                   npm +2     Lightweight coding agent from OpenAI ...
 continue-cli  Continue CLI            npm        Open-source AI code assistant CLI
-crush         Crush                   brew +2    Terminal-based AI coding agent from C...
+crush         Crush                   go +2      Terminal-based AI coding agent from C...
 cursor-cli    Cursor CLI              native     Cursor AI editor CLI agent
 deepseek-cli  DeepSeek CLI            npm        Command-line AI coding assistant leve...
+droid         Droid                   brew +1    AI-powered software engineering agent...
 gemini-cli    Gemini CLI              npm        Google's Gemini AI in your terminal
 copilot-cli   GitHub Copilot CLI      npm +1     GitHub Copilot in the command line
 kilocode-cli  Kilocode CLI            npm        Terminal UI for Kilo Code, the all-in...
@@ -97,7 +99,7 @@ qwen-code     Qwen Code               npm +1     Open-source AI coding agent opt
 rallies-cli   Rallies CLI             pip +1     AI-powered investment research CLI wi...
 tokscale      Tokscale                bun +1     High-performance CLI for monitoring A...
 
-22 agents available
+24 agents available
 ```
 
 ```console
@@ -127,13 +129,17 @@ tokscale      Tokscale            npm     1.0.22               1.0.22   ●
 ### Agent Management
 
 ```bash
-agentmgr agent list              # List all detected agents
+agentmgr agent list              # List all detected agents (uses cache)
+agentmgr agent list --refresh    # Force re-detection, ignore cache
+agentmgr agent refresh           # Force re-detection and update cache
 agentmgr agent install <name>    # Install an agent
 agentmgr agent update <name>     # Update specific agent
 agentmgr agent update --all      # Update all agents
 agentmgr agent info <name>       # Show agent details
 agentmgr agent remove <name>     # Remove an agent
 ```
+
+> **Note:** Agent detection results are cached for 1 hour by default. Use `agent refresh` or `agent list --refresh` to force re-detection.
 
 ### Catalog Management
 
@@ -179,10 +185,12 @@ agentmgr helper status           # Check helper status
 | Blackbox CLI | npm, native, powershell |
 | Claude Code | npm, native |
 | Claude Squad | brew, native |
+| Codex | npm, brew, binary |
 | Continue CLI | npm |
 | Crush | brew, npm, go, winget, scoop |
 | Cursor CLI | native |
 | DeepSeek CLI | npm |
+| Droid | brew, native, powershell |
 | Gemini CLI | npm |
 | GitHub Copilot CLI | npm, brew, winget |
 | Kilocode CLI | npm |
@@ -238,6 +246,11 @@ Example configuration:
 catalog:
   refresh_interval: 1h
   github_token: ""  # Optional: for higher rate limits
+
+detection:
+  cache_duration: 1h              # How long to cache detected agents
+  update_check_cache_duration: 15m # How long to cache update check results
+  cache_enabled: true             # Set to false to always detect fresh
 
 updates:
   check_interval: 6h
