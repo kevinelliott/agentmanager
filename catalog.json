@@ -1,8 +1,73 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.2",
   "schema_version": 1,
-  "last_updated": "2025-01-09T00:00:00Z",
+  "last_updated": "2026-01-09T00:00:00Z",
   "agents": {
+    "amp": {
+      "id": "amp",
+      "name": "Amp",
+      "description": "Frontier coding agent by Sourcegraph for terminal and editor",
+      "homepage": "https://ampcode.com",
+      "repository": "https://github.com/sourcegraph/amp-cli",
+      "documentation": "https://ampcode.com/manual",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://ampcode.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["ripgrep"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "auto_update": "true"
+          }
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@sourcegraph/amp",
+          "command": "npm install -g @sourcegraph/amp",
+          "update_cmd": "npm update -g @sourcegraph/amp",
+          "uninstall_cmd": "npm uninstall -g @sourcegraph/amp",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "sourcegraph/amp-cli/amp",
+          "command": "brew install sourcegraph/amp-cli/amp",
+          "update_cmd": "brew upgrade amp",
+          "uninstall_cmd": "brew uninstall amp",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["ripgrep"]
+        },
+        "chocolatey": {
+          "method": "chocolatey",
+          "package": "amp",
+          "command": "choco install amp",
+          "update_cmd": "choco upgrade amp",
+          "uninstall_cmd": "choco uninstall amp",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["amp"],
+        "version_cmd": "amp --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @sourcegraph/amp --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "npm",
+        "url": "https://www.npmjs.com/package/@sourcegraph/amp",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Sourcegraph",
+        "license": "Proprietary"
+      }
+    },
     "claude-code": {
       "id": "claude-code",
       "name": "Claude Code",
@@ -1014,6 +1079,48 @@
       "metadata": {
         "vendor": "Nano Collective",
         "license": "MIT"
+      }
+    },
+    "dexter": {
+      "id": "dexter",
+      "name": "Dexter",
+      "description": "Autonomous agent for deep financial research and analysis",
+      "homepage": "https://github.com/virattt/dexter",
+      "repository": "https://github.com/virattt/dexter",
+      "documentation": "https://github.com/virattt/dexter#readme",
+      "install_methods": {
+        "git": {
+          "method": "git",
+          "command": "git clone https://github.com/virattt/dexter.git && cd dexter && bun install",
+          "update_cmd": "cd dexter && git pull && bun install",
+          "uninstall_cmd": "rm -rf dexter",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["bun>=1.0", "git"],
+          "metadata": {
+            "run_cmd": "bun start",
+            "dev_cmd": "bun dev"
+          }
+        }
+      },
+      "detection": {
+        "executables": [],
+        "version_cmd": "",
+        "version_regex": "",
+        "signatures": {
+          "git": {
+            "paths": ["dexter/package.json", "dexter/src/index.tsx"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/virattt/dexter/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Virat Singh",
+        "license": "MIT",
+        "category": "financial-research"
       }
     },
     "droid": {
