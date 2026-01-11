@@ -1,5 +1,5 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "schema_version": 1,
   "last_updated": "2026-01-10T00:00:00Z",
   "agents": {
@@ -518,6 +518,57 @@
       "metadata": {
         "vendor": "Rallies AI",
         "license": "GPL-3.0"
+      }
+    },
+    "tunacode-cli": {
+      "id": "tunacode-cli",
+      "name": "TunaCode CLI",
+      "description": "AI CLI coding agent with TUI, safe git branches, and multi-LLM support",
+      "homepage": "https://tunacode.xyz",
+      "repository": "https://github.com/alchemiststudiosDOTai/tunacode",
+      "documentation": "https://github.com/alchemiststudiosDOTai/tunacode#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "tunacode-cli",
+          "command": "uv tool install tunacode-cli",
+          "update_cmd": "uv tool upgrade tunacode-cli",
+          "uninstall_cmd": "uv tool uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["uv", "python>=3.11"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "tunacode-cli",
+          "command": "pip install tunacode-cli",
+          "update_cmd": "pip install --upgrade tunacode-cli",
+          "uninstall_cmd": "pip uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python>=3.11"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "tunacode-cli",
+          "command": "pipx install tunacode-cli",
+          "update_cmd": "pipx upgrade tunacode-cli",
+          "uninstall_cmd": "pipx uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["pipx", "python>=3.11"]
+        }
+      },
+      "detection": {
+        "executables": ["tunacode"],
+        "version_cmd": "tunacode --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/alchemiststudiosDOTai/tunacode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Alchemist Studios",
+        "license": "MIT"
       }
     },
     "tokscale": {
