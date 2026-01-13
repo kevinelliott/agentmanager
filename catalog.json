@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
+  "version": "1.0.8",
   "schema_version": 1,
   "last_updated": "2026-01-10T00:00:00Z",
   "agents": {
@@ -518,6 +518,50 @@
       "metadata": {
         "vendor": "Rallies AI",
         "license": "GPL-3.0"
+      }
+    },
+    "ralph-tui": {
+      "id": "ralph-tui",
+      "name": "Ralph TUI",
+      "description": "AI Agent Loop Orchestrator for autonomous task execution with AI coders",
+      "homepage": "https://github.com/subsy/ralph-tui",
+      "repository": "https://github.com/subsy/ralph-tui",
+      "documentation": "https://github.com/subsy/ralph-tui#readme",
+      "install_methods": {
+        "bun": {
+          "method": "bun",
+          "package": "ralph-tui",
+          "command": "bun install -g ralph-tui",
+          "update_cmd": "bun update -g ralph-tui",
+          "uninstall_cmd": "bun remove -g ralph-tui",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["bun>=1.0"]
+        },
+        "bunx": {
+          "method": "bunx",
+          "package": "ralph-tui",
+          "command": "bunx ralph-tui",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["bun>=1.0"],
+          "metadata": {
+            "ephemeral": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["ralph-tui"],
+        "version_cmd": "ralph-tui --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/subsy/ralph-tui/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "subsy",
+        "license": "MIT"
       }
     },
     "tunacode-cli": {
