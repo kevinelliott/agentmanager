@@ -46,6 +46,7 @@ detailed information about agents.`,
 	return cmd
 }
 
+//nolint:gocyclo // CLI command setup with many flags and options
 func newAgentListCommand(cfg *config.Config) *cobra.Command {
 	var (
 		showAll      bool
@@ -175,7 +176,7 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 				}
 
 				// Save last update check time
-				_ = store.SetLastUpdateCheckTime(ctx, time.Now())
+				_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
 
 				// Save to cache if enabled (with updated version info)
 				if cfg.Detection.CacheEnabled {

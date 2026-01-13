@@ -69,6 +69,20 @@ func (m *mockStore) SaveCatalogCache(ctx context.Context, data []byte, etag stri
 func (m *mockStore) GetSetting(ctx context.Context, key string) (string, error) { return "", nil }
 func (m *mockStore) SetSetting(ctx context.Context, key, value string) error    { return nil }
 func (m *mockStore) DeleteSetting(ctx context.Context, key string) error        { return nil }
+func (m *mockStore) SaveDetectionCache(ctx context.Context, installations []*agent.Installation) error {
+	return nil
+}
+func (m *mockStore) GetDetectionCache(ctx context.Context) ([]*agent.Installation, time.Time, error) {
+	return nil, time.Time{}, nil
+}
+func (m *mockStore) ClearDetectionCache(ctx context.Context) error { return nil }
+func (m *mockStore) GetDetectionCacheTime(ctx context.Context) (time.Time, error) {
+	return time.Time{}, nil
+}
+func (m *mockStore) SetLastUpdateCheckTime(ctx context.Context, t time.Time) error { return nil }
+func (m *mockStore) GetLastUpdateCheckTime(ctx context.Context) (time.Time, error) {
+	return time.Time{}, nil
+}
 
 func createTestCatalog() *catalog.Catalog {
 	return &catalog.Catalog{

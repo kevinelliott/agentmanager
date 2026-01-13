@@ -26,6 +26,13 @@ var (
 )
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	// Get current platform
 	plat := platform.Current()
 
@@ -33,16 +40,14 @@ func main() {
 	loader := config.NewLoader()
 	cfg, err := loader.Load("")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to load config: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	// Initialize storage
 	dataDir := plat.GetDataDir()
 	store, err := storage.NewSQLiteStore(dataDir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to create storage: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to create storage: %w", err)
 	}
 	defer store.Close()
 
@@ -50,8 +55,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	if err := store.Initialize(ctx); err != nil {
 		cancel()
-		fmt.Fprintf(os.Stderr, "Failed to initialize storage: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to initialize storage: %w", err)
 	}
 	cancel()
 
@@ -79,8 +83,5 @@ func main() {
 
 	// Run systray on main thread (required for macOS)
 	// This blocks until systray.Quit() is called
-	if err := app.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
+	return app.Run()
 }

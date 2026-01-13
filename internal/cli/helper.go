@@ -94,7 +94,7 @@ to agent status and updates.`,
 			if isAppBundle {
 				// For .app bundles, 'open' returns immediately
 				// Wait briefly for it to complete
-				_ = c.Wait()
+				_ = c.Wait() //nolint:errcheck // 'open' returns immediately for .app bundles; exit status irrelevant
 				printSuccess("Helper started")
 			} else {
 				// Save PID before releasing (Release invalidates the Process)

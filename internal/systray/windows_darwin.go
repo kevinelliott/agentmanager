@@ -20,12 +20,17 @@ import (
 
 // Apple HIG-compliant design constants
 const (
-	windowPadding   = 20.0  // Standard macOS window margin
-	sectionGap      = 24.0  // Gap between major sections
-	itemGap         = 8.0   // Gap between items within a section
-	boxRadius       = 8.0   // Rounded corner radius for content boxes
-	boxInnerPadding = 16.0  // Padding inside content boxes
-	rowHeight       = 22.0  // Standard row height for info rows
+	windowPadding   = 20.0 // Standard macOS window margin
+	sectionGap      = 24.0 // Gap between major sections
+	itemGap         = 8.0  // Gap between items within a section
+	boxRadius       = 8.0  // Rounded corner radius for content boxes
+	boxInnerPadding = 16.0 // Padding inside content boxes
+	rowHeight       = 22.0 // Standard row height for info rows
+
+	// Action type constants
+	actionInstall   = "install"
+	actionUninstall = "uninstall"
+	actionUpdate    = "update"
 )
 
 var (
@@ -314,7 +319,7 @@ func (a *App) showNativeSettingsWindow() {
 						installBtn.SetTitle("Reinstall")
 						uninstallBtn.SetHidden(false) // Show uninstall button
 					} else {
-						feedbackLabel.SetStringValue("Installation cancelled")
+						feedbackLabel.SetStringValue("Installation canceled")
 						feedbackLabel.SetTextColor(appkit.Color_SystemOrangeColor())
 					}
 				})
@@ -338,7 +343,7 @@ func (a *App) showNativeSettingsWindow() {
 						installBtn.SetTitle("Install")
 						uninstallBtn.SetHidden(true)
 					} else {
-						feedbackLabel.SetStringValue("Uninstall cancelled")
+						feedbackLabel.SetStringValue("Uninstall canceled")
 						feedbackLabel.SetTextColor(appkit.Color_SystemOrangeColor())
 					}
 				})
@@ -811,18 +816,18 @@ func hasNativeWindowSupport() bool {
 
 // manageAgentRow tracks a row in the manage agents window
 type manageAgentRow struct {
-	agentDef          catalog.AgentDef
-	installed         bool
-	hasUpdate         bool
-	version           string
-	latestVer         string
-	checkbox          appkit.Button
-	selected          bool
-	statusLabel       appkit.TextField
-	actionBtn         appkit.Button
-	actionPopup       appkit.PopUpButton
-	installedMethods  []agent.Installation   // All installed methods for this agent
-	availableMethods  []catalog.InstallMethodDef // Available install methods for platform
+	agentDef         catalog.AgentDef
+	installed        bool
+	hasUpdate        bool
+	version          string
+	latestVer        string
+	checkbox         appkit.Button
+	selected         bool
+	statusLabel      appkit.TextField
+	actionBtn        appkit.Button
+	actionPopup      appkit.PopUpButton
+	installedMethods []agent.Installation       // All installed methods for this agent
+	availableMethods []catalog.InstallMethodDef // Available install methods for platform
 }
 
 var (
@@ -832,6 +837,8 @@ var (
 )
 
 // showNativeManageAgentsWindow displays the agent management window.
+//
+//nolint:gocyclo // Complex native UI window construction
 func (a *App) showNativeManageAgentsWindow(agentDefs []catalog.AgentDef, installedAgents []agent.Installation) {
 	app := a
 	defs := agentDefs
@@ -1214,7 +1221,7 @@ func (a *App) showNativeManageAgentsWindow(agentDefs []catalog.AgentDef, install
 						if selectedIdx > 0 {
 							methodIdx := selectedIdx - 1
 							if methodIdx < len(currentRow.installedMethods) {
-								go app.performAgentActionWithMethod(currentRow, win, "uninstall", string(currentRow.installedMethods[methodIdx].Method))
+								go app.performAgentActionWithMethod(currentRow, win, actionUninstall, string(currentRow.installedMethods[methodIdx].Method))
 							}
 						}
 					})
@@ -1437,11 +1444,11 @@ func (a *App) showNativeManageAgentsWindow(agentDefs []catalog.AgentDef, install
 func (a *App) performAgentAction(row *manageAgentRow, parentWin appkit.Window) {
 	var actionType string
 	if row.hasUpdate {
-		actionType = "update"
+		actionType = actionUpdate
 	} else if row.installed {
-		actionType = "uninstall"
+		actionType = actionUninstall
 	} else {
-		actionType = "install"
+		actionType = actionInstall
 	}
 
 	// Show progress
@@ -1451,11 +1458,11 @@ func (a *App) performAgentAction(row *manageAgentRow, parentWin appkit.Window) {
 	var err error
 
 	switch actionType {
-	case "install":
+	case actionInstall:
 		success, err = a.installAgent(row.agentDef)
-	case "update":
+	case actionUpdate:
 		success, err = a.updateAgentByID(row.agentDef.ID)
-	case "uninstall":
+	case actionUninstall:
 		success, err = a.uninstallAgent(row.agentDef)
 	}
 
@@ -1466,14 +1473,14 @@ func (a *App) performAgentAction(row *manageAgentRow, parentWin appkit.Window) {
 		if success && err == nil {
 			// Update row state
 			switch actionType {
-			case "install", "update":
+			case actionInstall, actionUpdate:
 				row.installed = true
 				row.hasUpdate = false
 				row.statusLabel.SetStringValue("Installed")
 				row.statusLabel.SetTextColor(appkit.Color_LabelColor())
 				row.actionBtn.SetTitle("Uninstall")
 				row.actionBtn.SetContentTintColor(appkit.Color_SystemRedColor())
-			case "uninstall":
+			case actionUninstall:
 				row.installed = false
 				row.hasUpdate = false
 				row.statusLabel.SetStringValue("Not Installed")
@@ -1497,9 +1504,9 @@ func (a *App) performAgentActionWithMethod(row *manageAgentRow, parentWin appkit
 	var err error
 
 	switch actionType {
-	case "install":
+	case actionInstall:
 		success, err = a.installAgentWithMethod(row.agentDef, method)
-	case "uninstall":
+	case actionUninstall:
 		success, err = a.uninstallAgentWithMethod(row.agentDef, method)
 	}
 
@@ -1509,14 +1516,14 @@ func (a *App) performAgentActionWithMethod(row *manageAgentRow, parentWin appkit
 
 		if success && err == nil {
 			switch actionType {
-			case "install":
+			case actionInstall:
 				row.installed = true
 				row.hasUpdate = false
 				if row.statusLabel.Ptr() != nil {
 					row.statusLabel.SetStringValue("Installed")
 					row.statusLabel.SetTextColor(appkit.Color_LabelColor())
 				}
-			case "uninstall":
+			case actionUninstall:
 				// Only mark as not installed if no other methods remain installed
 				row.installed = false
 				row.hasUpdate = false
@@ -1559,19 +1566,19 @@ func (a *App) performBulkAction(actionType string, resultLabel appkit.TextField,
 		var err error
 
 		switch actionType {
-		case "install":
+		case actionInstall:
 			if !row.installed {
 				success, err = a.installAgent(row.agentDef)
 			} else {
 				continue
 			}
-		case "update":
+		case actionUpdate:
 			if row.hasUpdate {
 				success, err = a.updateAgentByID(row.agentDef.ID)
 			} else {
 				continue
 			}
-		case "uninstall":
+		case actionUninstall:
 			if row.installed {
 				success, err = a.uninstallAgent(row.agentDef)
 			} else {

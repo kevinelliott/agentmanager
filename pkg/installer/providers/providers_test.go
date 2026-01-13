@@ -118,9 +118,9 @@ func TestExtractNPMPackage(t *testing.T) {
 
 func TestFormatNPMPermissionHint(t *testing.T) {
 	tests := []struct {
-		name        string
-		stderr      string
-		expectHint  bool
+		name       string
+		stderr     string
+		expectHint bool
 	}{
 		{
 			name:       "EACCES error",

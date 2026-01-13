@@ -392,6 +392,10 @@ func (c *unixClient) listenForNotifications(ctx context.Context) {
 	}
 }
 
+// Silence unused warning - kept for future async notification support.
+// See comment in Connect() at line 351-353.
+var _ = (*unixClient).listenForNotifications
+
 // Disconnect closes the connection.
 func (c *unixClient) Disconnect() error {
 	c.mu.Lock()

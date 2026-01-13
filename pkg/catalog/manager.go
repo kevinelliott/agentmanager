@@ -96,7 +96,7 @@ func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 	}
 
 	// Get current catalog (if available) and compare versions
-	currentCatalog, _ := m.Get(ctx)
+	currentCatalog, _ := m.Get(ctx) //nolint:errcheck // best-effort; nil catalog is handled below
 	if currentCatalog != nil {
 		result.CurrentVersion = currentCatalog.Version
 

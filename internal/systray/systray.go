@@ -25,6 +25,11 @@ import (
 	"github.com/kevinelliott/agentmgr/pkg/storage"
 )
 
+// String constants for repeated values.
+const (
+	statusNotFound = "(not found)"
+)
+
 // agentMenuItem tracks a menu item for an agent.
 type agentMenuItem struct {
 	item    *systray.MenuItem
@@ -63,12 +68,12 @@ type App struct {
 	mAgentsLoading *systray.MenuItem
 	agentItems     []*agentMenuItem
 	agentItemsMu   sync.Mutex
-	mRefresh      *systray.MenuItem
-	mUpdateAll    *systray.MenuItem
-	mOpenTUI      *systray.MenuItem
-	mSettings     *systray.MenuItem
-	mAutoStart    *systray.MenuItem
-	mQuit         *systray.MenuItem
+	mRefresh       *systray.MenuItem
+	mUpdateAll     *systray.MenuItem
+	mOpenTUI       *systray.MenuItem
+	mSettings      *systray.MenuItem
+	mAutoStart     *systray.MenuItem
+	mQuit          *systray.MenuItem
 
 	// Track spawned dialog processes to kill on exit
 	dialogProcs   []*exec.Cmd
@@ -79,6 +84,9 @@ type App struct {
 	cancel context.CancelFunc
 	done   chan struct{}
 }
+
+// Silence unused warning - reserved for future settings UI
+var _ = (*App).changeCLIPath
 
 // New creates a new systray application.
 func New(cfg *config.Config, cfgLoader *config.Loader, plat platform.Platform, store storage.Store, det *detector.Detector, cat *catalog.Manager, inst *installer.Manager, version string) *App {
@@ -253,7 +261,6 @@ func (a *App) handleGetStatus(ctx context.Context, msg *ipc.Message) (*ipc.Messa
 
 // onReady is called when systray is ready.
 func (a *App) onReady() {
-
 	// Set icon and tooltip
 	icon := getIcon()
 	systray.SetTemplateIcon(icon, icon)
@@ -300,7 +307,6 @@ func (a *App) onReady() {
 
 	// Handle menu clicks (all menu items in one goroutine)
 	go a.handleMenuClicks()
-
 }
 
 // onExit is called when systray is exiting.
@@ -784,7 +790,7 @@ return "close"
 	cmd := exec.Command("osascript", "-e", script)
 	output, err := cmd.Output()
 	if err != nil {
-		// Dialog was cancelled or errored, ignore
+		// Dialog was canceled or errored, ignore
 		return
 	}
 
@@ -800,13 +806,13 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 	if _, err := exec.LookPath("zenity"); err == nil {
 		var cmd *exec.Cmd
 		if hasUpdate {
-			cmd = exec.Command("zenity", "--question",
+			cmd = exec.Command("zenity", "--question", //nolint:gosec // G204: agent names from trusted catalog
 				"--title="+inst.AgentName,
 				"--text="+details+"\n\nDo you want to update?",
 				"--ok-label=Update",
 				"--cancel-label=Close")
 		} else {
-			cmd = exec.Command("zenity", "--info",
+			cmd = exec.Command("zenity", "--info", //nolint:gosec // G204: agent names from trusted catalog
 				"--title="+inst.AgentName,
 				"--text="+details)
 		}
@@ -820,12 +826,14 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 	// Try kdialog
 	if _, err := exec.LookPath("kdialog"); err == nil {
 		if hasUpdate {
+			//nolint:gosec // G204: agent names come from trusted catalog, not user input
 			cmd := exec.Command("kdialog", "--yesno", details+"\n\nDo you want to update?", "--title", inst.AgentName)
 			err := cmd.Run()
 			if err == nil {
 				go a.updateSingleAgent(inst)
 			}
 		} else {
+			//nolint:gosec // G204: agent names come from trusted catalog, not user input
 			cmd := exec.Command("kdialog", "--msgbox", details, "--title", inst.AgentName)
 			_ = cmd.Run()
 		}
@@ -1155,7 +1163,7 @@ func (a *App) showMacOSSettings() {
 		if path, err := findAgentMgrBinary(); err == nil {
 			currentPath = path
 		} else {
-			currentPath = "(not found)"
+			currentPath = statusNotFound
 		}
 	}
 
@@ -1178,7 +1186,7 @@ return button returned of result
 `, escapeAppleScript(currentPath), notifyStatus)
 
 	for {
-		// Check if context is cancelled (helper is shutting down)
+		// Check if context is canceled (helper is shutting down)
 		select {
 		case <-a.ctx.Done():
 			return
@@ -1191,7 +1199,7 @@ return button returned of result
 		a.untrackDialog(cmd)
 
 		if err != nil {
-			// Dialog was cancelled, killed, or errored
+			// Dialog was canceled, killed, or errored
 			return
 		}
 
@@ -1432,13 +1440,14 @@ func (a *App) showLinuxSettings() {
 			if path, err := findAgentMgrBinary(); err == nil {
 				currentPath = path
 			} else {
-				currentPath = "(not found)"
+				currentPath = statusNotFound
 			}
 		}
 
 		details := fmt.Sprintf("CLI Path: %s\nNotifications: %s\n\nEdit config file to change settings:\n%s",
 			currentPath, boolToOnOff(a.config.Updates.Notify), config.GetConfigPath())
 
+		//nolint:gosec // G204: uses fixed zenity command with app-controlled content
 		cmd := exec.Command("zenity", "--info", "--title=AgentManager Settings", "--text="+details)
 		_ = cmd.Run()
 		return
@@ -1455,7 +1464,7 @@ func (a *App) showWindowsSettings() {
 		if path, err := findAgentMgrBinary(); err == nil {
 			currentPath = path
 		} else {
-			currentPath = "(not found)"
+			currentPath = statusNotFound
 		}
 	}
 

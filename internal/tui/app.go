@@ -238,6 +238,7 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	if !usedDetectionCache {
 		// Clear cache if forcing refresh
 		if forceRefresh {
+			//nolint:errcheck // best-effort cache clear; will be refreshed on next detection
 			_ = store.ClearDetectionCache(ctx)
 		}
 
@@ -270,11 +271,11 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 		}
 
 		// Save last update check time
-		_ = store.SetLastUpdateCheckTime(ctx, time.Now())
+		_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
 
 		// Save to cache if enabled (with updated version info)
 		if m.config.Detection.CacheEnabled {
-			_ = store.SaveDetectionCache(ctx, installations)
+			_ = store.SaveDetectionCache(ctx, installations) //nolint:errcheck // best-effort cache; agents will be redetected on next run
 		}
 	}
 
