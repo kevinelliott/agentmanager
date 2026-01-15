@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
+  "version": "1.0.10",
   "schema_version": 1,
   "last_updated": "2026-01-10T00:00:00Z",
   "agents": {
@@ -66,6 +66,57 @@
       "metadata": {
         "vendor": "Sourcegraph",
         "license": "Proprietary"
+      }
+    },
+    "codebuff": {
+      "id": "codebuff",
+      "name": "Codebuff",
+      "description": "Open-source AI coding assistant with multi-agent architecture",
+      "homepage": "https://www.codebuff.com",
+      "repository": "https://github.com/CodebuffAI/codebuff",
+      "documentation": "https://www.codebuff.com/docs/help/quick-start",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "codebuff",
+          "command": "npm install -g codebuff",
+          "update_cmd": "npm update -g codebuff",
+          "uninstall_cmd": "npm uninstall -g codebuff",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node"]
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://github.com/CodebuffAI/codebuff/releases",
+            "artifact_darwin_arm64": "codebuff-macos-arm64.tar.gz",
+            "artifact_darwin_amd64": "codebuff-macos-x64.tar.gz",
+            "artifact_linux_amd64": "codebuff-linux-x64.tar.gz",
+            "artifact_linux_arm64": "codebuff-linux-arm64.tar.gz",
+            "artifact_windows_amd64": "codebuff-win32-x64.tar.gz"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["codebuff"],
+        "version_cmd": "codebuff --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g codebuff --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/CodebuffAI/codebuff/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Codebuff AI",
+        "license": "Apache-2.0"
       }
     },
     "claude-code": {
