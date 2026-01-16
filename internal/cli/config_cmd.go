@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -29,6 +32,8 @@ environment variables using the AGENTMGR_ prefix.`,
 		newConfigSetCommand(cfg),
 		newConfigPathCommand(cfg),
 		newConfigInitCommand(cfg),
+		newConfigExportCommand(cfg),
+		newConfigImportCommand(cfg),
 	)
 
 	return cmd
@@ -207,4 +212,184 @@ if they don't exist.`,
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "overwrite existing config")
 
 	return cmd
+}
+
+func newConfigExportCommand(cfg *config.Config) *cobra.Command {
+	var format string
+
+	cmd := &cobra.Command{
+		Use:   "export [file]",
+		Short: "Export configuration to a file",
+		Long: `Export the current configuration to a file.
+
+If no file is specified, outputs to stdout.
+
+Examples:
+  agentmgr config export                    # Output to stdout
+  agentmgr config export config.yaml        # Export to YAML file
+  agentmgr config export config.json -f json # Export to JSON file`,
+		Args: cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var data []byte
+			var err error
+
+			if format == "json" {
+				data, err = json.MarshalIndent(cfg, "", "  ")
+			} else {
+				data, err = yaml.Marshal(cfg)
+			}
+
+			if err != nil {
+				return fmt.Errorf("failed to serialize config: %w", err)
+			}
+
+			if len(args) == 0 {
+				fmt.Println(string(data))
+				return nil
+			}
+
+			filename := args[0]
+			if err := os.WriteFile(filename, data, 0644); err != nil {
+				return fmt.Errorf("failed to write config file: %w", err)
+			}
+
+			printSuccess("Configuration exported to %s", filename)
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVarP(&format, "format", "F", "yaml", "output format (yaml, json)")
+
+	return cmd
+}
+
+func newConfigImportCommand(cfg *config.Config) *cobra.Command {
+	var merge bool
+
+	cmd := &cobra.Command{
+		Use:   "import <file>",
+		Short: "Import configuration from a file",
+		Long: `Import configuration from a YAML or JSON file.
+
+By default, this replaces the current configuration. Use --merge to
+merge with existing settings.
+
+Examples:
+  agentmgr config import config.yaml        # Replace with imported config
+  agentmgr config import config.yaml --merge # Merge with existing config`,
+		Args: cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			filename := args[0]
+
+			data, err := os.ReadFile(filename)
+			if err != nil {
+				return fmt.Errorf("failed to read config file: %w", err)
+			}
+
+			var importedCfg config.Config
+
+			// Detect format from extension
+			ext := strings.ToLower(filepath.Ext(filename))
+			if ext == ".json" {
+				if err := json.Unmarshal(data, &importedCfg); err != nil {
+					return fmt.Errorf("failed to parse JSON config: %w", err)
+				}
+			} else {
+				if err := yaml.Unmarshal(data, &importedCfg); err != nil {
+					return fmt.Errorf("failed to parse YAML config: %w", err)
+				}
+			}
+
+			// Validate imported config
+			if err := importedCfg.Validate(); err != nil {
+				return fmt.Errorf("invalid configuration: %w", err)
+			}
+
+			// Save to config file
+			loader := config.NewLoader()
+			if merge {
+				// Merge with existing config
+				*cfg = mergeConfigs(*cfg, importedCfg)
+			} else {
+				*cfg = importedCfg
+			}
+
+			if err := loader.Save(cfg); err != nil {
+				return fmt.Errorf("failed to save config: %w", err)
+			}
+
+			if merge {
+				printSuccess("Configuration merged from %s", filename)
+			} else {
+				printSuccess("Configuration imported from %s", filename)
+			}
+			return nil
+		},
+	}
+
+	cmd.Flags().BoolVarP(&merge, "merge", "m", false, "merge with existing configuration")
+
+	return cmd
+}
+
+// mergeConfigs merges imported config into base config.
+// Non-zero values from imported overwrite base values.
+func mergeConfigs(base, imported config.Config) config.Config {
+	// Catalog settings
+	if imported.Catalog.SourceURL != "" {
+		base.Catalog.SourceURL = imported.Catalog.SourceURL
+	}
+	if imported.Catalog.RefreshInterval != 0 {
+		base.Catalog.RefreshInterval = imported.Catalog.RefreshInterval
+	}
+	if imported.Catalog.GitHubToken != "" {
+		base.Catalog.GitHubToken = imported.Catalog.GitHubToken
+	}
+
+	// Detection settings
+	if imported.Detection.CacheDuration != 0 {
+		base.Detection.CacheDuration = imported.Detection.CacheDuration
+	}
+	if imported.Detection.UpdateCheckCacheDuration != 0 {
+		base.Detection.UpdateCheckCacheDuration = imported.Detection.UpdateCheckCacheDuration
+	}
+
+	// Updates settings
+	if imported.Updates.CheckInterval != 0 {
+		base.Updates.CheckInterval = imported.Updates.CheckInterval
+	}
+	if len(imported.Updates.ExcludeAgents) > 0 {
+		base.Updates.ExcludeAgents = imported.Updates.ExcludeAgents
+	}
+
+	// UI settings
+	if imported.UI.Theme != "" {
+		base.UI.Theme = imported.UI.Theme
+	}
+	if imported.UI.PageSize != 0 {
+		base.UI.PageSize = imported.UI.PageSize
+	}
+
+	// Logging settings
+	if imported.Logging.Level != "" {
+		base.Logging.Level = imported.Logging.Level
+	}
+	if imported.Logging.Format != "" {
+		base.Logging.Format = imported.Logging.Format
+	}
+	if imported.Logging.File != "" {
+		base.Logging.File = imported.Logging.File
+	}
+
+	// Merge agent configs
+	if len(imported.Agents) > 0 {
+		if base.Agents == nil {
+			base.Agents = make(map[string]config.AgentConfig)
+		}
+		for id, agentCfg := range imported.Agents {
+			base.Agents[id] = agentCfg
+		}
+	}
+
+	return base
 }

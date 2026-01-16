@@ -56,7 +56,7 @@ func (p *PipProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("%s install failed: %w\n%s", manager, err, stderr.String())
+		return nil, fmt.Errorf("%s install failed: %w\n%s%s", manager, err, stderr.String(), FormatInstallError(manager, "install", stderr.String()))
 	}
 
 	// Get installed version
@@ -93,7 +93,7 @@ func (p *PipProvider) Update(ctx context.Context, inst *agent.Installation, agen
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("%s update failed: %w\n%s", manager, err, stderr.String())
+		return nil, fmt.Errorf("%s update failed: %w\n%s%s", manager, err, stderr.String(), FormatInstallError(manager, "update", stderr.String()))
 	}
 
 	// Get new version

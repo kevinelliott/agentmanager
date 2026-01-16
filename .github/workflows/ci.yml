@@ -102,7 +102,7 @@ jobs:
     needs: [build]
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,37 +112,85 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Build binaries
+      - name: Build binaries (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           go build -o bin/agentmgr ./cmd/agentmgr
           chmod +x bin/agentmgr
 
-      - name: Test CLI version
+      - name: Build binaries (Windows)
+        if: matrix.os == 'windows-latest'
+        run: go build -o bin/agentmgr.exe ./cmd/agentmgr
+
+      - name: Test CLI version (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr version
 
-      - name: Test CLI help
+      - name: Test CLI version (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe version
+
+      - name: Test CLI help (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr --help
 
-      - name: Test doctor command
+      - name: Test CLI help (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe --help
+
+      - name: Test doctor command (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr doctor || true
 
-      - name: Test catalog list
+      - name: Test doctor command (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe doctor
+        continue-on-error: true
+
+      - name: Test catalog list (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr catalog list
 
-      - name: Test agent list (may be empty)
+      - name: Test catalog list (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe catalog list
+
+      - name: Test agent list (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr agent list || true
 
-      - name: Test completion generation
+      - name: Test agent list (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe agent list
+        continue-on-error: true
+
+      - name: Test completion generation (Unix)
+        if: matrix.os != 'windows-latest'
         run: |
           ./bin/agentmgr completion bash > /dev/null
           ./bin/agentmgr completion zsh > /dev/null
           ./bin/agentmgr completion fish > /dev/null
 
-      - name: Test config show
+      - name: Test completion generation (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe completion powershell | Out-Null
+
+      - name: Test config show (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr config show
 
-      - name: Test upgrade check
+      - name: Test config show (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe config show
+
+      - name: Test upgrade check (Unix)
+        if: matrix.os != 'windows-latest'
         run: ./bin/agentmgr upgrade --check || true
+
+      - name: Test upgrade check (Windows)
+        if: matrix.os == 'windows-latest'
+        run: ./bin/agentmgr.exe upgrade --check
+        continue-on-error: true
 
   security:
     name: Security Scan

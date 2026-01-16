@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"time"
@@ -55,6 +56,7 @@ func newAgentListCommand(cfg *config.Config) *cobra.Command {
 		updatesOnly  bool
 		checkUpdates bool
 		refresh      bool
+		verify       bool
 	)
 
 	cmd := &cobra.Command{
@@ -219,7 +221,7 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 					latestVer = inst.LatestVersion.String()
 				}
 
-				items = append(items, AgentListItem{
+				item := AgentListItem{
 					ID:            inst.AgentID,
 					Name:          inst.AgentName,
 					Method:        string(inst.Method),
@@ -228,14 +230,25 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 					HasUpdate:     inst.HasUpdate(),
 					Path:          inst.ExecutablePath,
 					Status:        string(inst.GetStatus()),
-				})
+				}
+
+				// Verify agent health if requested
+				if verify && inst.ExecutablePath != "" {
+					healthy, healthErr := verifyAgentHealth(ctx, inst.ExecutablePath)
+					item.Healthy = &healthy
+					if healthErr != "" {
+						item.HealthError = healthErr
+					}
+				}
+
+				items = append(items, item)
 			}
 
 			if format == "json" {
 				return outputAgentsJSON(items)
 			}
 
-			return outputAgentsTable(items, printer)
+			return outputAgentsTable(items, printer, verify)
 		},
 	}
 
@@ -245,6 +258,7 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 	cmd.Flags().BoolVarP(&updatesOnly, "updates", "u", false, "show only agents with updates")
 	cmd.Flags().BoolVar(&checkUpdates, "check-updates", false, "check for available updates")
 	cmd.Flags().BoolVarP(&refresh, "refresh", "r", false, "force re-detection (ignore cache)")
+	cmd.Flags().BoolVar(&verify, "verify", false, "verify agents can execute (health check)")
 
 	return cmd
 }
@@ -1003,9 +1017,11 @@ type AgentListItem struct {
 	HasUpdate     bool   `json:"has_update"`
 	Path          string `json:"path"`
 	Status        string `json:"status"`
+	Healthy       *bool  `json:"healthy,omitempty"`
+	HealthError   string `json:"health_error,omitempty"`
 }
 
-func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
+func outputAgentsTable(agents []AgentListItem, printer *output.Printer, showHealth bool) error {
 	if len(agents) == 0 {
 		printer.Info("No agents detected")
 		printer.Print("")
@@ -1017,14 +1033,26 @@ func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 	table := output.NewTable()
 
 	// Set headers
-	table.SetHeaders(
-		styles.FormatHeader("ID"),
-		styles.FormatHeader("AGENT"),
-		styles.FormatHeader("METHOD"),
-		styles.FormatHeader("VERSION"),
-		styles.FormatHeader("LATEST"),
-		styles.FormatHeader("STATUS"),
-	)
+	if showHealth {
+		table.SetHeaders(
+			styles.FormatHeader("ID"),
+			styles.FormatHeader("AGENT"),
+			styles.FormatHeader("METHOD"),
+			styles.FormatHeader("VERSION"),
+			styles.FormatHeader("LATEST"),
+			styles.FormatHeader("STATUS"),
+			styles.FormatHeader("HEALTH"),
+		)
+	} else {
+		table.SetHeaders(
+			styles.FormatHeader("ID"),
+			styles.FormatHeader("AGENT"),
+			styles.FormatHeader("METHOD"),
+			styles.FormatHeader("VERSION"),
+			styles.FormatHeader("LATEST"),
+			styles.FormatHeader("STATUS"),
+		)
+	}
 
 	// Add rows
 	for _, agent := range agents {
@@ -1042,18 +1070,82 @@ func outputAgentsTable(agents []AgentListItem, printer *output.Printer) error {
 			latest = styles.FormatVersion(latest, false)
 		}
 
-		table.AddRow(
-			styles.Info.Render(agent.ID),
-			styles.FormatAgentName(agent.Name),
-			styles.FormatMethod(agent.Method),
-			styles.FormatVersion(agent.Version, agent.HasUpdate),
-			latest,
-			statusIcon,
-		)
+		if showHealth {
+			healthIcon := "-"
+			if agent.Healthy != nil {
+				if *agent.Healthy {
+					healthIcon = styles.SuccessIcon()
+				} else {
+					healthIcon = styles.ErrorIcon()
+				}
+			}
+			table.AddRow(
+				styles.Info.Render(agent.ID),
+				styles.FormatAgentName(agent.Name),
+				styles.FormatMethod(agent.Method),
+				styles.FormatVersion(agent.Version, agent.HasUpdate),
+				latest,
+				statusIcon,
+				healthIcon,
+			)
+		} else {
+			table.AddRow(
+				styles.Info.Render(agent.ID),
+				styles.FormatAgentName(agent.Name),
+				styles.FormatMethod(agent.Method),
+				styles.FormatVersion(agent.Version, agent.HasUpdate),
+				latest,
+				statusIcon,
+			)
+		}
 	}
 
 	table.Render()
 	return nil
+}
+
+// verifyAgentHealth checks if an agent executable can run by trying --version or --help.
+func verifyAgentHealth(ctx context.Context, execPath string) (bool, string) {
+	// Try common version/help flags
+	flags := []string{"--version", "-v", "--help", "-h"}
+
+	for _, flag := range flags {
+		cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		cmd := exec.CommandContext(cmdCtx, execPath, flag)
+		err := cmd.Run()
+		cancel()
+
+		if err == nil {
+			return true, ""
+		}
+
+		// Check if it's just a non-zero exit (some tools exit non-zero for --help)
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			// If it ran but exited non-zero, it's still "healthy" (executable works)
+			if exitErr.ExitCode() != 0 {
+				return true, ""
+			}
+		}
+	}
+
+	// Try running with no arguments (some tools show help this way)
+	cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	cmd := exec.CommandContext(cmdCtx, execPath)
+	err := cmd.Run()
+	cancel()
+
+	if err == nil {
+		return true, ""
+	}
+
+	// Check if it ran but exited non-zero
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		if exitErr.ExitCode() != 0 {
+			return true, ""
+		}
+	}
+
+	return false, err.Error()
 }
 
 func outputAgentsJSON(agents []AgentListItem) error {

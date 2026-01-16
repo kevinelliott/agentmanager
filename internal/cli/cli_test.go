@@ -536,7 +536,7 @@ func TestConfigCommandSubcommandCount(t *testing.T) {
 	cfg := &config.Config{}
 	cmd := NewConfigCommand(cfg)
 
-	expectedCount := 5 // show, get, set, path, init
+	expectedCount := 7 // show, get, set, path, init, export, import
 	actualCount := len(cmd.Commands())
 
 	if actualCount != expectedCount {
