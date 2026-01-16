@@ -301,7 +301,7 @@ func runStorageChecks(ctx context.Context, cfg *config.Config, _ bool) []CheckRe
 
 	// Check database
 	dbPath := dataDir + "/agentmgr.db"
-	store, err := storage.NewSQLiteStore(dbPath)
+	store, err := storage.NewSQLiteStore(dataDir)
 	if err != nil {
 		results = append(results, CheckResult{
 			Name:    "Database",
