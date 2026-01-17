@@ -488,7 +488,7 @@ func TestRootCommandSubcommandCount(t *testing.T) {
 
 	// Verify we have exactly the expected number of subcommands
 	// This helps catch if subcommands are accidentally removed
-	expectedCount := 9 // agent, catalog, completion, config, doctor, helper, tui, upgrade, version
+	expectedCount := 11 // agent, api, catalog, completion, config, doctor, helper, plugin, tui, upgrade, version
 	actualCount := len(cmd.Commands())
 
 	if actualCount != expectedCount {

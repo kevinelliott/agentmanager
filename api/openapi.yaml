@@ -1,0 +1,752 @@
+openapi: 3.0.3
+info:
+  title: AgentManager REST API
+  description: |
+    REST API for managing AI development agents.
+    
+    AgentManager helps you discover, install, update, and manage AI coding agents
+    like Claude CLI, GitHub Copilot CLI, Aider, and others.
+  version: 1.0.0
+  contact:
+    name: Kevin Elliott
+    url: https://github.com/kevinelliott/agentmanager
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: http://localhost:{port}/api/v1
+    description: Custom port
+    variables:
+      port:
+        default: "8080"
+        description: Server port
+
+tags:
+  - name: Status
+    description: Server status and health checks
+  - name: Agents
+    description: Installed agent management
+  - name: Catalog
+    description: Agent catalog operations
+  - name: Updates
+    description: Update checking and changelogs
+
+paths:
+  /health:
+    get:
+      tags:
+        - Status
+      summary: Health check
+      description: Simple health check endpoint to verify the server is running.
+      operationId: getHealth
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /status:
+    get:
+      tags:
+        - Status
+      summary: Get server status
+      description: Returns detailed server status including uptime, agent counts, and update availability.
+      operationId: getStatus
+      responses:
+        "200":
+          description: Server status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+
+  /agents:
+    get:
+      tags:
+        - Agents
+      summary: List installed agents
+      description: Returns a list of all detected and installed AI development agents.
+      operationId: listAgents
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of agents to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          description: Number of agents to skip for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: List of installed agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentListResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    post:
+      tags:
+        - Agents
+      summary: Install an agent
+      description: |
+        Installs a new agent using the specified installation method.
+        The agent must exist in the catalog.
+      operationId: installAgent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallRequest"
+      responses:
+        "200":
+          description: Agent installed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Agent not found in catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Installation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /agents/{key}:
+    get:
+      tags:
+        - Agents
+      summary: Get agent details
+      description: Returns detailed information about a specific installed agent.
+      operationId: getAgent
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Agent installation key (format agent_id:method)
+          schema:
+            type: string
+            example: "claude-cli:npm"
+      responses:
+        "200":
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    put:
+      tags:
+        - Agents
+      summary: Update an agent
+      description: Updates an installed agent to the latest version or a specific version.
+      operationId: updateAgent
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Agent installation key
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRequest"
+      responses:
+        "200":
+          description: Agent updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Update failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      tags:
+        - Agents
+      summary: Uninstall an agent
+      description: Removes an installed agent from the system.
+      operationId: uninstallAgent
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Agent installation key
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent uninstalled successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Uninstall failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /catalog:
+    get:
+      tags:
+        - Catalog
+      summary: List catalog agents
+      description: Returns all agents available in the catalog, optionally filtered by platform.
+      operationId: listCatalog
+      parameters:
+        - name: platform
+          in: query
+          description: Filter by platform (darwin, linux, windows)
+          schema:
+            type: string
+            enum: [darwin, linux, windows]
+      responses:
+        "200":
+          description: Catalog agents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogListResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /catalog/{agentID}:
+    get:
+      tags:
+        - Catalog
+      summary: Get catalog agent
+      description: Returns detailed information about an agent in the catalog.
+      operationId: getCatalogAgent
+      parameters:
+        - name: agentID
+          in: path
+          required: true
+          description: Agent ID from the catalog
+          schema:
+            type: string
+            example: "claude-cli"
+      responses:
+        "200":
+          description: Catalog agent details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogAgentResponse"
+        "404":
+          description: Agent not found in catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /catalog/refresh:
+    post:
+      tags:
+        - Catalog
+      summary: Refresh catalog
+      description: Fetches the latest catalog from the remote source.
+      operationId: refreshCatalog
+      responses:
+        "200":
+          description: Catalog refresh result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResponse"
+        "500":
+          description: Refresh failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /catalog/search:
+    get:
+      tags:
+        - Catalog
+      summary: Search catalog
+      description: Searches the catalog for agents matching the query.
+      operationId: searchCatalog
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query
+          schema:
+            type: string
+            minLength: 1
+        - name: platform
+          in: query
+          description: Filter by platform
+          schema:
+            type: string
+            enum: [darwin, linux, windows]
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogListResponse"
+        "500":
+          description: Search failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /updates:
+    get:
+      tags:
+        - Updates
+      summary: Check for updates
+      description: Returns a list of installed agents that have updates available.
+      operationId: checkUpdates
+      responses:
+        "200":
+          description: Available updates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatesResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /changelog/{agentID}:
+    get:
+      tags:
+        - Updates
+      summary: Get agent changelog
+      description: Returns the changelog for an agent between two versions.
+      operationId: getChangelog
+      parameters:
+        - name: agentID
+          in: path
+          required: true
+          description: Agent ID
+          schema:
+            type: string
+        - name: from
+          in: query
+          required: true
+          description: From version
+          schema:
+            type: string
+            example: "1.0.0"
+        - name: to
+          in: query
+          required: true
+          description: To version
+          schema:
+            type: string
+            example: "1.2.0"
+      responses:
+        "200":
+          description: Changelog content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChangelogResponse"
+        "400":
+          description: Invalid version parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+      required:
+        - status
+
+    StatusResponse:
+      type: object
+      properties:
+        running:
+          type: boolean
+          example: true
+        uptime_seconds:
+          type: integer
+          format: int64
+          example: 3600
+        agent_count:
+          type: integer
+          example: 5
+        updates_available:
+          type: integer
+          example: 2
+        last_catalog_refresh:
+          type: string
+          format: date-time
+        last_update_check:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: "1.0.0"
+
+    Agent:
+      type: object
+      properties:
+        key:
+          type: string
+          description: Unique key for the installation (agent_id:method)
+          example: "claude-cli:npm"
+        agent_id:
+          type: string
+          description: Agent identifier
+          example: "claude-cli"
+        agent_name:
+          type: string
+          description: Human-readable agent name
+          example: "Claude CLI"
+        install_method:
+          type: string
+          description: Installation method used
+          enum: [npm, pip, pipx, uv, brew, go, cargo, binary, native]
+          example: "npm"
+        installed_version:
+          type: string
+          description: Currently installed version
+          example: "1.0.5"
+        latest_version:
+          type: string
+          description: Latest available version
+          example: "1.0.8"
+        executable_path:
+          type: string
+          description: Path to the agent executable
+          example: "/usr/local/bin/claude"
+        install_path:
+          type: string
+          description: Installation directory
+        is_global:
+          type: boolean
+          description: Whether installed globally
+          example: true
+        detected_at:
+          type: string
+          format: date-time
+          description: When the agent was first detected
+        last_checked:
+          type: string
+          format: date-time
+          description: When the agent was last checked
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional metadata
+        has_update:
+          type: boolean
+          description: Whether an update is available
+          example: true
+        status:
+          type: string
+          description: Agent status
+          enum: [installed, update_available, unknown]
+          example: "update_available"
+
+    CatalogAgent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Agent identifier
+          example: "claude-cli"
+        name:
+          type: string
+          description: Human-readable name
+          example: "Claude CLI"
+        description:
+          type: string
+          description: Agent description
+          example: "Anthropic's Claude AI assistant for the command line"
+        category:
+          type: string
+          description: Agent category
+          example: "coding"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["ai", "assistant", "anthropic"]
+        homepage:
+          type: string
+          format: uri
+          description: Agent homepage URL
+          example: "https://claude.ai/cli"
+        repository:
+          type: string
+          format: uri
+          description: Source repository URL
+        install_methods:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstallMethod"
+
+    InstallMethod:
+      type: object
+      properties:
+        method:
+          type: string
+          description: Installation method
+          example: "npm"
+        package:
+          type: string
+          description: Package name
+          example: "@anthropic-ai/claude-cli"
+        command:
+          type: string
+          description: Installation command
+          example: "npm install -g @anthropic-ai/claude-cli"
+        platforms:
+          type: array
+          items:
+            type: string
+          description: Supported platforms
+          example: ["darwin", "linux", "windows"]
+
+    AgentListResponse:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Agent"
+        total:
+          type: integer
+          description: Total number of agents
+        offset:
+          type: integer
+          description: Current offset
+        limit:
+          type: integer
+          description: Current limit
+
+    AgentResponse:
+      type: object
+      properties:
+        agent:
+          $ref: "#/components/schemas/Agent"
+
+    CatalogListResponse:
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogAgent"
+        total:
+          type: integer
+          description: Total number of agents
+
+    CatalogAgentResponse:
+      type: object
+      properties:
+        agent:
+          $ref: "#/components/schemas/CatalogAgent"
+
+    InstallRequest:
+      type: object
+      required:
+        - agent_id
+      properties:
+        agent_id:
+          type: string
+          description: Agent ID from the catalog
+          example: "claude-cli"
+        method:
+          type: string
+          description: Preferred installation method (optional, uses best available if not specified)
+          example: "npm"
+        version:
+          type: string
+          description: Specific version to install (optional, uses latest if not specified)
+          example: "1.0.5"
+
+    InstallResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Agent installed successfully"
+        installation:
+          $ref: "#/components/schemas/Agent"
+
+    UpdateRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Specific version to update to (optional, uses latest if not specified)
+
+    UpdateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Agent updated successfully"
+        from_version:
+          type: string
+          example: "1.0.5"
+        to_version:
+          type: string
+          example: "1.0.8"
+
+    UpdatesResponse:
+      type: object
+      properties:
+        updates:
+          type: array
+          items:
+            type: object
+            properties:
+              installation:
+                $ref: "#/components/schemas/Agent"
+              from_version:
+                type: string
+              to_version:
+                type: string
+        total:
+          type: integer
+
+    RefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        updated:
+          type: boolean
+          description: Whether the catalog was updated
+          example: true
+        message:
+          type: string
+          example: "Catalog updated successfully"
+        version:
+          type: string
+          description: Current catalog version
+        agent_count:
+          type: integer
+          description: Number of agents in catalog
+
+    ChangelogResponse:
+      type: object
+      properties:
+        changelog:
+          type: string
+          description: Changelog content in Markdown format
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        success:
+          type: boolean
+          example: false
+        details:
+          type: string
+          description: Detailed error information
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Optional API key for authentication
+
+security: []

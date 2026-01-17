@@ -112,6 +112,10 @@ func (s *Server) setupRoutes() {
 	// Health check
 	r.Get("/health", s.handleHealth)
 
+	// OpenAPI specification
+	r.Get("/openapi.yaml", s.handleOpenAPISpec)
+	r.Get("/openapi.json", s.handleOpenAPISpecJSON)
+
 	s.router = r
 }
 
@@ -682,8 +686,153 @@ func (s *Server) catalogAgentToMap(def *catalog.AgentDef) map[string]interface{}
 		"id":              def.ID,
 		"name":            def.Name,
 		"description":     def.Description,
+		"category":        def.Category,
+		"tags":            def.Tags,
 		"homepage":        def.Homepage,
 		"repository":      def.Repository,
 		"install_methods": methods,
 	}
 }
+
+// handleOpenAPISpec serves the OpenAPI specification in YAML format.
+func (s *Server) handleOpenAPISpec(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/x-yaml")
+	w.Write([]byte(openAPISpec))
+}
+
+// handleOpenAPISpecJSON serves the OpenAPI specification in JSON format.
+func (s *Server) handleOpenAPISpecJSON(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	// Simple YAML to JSON conversion for the spec
+	// Since we embed the spec as a string, we serve it directly
+	// For JSON, clients can use yaml-to-json conversion tools
+	s.respondJSON(w, http.StatusOK, map[string]interface{}{
+		"message":  "Use /openapi.yaml for the full OpenAPI specification",
+		"spec_url": "/openapi.yaml",
+	})
+}
+
+// openAPISpec is the embedded OpenAPI specification.
+// This is a simplified version; the full spec is in api/openapi.yaml.
+const openAPISpec = `openapi: 3.0.3
+info:
+  title: AgentManager REST API
+  description: REST API for managing AI development agents.
+  version: 1.0.0
+  contact:
+    name: Kevin Elliott
+    url: https://github.com/kevinelliott/agentmanager
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Server is healthy
+  /status:
+    get:
+      summary: Get server status
+      responses:
+        "200":
+          description: Server status
+  /agents:
+    get:
+      summary: List installed agents
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of agents
+    post:
+      summary: Install an agent
+      responses:
+        "200":
+          description: Agent installed
+  /agents/{key}:
+    get:
+      summary: Get agent details
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent details
+    put:
+      summary: Update an agent
+      responses:
+        "200":
+          description: Agent updated
+    delete:
+      summary: Uninstall an agent
+      responses:
+        "200":
+          description: Agent uninstalled
+  /catalog:
+    get:
+      summary: List catalog agents
+      responses:
+        "200":
+          description: Catalog agents
+  /catalog/{agentID}:
+    get:
+      summary: Get catalog agent
+      responses:
+        "200":
+          description: Catalog agent details
+  /catalog/refresh:
+    post:
+      summary: Refresh catalog
+      responses:
+        "200":
+          description: Catalog refreshed
+  /catalog/search:
+    get:
+      summary: Search catalog
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Search results
+  /updates:
+    get:
+      summary: Check for updates
+      responses:
+        "200":
+          description: Available updates
+  /changelog/{agentID}:
+    get:
+      summary: Get changelog
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Changelog
+`

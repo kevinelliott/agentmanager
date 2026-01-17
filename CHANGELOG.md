@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.14] - 2026-01-16
+
+### Added
+
+- OpenAPI/Swagger documentation for REST API (`api/openapi.yaml`)
+- `agentmgr api` command group for viewing API documentation and endpoints
+- Detection plugin system for custom agent discovery logic
+- `agentmgr plugin` command group (list, create, validate, enable, disable)
+- Plugin documentation in `docs/plugins.md`
+
+### Changed
+
+- REST API now includes `/openapi.yaml` endpoint for self-documentation
+- Catalog API response now includes `category` and `tags` fields
+
 ## [1.0.13] - 2026-01-16
 
 ### Added

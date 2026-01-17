@@ -29,16 +29,18 @@ type Strategy interface {
 
 // Detector orchestrates agent detection across multiple strategies.
 type Detector struct {
-	strategies []Strategy
-	platform   platform.Platform
-	mu         sync.RWMutex
+	strategies     []Strategy
+	platform       platform.Platform
+	pluginRegistry *PluginRegistry
+	mu             sync.RWMutex
 }
 
 // New creates a new Detector with all available strategies.
 func New(p platform.Platform) *Detector {
 	d := &Detector{
-		platform:   p,
-		strategies: make([]Strategy, 0),
+		platform:       p,
+		strategies:     make([]Strategy, 0),
+		pluginRegistry: NewPluginRegistry(p),
 	}
 
 	// Register default strategies
@@ -48,6 +50,25 @@ func New(p platform.Platform) *Detector {
 	d.RegisterStrategy(NewBrewStrategy(p))
 
 	return d
+}
+
+// PluginRegistry returns the detector's plugin registry.
+func (d *Detector) PluginRegistry() *PluginRegistry {
+	return d.pluginRegistry
+}
+
+// LoadPlugins loads detection plugins from the given directory.
+func (d *Detector) LoadPlugins(dir string) error {
+	if err := d.pluginRegistry.LoadPluginsFromDir(dir); err != nil {
+		return err
+	}
+
+	// Register plugin strategies
+	for _, s := range d.pluginRegistry.GetStrategies() {
+		d.RegisterStrategy(s)
+	}
+
+	return nil
 }
 
 // RegisterStrategy adds a detection strategy.
