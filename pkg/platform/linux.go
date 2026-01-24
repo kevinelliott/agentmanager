@@ -76,16 +76,17 @@ func (l *linuxPlatform) EnableAutoStart(ctx context.Context) error {
 }
 
 func (l *linuxPlatform) DisableAutoStart(ctx context.Context) error {
-	// Try both methods
-	l.disableSystemdAutoStart(ctx)
-	l.disableXDGAutoStart()
+	// Try both methods - errors are intentionally ignored as this is best-effort cleanup
+	_ = l.disableSystemdAutoStart(ctx) //nolint:errcheck
+	_ = l.disableXDGAutoStart()        //nolint:errcheck
 	return nil
 }
 
 func (l *linuxPlatform) IsAutoStartEnabled(ctx context.Context) (bool, error) {
 	// Check systemd
 	if l.hasSystemd() {
-		if enabled, _ := l.isSystemdEnabled(ctx); enabled {
+		enabled, err := l.isSystemdEnabled(ctx)
+		if err == nil && enabled {
 			return true, nil
 		}
 	}
@@ -152,7 +153,7 @@ func (l *linuxPlatform) getSystemdUserDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", ".config", "systemd", "user")
+		return filepath.Join(os.TempDir(), ".config", "systemd", "user")
 	}
 	return filepath.Join(home, ".config", "systemd", "user")
 }
@@ -199,7 +200,7 @@ func (l *linuxPlatform) getXDGAutostartDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", ".config", "autostart")
+		return filepath.Join(os.TempDir(), ".config", "autostart")
 	}
 	return filepath.Join(home, ".config", "autostart")
 }
