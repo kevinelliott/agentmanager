@@ -64,7 +64,7 @@ func (p *BrewProvider) Install(ctx context.Context, agentDef catalog.AgentDef, m
 	cmd.Stderr = &stderr
 
 	if err := cmd.Run(); err != nil {
-		return nil, fmt.Errorf("brew install failed: %w\n%s", err, stderr.String())
+		return nil, fmt.Errorf("brew install failed: %w\n%s%s", err, stderr.String(), FormatInstallError("brew", "install", stderr.String()))
 	}
 
 	// Get installed version
@@ -110,7 +110,7 @@ func (p *BrewProvider) Update(ctx context.Context, inst *agent.Installation, age
 	if err := cmd.Run(); err != nil {
 		// brew upgrade returns error if already up to date
 		if !strings.Contains(stderr.String(), "already installed") {
-			return nil, fmt.Errorf("brew upgrade failed: %w\n%s", err, stderr.String())
+			return nil, fmt.Errorf("brew upgrade failed: %w\n%s%s", err, stderr.String(), FormatInstallError("brew", "upgrade", stderr.String()))
 		}
 	}
 

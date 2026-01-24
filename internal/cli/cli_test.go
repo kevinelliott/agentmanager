@@ -3,7 +3,333 @@ package cli
 import (
 	"testing"
 	"time"
+
+	"github.com/spf13/cobra"
+
+	"github.com/kevinelliott/agentmgr/pkg/config"
 )
+
+// findSubcommand returns a subcommand by name, or nil if not found.
+func findSubcommand(cmd *cobra.Command, name string) *cobra.Command {
+	for _, sub := range cmd.Commands() {
+		if sub.Name() == name {
+			return sub
+		}
+	}
+	return nil
+}
+
+// assertSubcommandExists checks that a subcommand exists.
+func assertSubcommandExists(t *testing.T, cmd *cobra.Command, name string) *cobra.Command {
+	t.Helper()
+	sub := findSubcommand(cmd, name)
+	if sub == nil {
+		t.Errorf("expected subcommand %q to exist, but it was not found", name)
+	}
+	return sub
+}
+
+// assertFlagExists checks that a flag exists on the command.
+func assertFlagExists(t *testing.T, cmd *cobra.Command, name string) {
+	t.Helper()
+	if cmd.Flags().Lookup(name) == nil && cmd.PersistentFlags().Lookup(name) == nil {
+		t.Errorf("expected flag %q to exist on command %q", name, cmd.Name())
+	}
+}
+
+func TestNewRootCommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewRootCommand(cfg, "1.0.0", "abc123", "2024-01-01")
+
+	// Verify Use and Short
+	if cmd.Use != "agentmgr" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "agentmgr")
+	}
+	if cmd.Short != "AI Development Agent Manager" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "AI Development Agent Manager")
+	}
+
+	// Verify SilenceUsage and SilenceErrors
+	if !cmd.SilenceUsage {
+		t.Error("SilenceUsage should be true")
+	}
+	if !cmd.SilenceErrors {
+		t.Error("SilenceErrors should be true")
+	}
+
+	// Check expected subcommands
+	expectedSubcommands := []string{"agent", "catalog", "completion", "config", "doctor", "helper", "tui", "upgrade", "version"}
+	subCmds := cmd.Commands()
+	if len(subCmds) < len(expectedSubcommands) {
+		t.Errorf("Expected at least %d subcommands, got %d", len(expectedSubcommands), len(subCmds))
+	}
+
+	for _, name := range expectedSubcommands {
+		assertSubcommandExists(t, cmd, name)
+	}
+
+	// Check persistent flags
+	assertFlagExists(t, cmd, "config")
+	assertFlagExists(t, cmd, "verbose")
+	assertFlagExists(t, cmd, "format")
+	assertFlagExists(t, cmd, "no-color")
+
+	// Verify flag shorthand
+	if flag := cmd.PersistentFlags().ShorthandLookup("c"); flag == nil {
+		t.Error("expected -c shorthand for --config flag")
+	}
+	if flag := cmd.PersistentFlags().ShorthandLookup("v"); flag == nil {
+		t.Error("expected -v shorthand for --verbose flag")
+	}
+	if flag := cmd.PersistentFlags().ShorthandLookup("f"); flag == nil {
+		t.Error("expected -f shorthand for --format flag")
+	}
+}
+
+func TestNewAgentCommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewAgentCommand(cfg)
+
+	// Verify Use and Short
+	if cmd.Use != "agent" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "agent")
+	}
+	if cmd.Short != "Manage AI development agents" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Manage AI development agents")
+	}
+
+	// Verify alias
+	if len(cmd.Aliases) == 0 || cmd.Aliases[0] != "agents" {
+		t.Errorf("Aliases = %v, want [agents]", cmd.Aliases)
+	}
+
+	// Check expected subcommands
+	expectedSubcommands := []string{"list", "install", "update", "info", "remove", "refresh"}
+	for _, name := range expectedSubcommands {
+		assertSubcommandExists(t, cmd, name)
+	}
+
+	// Verify list subcommand has expected flags
+	listCmd := findSubcommand(cmd, "list")
+	if listCmd != nil {
+		assertFlagExists(t, listCmd, "all")
+		assertFlagExists(t, listCmd, "hidden")
+		assertFlagExists(t, listCmd, "format")
+		assertFlagExists(t, listCmd, "updates")
+		assertFlagExists(t, listCmd, "refresh")
+
+		// Check alias
+		if len(listCmd.Aliases) == 0 || listCmd.Aliases[0] != "ls" {
+			t.Errorf("list command Aliases = %v, want [ls]", listCmd.Aliases)
+		}
+	}
+
+	// Verify install subcommand
+	installCmd := findSubcommand(cmd, "install")
+	if installCmd != nil {
+		assertFlagExists(t, installCmd, "method")
+	}
+
+	// Verify update subcommand
+	updateCmd := findSubcommand(cmd, "update")
+	if updateCmd != nil {
+		assertFlagExists(t, updateCmd, "all")
+		assertFlagExists(t, updateCmd, "force")
+	}
+
+	// Verify remove subcommand
+	removeCmd := findSubcommand(cmd, "remove")
+	if removeCmd != nil {
+		assertFlagExists(t, removeCmd, "force")
+		assertFlagExists(t, removeCmd, "method")
+	}
+}
+
+func TestNewCatalogCommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewCatalogCommand(cfg)
+
+	// Verify Use and Short
+	if cmd.Use != "catalog" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "catalog")
+	}
+	if cmd.Short != "Manage the agent catalog" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Manage the agent catalog")
+	}
+
+	// Check expected subcommands
+	expectedSubcommands := []string{"list", "refresh", "search", "show"}
+	for _, name := range expectedSubcommands {
+		assertSubcommandExists(t, cmd, name)
+	}
+
+	// Verify list subcommand has expected flags
+	listCmd := findSubcommand(cmd, "list")
+	if listCmd != nil {
+		assertFlagExists(t, listCmd, "format")
+		assertFlagExists(t, listCmd, "platform")
+
+		// Check alias
+		if len(listCmd.Aliases) == 0 || listCmd.Aliases[0] != "ls" {
+			t.Errorf("list command Aliases = %v, want [ls]", listCmd.Aliases)
+		}
+	}
+
+	// Verify refresh subcommand
+	refreshCmd := findSubcommand(cmd, "refresh")
+	if refreshCmd != nil {
+		assertFlagExists(t, refreshCmd, "force")
+	}
+
+	// Verify search subcommand requires exactly 1 arg
+	searchCmd := findSubcommand(cmd, "search")
+	if searchCmd != nil {
+		assertFlagExists(t, searchCmd, "format")
+	}
+
+	// Verify show subcommand
+	showCmd := findSubcommand(cmd, "show")
+	if showCmd != nil {
+		assertFlagExists(t, showCmd, "format")
+	}
+}
+
+func TestNewConfigCommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewConfigCommand(cfg)
+
+	// Verify Use and Short
+	if cmd.Use != "config" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "config")
+	}
+	if cmd.Short != "Manage configuration" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Manage configuration")
+	}
+
+	// Check expected subcommands
+	expectedSubcommands := []string{"show", "get", "set", "path", "init"}
+	for _, name := range expectedSubcommands {
+		assertSubcommandExists(t, cmd, name)
+	}
+
+	// Verify init subcommand has force flag
+	initCmd := findSubcommand(cmd, "init")
+	if initCmd != nil {
+		assertFlagExists(t, initCmd, "force")
+	}
+}
+
+func TestNewHelperCommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewHelperCommand(cfg)
+
+	// Verify Use and Short
+	if cmd.Use != "helper" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "helper")
+	}
+	if cmd.Short != "Manage the systray helper" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Manage the systray helper")
+	}
+
+	// Check expected subcommands
+	expectedSubcommands := []string{"start", "stop", "status", "autostart"}
+	for _, name := range expectedSubcommands {
+		assertSubcommandExists(t, cmd, name)
+	}
+
+	// Verify start subcommand has foreground flag
+	startCmd := findSubcommand(cmd, "start")
+	if startCmd != nil {
+		assertFlagExists(t, startCmd, "foreground")
+	}
+
+	// Verify autostart has enable/disable subcommands
+	autoStartCmd := findSubcommand(cmd, "autostart")
+	if autoStartCmd != nil {
+		assertSubcommandExists(t, autoStartCmd, "enable")
+		assertSubcommandExists(t, autoStartCmd, "disable")
+	}
+}
+
+func TestNewVersionCommand(t *testing.T) {
+	version := "1.2.3"
+	commit := "abc123def"
+	date := "2024-06-15"
+
+	cmd := NewVersionCommand(version, commit, date)
+
+	// Verify Use and Short
+	if cmd.Use != "version" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "version")
+	}
+	if cmd.Short != "Show version information" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Show version information")
+	}
+
+	// Verify json flag exists
+	assertFlagExists(t, cmd, "json")
+
+	// Verify command has a Run function (not RunE)
+	if cmd.Run == nil {
+		t.Error("expected Run function to be set")
+	}
+}
+
+func TestNewCompletionCommand(t *testing.T) {
+	cmd := NewCompletionCommand()
+
+	// Verify Use and Short
+	if cmd.Use != "completion [bash|zsh|fish|powershell]" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "completion [bash|zsh|fish|powershell]")
+	}
+	if cmd.Short != "Generate shell completion scripts" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Generate shell completion scripts")
+	}
+
+	// Verify ValidArgs
+	expectedValidArgs := []string{"bash", "zsh", "fish", "powershell"}
+	if len(cmd.ValidArgs) != len(expectedValidArgs) {
+		t.Errorf("ValidArgs length = %d, want %d", len(cmd.ValidArgs), len(expectedValidArgs))
+	}
+	for i, arg := range expectedValidArgs {
+		if i < len(cmd.ValidArgs) && cmd.ValidArgs[i] != arg {
+			t.Errorf("ValidArgs[%d] = %q, want %q", i, cmd.ValidArgs[i], arg)
+		}
+	}
+
+	// Verify DisableFlagsInUseLine
+	if !cmd.DisableFlagsInUseLine {
+		t.Error("DisableFlagsInUseLine should be true")
+	}
+
+	// Verify command has a RunE function
+	if cmd.RunE == nil {
+		t.Error("expected RunE function to be set")
+	}
+}
+
+func TestNewTUICommand(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewTUICommand(cfg)
+
+	// Verify Use and Short
+	if cmd.Use != "tui" {
+		t.Errorf("Use = %q, want %q", cmd.Use, "tui")
+	}
+	if cmd.Short != "Launch the terminal user interface" {
+		t.Errorf("Short = %q, want %q", cmd.Short, "Launch the terminal user interface")
+	}
+
+	// Verify command has Long description
+	if cmd.Long == "" {
+		t.Error("expected Long description to be set")
+	}
+
+	// Verify command has a RunE function
+	if cmd.RunE == nil {
+		t.Error("expected RunE function to be set")
+	}
+}
 
 func TestFormatDuration(t *testing.T) {
 	tests := []struct {
@@ -153,5 +479,104 @@ func TestParseConfigValueAllDurationKeys(t *testing.T) {
 				t.Errorf("parseConfigValue(%q, %q) = %v (%T), want 1h (time.Duration)", key, "1h", result, result)
 			}
 		})
+	}
+}
+
+func TestRootCommandSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewRootCommand(cfg, "1.0.0", "abc123", "2024-01-01")
+
+	// Verify we have exactly the expected number of subcommands
+	// This helps catch if subcommands are accidentally removed
+	expectedCount := 11 // agent, api, catalog, completion, config, doctor, helper, plugin, tui, upgrade, version
+	actualCount := len(cmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("subcommand count = %d, want %d", actualCount, expectedCount)
+		t.Log("Subcommands found:")
+		for _, sub := range cmd.Commands() {
+			t.Logf("  - %s", sub.Name())
+		}
+	}
+}
+
+func TestAgentCommandSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewAgentCommand(cfg)
+
+	expectedCount := 6 // list, install, update, info, remove, refresh
+	actualCount := len(cmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("subcommand count = %d, want %d", actualCount, expectedCount)
+		t.Log("Subcommands found:")
+		for _, sub := range cmd.Commands() {
+			t.Logf("  - %s", sub.Name())
+		}
+	}
+}
+
+func TestCatalogCommandSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewCatalogCommand(cfg)
+
+	expectedCount := 4 // list, refresh, search, show
+	actualCount := len(cmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("subcommand count = %d, want %d", actualCount, expectedCount)
+		t.Log("Subcommands found:")
+		for _, sub := range cmd.Commands() {
+			t.Logf("  - %s", sub.Name())
+		}
+	}
+}
+
+func TestConfigCommandSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewConfigCommand(cfg)
+
+	expectedCount := 7 // show, get, set, path, init, export, import
+	actualCount := len(cmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("subcommand count = %d, want %d", actualCount, expectedCount)
+		t.Log("Subcommands found:")
+		for _, sub := range cmd.Commands() {
+			t.Logf("  - %s", sub.Name())
+		}
+	}
+}
+
+func TestHelperCommandSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewHelperCommand(cfg)
+
+	expectedCount := 4 // start, stop, status, autostart
+	actualCount := len(cmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("subcommand count = %d, want %d", actualCount, expectedCount)
+		t.Log("Subcommands found:")
+		for _, sub := range cmd.Commands() {
+			t.Logf("  - %s", sub.Name())
+		}
+	}
+}
+
+func TestHelperAutoStartSubcommandCount(t *testing.T) {
+	cfg := &config.Config{}
+	cmd := NewHelperCommand(cfg)
+	autoStartCmd := findSubcommand(cmd, "autostart")
+
+	if autoStartCmd == nil {
+		t.Fatal("autostart subcommand not found")
+	}
+
+	expectedCount := 2 // enable, disable
+	actualCount := len(autoStartCmd.Commands())
+
+	if actualCount != expectedCount {
+		t.Errorf("autostart subcommand count = %d, want %d", actualCount, expectedCount)
 	}
 }

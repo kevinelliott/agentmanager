@@ -679,3 +679,54 @@ func TestCatalogAgentToMap(t *testing.T) {
 		t.Errorf("install_methods count = %d, want 1", len(methods))
 	}
 }
+
+func TestHandleOpenAPISpec(t *testing.T) {
+	server := setupTestServer()
+
+	req := httptest.NewRequest(http.MethodGet, "/openapi.yaml", nil)
+	w := httptest.NewRecorder()
+
+	server.router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	contentType := w.Header().Get("Content-Type")
+	if contentType != "application/x-yaml" {
+		t.Errorf("Content-Type = %q, want %q", contentType, "application/x-yaml")
+	}
+
+	body := w.Body.String()
+	if !strings.Contains(body, "openapi: 3.0.3") {
+		t.Error("response should contain OpenAPI version")
+	}
+	if !strings.Contains(body, "AgentManager REST API") {
+		t.Error("response should contain API title")
+	}
+	if !strings.Contains(body, "/agents") {
+		t.Error("response should contain /agents path")
+	}
+}
+
+func TestHandleOpenAPISpecJSON(t *testing.T) {
+	server := setupTestServer()
+
+	req := httptest.NewRequest(http.MethodGet, "/openapi.json", nil)
+	w := httptest.NewRecorder()
+
+	server.router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var response map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if _, ok := response["spec_url"]; !ok {
+		t.Error("response should contain spec_url")
+	}
+}

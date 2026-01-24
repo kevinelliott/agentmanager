@@ -2,6 +2,7 @@ package ipc
 
 import (
 	"context"
+	"errors"
 	"net"
 	"os"
 	"path/filepath"
@@ -593,5 +594,975 @@ func TestSocketCleanup(t *testing.T) {
 	// Server should not be running
 	if server.IsRunning() {
 		t.Error("Server should not be running after Stop()")
+	}
+}
+
+// Additional tests for improved coverage
+
+func TestNewMessageWithUnmarshalablePayload(t *testing.T) {
+	// Channels cannot be marshaled to JSON
+	ch := make(chan int)
+	_, err := NewMessage(MessageTypeGetStatus, ch)
+	if err == nil {
+		t.Error("NewMessage() should fail for unmarshalable payload")
+	}
+}
+
+func TestDecodePayloadWithInvalidJSON(t *testing.T) {
+	msg := &Message{
+		ID:      "test",
+		Type:    MessageTypeGetStatus,
+		Payload: []byte(`{invalid json}`),
+	}
+
+	var decoded StatusResponse
+	err := msg.DecodePayload(&decoded)
+	if err == nil {
+		t.Error("DecodePayload() should fail for invalid JSON")
+	}
+}
+
+func TestDecodePayloadTypeMismatch(t *testing.T) {
+	original := StatusResponse{
+		Running:    true,
+		AgentCount: 5,
+	}
+
+	msg, err := NewMessage(MessageTypeGetStatus, original)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Decode into wrong type - this actually works in JSON since it maps fields
+	var decoded InstallAgentRequest
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatalf("DecodePayload failed: %v", err)
+	}
+	// JSON is lenient, so we check field values instead
+	if decoded.AgentID != "" {
+		t.Error("AgentID should be empty for mismatched type")
+	}
+}
+
+func TestMessagePayloadPreservation(t *testing.T) {
+	req := InstallAgentRequest{
+		AgentID: "test-agent",
+		Method:  agent.InstallMethodNPM,
+		Global:  true,
+	}
+
+	msg, err := NewMessage(MessageTypeInstallAgent, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Decode multiple times to verify payload is not consumed
+	var decoded1, decoded2 InstallAgentRequest
+	if err := msg.DecodePayload(&decoded1); err != nil {
+		t.Fatal(err)
+	}
+	if err := msg.DecodePayload(&decoded2); err != nil {
+		t.Fatal(err)
+	}
+
+	if decoded1.AgentID != decoded2.AgentID {
+		t.Error("Multiple decodes should produce same result")
+	}
+}
+
+func TestConnectionSendReceiveLargeMessage(t *testing.T) {
+	server, client := net.Pipe()
+	defer server.Close()
+	defer client.Close()
+
+	serverConn := newConnection(server)
+	clientConn := newConnection(client)
+
+	// Create a large payload
+	largeDetails := ""
+	for i := 0; i < 10000; i++ {
+		largeDetails += "x"
+	}
+
+	go func() {
+		msg, _ := NewMessage(MessageTypeError, ErrorResponse{
+			Code:    "large_error",
+			Message: "Test message",
+			Details: largeDetails,
+		})
+		clientConn.Send(msg)
+	}()
+
+	msg, err := serverConn.Receive()
+	if err != nil {
+		t.Fatalf("Receive() error = %v", err)
+	}
+
+	var decoded ErrorResponse
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(decoded.Details) != 10000 {
+		t.Errorf("Details length = %d, want 10000", len(decoded.Details))
+	}
+}
+
+func TestConnectionClose(t *testing.T) {
+	server, client := net.Pipe()
+	serverConn := newConnection(server)
+	clientConn := newConnection(client)
+
+	// Close client side
+	if err := clientConn.Close(); err != nil {
+		t.Fatalf("Close() error = %v", err)
+	}
+
+	// Server should get error on receive
+	_, err := serverConn.Receive()
+	if err == nil {
+		t.Error("Receive() should fail after connection closed")
+	}
+
+	// Close server side (already closed from other end, but should be safe)
+	serverConn.Close()
+}
+
+func TestConnectionSetDeadline(t *testing.T) {
+	server, client := net.Pipe()
+	defer server.Close()
+	defer client.Close()
+
+	conn := newConnection(client)
+
+	// Set a deadline in the past
+	pastDeadline := time.Now().Add(-1 * time.Second)
+	if err := conn.SetDeadline(pastDeadline); err != nil {
+		t.Fatalf("SetDeadline() error = %v", err)
+	}
+
+	// Should timeout on send
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	err := conn.Send(msg)
+	if err == nil {
+		t.Error("Send() should fail with past deadline")
+	}
+}
+
+func TestUnixServerWithNoHandler(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "test.sock")
+
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	// Connect client
+	client := NewUnixClient(socketPath)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Server with no handler should not crash when receiving message
+	// Send async since no response will come
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	if err := client.SendAsync(msg); err != nil {
+		t.Fatalf("SendAsync() error = %v", err)
+	}
+
+	// Give server time to process
+	time.Sleep(50 * time.Millisecond)
+}
+
+func TestUnixServerHandlerError(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "test.sock")
+
+	server := NewUnixServer(socketPath)
+	server.SetHandler(HandlerFunc(func(ctx context.Context, msg *Message) (*Message, error) {
+		return nil, errors.New("handler error")
+	}))
+
+	ctx := context.Background()
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	client := NewUnixClient(socketPath)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Send message and expect error response
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	resp, err := client.Send(ctx, msg)
+	if err != nil {
+		t.Fatalf("Send() error = %v", err)
+	}
+
+	if resp.Type != MessageTypeError {
+		t.Errorf("Response type = %v, want %v", resp.Type, MessageTypeError)
+	}
+
+	var errResp ErrorResponse
+	if err := resp.DecodePayload(&errResp); err != nil {
+		t.Fatal(err)
+	}
+
+	if errResp.Code != "handler_error" {
+		t.Errorf("Error code = %q, want %q", errResp.Code, "handler_error")
+	}
+}
+
+func TestUnixServerHandlerReturnsNilResponse(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_nil.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	server := NewUnixServer(socketPath)
+	server.SetHandler(HandlerFunc(func(ctx context.Context, msg *Message) (*Message, error) {
+		return nil, nil // Return nil response with no error
+	}))
+
+	ctx := context.Background()
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	client := NewUnixClient(socketPath)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Send async since no response expected
+	msg, _ := NewMessage(MessageTypeShutdown, nil)
+	if err := client.SendAsync(msg); err != nil {
+		t.Fatalf("SendAsync() error = %v", err)
+	}
+
+	// Give server time to process
+	time.Sleep(50 * time.Millisecond)
+}
+
+func TestUnixClientAlreadyConnected(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "test.sock")
+
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	client := NewUnixClient(socketPath)
+
+	// First connect
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("First Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Second connect should be a no-op (already connected)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Second Connect() error = %v", err)
+	}
+
+	if !client.IsConnected() {
+		t.Error("Client should still be connected")
+	}
+}
+
+func TestUnixClientSendWithTimeout(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "test.sock")
+
+	server := NewUnixServer(socketPath)
+	// Handler that takes a long time
+	server.SetHandler(HandlerFunc(func(ctx context.Context, msg *Message) (*Message, error) {
+		time.Sleep(5 * time.Second)
+		return NewMessage(MessageTypeSuccess, nil)
+	}))
+
+	ctx := context.Background()
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	client := NewUnixClient(socketPath)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Send with short timeout
+	ctxTimeout, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
+	defer cancel()
+
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	_, err := client.Send(ctxTimeout, msg)
+	if err == nil {
+		t.Error("Send() should timeout")
+	}
+}
+
+func TestStaleSocketCleanup(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "stale.sock")
+
+	// Create a stale socket file (not a real socket)
+	f, err := os.Create(socketPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.Close()
+
+	// Server should clean up stale socket and start successfully
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() should succeed after cleaning stale socket: %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	if !server.IsRunning() {
+		t.Error("Server should be running")
+	}
+}
+
+func TestServerStopClosesConnections(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_stop.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	server := NewUnixServer(socketPath)
+	server.SetHandler(HandlerFunc(func(ctx context.Context, msg *Message) (*Message, error) {
+		return NewMessage(MessageTypeSuccess, nil)
+	}))
+
+	ctx := context.Background()
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+
+	time.Sleep(50 * time.Millisecond)
+
+	// Connect multiple clients
+	clients := make([]Client, 3)
+	for i := 0; i < 3; i++ {
+		clients[i] = NewUnixClient(socketPath)
+		if err := clients[i].Connect(ctx); err != nil {
+			t.Fatalf("Connect() error = %v", err)
+		}
+	}
+
+	// Stop server
+	if err := server.Stop(ctx); err != nil {
+		t.Fatalf("Stop() error = %v", err)
+	}
+
+	// Give connections time to close
+	time.Sleep(50 * time.Millisecond)
+
+	// Cleanup clients
+	for _, client := range clients {
+		client.Disconnect()
+	}
+}
+
+func TestAllNotificationTypes(t *testing.T) {
+	tests := []struct {
+		name    string
+		msgType MessageType
+		payload interface{}
+	}{
+		{
+			name:    "AgentInstalled notification",
+			msgType: MessageTypeAgentInstalled,
+			payload: map[string]interface{}{
+				"agent_id": "claude-code",
+				"version":  "1.0.0",
+			},
+		},
+		{
+			name:    "AgentUpdated notification",
+			msgType: MessageTypeAgentUpdated,
+			payload: map[string]interface{}{
+				"agent_id":     "claude-code",
+				"from_version": "1.0.0",
+				"to_version":   "1.1.0",
+			},
+		},
+		{
+			name:    "AgentRemoved notification",
+			msgType: MessageTypeAgentRemoved,
+			payload: map[string]interface{}{
+				"agent_id": "claude-code",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			msg, err := NewMessage(tt.msgType, tt.payload)
+			if err != nil {
+				t.Fatalf("NewMessage() error = %v", err)
+			}
+			if msg.Type != tt.msgType {
+				t.Errorf("Type = %v, want %v", msg.Type, tt.msgType)
+			}
+		})
+	}
+}
+
+func TestGetAgentResponse(t *testing.T) {
+	resp := GetAgentResponse{
+		Agent: &agent.Installation{
+			AgentID: "test-agent",
+			Method:  agent.InstallMethodNPM,
+		},
+	}
+
+	msg, err := NewMessage(MessageTypeSuccess, resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded GetAgentResponse
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if decoded.Agent == nil {
+		t.Fatal("Agent should not be nil")
+	}
+	if decoded.Agent.AgentID != "test-agent" {
+		t.Errorf("AgentID = %q, want %q", decoded.Agent.AgentID, "test-agent")
+	}
+}
+
+func TestInstallAgentResponse(t *testing.T) {
+	resp := InstallAgentResponse{
+		Installation: &agent.Installation{
+			AgentID: "claude-code",
+			Method:  agent.InstallMethodBrew,
+		},
+		Success: true,
+		Message: "Installation complete",
+	}
+
+	msg, err := NewMessage(MessageTypeSuccess, resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded InstallAgentResponse
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if !decoded.Success {
+		t.Error("Success should be true")
+	}
+	if decoded.Message != "Installation complete" {
+		t.Errorf("Message = %q, want %q", decoded.Message, "Installation complete")
+	}
+}
+
+func TestUpdateAgentResponse(t *testing.T) {
+	resp := UpdateAgentResponse{
+		Installation: &agent.Installation{
+			AgentID: "claude-code",
+		},
+		FromVersion: "1.0.0",
+		ToVersion:   "2.0.0",
+		Success:     true,
+	}
+
+	msg, err := NewMessage(MessageTypeSuccess, resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded UpdateAgentResponse
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if decoded.FromVersion != "1.0.0" {
+		t.Errorf("FromVersion = %q, want %q", decoded.FromVersion, "1.0.0")
+	}
+	if decoded.ToVersion != "2.0.0" {
+		t.Errorf("ToVersion = %q, want %q", decoded.ToVersion, "2.0.0")
+	}
+}
+
+func TestStatusResponseAllFields(t *testing.T) {
+	now := time.Now()
+	resp := StatusResponse{
+		Running:            true,
+		PID:                12345,
+		Uptime:             3600,
+		AgentCount:         10,
+		UpdatesAvailable:   3,
+		LastCatalogRefresh: now,
+		LastUpdateCheck:    now,
+	}
+
+	msg, err := NewMessage(MessageTypeSuccess, resp)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded StatusResponse
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if decoded.PID != 12345 {
+		t.Errorf("PID = %d, want %d", decoded.PID, 12345)
+	}
+	if decoded.Uptime != 3600 {
+		t.Errorf("Uptime = %d, want %d", decoded.Uptime, 3600)
+	}
+	if decoded.UpdatesAvailable != 3 {
+		t.Errorf("UpdatesAvailable = %d, want %d", decoded.UpdatesAvailable, 3)
+	}
+}
+
+func TestFactoryNewServerWithEmptyAddress(t *testing.T) {
+	// NewServer with empty address should use default
+	server := NewServer("")
+	if server == nil {
+		t.Fatal("NewServer() returned nil")
+	}
+	defer server.Stop(context.Background())
+
+	// Address should be the default socket path
+	if server.Address() == "" {
+		t.Error("Server address should not be empty")
+	}
+}
+
+func TestFactoryNewClientWithEmptyAddress(t *testing.T) {
+	// NewClient with empty address should use default
+	client := NewClient("")
+	if client == nil {
+		t.Fatal("NewClient() returned nil")
+	}
+
+	// Should not be connected initially
+	if client.IsConnected() {
+		t.Error("Client should not be connected initially")
+	}
+}
+
+func TestFactoryNewServerWithCustomAddress(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "custom.sock")
+
+	server := NewServer(socketPath)
+	if server == nil {
+		t.Fatal("NewServer() returned nil")
+	}
+
+	if server.Address() != socketPath {
+		t.Errorf("Address() = %q, want %q", server.Address(), socketPath)
+	}
+}
+
+func TestFactoryNewClientWithCustomAddress(t *testing.T) {
+	socketPath := "/custom/path/socket.sock"
+	client := NewClient(socketPath)
+	if client == nil {
+		t.Fatal("NewClient() returned nil")
+	}
+}
+
+func TestDefaultSocketPath(t *testing.T) {
+	path := DefaultSocketPath()
+	if path == "" {
+		t.Error("DefaultSocketPath() should not return empty string")
+	}
+}
+
+func TestConnectionMultipleSendReceive(t *testing.T) {
+	server, client := net.Pipe()
+	defer server.Close()
+	defer client.Close()
+
+	serverConn := newConnection(server)
+	clientConn := newConnection(client)
+
+	// Send multiple messages in sequence
+	go func() {
+		for i := 0; i < 5; i++ {
+			msg, _ := NewMessage(MessageTypeGetStatus, StatusResponse{
+				Running:    true,
+				AgentCount: i,
+			})
+			clientConn.Send(msg)
+		}
+	}()
+
+	// Receive all messages
+	for i := 0; i < 5; i++ {
+		msg, err := serverConn.Receive()
+		if err != nil {
+			t.Fatalf("Receive() error = %v", err)
+		}
+
+		var status StatusResponse
+		if err := msg.DecodePayload(&status); err != nil {
+			t.Fatal(err)
+		}
+
+		if status.AgentCount != i {
+			t.Errorf("AgentCount = %d, want %d", status.AgentCount, i)
+		}
+	}
+}
+
+func TestUnixClientMultipleSubscribers(t *testing.T) {
+	client := NewUnixClient("/test.sock").(*unixClient)
+
+	var received1, received2 int
+
+	client.Subscribe(func(msg *Message) {
+		received1++
+	})
+	client.Subscribe(func(msg *Message) {
+		received2++
+	})
+
+	if len(client.subscribers) != 2 {
+		t.Errorf("Subscribers count = %d, want 2", len(client.subscribers))
+	}
+
+	// Simulate calling subscribers (normally done in listenForNotifications)
+	client.subMu.RLock()
+	testMsg, _ := NewMessage(MessageTypeUpdateAvailable, nil)
+	for _, sub := range client.subscribers {
+		sub(testMsg)
+	}
+	client.subMu.RUnlock()
+
+	if received1 != 1 {
+		t.Errorf("Subscriber 1 received %d, want 1", received1)
+	}
+	if received2 != 1 {
+		t.Errorf("Subscriber 2 received %d, want 1", received2)
+	}
+}
+
+func TestMessageTypeStrings(t *testing.T) {
+	types := []struct {
+		msgType MessageType
+		str     string
+	}{
+		{MessageTypeListAgents, "list_agents"},
+		{MessageTypeGetAgent, "get_agent"},
+		{MessageTypeInstallAgent, "install_agent"},
+		{MessageTypeUpdateAgent, "update_agent"},
+		{MessageTypeUninstallAgent, "uninstall_agent"},
+		{MessageTypeRefreshCatalog, "refresh_catalog"},
+		{MessageTypeCheckUpdates, "check_updates"},
+		{MessageTypeGetStatus, "get_status"},
+		{MessageTypeShutdown, "shutdown"},
+		{MessageTypeSuccess, "success"},
+		{MessageTypeError, "error"},
+		{MessageTypeProgress, "progress"},
+		{MessageTypeUpdateAvailable, "update_available"},
+		{MessageTypeAgentInstalled, "agent_installed"},
+		{MessageTypeAgentUpdated, "agent_updated"},
+		{MessageTypeAgentRemoved, "agent_removed"},
+	}
+
+	for _, tt := range types {
+		t.Run(string(tt.msgType), func(t *testing.T) {
+			if string(tt.msgType) != tt.str {
+				t.Errorf("MessageType = %q, want %q", string(tt.msgType), tt.str)
+			}
+		})
+	}
+}
+
+func TestErrorVariables(t *testing.T) {
+	// Verify error variables are defined correctly
+	if ErrNotConnected.Error() != "not connected to server" {
+		t.Errorf("ErrNotConnected = %q", ErrNotConnected.Error())
+	}
+	if ErrServerClosed.Error() != "server is closed" {
+		t.Errorf("ErrServerClosed = %q", ErrServerClosed.Error())
+	}
+	if ErrTimeout.Error() != "operation timed out" {
+		t.Errorf("ErrTimeout = %q", ErrTimeout.Error())
+	}
+	if ErrInvalidMessage.Error() != "invalid message format" {
+		t.Errorf("ErrInvalidMessage = %q", ErrInvalidMessage.Error())
+	}
+}
+
+func TestListenForNotificationsContextCanceled(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_listen.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+	defer server.Stop(context.Background())
+
+	time.Sleep(50 * time.Millisecond)
+
+	client := NewUnixClient(socketPath).(*unixClient)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+	defer client.Disconnect()
+
+	// Create a context we can cancel
+	listenCtx, cancel := context.WithCancel(ctx)
+
+	// Start listening
+	done := make(chan struct{})
+	go func() {
+		client.listenForNotifications(listenCtx)
+		close(done)
+	}()
+
+	// Cancel context
+	cancel()
+
+	// Should exit quickly
+	select {
+	case <-done:
+		// Success
+	case <-time.After(1 * time.Second):
+		t.Error("listenForNotifications did not exit after context cancel")
+	}
+}
+
+func TestServerContextCanceled(t *testing.T) {
+	tmpDir := t.TempDir()
+	socketPath := filepath.Join(tmpDir, "test.sock")
+
+	server := NewUnixServer(socketPath)
+	ctx, cancel := context.WithCancel(context.Background())
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+
+	// Cancel context
+	cancel()
+
+	// Give accept loop time to notice
+	time.Sleep(100 * time.Millisecond)
+
+	// Stop server
+	server.Stop(context.Background())
+}
+
+func TestListAgentsRequestWithFilter(t *testing.T) {
+	filter := &agent.Filter{}
+	req := ListAgentsRequest{Filter: filter}
+
+	msg, err := NewMessage(MessageTypeListAgents, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var decoded ListAgentsRequest
+	if err := msg.DecodePayload(&decoded); err != nil {
+		t.Fatal(err)
+	}
+
+	if decoded.Filter == nil {
+		t.Error("Filter should not be nil")
+	}
+}
+
+func TestCleanupStaleSocketWithActiveServer(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_active.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	// Start first server
+	server1 := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server1.Start(ctx); err != nil {
+		t.Fatalf("First server Start() error = %v", err)
+	}
+	defer server1.Stop(context.Background())
+
+	// Try to start second server on same socket - should fail
+	server2 := NewUnixServer(socketPath)
+	err := server2.Start(ctx)
+	if err == nil {
+		server2.Stop(context.Background())
+		t.Error("Second server Start() should fail when another server is active")
+	}
+}
+
+func TestListenForNotificationsNotConnected(t *testing.T) {
+	client := NewUnixClient("/nonexistent.sock").(*unixClient)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// listenForNotifications should return immediately when not connected
+	done := make(chan struct{})
+	go func() {
+		client.listenForNotifications(ctx)
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// Expected - exits quickly when not connected
+	case <-time.After(1 * time.Second):
+		t.Error("listenForNotifications should exit when not connected")
+	}
+}
+
+func TestListenForNotificationsConnectionClosed(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_close.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+
+	client := NewUnixClient(socketPath).(*unixClient)
+	if err := client.Connect(ctx); err != nil {
+		t.Fatalf("Connect() error = %v", err)
+	}
+
+	// Start listening
+	listenCtx := context.Background()
+	done := make(chan struct{})
+	go func() {
+		client.listenForNotifications(listenCtx)
+		close(done)
+	}()
+
+	// Give listener time to start
+	time.Sleep(50 * time.Millisecond)
+
+	// Stop server to close connections
+	server.Stop(context.Background())
+
+	// listenForNotifications should exit after connection closes
+	select {
+	case <-done:
+		// Success
+	case <-time.After(2 * time.Second):
+		t.Error("listenForNotifications should exit after connection closes")
+	}
+}
+
+func TestDisconnectWithNilConnection(t *testing.T) {
+	client := NewUnixClient("/nonexistent.sock").(*unixClient)
+
+	// Manually set connected to true but leave conn nil (edge case)
+	client.mu.Lock()
+	client.connected = true
+	client.conn = nil
+	client.mu.Unlock()
+
+	// Disconnect should handle nil conn gracefully
+	err := client.Disconnect()
+	if err != nil {
+		t.Errorf("Disconnect() error = %v", err)
+	}
+
+	if client.IsConnected() {
+		t.Error("Client should not be connected after Disconnect()")
+	}
+}
+
+func TestSendWithNilConnection(t *testing.T) {
+	client := NewUnixClient("/nonexistent.sock").(*unixClient)
+
+	// Manually set connected to true but leave conn nil (edge case)
+	client.mu.Lock()
+	client.connected = true
+	client.conn = nil
+	client.mu.Unlock()
+
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	_, err := client.Send(context.Background(), msg)
+	if err != ErrNotConnected {
+		t.Errorf("Send() error = %v, want ErrNotConnected", err)
+	}
+}
+
+func TestSendAsyncWithNilConnection(t *testing.T) {
+	client := NewUnixClient("/nonexistent.sock").(*unixClient)
+
+	// Manually set connected to true but leave conn nil (edge case)
+	client.mu.Lock()
+	client.connected = true
+	client.conn = nil
+	client.mu.Unlock()
+
+	msg, _ := NewMessage(MessageTypeGetStatus, nil)
+	err := client.SendAsync(msg)
+	if err != ErrNotConnected {
+		t.Errorf("SendAsync() error = %v, want ErrNotConnected", err)
+	}
+}
+
+func TestServerAcceptLoopClosedListener(t *testing.T) {
+	socketPath := filepath.Join(os.TempDir(), "ipc_test_accept.sock")
+	os.Remove(socketPath)
+	defer os.Remove(socketPath)
+
+	server := NewUnixServer(socketPath)
+	ctx := context.Background()
+
+	if err := server.Start(ctx); err != nil {
+		t.Fatalf("Start() error = %v", err)
+	}
+
+	// Immediately stop the server
+	if err := server.Stop(ctx); err != nil {
+		t.Fatalf("Stop() error = %v", err)
+	}
+
+	// Accept loop should have exited cleanly
+	if server.IsRunning() {
+		t.Error("Server should not be running")
 	}
 }

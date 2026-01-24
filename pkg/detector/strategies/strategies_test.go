@@ -1421,3 +1421,64 @@ func TestExtractNPMPackageName_VersionTags(t *testing.T) {
 		})
 	}
 }
+
+func TestIsPackageManagerPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		path     string
+		expected bool
+	}{
+		// npm/node paths - should be detected
+		{"npm global", "/usr/local/lib/node_modules/.bin/claude", true},
+		{"mise node", "/Users/kevin/.local/share/mise/installs/node/22.20.0/bin/blackbox", true},
+		{"nvm node", "/Users/kevin/.nvm/versions/node/v20.0.0/bin/amp", true},
+		{"fnm node", "/Users/kevin/Library/fnm/node-versions/v20.0.0/bin/app", true},
+		{"volta node", "/Users/kevin/.volta/bin/node", true},
+		{"pnpm", "/Users/kevin/.local/share/pnpm/bin/app", true},
+		{"bun", "/Users/kevin/.bun/bin/app", true},
+
+		// Python paths - should be detected
+		{"pipx", "/Users/kevin/.local/pipx/venvs/aider/bin/aider", true},
+		{"pyenv", "/Users/kevin/.pyenv/versions/3.11.0/bin/python", true},
+		{"conda", "/opt/conda/bin/python", true},
+		{"venv", "/project/.venv/bin/python", true},
+		{"uv", "/Users/kevin/.local/share/uv/bin/app", true},
+
+		// Homebrew paths - should be detected
+		{"homebrew cellar", "/opt/homebrew/Cellar/droid/0.47.0/bin/droid", true},
+		{"homebrew bin", "/opt/homebrew/bin/droid", true},
+		{"linuxbrew", "/home/linuxbrew/.linuxbrew/bin/app", true},
+
+		// Go paths - should be detected
+		{"go bin", "/Users/kevin/go/bin/app", true},
+		{"gopath", "/Users/kevin/gopath/bin/app", true},
+
+		// Cargo paths - should be detected
+		{"cargo", "/Users/kevin/.cargo/bin/rustc", true},
+
+		// Native paths - should NOT be detected
+		{"usr local bin", "/usr/local/bin/claude", false},
+		{"usr bin", "/usr/bin/python", false},
+		{"opt bin", "/opt/app/bin/app", false},
+		{"applications", "/Applications/App.app/Contents/MacOS/app", false},
+		{"home bin", "/Users/kevin/bin/app", false},
+		{"custom install", "/opt/claude-cli/bin/claude", false},
+
+		// asdf paths - should be detected
+		{"asdf nodejs", "/Users/kevin/.asdf/installs/nodejs/20.0.0/bin/node", true},
+		{"asdf python", "/Users/kevin/.asdf/installs/python/3.11.0/bin/python", true},
+
+		// Generic version managers
+		{"mise generic", "/Users/kevin/.local/share/mise/installs/go/1.22.0/bin/go", true},
+		{"rtx", "/Users/kevin/.local/share/rtx/installs/node/20.0.0/bin/node", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isPackageManagerPath(tt.path)
+			if result != tt.expected {
+				t.Errorf("isPackageManagerPath(%q) = %v, want %v", tt.path, result, tt.expected)
+			}
+		})
+	}
+}

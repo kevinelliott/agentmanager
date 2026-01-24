@@ -69,11 +69,15 @@ Examples:
 	// Add subcommands
 	root.AddCommand(
 		NewAgentCommand(cfg),
+		NewAPICommand(cfg),
 		NewCatalogCommand(cfg),
 		NewCompletionCommand(),
 		NewConfigCommand(cfg),
+		NewDoctorCommand(cfg),
 		NewHelperCommand(cfg),
+		NewPluginCommand(cfg),
 		NewTUICommand(cfg),
+		NewUpgradeCommand(cfg, version),
 		NewVersionCommand(version, commit, date),
 	)
 

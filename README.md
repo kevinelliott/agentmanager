@@ -175,6 +175,41 @@ agentmgr helper stop             # Stop systray helper
 agentmgr helper status           # Check helper status
 ```
 
+### System Health
+
+```bash
+agentmgr doctor                  # Check system health and configuration
+agentmgr doctor --verbose        # Show detailed output
+```
+
+### Self-Update
+
+```bash
+agentmgr upgrade                 # Check for and install updates
+agentmgr upgrade --check         # Check for updates only
+agentmgr upgrade --force         # Force reinstall
+```
+
+### Detection Plugins
+
+```bash
+agentmgr plugin list             # List installed plugins
+agentmgr plugin create <name>    # Create a new plugin
+agentmgr plugin validate <file>  # Validate plugin config
+agentmgr plugin enable <name>    # Enable a plugin
+agentmgr plugin disable <name>   # Disable a plugin
+```
+
+See [docs/plugins.md](docs/plugins.md) for detailed plugin documentation.
+
+### API Documentation
+
+```bash
+agentmgr api docs                # Show REST API documentation
+agentmgr api endpoints           # List all API endpoints
+agentmgr api spec                # Output OpenAPI specification
+```
+
 ### Global Options
 
 ```bash

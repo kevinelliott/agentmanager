@@ -777,3 +777,546 @@ func TestGetAgent(t *testing.T) {
 		}
 	})
 }
+
+// Additional edge case tests for FromAgentInstallation
+func TestFromAgentInstallationEdgeCases(t *testing.T) {
+	t.Run("empty metadata", func(t *testing.T) {
+		version, _ := agent.ParseVersion("2.0.0")
+		inst := &agent.Installation{
+			AgentID:          "test-agent",
+			Method:           agent.InstallMethodBrew,
+			InstalledVersion: version,
+			Metadata:         nil,
+		}
+		result := FromAgentInstallation(inst)
+		if result.Metadata != nil {
+			t.Error("Metadata should be nil when source is nil")
+		}
+	})
+
+	t.Run("with empty strings", func(t *testing.T) {
+		version, _ := agent.ParseVersion("1.0.0")
+		inst := &agent.Installation{
+			AgentID:          "",
+			AgentName:        "",
+			Method:           agent.InstallMethodPip,
+			InstalledVersion: version,
+			ExecutablePath:   "",
+			InstallPath:      "",
+		}
+		result := FromAgentInstallation(inst)
+		if result == nil {
+			t.Fatal("Result should not be nil even with empty strings")
+		}
+		if result.AgentID != "" {
+			t.Errorf("AgentID should be empty, got %q", result.AgentID)
+		}
+	})
+
+	t.Run("all install methods", func(t *testing.T) {
+		version, _ := agent.ParseVersion("1.0.0")
+		methods := []agent.InstallMethod{
+			agent.InstallMethodNPM,
+			agent.InstallMethodBrew,
+			agent.InstallMethodPip,
+			agent.InstallMethodPipx,
+			agent.InstallMethodUV,
+			agent.InstallMethodScoop,
+			agent.InstallMethodWinget,
+			agent.InstallMethodChocolatey,
+			agent.InstallMethodNative,
+			agent.InstallMethodCurl,
+			agent.InstallMethodBinary,
+		}
+
+		for _, method := range methods {
+			t.Run(string(method), func(t *testing.T) {
+				inst := &agent.Installation{
+					AgentID:          "test",
+					Method:           method,
+					InstalledVersion: version,
+				}
+				result := FromAgentInstallation(inst)
+				if result.InstallMethod != string(method) {
+					t.Errorf("InstallMethod = %q, want %q", result.InstallMethod, string(method))
+				}
+			})
+		}
+	})
+
+	t.Run("version comparison with update", func(t *testing.T) {
+		installed, _ := agent.ParseVersion("1.0.0")
+		latest, _ := agent.ParseVersion("2.0.0")
+		inst := &agent.Installation{
+			AgentID:          "test",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: installed,
+			LatestVersion:    &latest,
+		}
+		result := FromAgentInstallation(inst)
+		if !result.HasUpdate {
+			t.Error("HasUpdate should be true when latest > installed")
+		}
+	})
+
+	t.Run("version comparison no update", func(t *testing.T) {
+		installed, _ := agent.ParseVersion("2.0.0")
+		latest, _ := agent.ParseVersion("1.0.0")
+		inst := &agent.Installation{
+			AgentID:          "test",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: installed,
+			LatestVersion:    &latest,
+		}
+		result := FromAgentInstallation(inst)
+		if result.HasUpdate {
+			t.Error("HasUpdate should be false when installed >= latest")
+		}
+	})
+
+	t.Run("same version no update", func(t *testing.T) {
+		installed, _ := agent.ParseVersion("1.0.0")
+		latest, _ := agent.ParseVersion("1.0.0")
+		inst := &agent.Installation{
+			AgentID:          "test",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: installed,
+			LatestVersion:    &latest,
+		}
+		result := FromAgentInstallation(inst)
+		if result.HasUpdate {
+			t.Error("HasUpdate should be false when versions are equal")
+		}
+	})
+}
+
+// Additional edge case tests for FromCatalogAgentDef
+func TestFromCatalogAgentDefEdgeCases(t *testing.T) {
+	t.Run("empty install methods", func(t *testing.T) {
+		def := &catalog.AgentDef{
+			ID:             "test",
+			Name:           "Test",
+			InstallMethods: map[string]catalog.InstallMethodDef{},
+		}
+		result := FromCatalogAgentDef(def)
+		if len(result.InstallMethods) != 0 {
+			t.Error("InstallMethods should be empty")
+		}
+	})
+
+	t.Run("multiple install methods", func(t *testing.T) {
+		def := &catalog.AgentDef{
+			ID:   "test",
+			Name: "Test",
+			InstallMethods: map[string]catalog.InstallMethodDef{
+				"npm": {
+					Method:    "npm",
+					Package:   "@test/pkg",
+					Command:   "npm install -g @test/pkg",
+					Platforms: []string{"darwin", "linux"},
+				},
+				"pip": {
+					Method:    "pip",
+					Package:   "test-pkg",
+					Command:   "pip install test-pkg",
+					Platforms: []string{"darwin", "linux", "windows"},
+				},
+				"brew": {
+					Method:    "brew",
+					Package:   "test",
+					Command:   "brew install test",
+					Platforms: []string{"darwin"},
+				},
+			},
+		}
+		result := FromCatalogAgentDef(def)
+		if len(result.InstallMethods) != 3 {
+			t.Errorf("InstallMethods count = %d, want 3", len(result.InstallMethods))
+		}
+	})
+
+	t.Run("empty fields", func(t *testing.T) {
+		def := &catalog.AgentDef{
+			ID:          "test",
+			Name:        "",
+			Description: "",
+			Homepage:    "",
+			Repository:  "",
+			InstallMethods: map[string]catalog.InstallMethodDef{
+				"npm": {Method: "npm"},
+			},
+		}
+		result := FromCatalogAgentDef(def)
+		if result.Name != "" {
+			t.Errorf("Name should be empty, got %q", result.Name)
+		}
+		if result.Homepage != "" {
+			t.Errorf("Homepage should be empty, got %q", result.Homepage)
+		}
+	})
+
+	t.Run("install method with empty platforms", func(t *testing.T) {
+		def := &catalog.AgentDef{
+			ID:   "test",
+			Name: "Test",
+			InstallMethods: map[string]catalog.InstallMethodDef{
+				"npm": {
+					Method:    "npm",
+					Package:   "@test/pkg",
+					Platforms: []string{},
+				},
+			},
+		}
+		result := FromCatalogAgentDef(def)
+		if len(result.InstallMethods) != 1 {
+			t.Fatal("Should have one install method")
+		}
+		if len(result.InstallMethods[0].Platforms) != 0 {
+			t.Error("Platforms should be empty")
+		}
+	})
+}
+
+// Test SearchCatalog with platform filter
+func TestSearchCatalogWithPlatformFilter(t *testing.T) {
+	server := setupTestServer()
+	ctx := context.Background()
+
+	t.Run("search with platform filter", func(t *testing.T) {
+		resp, err := server.SearchCatalog(ctx, &SearchCatalogRequest{
+			Query:    "claude",
+			Platform: "darwin",
+		})
+		if err != nil {
+			t.Fatalf("SearchCatalog() error = %v", err)
+		}
+		if resp.Total != 1 {
+			t.Errorf("Total = %d, want 1", resp.Total)
+		}
+	})
+
+	t.Run("search with unsupported platform filter", func(t *testing.T) {
+		resp, err := server.SearchCatalog(ctx, &SearchCatalogRequest{
+			Query:    "claude",
+			Platform: "unsupported-platform",
+		})
+		if err != nil {
+			t.Fatalf("SearchCatalog() error = %v", err)
+		}
+		if resp.Total != 0 {
+			t.Errorf("Total = %d, want 0 (no agents support this platform)", resp.Total)
+		}
+	})
+
+	t.Run("search by description", func(t *testing.T) {
+		resp, err := server.SearchCatalog(ctx, &SearchCatalogRequest{Query: "pair programming"})
+		if err != nil {
+			t.Fatalf("SearchCatalog() error = %v", err)
+		}
+		if resp.Total != 1 {
+			t.Errorf("Total = %d, want 1", resp.Total)
+		}
+		if len(resp.Agents) > 0 && resp.Agents[0].ID != "aider" {
+			t.Errorf("Agent ID = %q, want %q", resp.Agents[0].ID, "aider")
+		}
+	})
+}
+
+// Test RefreshCatalog method
+func TestRefreshCatalog(t *testing.T) {
+	// Note: RefreshCatalog tries to fetch from remote URL which will fail in tests
+	// We test that it handles failures gracefully
+	server := setupTestServer()
+	ctx := context.Background()
+
+	resp, err := server.RefreshCatalog(ctx)
+	if err != nil {
+		t.Fatalf("RefreshCatalog() error = %v", err)
+	}
+	// Should return failure since no actual HTTP server is available
+	if resp.Success {
+		t.Log("RefreshCatalog succeeded (possibly cached data)")
+	} else if resp.Message == "" {
+		t.Error("Message should contain error info on failure")
+	}
+}
+
+// Test more matchesFilter combinations
+func TestMatchesFilterCombinations(t *testing.T) {
+	server := setupTestServer()
+
+	version, _ := agent.ParseVersion("1.0.0")
+	latestVersion, _ := agent.ParseVersion("2.0.0")
+
+	inst := &agent.Installation{
+		AgentID:          "claude-code",
+		AgentName:        "Claude Code",
+		Method:           agent.InstallMethodNPM,
+		InstalledVersion: version,
+		LatestVersion:    &latestVersion,
+		IsGlobal:         true,
+	}
+
+	t.Run("multiple agent IDs - match first", func(t *testing.T) {
+		filter := &AgentFilter{AgentIDs: []string{"claude-code", "aider"}}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("should match when agent ID is in list")
+		}
+	})
+
+	t.Run("multiple agent IDs - match second", func(t *testing.T) {
+		filter := &AgentFilter{AgentIDs: []string{"aider", "claude-code"}}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("should match when agent ID is in list (second position)")
+		}
+	})
+
+	t.Run("multiple methods - match", func(t *testing.T) {
+		filter := &AgentFilter{Methods: []string{"pip", "npm", "brew"}}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("should match when method is in list")
+		}
+	})
+
+	t.Run("combined filters - all match", func(t *testing.T) {
+		hasUpdate := true
+		isGlobal := true
+		filter := &AgentFilter{
+			AgentIDs:  []string{"claude-code"},
+			Methods:   []string{"npm"},
+			HasUpdate: &hasUpdate,
+			IsGlobal:  &isGlobal,
+			Query:     "claude",
+		}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("should match when all filter criteria are met")
+		}
+	})
+
+	t.Run("combined filters - one fails", func(t *testing.T) {
+		hasUpdate := true
+		isGlobal := false // This doesn't match
+		filter := &AgentFilter{
+			AgentIDs:  []string{"claude-code"},
+			Methods:   []string{"npm"},
+			HasUpdate: &hasUpdate,
+			IsGlobal:  &isGlobal,
+		}
+		if server.matchesFilter(inst, filter) {
+			t.Error("should not match when IsGlobal doesn't match")
+		}
+	})
+
+	t.Run("query matches agent name", func(t *testing.T) {
+		filter := &AgentFilter{Query: "Code"}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("query should match agent name")
+		}
+	})
+
+	t.Run("query partial match", func(t *testing.T) {
+		filter := &AgentFilter{Query: "aud"}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("query should partial match agent ID")
+		}
+	})
+
+	t.Run("is_global false filter", func(t *testing.T) {
+		isGlobal := false
+		filter := &AgentFilter{IsGlobal: &isGlobal}
+		if server.matchesFilter(inst, filter) {
+			t.Error("should not match when IsGlobal filter is false but inst.IsGlobal is true")
+		}
+	})
+
+	t.Run("has_update nil - no filter applied", func(t *testing.T) {
+		filter := &AgentFilter{HasUpdate: nil}
+		if !server.matchesFilter(inst, filter) {
+			t.Error("nil HasUpdate should not filter anything")
+		}
+	})
+}
+
+// Test GetChangelog edge cases
+func TestGetChangelogEdgeCases(t *testing.T) {
+	server := setupTestServer()
+	ctx := context.Background()
+
+	t.Run("nonexistent agent", func(t *testing.T) {
+		resp, err := server.GetChangelog(ctx, &GetChangelogRequest{
+			AgentID:     "nonexistent",
+			FromVersion: "1.0.0",
+			ToVersion:   "2.0.0",
+		})
+		if err != nil {
+			t.Fatalf("GetChangelog() error = %v", err)
+		}
+		// Should return empty changelog for nonexistent agent
+		if resp.Changelog != "" {
+			t.Error("Changelog should be empty for nonexistent agent")
+		}
+	})
+}
+
+// Test update detection logic with pre-populated agents
+// Note: CheckUpdates calls refreshAgents which requires a detector,
+// so we test the underlying HasUpdate logic instead
+func TestUpdateDetectionLogic(t *testing.T) {
+	version, _ := agent.ParseVersion("1.0.0")
+	latestVersion, _ := agent.ParseVersion("2.0.0")
+
+	t.Run("agent with update available", func(t *testing.T) {
+		inst := &agent.Installation{
+			AgentID:          "claude-code",
+			AgentName:        "Claude Code",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: version,
+			LatestVersion:    &latestVersion,
+		}
+		if !inst.HasUpdate() {
+			t.Error("HasUpdate should return true when latest > installed")
+		}
+	})
+
+	t.Run("agent without latest version", func(t *testing.T) {
+		inst := &agent.Installation{
+			AgentID:          "aider",
+			AgentName:        "Aider",
+			Method:           agent.InstallMethodPip,
+			InstalledVersion: version,
+			LatestVersion:    nil,
+		}
+		if inst.HasUpdate() {
+			t.Error("HasUpdate should return false when LatestVersion is nil")
+		}
+	})
+
+	t.Run("agent with same version", func(t *testing.T) {
+		inst := &agent.Installation{
+			AgentID:          "test",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: version,
+			LatestVersion:    &version,
+		}
+		if inst.HasUpdate() {
+			t.Error("HasUpdate should return false when versions are equal")
+		}
+	})
+}
+
+// Test multiple subscribers
+func TestMultipleSubscribers(t *testing.T) {
+	server := setupTestServer()
+
+	ch1 := server.Subscribe()
+	ch2 := server.Subscribe()
+	ch3 := server.Subscribe()
+
+	server.subMu.RLock()
+	count := len(server.subscribers)
+	server.subMu.RUnlock()
+	if count != 3 {
+		t.Errorf("Subscriber count = %d, want 3", count)
+	}
+
+	// Unsubscribe middle one
+	server.Unsubscribe(ch2)
+
+	server.subMu.RLock()
+	count = len(server.subscribers)
+	server.subMu.RUnlock()
+	if count != 2 {
+		t.Errorf("Subscriber count after unsubscribe = %d, want 2", count)
+	}
+
+	// Unsubscribe non-existent (should be no-op)
+	fakeCh := make(chan *AgentEvent)
+	server.Unsubscribe(fakeCh)
+
+	server.subMu.RLock()
+	count = len(server.subscribers)
+	server.subMu.RUnlock()
+	if count != 2 {
+		t.Errorf("Subscriber count after fake unsubscribe = %d, want 2", count)
+	}
+
+	// Clean up
+	server.Unsubscribe(ch1)
+	server.Unsubscribe(ch3)
+}
+
+// Test containsIgnoreCase edge cases
+func TestContainsIgnoreCaseEdgeCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		s        string
+		substr   string
+		expected bool
+	}{
+		{"both empty", "", "", true},
+		{"s empty substr not", "", "a", false},
+		{"substr empty s not", "a", "", true},
+		{"exact match", "test", "test", true},
+		{"exact match different case", "TEST", "test", true},
+		{"substr at start", "hello world", "hello", true},
+		{"substr at end", "hello world", "world", true},
+		{"substr in middle", "hello world", "lo wo", true},
+		{"mixed case in middle", "Hello World", "LO WO", true},
+		{"single char match", "a", "a", true},
+		{"single char no match", "a", "b", false},
+		{"longer substr than s", "ab", "abc", false},
+		{"numbers", "test123", "123", true},
+		{"special chars", "test-name", "-name", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := containsIgnoreCase(tt.s, tt.substr)
+			if result != tt.expected {
+				t.Errorf("containsIgnoreCase(%q, %q) = %v, want %v", tt.s, tt.substr, result, tt.expected)
+			}
+		})
+	}
+}
+
+// Test GetStatus with agents and updates
+func TestGetStatusWithAgents(t *testing.T) {
+	server := setupTestServer()
+	ctx := context.Background()
+
+	// Pre-populate agents
+	version, _ := agent.ParseVersion("1.0.0")
+	latestVersion, _ := agent.ParseVersion("2.0.0")
+	server.agents = []*agent.Installation{
+		{
+			AgentID:          "claude-code",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: version,
+			LatestVersion:    &latestVersion, // Has update
+		},
+		{
+			AgentID:          "aider",
+			Method:           agent.InstallMethodPip,
+			InstalledVersion: version,
+			LatestVersion:    &version, // No update (same version)
+		},
+		{
+			AgentID:          "copilot",
+			Method:           agent.InstallMethodNPM,
+			InstalledVersion: version,
+			LatestVersion:    nil, // Unknown
+		},
+	}
+
+	status, err := server.GetStatus(ctx)
+	if err != nil {
+		t.Fatalf("GetStatus() error = %v", err)
+	}
+
+	if status.AgentCount != 3 {
+		t.Errorf("AgentCount = %d, want 3", status.AgentCount)
+	}
+	if status.UpdatesAvailable != 1 {
+		t.Errorf("UpdatesAvailable = %d, want 1", status.UpdatesAvailable)
+	}
+}

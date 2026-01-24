@@ -5,6 +5,7 @@ import (
 	"context"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/kevinelliott/agentmgr/pkg/agent"
@@ -65,6 +66,12 @@ func (s *BinaryStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) 
 			path, err := s.platform.FindExecutable(executable)
 			if err != nil {
 				continue // Not found, try next executable
+			}
+
+			// Skip if the path indicates this is managed by another package manager.
+			// This prevents reporting npm/pip/brew installations as "native".
+			if isPackageManagerPath(path) {
+				continue
 			}
 
 			// Get version
@@ -148,4 +155,79 @@ func extractVersionFromOutput(output string) string {
 	}
 
 	return ""
+}
+
+// isPackageManagerPath checks if a path belongs to a package manager installation.
+// This helps avoid reporting npm/pip/brew/etc. installations as "native".
+func isPackageManagerPath(path string) bool {
+	// Normalize path separators for comparison
+	normalizedPath := strings.ToLower(path)
+	if runtime.GOOS == "windows" {
+		normalizedPath = strings.ReplaceAll(normalizedPath, "\\", "/")
+	}
+
+	// Package manager path patterns to exclude from native detection
+	packageManagerPatterns := []string{
+		// npm/node paths
+		"/node_modules/",
+		"/npm/",
+		"/node/",
+		"/.npm/",
+		"/pnpm/",
+		"/yarn/",
+		"/.bun/",
+		"/fnm/",
+		"/.nvm/",
+		"/.volta/",
+		"/asdf/installs/nodejs/",
+		"/mise/installs/node/",
+
+		// Python paths
+		"/pip/",
+		"/pipx/",
+		"/site-packages/",
+		"/.local/pipx/",
+		"/.pyenv/",
+		"/conda/",
+		"/virtualenv/",
+		"/venv/",
+		"/.venv/",
+		"/uv/",
+		"/asdf/installs/python/",
+		"/mise/installs/python/",
+
+		// Homebrew paths
+		"/homebrew/",
+		"/cellar/",
+		"/linuxbrew/",
+
+		// Go paths
+		"/go/bin/",
+		"/gopath/",
+
+		// Rust/Cargo paths
+		"/.cargo/",
+
+		// Ruby paths
+		"/.gem/",
+		"/.rbenv/",
+		"/.rvm/",
+		"/asdf/installs/ruby/",
+
+		// Generic version managers
+		"/.asdf/",
+		"/mise/",
+		"/rtx/",
+
+		// Scoop (Windows)
+		"/scoop/",
+	}
+
+	for _, pattern := range packageManagerPatterns {
+		if strings.Contains(normalizedPath, pattern) {
+			return true
+		}
+	}
+
+	return false
 }

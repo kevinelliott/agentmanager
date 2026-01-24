@@ -21,6 +21,8 @@ type AgentDef struct {
 	ID             string                      `json:"id"`
 	Name           string                      `json:"name"`
 	Description    string                      `json:"description"`
+	Category       string                      `json:"category,omitempty"`
+	Tags           []string                    `json:"tags,omitempty"`
 	Homepage       string                      `json:"homepage,omitempty"`
 	Repository     string                      `json:"repository,omitempty"`
 	Documentation  string                      `json:"documentation,omitempty"`
@@ -30,6 +32,18 @@ type AgentDef struct {
 	Changelog      ChangelogDef                `json:"changelog,omitempty"`
 	Metadata       map[string]string           `json:"metadata,omitempty"`
 }
+
+// AgentCategory represents a category for grouping agents.
+type AgentCategory string
+
+const (
+	CategoryCoding       AgentCategory = "coding"
+	CategoryDevOps       AgentCategory = "devops"
+	CategoryTerminal     AgentCategory = "terminal"
+	CategoryResearch     AgentCategory = "research"
+	CategoryProductivity AgentCategory = "productivity"
+	CategoryOther        AgentCategory = "other"
+)
 
 // InstallMethodDef defines how to install via a specific method.
 type InstallMethodDef struct {
@@ -213,4 +227,91 @@ func (c *Catalog) Validate() error {
 	}
 
 	return nil
+}
+
+// GetAgentsByCategory returns agents that match the given category.
+func (c *Catalog) GetAgentsByCategory(category string) []AgentDef {
+	var agents []AgentDef
+	for _, agent := range c.Agents {
+		if agent.Category == category {
+			agents = append(agents, agent)
+		}
+	}
+	sort.Slice(agents, func(i, j int) bool {
+		return strings.ToLower(agents[i].Name) < strings.ToLower(agents[j].Name)
+	})
+	return agents
+}
+
+// GetAgentsByTag returns agents that have the given tag.
+func (c *Catalog) GetAgentsByTag(tag string) []AgentDef {
+	var agents []AgentDef
+	tag = strings.ToLower(tag)
+	for _, agent := range c.Agents {
+		for _, t := range agent.Tags {
+			if strings.EqualFold(t, tag) {
+				agents = append(agents, agent)
+				break
+			}
+		}
+	}
+	sort.Slice(agents, func(i, j int) bool {
+		return strings.ToLower(agents[i].Name) < strings.ToLower(agents[j].Name)
+	})
+	return agents
+}
+
+// GetCategories returns all unique categories in the catalog.
+func (c *Catalog) GetCategories() []string {
+	categories := make(map[string]bool)
+	for _, agent := range c.Agents {
+		if agent.Category != "" {
+			categories[agent.Category] = true
+		}
+	}
+
+	result := make([]string, 0, len(categories))
+	for cat := range categories {
+		result = append(result, cat)
+	}
+	sort.Strings(result)
+	return result
+}
+
+// GetTags returns all unique tags in the catalog.
+func (c *Catalog) GetTags() []string {
+	tags := make(map[string]bool)
+	for _, agent := range c.Agents {
+		for _, tag := range agent.Tags {
+			tags[tag] = true
+		}
+	}
+
+	result := make([]string, 0, len(tags))
+	for tag := range tags {
+		result = append(result, tag)
+	}
+	sort.Strings(result)
+	return result
+}
+
+// GroupByCategory returns agents grouped by their category.
+func (c *Catalog) GroupByCategory() map[string][]AgentDef {
+	groups := make(map[string][]AgentDef)
+	for _, agent := range c.Agents {
+		category := agent.Category
+		if category == "" {
+			category = string(CategoryOther)
+		}
+		groups[category] = append(groups[category], agent)
+	}
+
+	// Sort agents within each group
+	for category := range groups {
+		sort.Slice(groups[category], func(i, j int) bool {
+			return strings.ToLower(groups[category][i].Name) < strings.ToLower(groups[category][j].Name)
+		})
+	}
+
+	return groups
 }
