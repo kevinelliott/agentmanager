@@ -1390,6 +1390,8 @@ func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
 }
 
 // uninstallCLI removes the CLI binary from the system path.
+//
+//nolint:unused // Reserved for future use in systray menu
 func (a *App) uninstallCLI() bool {
 	targetPath := "/usr/local/bin/agentmgr"
 
