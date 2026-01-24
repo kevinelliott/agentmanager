@@ -34,7 +34,10 @@ func (l *linuxPlatform) GetDataDir() string {
 	if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
 		return filepath.Join(xdgData, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join(os.TempDir(), ".local", "share", "agentmgr")
+	}
 	return filepath.Join(home, ".local", "share", "agentmgr")
 }
 
@@ -42,7 +45,10 @@ func (l *linuxPlatform) GetConfigDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join(os.TempDir(), ".config", "agentmgr")
+	}
 	return filepath.Join(home, ".config", "agentmgr")
 }
 
@@ -50,7 +56,10 @@ func (l *linuxPlatform) GetCacheDir() string {
 	if xdgCache := os.Getenv("XDG_CACHE_HOME"); xdgCache != "" {
 		return filepath.Join(xdgCache, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join(os.TempDir(), ".cache", "agentmgr")
+	}
 	return filepath.Join(home, ".cache", "agentmgr")
 }
 
