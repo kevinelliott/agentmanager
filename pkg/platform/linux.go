@@ -150,7 +150,10 @@ func (l *linuxPlatform) getSystemdUserDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "systemd", "user")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", ".config", "systemd", "user")
+	}
 	return filepath.Join(home, ".config", "systemd", "user")
 }
 
@@ -194,7 +197,10 @@ func (l *linuxPlatform) getXDGAutostartDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "autostart")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", ".config", "autostart")
+	}
 	return filepath.Join(home, ".config", "autostart")
 }
 
@@ -253,6 +259,7 @@ func (l *linuxPlatform) ShowNotification(title, message string) error {
 	}
 	// Try zenity
 	if _, err := exec.LookPath("zenity"); err == nil {
+		// #nosec G204 -- title and message are from controlled internal sources
 		return exec.Command("zenity", "--notification", "--text="+title+"\n"+message).Run()
 	}
 	return fmt.Errorf("no notification system available")
@@ -273,6 +280,7 @@ func (l *linuxPlatform) ShowChangelogDialog(agentName, fromVer, toVer, changelog
 func (l *linuxPlatform) showZenityDialog(agentName, fromVer, toVer, changelog string) DialogResult {
 	text := fmt.Sprintf("%s\n\n%s → %s\n\n%s", agentName, fromVer, toVer, changelog)
 
+	// #nosec G204 -- arguments are from controlled catalog sources, not user input
 	cmd := exec.Command("zenity", "--question",
 		"--title=Update Available",
 		"--text="+text,
