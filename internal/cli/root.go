@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // NewRootCommand creates the root command for agentmgr.

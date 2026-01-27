@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 func TestResult(t *testing.T) {

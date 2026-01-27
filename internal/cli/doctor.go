@@ -11,10 +11,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/internal/cli/output"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
-	"github.com/kevinelliott/agentmgr/pkg/storage"
+	"github.com/kevinelliott/agentmanager/internal/cli/output"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
 // CheckResult represents the result of a health check.

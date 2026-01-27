@@ -4,8 +4,8 @@ package grpc
 import (
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
 )
 
 // Installation represents an installed agent in API format.

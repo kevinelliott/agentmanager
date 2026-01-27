@@ -14,8 +14,8 @@ import (
 	"github.com/progrium/darwinkit/macos/foundation"
 	"github.com/progrium/darwinkit/objc"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
 )
 
 // Apple HIG-compliant design constants

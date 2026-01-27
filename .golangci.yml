@@ -94,7 +94,7 @@ linters-settings:
     min-complexity: 25  # Allow slightly complex test functions
 
   goimports:
-    local-prefixes: github.com/kevinelliott/agentmgr
+    local-prefixes: github.com/kevinelliott/agentmanager
 
   govet:
     enable-all: true

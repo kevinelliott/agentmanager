@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kevinelliott/agentmgr/internal/cli"
-	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmanager/internal/cli"
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // Version information (set by build flags)

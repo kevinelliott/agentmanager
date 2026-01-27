@@ -1,8 +1,8 @@
 package detector
 
 import (
-	"github.com/kevinelliott/agentmgr/pkg/detector/strategies"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/detector/strategies"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // NewBinaryStrategy creates a new binary detection strategy.

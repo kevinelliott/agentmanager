@@ -3,7 +3,7 @@ package tui
 import (
 	"testing"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 func TestViewConstants(t *testing.T) {

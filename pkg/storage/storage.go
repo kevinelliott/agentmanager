@@ -5,7 +5,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 // Store defines the storage interface for agent data.

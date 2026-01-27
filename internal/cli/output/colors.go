@@ -9,7 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 
-	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // Printer handles colorized output for CLI commands.

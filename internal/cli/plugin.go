@@ -8,10 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/internal/cli/output"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/detector"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/internal/cli/output"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/detector"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // NewPluginCommand creates the plugin management command group.

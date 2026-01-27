@@ -2,7 +2,7 @@
 
 package systray
 
-import "github.com/kevinelliott/agentmgr/pkg/agent"
+import "github.com/kevinelliott/agentmanager/pkg/agent"
 
 // showNativeSettingsWindow is not available on this platform.
 func (a *App) showNativeSettingsWindow() {

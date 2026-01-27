@@ -3,9 +3,9 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/internal/tui"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/internal/tui"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // NewTUICommand creates the TUI launch command.

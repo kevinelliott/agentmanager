@@ -4,7 +4,7 @@ package providers
 import (
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 // Result represents the result of an install or update operation.

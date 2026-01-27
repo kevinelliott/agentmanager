@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // NewConfigCommand creates the config management command group.

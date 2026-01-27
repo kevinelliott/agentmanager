@@ -1,10 +1,10 @@
 # AgentManager (agentmgr)
 
-[![CI](https://github.com/kevinelliott/agentmgr/actions/workflows/ci.yml/badge.svg)](https://github.com/kevinelliott/agentmgr/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/kevinelliott/agentmgr)](https://github.com/kevinelliott/agentmgr/releases)
-[![Go Version](https://img.shields.io/github/go-mod-go-version/kevinelliott/agentmgr)](https://go.dev/)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevinelliott/agentmgr)](https://goreportcard.com/report/github.com/kevinelliott/agentmgr)
-[![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmgr.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmgr)
+[![CI](https://github.com/kevinelliott/agentmanager/actions/workflows/ci.yml/badge.svg)](https://github.com/kevinelliott/agentmanager/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/kevinelliott/agentmanager)](https://github.com/kevinelliott/agentmanager/releases)
+[![Go Version](https://img.shields.io/github/go-mod-go-version/kevinelliott/agentmanager)](https://go.dev/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kevinelliott/agentmanager)](https://goreportcard.com/report/github.com/kevinelliott/agentmanager)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
@@ -26,7 +26,7 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 
 ```bash
 # Clone the repository
-git clone https://github.com/kevinelliott/agentmgr.git
+git clone https://github.com/kevinelliott/agentmanager.git
 cd agentmgr
 
 # Build
@@ -269,9 +269,9 @@ AgentManager can be used as a Go library:
 
 ```go
 import (
-    "github.com/kevinelliott/agentmgr/pkg/detector"
-    "github.com/kevinelliott/agentmgr/pkg/catalog"
-    "github.com/kevinelliott/agentmgr/pkg/installer"
+    "github.com/kevinelliott/agentmanager/pkg/detector"
+    "github.com/kevinelliott/agentmanager/pkg/catalog"
+    "github.com/kevinelliott/agentmanager/pkg/installer"
 )
 
 // Create a detector
