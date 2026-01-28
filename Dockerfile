@@ -1,8 +1,9 @@
 # Build stage
 FROM golang:1.24-alpine AS builder
 
-# Install build dependencies
-RUN apk add --no-cache git gcc musl-dev
+# Install build dependencies including systray requirements
+RUN apk add --no-cache git gcc musl-dev pkgconfig \
+    libayatana-appindicator-dev gtk+3.0-dev
 
 WORKDIR /app
 
@@ -27,7 +28,9 @@ RUN apk add --no-cache \
     git \
     npm \
     python3 \
-    py3-pip
+    py3-pip \
+    libayatana-appindicator \
+    gtk+3.0
 
 # Create non-root user
 RUN adduser -D -h /home/agentmgr agentmgr
