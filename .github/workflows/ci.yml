@@ -22,6 +22,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libayatana-appindicator3-dev
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
@@ -47,14 +52,20 @@ jobs:
       - name: Get dependencies
         run: go mod download
 
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libayatana-appindicator3-dev
+
       - name: Run tests
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
         uses: codecov/codecov-action@v4
         with:
-          file: ./coverage.out
+          file: ./coverage.txt
           flags: unittests
           name: codecov-umbrella
 
@@ -195,6 +206,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
