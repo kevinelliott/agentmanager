@@ -62,26 +62,8 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
 
-  # Helper binary - cross-compile without CGO for Darwin/Windows
-  - id: agentmgr-helper-nocgo
-    main: ./cmd/agentmgr-helper
-    binary: agentmgr-helper
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
-    ignore:
-      - goos: windows
-        goarch: arm64
-    ldflags:
-      - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
+  # Note: agentmgr-helper is not cross-compiled - it requires darwinkit and CGO
+  # For Darwin and Windows, users should build from source or use native builds
 
 archives:
   - id: default
