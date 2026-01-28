@@ -886,6 +886,11 @@ func TestPlatformNameHumanReadable(t *testing.T) {
 }
 
 func TestShowChangelogDialogDoesNotPanic(t *testing.T) {
+	// Skip in CI or headless environments - this test shows a real dialog
+	if os.Getenv("CI") != "" || os.Getenv("GITHUB_ACTIONS") != "" {
+		t.Skip("Skipping interactive dialog test in CI environment")
+	}
+
 	plat := Current()
 
 	result := plat.ShowChangelogDialog("TestAgent", "1.0.0", "2.0.0", "- Bug fixes\n- New features")
@@ -897,6 +902,11 @@ func TestShowChangelogDialogDoesNotPanic(t *testing.T) {
 }
 
 func TestShowNotificationDoesNotPanic(t *testing.T) {
+	// Skip in CI - requires display/notification system
+	if os.Getenv("CI") != "" || os.Getenv("GITHUB_ACTIONS") != "" {
+		t.Skip("Skipping notification test in CI environment")
+	}
+
 	plat := Current()
 
 	_ = plat.ShowNotification("Test Title", "Test Message")
