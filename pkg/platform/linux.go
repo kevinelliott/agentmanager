@@ -36,7 +36,7 @@ func (l *linuxPlatform) GetDataDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", "agentmgr")
+		return os.TempDir() + "/agentmgr"
 	}
 	return filepath.Join(home, ".local", "share", "agentmgr")
 }
@@ -47,7 +47,7 @@ func (l *linuxPlatform) GetConfigDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", "agentmgr")
+		return os.TempDir() + "/agentmgr"
 	}
 	return filepath.Join(home, ".config", "agentmgr")
 }
@@ -58,7 +58,7 @@ func (l *linuxPlatform) GetCacheDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", "agentmgr", "cache")
+		return os.TempDir() + "/agentmgr/cache"
 	}
 	return filepath.Join(home, ".cache", "agentmgr")
 }
@@ -85,9 +85,11 @@ func (l *linuxPlatform) EnableAutoStart(ctx context.Context) error {
 }
 
 func (l *linuxPlatform) DisableAutoStart(ctx context.Context) error {
-	// Try both methods
-	_ = l.disableSystemdAutoStart(ctx)
-	_ = l.disableXDGAutoStart()
+	// Try both methods - errors are intentionally ignored as we want to attempt both
+	//nolint:errcheck
+	l.disableSystemdAutoStart(ctx)
+	//nolint:errcheck
+	l.disableXDGAutoStart()
 	return nil
 }
 
@@ -162,7 +164,7 @@ func (l *linuxPlatform) getSystemdUserDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", "systemd", "user")
+		return os.TempDir() + "/systemd/user"
 	}
 	return filepath.Join(home, ".config", "systemd", "user")
 }
@@ -209,7 +211,7 @@ func (l *linuxPlatform) getXDGAutostartDir() string {
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return filepath.Join("/tmp", "autostart")
+		return os.TempDir() + "/autostart"
 	}
 	return filepath.Join(home, ".config", "autostart")
 }

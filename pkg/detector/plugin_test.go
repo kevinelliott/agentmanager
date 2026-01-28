@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -99,6 +100,9 @@ func TestPluginStrategy_IsApplicable(t *testing.T) {
 }
 
 func TestPluginStrategy_Detect_WithScript(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping test on Windows - requires /bin/sh")
+	}
 	cfg := PluginConfig{
 		Name:         "echo-plugin",
 		Method:       "custom",
@@ -136,6 +140,9 @@ func TestPluginStrategy_Detect_WithScript(t *testing.T) {
 }
 
 func TestPluginStrategy_Detect_WithAgentFilter(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping test on Windows - requires /bin/sh")
+	}
 	cfg := PluginConfig{
 		Name:         "filter-plugin",
 		Method:       "custom",
