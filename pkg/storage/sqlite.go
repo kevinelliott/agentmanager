@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -29,6 +30,12 @@ func NewSQLiteStore(dataDir string) (*SQLiteStore, error) {
 
 // Initialize opens the database and runs migrations.
 func (s *SQLiteStore) Initialize(ctx context.Context) error {
+	// Ensure the data directory exists
+	dir := filepath.Dir(s.dbPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+
 	db, err := sql.Open("sqlite3", s.dbPath+"?_journal_mode=WAL&_foreign_keys=ON")
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
