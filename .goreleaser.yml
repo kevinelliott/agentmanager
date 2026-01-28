@@ -9,14 +9,30 @@ before:
     - go generate ./...
 
 builds:
-  # CLI binary
-  - id: agentmgr
+  # CLI binary - Linux only (CGO required for systray)
+  - id: agentmgr-linux
     main: ./cmd/agentmgr
     binary: agentmgr
     env:
       - CGO_ENABLED=1
     goos:
       - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  # CLI binary - cross-compile without CGO for Darwin/Windows
+  - id: agentmgr-nocgo
+    main: ./cmd/agentmgr
+    binary: agentmgr
+    env:
+      - CGO_ENABLED=0
+    goos:
       - darwin
       - windows
     goarch:
@@ -31,14 +47,30 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
 
-  # Helper binary
-  - id: agentmgr-helper
+  # Helper binary - Linux only (CGO required for systray)
+  - id: agentmgr-helper-linux
     main: ./cmd/agentmgr-helper
     binary: agentmgr-helper
     env:
       - CGO_ENABLED=1
     goos:
       - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  # Helper binary - cross-compile without CGO for Darwin/Windows
+  - id: agentmgr-helper-nocgo
+    main: ./cmd/agentmgr-helper
+    binary: agentmgr-helper
+    env:
+      - CGO_ENABLED=0
+    goos:
       - darwin
       - windows
     goarch:
