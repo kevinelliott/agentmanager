@@ -34,7 +34,10 @@ func (l *linuxPlatform) GetDataDir() string {
 	if xdgData := os.Getenv("XDG_DATA_HOME"); xdgData != "" {
 		return filepath.Join(xdgData, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", "agentmgr")
+	}
 	return filepath.Join(home, ".local", "share", "agentmgr")
 }
 
@@ -42,7 +45,10 @@ func (l *linuxPlatform) GetConfigDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", "agentmgr")
+	}
 	return filepath.Join(home, ".config", "agentmgr")
 }
 
@@ -50,7 +56,10 @@ func (l *linuxPlatform) GetCacheDir() string {
 	if xdgCache := os.Getenv("XDG_CACHE_HOME"); xdgCache != "" {
 		return filepath.Join(xdgCache, "agentmgr")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", "agentmgr", "cache")
+	}
 	return filepath.Join(home, ".cache", "agentmgr")
 }
 
@@ -77,15 +86,16 @@ func (l *linuxPlatform) EnableAutoStart(ctx context.Context) error {
 
 func (l *linuxPlatform) DisableAutoStart(ctx context.Context) error {
 	// Try both methods
-	l.disableSystemdAutoStart(ctx)
-	l.disableXDGAutoStart()
+	_ = l.disableSystemdAutoStart(ctx)
+	_ = l.disableXDGAutoStart()
 	return nil
 }
 
 func (l *linuxPlatform) IsAutoStartEnabled(ctx context.Context) (bool, error) {
 	// Check systemd
 	if l.hasSystemd() {
-		if enabled, _ := l.isSystemdEnabled(ctx); enabled {
+		enabled, err := l.isSystemdEnabled(ctx)
+		if err == nil && enabled {
 			return true, nil
 		}
 	}
@@ -150,7 +160,10 @@ func (l *linuxPlatform) getSystemdUserDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "systemd", "user")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", "systemd", "user")
+	}
 	return filepath.Join(home, ".config", "systemd", "user")
 }
 
@@ -194,7 +207,10 @@ func (l *linuxPlatform) getXDGAutostartDir() string {
 	if xdgConfig := os.Getenv("XDG_CONFIG_HOME"); xdgConfig != "" {
 		return filepath.Join(xdgConfig, "autostart")
 	}
-	home, _ := os.UserHomeDir()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filepath.Join("/tmp", "autostart")
+	}
 	return filepath.Join(home, ".config", "autostart")
 }
 
@@ -253,7 +269,7 @@ func (l *linuxPlatform) ShowNotification(title, message string) error {
 	}
 	// Try zenity
 	if _, err := exec.LookPath("zenity"); err == nil {
-		return exec.Command("zenity", "--notification", "--text="+title+"\n"+message).Run()
+		return exec.Command("zenity", "--notification", "--text="+title+"\n"+message).Run() //nolint:gosec // User-provided notification text is intentional
 	}
 	return fmt.Errorf("no notification system available")
 }
@@ -273,7 +289,7 @@ func (l *linuxPlatform) ShowChangelogDialog(agentName, fromVer, toVer, changelog
 func (l *linuxPlatform) showZenityDialog(agentName, fromVer, toVer, changelog string) DialogResult {
 	text := fmt.Sprintf("%s\n\n%s → %s\n\n%s", agentName, fromVer, toVer, changelog)
 
-	cmd := exec.Command("zenity", "--question",
+	cmd := exec.Command("zenity", "--question", //nolint:gosec // User-provided dialog text is intentional
 		"--title=Update Available",
 		"--text="+text,
 		"--ok-label=Update Now",
