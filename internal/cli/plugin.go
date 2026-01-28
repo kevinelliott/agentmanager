@@ -198,7 +198,7 @@ Environment variables available to the script:
 	cmd.Flags().StringVarP(&method, "method", "m", "custom", "installation method this plugin detects")
 	cmd.Flags().StringVarP(&description, "description", "d", "", "plugin description")
 	cmd.Flags().StringVarP(&script, "script", "s", "", "inline detection script")
-	cmd.Flags().StringVarP(&command, "command", "c", "", "external detection command")
+	cmd.Flags().StringVarP(&command, "command", "x", "", "external detection command")
 	cmd.Flags().StringSliceVar(&platforms, "platforms", nil, "supported platforms (darwin, linux, windows)")
 	cmd.Flags().StringSliceVar(&agentFilter, "agents", nil, "agent IDs to handle (empty = all)")
 
