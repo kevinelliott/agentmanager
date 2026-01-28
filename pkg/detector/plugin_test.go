@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 func TestPluginStrategy_Name(t *testing.T) {

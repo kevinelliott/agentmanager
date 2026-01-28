@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 func setupTestStore(t *testing.T) (*SQLiteStore, func()) {

@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/storage"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
 // mockStore implements storage.Store for testing

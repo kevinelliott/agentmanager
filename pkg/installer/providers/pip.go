@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // PipProvider handles pip/pipx/uv-based installations.

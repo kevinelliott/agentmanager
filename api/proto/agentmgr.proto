@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package agentmgr.v1;
 
-option go_package = "github.com/kevinelliott/agentmgr/pkg/api/grpc/pb";
+option go_package = "github.com/kevinelliott/agentmanager/pkg/api/grpc/pb";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";

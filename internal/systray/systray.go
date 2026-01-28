@@ -14,15 +14,15 @@ import (
 
 	"github.com/getlantern/systray"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/api/rest"
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/detector"
-	"github.com/kevinelliott/agentmgr/pkg/installer"
-	"github.com/kevinelliott/agentmgr/pkg/ipc"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
-	"github.com/kevinelliott/agentmgr/pkg/storage"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/api/rest"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/detector"
+	"github.com/kevinelliott/agentmanager/pkg/installer"
+	"github.com/kevinelliott/agentmanager/pkg/ipc"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
 // String constants for repeated values.

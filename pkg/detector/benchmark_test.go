@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // BenchmarkDetectorDetectAll benchmarks the full detection pipeline.

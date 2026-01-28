@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
 
 // SQLiteStore implements Store using SQLite.

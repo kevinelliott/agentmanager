@@ -3,7 +3,7 @@
 package ipc
 
 import (
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // DefaultSocketPath returns the default IPC socket/pipe path for the current platform.

@@ -12,13 +12,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/kevinelliott/agentmgr/pkg/agent"
-	"github.com/kevinelliott/agentmgr/pkg/catalog"
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/detector"
-	"github.com/kevinelliott/agentmgr/pkg/installer"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
-	"github.com/kevinelliott/agentmgr/pkg/storage"
+	"github.com/kevinelliott/agentmanager/pkg/agent"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/detector"
+	"github.com/kevinelliott/agentmanager/pkg/installer"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
 // Server is the REST API server.

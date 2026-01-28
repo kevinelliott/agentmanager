@@ -11,9 +11,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/pkg/config"
-	"github.com/kevinelliott/agentmgr/pkg/ipc"
-	"github.com/kevinelliott/agentmgr/pkg/platform"
+	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/ipc"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // NewHelperCommand creates the helper management command group.

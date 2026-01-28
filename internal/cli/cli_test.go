@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/kevinelliott/agentmgr/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // findSubcommand returns a subcommand by name, or nil if not found.
