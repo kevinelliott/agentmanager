@@ -150,12 +150,11 @@ brews:
     homepage: "https://github.com/kevinelliott/agentmanager"
     description: "CLI tool for managing AI development agents"
     license: "MIT"
-    skip_upload: auto
+    skip_upload: true
     test: |
       system "#{bin}/agentmgr", "version"
     install: |
       bin.install "agentmgr"
-      bin.install "agentmgr-helper"
 
 nfpms:
   - id: packages
