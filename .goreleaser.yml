@@ -76,6 +76,7 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+    allow_different_binary_count: true
     files:
       - LICENSE*
       - README*
