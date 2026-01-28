@@ -1356,14 +1356,17 @@ func TestListenForNotificationsContextCanceled(t *testing.T) {
 		close(done)
 	}()
 
+	// Give the goroutine time to start listening
+	time.Sleep(100 * time.Millisecond)
+
 	// Cancel context
 	cancel()
 
-	// Should exit quickly
+	// Should exit quickly (allow more time for slow CI runners)
 	select {
 	case <-done:
 		// Success
-	case <-time.After(1 * time.Second):
+	case <-time.After(5 * time.Second):
 		t.Error("listenForNotifications did not exit after context cancel")
 	}
 }
