@@ -1,5 +1,5 @@
 {
-  "version": "1.0.10",
+  "version": "1.0.11",
   "schema_version": 1,
   "last_updated": "2026-01-10T00:00:00Z",
   "agents": {
@@ -894,6 +894,75 @@
       "metadata": {
         "vendor": "Juno AI INC.",
         "license": "MIT"
+      }
+    },
+    "kimi-code": {
+      "id": "kimi-code",
+      "name": "Kimi Code",
+      "description": "AI terminal agent for software development and shell operations",
+      "homepage": "https://www.kimi.com/code",
+      "repository": "https://github.com/MoonshotAI/kimi-cli",
+      "documentation": "https://moonshotai.github.io/kimi-cli/en/guides/getting-started.html",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -L code.kimi.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "uv": {
+          "method": "uv",
+          "package": "kimi-cli",
+          "command": "uv tool install kimi-cli",
+          "update_cmd": "uv tool upgrade kimi-cli",
+          "uninstall_cmd": "uv tool uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv", "python>=3.12"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "kimi-cli",
+          "command": "pip install kimi-cli",
+          "update_cmd": "pip install --upgrade kimi-cli",
+          "uninstall_cmd": "pip uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.12"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "kimi-cli",
+          "command": "pipx install kimi-cli",
+          "update_cmd": "pipx upgrade kimi-cli",
+          "uninstall_cmd": "pipx uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx", "python>=3.12"]
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://github.com/MoonshotAI/kimi-cli/releases",
+            "artifact_darwin_arm64": "kimi-VERSION-aarch64-apple-darwin.tar.gz",
+            "artifact_linux_arm64": "kimi-VERSION-aarch64-unknown-linux-gnu.tar.gz",
+            "artifact_windows_amd64": "kimi-VERSION-x86_64-pc-windows-msvc.zip"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["kimi"],
+        "version_cmd": "kimi --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/MoonshotAI/kimi-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Moonshot AI",
+        "license": "Apache-2.0"
       }
     },
     "kilocode-cli": {
