@@ -46,13 +46,13 @@ func (m *Manager) Install(ctx context.Context, agentDef catalog.AgentDef, method
 		}
 		return m.pip.Install(ctx, agentDef, method, force)
 
-	case "brew":
+	case "brew", "brew-cask":
 		if !m.brew.IsAvailable() {
 			return nil, fmt.Errorf("brew is not available")
 		}
 		return m.brew.Install(ctx, agentDef, method, force)
 
-	case "native", "curl", "binary":
+	case "native", "curl", "binary", "bun", "bunx", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
 		return m.native.Install(ctx, agentDef, method, force)
 
 	default:
@@ -63,9 +63,16 @@ func (m *Manager) Install(ctx context.Context, agentDef catalog.AgentDef, method
 // Update updates an installed agent.
 func (m *Manager) Update(ctx context.Context, inst *agent.Installation, agentDef catalog.AgentDef, method catalog.InstallMethodDef) (*providers.Result, error) {
 	switch method.Method {
-	case "npm":
-		if !m.npm.IsAvailable() {
+	case "npm", "bun", "bunx":
+		if method.Method == "npm" && !m.npm.IsAvailable() {
 			return nil, fmt.Errorf("npm is not available")
+		}
+		if (method.Method == "bun" || method.Method == "bunx") && !m.plat.IsExecutableInPath("bun") {
+			return nil, fmt.Errorf("bun is not available")
+		}
+		// bun/bunx use npm-compatible commands, but if they have explicit update_cmd, use native
+		if (method.Method == "bun" || method.Method == "bunx") && method.UpdateCmd != "" {
+			return m.native.Update(ctx, inst, agentDef, method)
 		}
 		return m.npm.Update(ctx, inst, agentDef, method)
 
@@ -75,13 +82,14 @@ func (m *Manager) Update(ctx context.Context, inst *agent.Installation, agentDef
 		}
 		return m.pip.Update(ctx, inst, agentDef, method)
 
-	case "brew":
+	case "brew", "brew-cask":
 		if !m.brew.IsAvailable() {
 			return nil, fmt.Errorf("brew is not available")
 		}
 		return m.brew.Update(ctx, inst, agentDef, method)
 
-	case "native", "curl", "binary":
+	case "native", "curl", "binary", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
+		// All of these use their update_cmd or command directly via the native provider
 		return m.native.Update(ctx, inst, agentDef, method)
 
 	default:
@@ -104,13 +112,13 @@ func (m *Manager) Uninstall(ctx context.Context, inst *agent.Installation, metho
 		}
 		return m.pip.Uninstall(ctx, inst, method)
 
-	case "brew":
+	case "brew", "brew-cask":
 		if !m.brew.IsAvailable() {
 			return fmt.Errorf("brew is not available")
 		}
 		return m.brew.Uninstall(ctx, inst, method)
 
-	case "native", "curl", "binary":
+	case "native", "curl", "binary", "bun", "bunx", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
 		return m.native.Uninstall(ctx, inst, method)
 
 	default:
@@ -143,9 +151,9 @@ func (m *Manager) GetAvailableMethods(agentDef catalog.AgentDef) []catalog.Insta
 			available = m.npm.IsAvailable()
 		case "pip", "pipx", "uv":
 			available = m.pip.IsAvailable()
-		case "brew":
+		case "brew", "brew-cask":
 			available = m.brew.IsAvailable()
-		case "native", "curl", "binary":
+		case "native", "curl", "binary", "bun", "bunx", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
 			available = true
 		}
 
@@ -164,9 +172,9 @@ func (m *Manager) IsMethodAvailable(method string) bool {
 		return m.npm.IsAvailable()
 	case "pip", "pipx", "uv":
 		return m.pip.IsAvailable()
-	case "brew":
+	case "brew", "brew-cask":
 		return m.brew.IsAvailable()
-	case "native", "curl", "binary":
+	case "native", "curl", "binary", "bun", "bunx", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
 		return true
 	default:
 		return false
@@ -188,14 +196,14 @@ func (m *Manager) GetLatestVersion(ctx context.Context, method catalog.InstallMe
 		}
 		return m.pip.GetLatestVersion(ctx, method)
 
-	case "brew":
+	case "brew", "brew-cask":
 		if !m.brew.IsAvailable() {
 			return agent.Version{}, fmt.Errorf("brew is not available")
 		}
 		return m.brew.GetLatestVersion(ctx, method)
 
-	case "native", "curl", "binary":
-		// Native installs don't have a registry to check
+	case "native", "curl", "binary", "bun", "bunx", "cargo", "go", "scoop", "chocolatey", "powershell", "winget", "dmg", "krew", "nix", "git":
+		// These methods don't have a standard registry to check
 		return agent.Version{}, fmt.Errorf("version checking not supported for %s", method.Method)
 
 	default:

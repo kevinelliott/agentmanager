@@ -3,6 +3,7 @@ package providers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -411,6 +412,24 @@ func extractVersionFromPipOutput(output, packageName, manager string) string {
 
 	switch manager {
 	case "pipx":
+		// pipx list --json returns JSON with package version info
+		var pipxData struct {
+			Venvs map[string]struct {
+				Metadata struct {
+					MainPackage struct {
+						PackageVersion string `json:"package_version"`
+					} `json:"main_package"`
+				} `json:"metadata"`
+			} `json:"venvs"`
+		}
+		if err := json.Unmarshal([]byte(output), &pipxData); err == nil {
+			// Try exact match first, then case-insensitive
+			for name, venv := range pipxData.Venvs {
+				if name == packageName || strings.EqualFold(name, packageName) {
+					return venv.Metadata.MainPackage.PackageVersion
+				}
+			}
+		}
 		return ""
 	case "uv":
 		for _, line := range lines {

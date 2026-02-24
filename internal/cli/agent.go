@@ -442,6 +442,7 @@ Use --all to update all agents at once.`,
 			spinner.UpdateMessage("Checking for updates...")
 
 			// Check for latest versions so HasUpdate() works correctly
+			var versionCheckErrors []string
 			for _, installation := range installations {
 				if agentDef, ok := agentDefMap[installation.AgentID]; ok {
 					methodStr := string(installation.Method)
@@ -449,6 +450,8 @@ Use --all to update all agents at once.`,
 						latestVer, err := inst.GetLatestVersion(ctx, method)
 						if err == nil {
 							installation.LatestVersion = &latestVer
+						} else {
+							versionCheckErrors = append(versionCheckErrors, fmt.Sprintf("%s (%s): %v", installation.AgentName, methodStr, err))
 						}
 					}
 				}
@@ -456,8 +459,17 @@ Use --all to update all agents at once.`,
 
 			spinner.Stop()
 
+			// Surface version check failures so users know why updates may not be detected
+			if len(versionCheckErrors) > 0 && !force {
+				printer.Warning("Could not check latest version for %d agent(s):", len(versionCheckErrors))
+				for _, e := range versionCheckErrors {
+					printer.Print("  - %s", e)
+				}
+				printer.Print("")
+			}
+
 			if all {
-				return updateAllAgents(ctx, installations, cat, inst, dryRun, printer)
+				return updateAllAgents(ctx, installations, cat, inst, force, dryRun, printer)
 			}
 
 			if len(args) == 0 {
@@ -477,7 +489,7 @@ Use --all to update all agents at once.`,
 }
 
 // updateAllAgents handles the --all flag to update all agents with available updates.
-func updateAllAgents(ctx context.Context, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, dryRun bool, printer *output.Printer) error {
+func updateAllAgents(ctx context.Context, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
 	styles := printer.Styles()
 
 	spinner := output.NewSpinner(
@@ -488,7 +500,7 @@ func updateAllAgents(ctx context.Context, installations []*agent.Installation, c
 
 	var toUpdate []*agent.Installation
 	for _, installation := range installations {
-		if installation.HasUpdate() {
+		if installation.HasUpdate() || force {
 			toUpdate = append(toUpdate, installation)
 		}
 	}
@@ -602,6 +614,7 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 		return nil
 	}
 
+	var lastErr error
 	for _, installation := range agentInstallations {
 		if !installation.HasUpdate() && !force {
 			continue
@@ -621,13 +634,14 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 
 		result, err := inst.Update(ctx, installation, agentDef, methodDef)
 		if err != nil {
-			spinner.Error(fmt.Sprintf("Failed to update %s", agentDef.Name))
-			return fmt.Errorf("update failed: %w", err)
+			spinner.Error(fmt.Sprintf("Failed to update %s via %s: %v", agentDef.Name, installation.Method, err))
+			lastErr = err
+			continue
 		}
 		spinner.Success(fmt.Sprintf("Updated %s to %s", agentDef.Name, result.Version.String()))
 	}
 
-	return nil
+	return lastErr
 }
 
 func newAgentInfoCommand(cfg *config.Config) *cobra.Command {
