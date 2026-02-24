@@ -1,5 +1,5 @@
 {
-  "version": "1.0.16",
+  "version": "1.0.17",
   "schema_version": 1,
   "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
@@ -739,6 +739,78 @@
       "metadata": {
         "vendor": "Alibaba",
         "license": "Proprietary"
+      }
+    },
+    "ra-aid": {
+      "id": "ra-aid",
+      "name": "RA.Aid",
+      "description": "Autonomous software development agent with research, planning, and implementation",
+      "homepage": "https://docs.ra-aid.ai/",
+      "repository": "https://github.com/ai-christianson/RA.Aid",
+      "documentation": "https://docs.ra-aid.ai/quickstart/installation/",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "ra-aid",
+          "command": "pip install ra-aid",
+          "update_cmd": "pip install --upgrade ra-aid",
+          "uninstall_cmd": "pip uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "ra-aid",
+          "command": "pipx install ra-aid",
+          "update_cmd": "pipx upgrade ra-aid",
+          "uninstall_cmd": "pipx uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "ra-aid",
+          "command": "uv pip install ra-aid",
+          "update_cmd": "uv pip install --upgrade ra-aid",
+          "uninstall_cmd": "uv pip uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "ra-aid",
+          "command": "brew tap ai-christianson/homebrew-ra-aid && brew install ra-aid",
+          "update_cmd": "brew upgrade ra-aid",
+          "uninstall_cmd": "brew uninstall ra-aid",
+          "platforms": ["darwin"],
+          "metadata": {
+            "tap": "ai-christianson/homebrew-ra-aid"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["ra-aid"],
+        "version_cmd": "ra-aid --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show ra-aid",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list ra-aid",
+            "paths": ["/opt/homebrew/bin/ra-aid", "/usr/local/bin/ra-aid"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ai-christianson/RA.Aid/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ai-christianson",
+        "license": "Apache-2.0"
       }
     },
     "rallies-cli": {
