@@ -1,5 +1,5 @@
 {
-  "version": "1.0.14",
+  "version": "1.0.15",
   "schema_version": 1,
   "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
@@ -1449,6 +1449,46 @@
       "metadata": {
         "vendor": "SMTG AI",
         "license": "AGPL-3.0"
+      }
+    },
+    "cline-cli": {
+      "id": "cline-cli",
+      "name": "Cline CLI",
+      "description": "Open-source AI coding agent with Plan/Act modes, MCP, and ACP support",
+      "homepage": "https://cline.bot/cli",
+      "repository": "https://github.com/cline/cline",
+      "documentation": "https://docs.cline.bot/cline-cli/getting-started",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "cline",
+          "command": "npm install -g cline",
+          "update_cmd": "npm update -g cline",
+          "uninstall_cmd": "npm uninstall -g cline",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 20"]
+        }
+      },
+      "detection": {
+        "executables": ["cline"],
+        "version_cmd": "cline version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g cline --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/cline/cline/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Cline Bot Inc.",
+        "license": "Apache-2.0"
       }
     },
     "deepseek-cli": {
