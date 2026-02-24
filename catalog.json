@@ -1,5 +1,5 @@
 {
-  "version": "1.0.12",
+  "version": "1.0.13",
   "schema_version": 1,
   "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
@@ -456,6 +456,56 @@
       "metadata": {
         "vendor": "Block Inc.",
         "license": "Apache-2.0"
+      }
+    },
+    "grok-cli": {
+      "id": "grok-cli",
+      "name": "Grok CLI",
+      "description": "AI agent bringing Grok into your terminal with file ops and MCP tools",
+      "homepage": "https://grokcli.io/",
+      "repository": "https://github.com/superagent-ai/grok-cli",
+      "documentation": "https://github.com/superagent-ai/grok-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@vibe-kit/grok-cli",
+          "command": "npm install -g @vibe-kit/grok-cli",
+          "update_cmd": "npm update -g @vibe-kit/grok-cli",
+          "uninstall_cmd": "npm uninstall -g @vibe-kit/grok-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        },
+        "bun": {
+          "method": "bun",
+          "package": "@vibe-kit/grok-cli",
+          "command": "bun add -g @vibe-kit/grok-cli",
+          "update_cmd": "bun add -g @vibe-kit/grok-cli",
+          "uninstall_cmd": "bun remove -g @vibe-kit/grok-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Bun >= 1.0"]
+        }
+      },
+      "detection": {
+        "executables": ["grok"],
+        "version_cmd": "grok --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @vibe-kit/grok-cli --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/superagent-ai/grok-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Superagent AI",
+        "license": "MIT"
       }
     },
     "gemini-cli": {
