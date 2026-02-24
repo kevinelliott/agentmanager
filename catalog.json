@@ -1,7 +1,7 @@
 {
-  "version": "1.0.11",
+  "version": "1.0.12",
   "schema_version": 1,
-  "last_updated": "2026-01-10T00:00:00Z",
+  "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -218,6 +218,77 @@
       "metadata": {
         "vendor": "Bas Nijholt",
         "license": "MIT"
+      }
+    },
+    "aichat": {
+      "id": "aichat",
+      "name": "AIChat",
+      "description": "All-in-one LLM CLI with shell assistant, RAG, AI agents, and 20+ providers",
+      "homepage": "https://github.com/sigoden/aichat",
+      "repository": "https://github.com/sigoden/aichat",
+      "documentation": "https://github.com/sigoden/aichat/wiki",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "aichat",
+          "command": "brew install aichat",
+          "update_cmd": "brew upgrade aichat",
+          "uninstall_cmd": "brew uninstall aichat",
+          "platforms": ["darwin", "linux"]
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "aichat",
+          "command": "cargo install aichat",
+          "update_cmd": "cargo install aichat",
+          "uninstall_cmd": "cargo uninstall aichat",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "artifact_darwin_arm64": "aichat-{version}-aarch64-apple-darwin.tar.gz",
+            "artifact_darwin_x64": "aichat-{version}-x86_64-apple-darwin.tar.gz",
+            "artifact_linux_arm64": "aichat-{version}-aarch64-unknown-linux-musl.tar.gz",
+            "artifact_linux_x64": "aichat-{version}-x86_64-unknown-linux-musl.tar.gz",
+            "artifact_windows_x64": "aichat-{version}-x86_64-pc-windows-msvc.zip",
+            "artifact_windows_arm64": "aichat-{version}-aarch64-pc-windows-msvc.zip"
+          }
+        },
+        "scoop": {
+          "method": "scoop",
+          "package": "aichat",
+          "command": "scoop install aichat",
+          "update_cmd": "scoop update aichat",
+          "uninstall_cmd": "scoop uninstall aichat",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["aichat"],
+        "version_cmd": "aichat --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list aichat",
+            "paths": ["/opt/homebrew/bin/aichat", "/usr/local/bin/aichat"]
+          },
+          "cargo": {
+            "check_cmd": "cargo install --list | grep aichat",
+            "paths": ["~/.cargo/bin/aichat"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sigoden/aichat/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "sigoden",
+        "license": "Apache-2.0 OR MIT"
       }
     },
     "aider": {
