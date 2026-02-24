@@ -1,5 +1,5 @@
 {
-  "version": "1.0.17",
+  "version": "1.0.18",
   "schema_version": 1,
   "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
@@ -1360,6 +1360,53 @@
       },
       "metadata": {
         "vendor": "Mario Zechner",
+        "license": "MIT"
+      }
+    },
+    "pi-agent-rust": {
+      "id": "pi-agent-rust",
+      "name": "Pi Agent Rust",
+      "description": "High-performance Rust port of Pi Agent with single binary and instant startup",
+      "homepage": "https://github.com/Dicklesworthstone/pi_agent_rust",
+      "repository": "https://github.com/Dicklesworthstone/pi_agent_rust",
+      "documentation": "https://github.com/Dicklesworthstone/pi_agent_rust#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/pi_agent_rust/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "artifact_darwin": "pi",
+            "artifact_linux_x64": "pi-linux-x86_64.tar.xz"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["pi"],
+        "version_cmd": "pi --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "check_cmd": "which pi",
+            "paths": ["/usr/local/bin/pi", "~/.local/bin/pi"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/pi_agent_rust/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Jeff Emanuel",
         "license": "MIT"
       }
     },
