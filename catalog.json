@@ -1,5 +1,5 @@
 {
-  "version": "1.0.13",
+  "version": "1.0.14",
   "schema_version": 1,
   "last_updated": "2026-02-23T00:00:00Z",
   "agents": {
@@ -1124,6 +1124,46 @@
       },
       "metadata": {
         "vendor": "Kilo",
+        "license": "Apache-2.0"
+      }
+    },
+    "kode-cli": {
+      "id": "kode-cli",
+      "name": "Kode CLI",
+      "description": "AI-powered terminal agent for coding, commands, and post-human workflows",
+      "homepage": "https://github.com/shareAI-lab/Kode-cli",
+      "repository": "https://github.com/shareAI-lab/Kode-cli",
+      "documentation": "https://github.com/shareAI-lab/Kode-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@shareai-lab/kode",
+          "command": "npm install -g @shareai-lab/kode",
+          "update_cmd": "npm update -g @shareai-lab/kode",
+          "uninstall_cmd": "npm uninstall -g @shareai-lab/kode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        }
+      },
+      "detection": {
+        "executables": ["kode", "kd", "kwa"],
+        "version_cmd": "kode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @shareai-lab/kode --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/shareAI-lab/Kode-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "shareAI-lab",
         "license": "Apache-2.0"
       }
     },
