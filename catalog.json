@@ -1,7 +1,7 @@
 {
-  "version": "1.0.22",
+  "version": "1.0.24",
   "schema_version": 1,
-  "last_updated": "2026-02-23T00:00:00Z",
+  "last_updated": "2026-02-28T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -1564,6 +1564,46 @@
       },
       "metadata": {
         "vendor": "Google Cloud Platform",
+        "license": "Apache-2.0"
+      }
+    },
+    "mastracode": {
+      "id": "mastracode",
+      "name": "Mastra Code",
+      "description": "Terminal AI coding agent with observational memory, 70+ models, and multi-mode workflows",
+      "homepage": "https://code.mastra.ai/",
+      "repository": "https://github.com/mastra-ai/mastra",
+      "documentation": "https://mastra.ai/docs/mastra-code/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mastracode",
+          "command": "npm install -g mastracode",
+          "update_cmd": "npm update -g mastracode",
+          "uninstall_cmd": "npm uninstall -g mastracode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 22.13.0"]
+        }
+      },
+      "detection": {
+        "executables": ["mastracode"],
+        "version_cmd": "mastracode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g mastracode --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mastra-ai/mastra/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Mastra",
         "license": "Apache-2.0"
       }
     },
