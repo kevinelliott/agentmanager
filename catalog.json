@@ -1,7 +1,7 @@
 {
-  "version": "1.0.24",
+  "version": "1.0.25",
   "schema_version": 1,
-  "last_updated": "2026-02-28T00:00:00Z",
+  "last_updated": "2026-03-26T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -675,6 +675,67 @@
       },
       "metadata": {
         "vendor": "Anomaly",
+        "license": "MIT"
+      }
+    },
+    "openclaw": {
+      "id": "openclaw",
+      "name": "OpenClaw",
+      "description": "Personal AI assistant with multi-channel inbox and multi-agent routing",
+      "homepage": "https://openclaw.ai",
+      "repository": "https://github.com/openclaw/openclaw",
+      "documentation": "https://docs.openclaw.ai",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "openclaw",
+          "command": "npm install -g openclaw",
+          "update_cmd": "npm update -g openclaw",
+          "uninstall_cmd": "npm uninstall -g openclaw",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "openclaw",
+          "command": "brew install openclaw",
+          "update_cmd": "brew upgrade openclaw",
+          "uninstall_cmd": "brew uninstall openclaw",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "Download .dmg from GitHub Releases",
+          "platforms": ["darwin"],
+          "metadata": {
+            "installer_type": "dmg",
+            "download_url": "https://github.com/openclaw/openclaw/releases"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["openclaw"],
+        "version_cmd": "openclaw --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g openclaw --json"
+          },
+          "brew": {
+            "paths": ["/opt/homebrew/Caskroom/openclaw"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openclaw/openclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "OpenClaw",
         "license": "MIT"
       }
     },
@@ -2057,6 +2118,510 @@
       "metadata": {
         "vendor": "OpenAI",
         "license": "Apache-2.0"
+      }
+    },
+    "junie-cli": {
+      "id": "junie-cli",
+      "name": "Junie CLI",
+      "description": "JetBrains LLM-agnostic coding agent for terminal, IDE, and CI/CD",
+      "homepage": "https://junie.jetbrains.com",
+      "repository": "https://github.com/JetBrains/junie",
+      "documentation": "https://junie.jetbrains.com/docs",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@jetbrains/junie",
+          "command": "npm install -g @jetbrains/junie",
+          "update_cmd": "npm update -g @jetbrains/junie",
+          "uninstall_cmd": "npm uninstall -g @jetbrains/junie",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "jetbrains-junie/junie/junie",
+          "command": "brew tap jetbrains-junie/junie && brew install junie",
+          "update_cmd": "brew upgrade junie",
+          "uninstall_cmd": "brew uninstall junie",
+          "platforms": ["darwin"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://junie.jetbrains.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["junie"],
+        "version_cmd": "junie --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @jetbrains/junie --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/JetBrains/junie/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "JetBrains",
+        "license": "Proprietary"
+      }
+    },
+    "mistral-vibe": {
+      "id": "mistral-vibe",
+      "name": "Mistral Vibe",
+      "description": "Minimal CLI coding agent by Mistral powered by Devstral",
+      "homepage": "https://github.com/mistralai/mistral-vibe",
+      "repository": "https://github.com/mistralai/mistral-vibe",
+      "documentation": "https://github.com/mistralai/mistral-vibe#readme",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "mistral-vibe",
+          "command": "pip install mistral-vibe",
+          "update_cmd": "pip install --upgrade mistral-vibe",
+          "uninstall_cmd": "pip uninstall mistral-vibe",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "mistral-vibe",
+          "command": "uv tool install mistral-vibe",
+          "update_cmd": "uv tool upgrade mistral-vibe",
+          "uninstall_cmd": "uv tool uninstall mistral-vibe",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "mistral-vibe",
+          "command": "brew install mistral-vibe",
+          "update_cmd": "brew upgrade mistral-vibe",
+          "uninstall_cmd": "brew uninstall mistral-vibe",
+          "platforms": ["darwin", "linux"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -LsSf https://mistral.ai/vibe/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["vibe"],
+        "version_cmd": "vibe --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show mistral-vibe"
+          },
+          "brew": {
+            "check_cmd": "brew list mistral-vibe"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mistralai/mistral-vibe/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Mistral AI",
+        "license": "Apache-2.0"
+      }
+    },
+    "letta-code": {
+      "id": "letta-code",
+      "name": "Letta Code",
+      "description": "Memory-first coding agent that persists and learns across sessions",
+      "homepage": "https://letta.com",
+      "repository": "https://github.com/letta-ai/letta-code",
+      "documentation": "https://docs.letta.com/letta-code",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@letta-ai/letta-code",
+          "command": "npm install -g @letta-ai/letta-code",
+          "update_cmd": "npm update -g @letta-ai/letta-code",
+          "uninstall_cmd": "npm uninstall -g @letta-ai/letta-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["letta"],
+        "version_cmd": "letta --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @letta-ai/letta-code --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/letta-ai/letta-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Letta",
+        "license": "Apache-2.0"
+      }
+    },
+    "deepagents-cli": {
+      "id": "deepagents-cli",
+      "name": "Deep Agents CLI",
+      "description": "LangChain pre-built terminal coding agent with planning and subagents",
+      "homepage": "https://docs.langchain.com/oss/python/deepagents/overview",
+      "repository": "https://github.com/langchain-ai/deepagents",
+      "documentation": "https://docs.langchain.com/oss/python/deepagents/cli/overview",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "deepagents-cli",
+          "command": "pip install deepagents-cli",
+          "update_cmd": "pip install --upgrade deepagents-cli",
+          "uninstall_cmd": "pip uninstall deepagents-cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "deepagents-cli",
+          "command": "uv tool install deepagents-cli",
+          "update_cmd": "uv tool upgrade deepagents-cli",
+          "uninstall_cmd": "uv tool uninstall deepagents-cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/libs/cli/scripts/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["deepagents", "deepagents-cli"],
+        "version_cmd": "deepagents --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show deepagents-cli"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/langchain-ai/deepagents/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "LangChain",
+        "license": "MIT"
+      }
+    },
+    "trae-agent": {
+      "id": "trae-agent",
+      "name": "Trae Agent",
+      "description": "ByteDance LLM-based agent for software engineering tasks",
+      "homepage": "https://www.trae.ai",
+      "repository": "https://github.com/bytedance/trae-agent",
+      "documentation": "https://github.com/bytedance/trae-agent#readme",
+      "install_methods": {
+        "source": {
+          "method": "source",
+          "command": "git clone https://github.com/bytedance/trae-agent.git && cd trae-agent && uv sync --all-extras",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python3.12", "uv"]
+        }
+      },
+      "detection": {
+        "executables": ["trae-cli"],
+        "version_cmd": "trae-cli --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bytedance/trae-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ByteDance",
+        "license": "MIT"
+      }
+    },
+    "kiro-cli": {
+      "id": "kiro-cli",
+      "name": "Kiro CLI",
+      "description": "AWS AI-powered spec-driven coding agent for the terminal",
+      "homepage": "https://kiro.dev",
+      "documentation": "https://kiro.dev/docs/cli/",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "kiro-cli",
+          "command": "brew install --cask kiro-cli",
+          "update_cmd": "brew upgrade --cask kiro-cli",
+          "uninstall_cmd": "brew uninstall --cask kiro-cli",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://cli.kiro.dev/install | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["kiro-cli", "kiro"],
+        "version_cmd": "kiro-cli version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "paths": ["/opt/homebrew/Caskroom/kiro-cli"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://kiro.dev/docs/cli/",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Amazon Web Services",
+        "license": "Proprietary"
+      }
+    },
+    "forgecode": {
+      "id": "forgecode",
+      "name": "ForgeCode",
+      "description": "AI pair programmer supporting 300+ models, written in Rust",
+      "homepage": "https://forgecode.dev",
+      "repository": "https://github.com/antinomyhq/forgecode",
+      "documentation": "https://github.com/antinomyhq/forgecode#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "forgecode",
+          "command": "npm install -g forgecode",
+          "update_cmd": "npm update -g forgecode",
+          "uninstall_cmd": "npm uninstall -g forgecode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://forgecode.dev/cli | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["forge"],
+        "version_cmd": "forge --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g forgecode --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/antinomyhq/forgecode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Antinomy HQ",
+        "license": "Apache-2.0"
+      }
+    },
+    "hermes-agent": {
+      "id": "hermes-agent",
+      "name": "Hermes Agent",
+      "description": "Self-improving AI agent with learning loop and multi-channel gateway",
+      "homepage": "https://hermes-agent.nousresearch.com",
+      "repository": "https://github.com/NousResearch/hermes-agent",
+      "documentation": "https://hermes-agent.nousresearch.com/docs/",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "source": {
+          "method": "source",
+          "command": "git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git && cd hermes-agent && uv venv venv --python 3.11 && source venv/bin/activate && uv pip install -e '.[all,dev]'",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python3.11", "uv"]
+        }
+      },
+      "detection": {
+        "executables": ["hermes", "hermes-agent"],
+        "version_cmd": "hermes version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/NousResearch/hermes-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Nous Research",
+        "license": "MIT"
+      }
+    },
+    "roo-code-cli": {
+      "id": "roo-code-cli",
+      "name": "Roo Code CLI",
+      "description": "Multi-mode AI coding agent for the terminal by Roo Code",
+      "homepage": "https://roocode.com",
+      "repository": "https://github.com/RooCodeInc/Roo-Code",
+      "documentation": "https://docs.roocode.com",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/RooCodeInc/Roo-Code/main/apps/cli/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["roo"],
+        "version_cmd": "roo --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/RooCodeInc/Roo-Code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Roo Code Inc.",
+        "license": "Apache-2.0"
+      }
+    },
+    "tabnine-cli": {
+      "id": "tabnine-cli",
+      "name": "Tabnine CLI",
+      "description": "Enterprise AI coding agent for the terminal with autonomous mode",
+      "homepage": "https://www.tabnine.com",
+      "documentation": "https://docs.tabnine.com/main/getting-started/tabnine-cli",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl $TABNINE_HOST/update/cli/installer.mjs | node --input-type=module - $TABNINE_HOST",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["node22"],
+          "metadata": {
+            "installer_type": "node_script",
+            "requires_tabnine_host": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["tabnine"],
+        "version_cmd": "tabnine --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://docs.tabnine.com/main/getting-started/tabnine-cli",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Tabnine",
+        "license": "Proprietary"
+      }
+    },
+    "cortex-code": {
+      "id": "cortex-code",
+      "name": "Cortex Code",
+      "description": "Snowflake-native AI coding agent for data engineering and analytics",
+      "homepage": "https://www.snowflake.com/en/product/features/cortex-code/",
+      "documentation": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["cortex"],
+        "version_cmd": "cortex --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Snowflake",
+        "license": "Proprietary"
+      }
+    },
+    "fetchcoder": {
+      "id": "fetchcoder",
+      "name": "FetchCoder",
+      "description": "AI coding agent powered by ASI1 with MCP and Agentverse integration",
+      "homepage": "https://innovationlab.fetch.ai/resources/docs/fetchcoder/overview",
+      "repository": "https://github.com/fetchai/fetchcoder",
+      "documentation": "https://innovationlab.fetch.ai/resources/docs/fetchcoder/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@fetchai/fetchcoder",
+          "command": "npm install -g @fetchai/fetchcoder",
+          "update_cmd": "npm update -g @fetchai/fetchcoder",
+          "uninstall_cmd": "npm uninstall -g @fetchai/fetchcoder",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["fetchcoder"],
+        "version_cmd": "fetchcoder --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @fetchai/fetchcoder --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/fetchai/fetchcoder/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Fetch.ai",
+        "license": "MIT"
       }
     }
   }
