@@ -1,5 +1,5 @@
 {
-  "version": "1.0.26",
+  "version": "1.0.27",
   "schema_version": 1,
   "last_updated": "2026-03-28T00:00:00Z",
   "agents": {
@@ -2156,6 +2156,135 @@
       "metadata": {
         "vendor": "OpenAI",
         "license": "Apache-2.0"
+      }
+    },
+    "forge-cli": {
+      "id": "forge-cli",
+      "name": "Forge CLI",
+      "description": "Multi-agent TDD orchestrator that drives Claude Code with 6 agents",
+      "homepage": "https://redgreenlabs.github.io/forge-cli/",
+      "repository": "https://github.com/redgreenlabs/forge-cli",
+      "documentation": "https://redgreenlabs.github.io/forge-cli/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@redgreen-labs/forge-cli",
+          "command": "npm install -g @redgreen-labs/forge-cli",
+          "update_cmd": "npm update -g @redgreen-labs/forge-cli",
+          "uninstall_cmd": "npm uninstall -g @redgreen-labs/forge-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node22", "claude-code"]
+        }
+      },
+      "detection": {
+        "executables": ["forge"],
+        "version_cmd": "forge --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @redgreen-labs/forge-cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/redgreenlabs/forge-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Red Green Labs",
+        "license": "MIT"
+      }
+    },
+    "nono": {
+      "id": "nono",
+      "name": "nono",
+      "description": "Kernel-enforced capability-based sandbox for AI coding agents",
+      "homepage": "https://nono.sh",
+      "repository": "https://github.com/always-further/nono",
+      "documentation": "https://docs.nono.sh",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "nono",
+          "command": "brew install nono",
+          "update_cmd": "brew upgrade nono",
+          "uninstall_cmd": "brew uninstall nono",
+          "platforms": ["darwin", "linux"]
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "nono-cli",
+          "command": "cargo install nono-cli",
+          "update_cmd": "cargo install nono-cli --force",
+          "uninstall_cmd": "cargo uninstall nono-cli",
+          "platforms": ["darwin", "linux"]
+        }
+      },
+      "detection": {
+        "executables": ["nono"],
+        "version_cmd": "nono --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list nono"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/always-further/nono/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Always Further",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcp2cli": {
+      "id": "mcp2cli",
+      "name": "mcp2cli",
+      "description": "Turn any MCP server, OpenAPI spec, or GraphQL into a CLI at runtime",
+      "homepage": "https://github.com/knowsuchagency/mcp2cli",
+      "repository": "https://github.com/knowsuchagency/mcp2cli",
+      "documentation": "https://github.com/knowsuchagency/mcp2cli#readme",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "mcp2cli",
+          "command": "pip install mcp2cli",
+          "update_cmd": "pip install --upgrade mcp2cli",
+          "uninstall_cmd": "pip uninstall mcp2cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "mcp2cli",
+          "command": "uv tool install mcp2cli",
+          "update_cmd": "uv tool upgrade mcp2cli",
+          "uninstall_cmd": "uv tool uninstall mcp2cli",
+          "platforms": ["darwin", "linux", "windows"]
+        }
+      },
+      "detection": {
+        "executables": ["mcp2cli"],
+        "version_cmd": "mcp2cli --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show mcp2cli"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/knowsuchagency/mcp2cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "knowsuchagency",
+        "license": "MIT"
       }
     },
     "junie-cli": {
