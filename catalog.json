@@ -1,7 +1,7 @@
 {
-  "version": "1.0.25",
+  "version": "1.0.26",
   "schema_version": 1,
-  "last_updated": "2026-03-26T00:00:00Z",
+  "last_updated": "2026-03-28T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -1787,6 +1787,44 @@
       },
       "metadata": {
         "vendor": "Martin Gonzalez",
+        "license": "MIT"
+      }
+    },
+    "elevenlabs-cli": {
+      "id": "elevenlabs-cli",
+      "name": "ElevenLabs CLI",
+      "description": "Manage ElevenLabs voice and conversational AI agents as code",
+      "homepage": "https://elevenlabs.io",
+      "repository": "https://github.com/elevenlabs/cli",
+      "documentation": "https://elevenlabs.io/docs/agents-platform/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@elevenlabs/cli",
+          "command": "npm install -g @elevenlabs/cli",
+          "update_cmd": "npm update -g @elevenlabs/cli",
+          "uninstall_cmd": "npm uninstall -g @elevenlabs/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["elevenlabs"],
+        "version_cmd": "elevenlabs --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @elevenlabs/cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/elevenlabs/cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ElevenLabs",
         "license": "MIT"
       }
     },
