@@ -1,5 +1,5 @@
 {
-  "version": "1.0.28",
+  "version": "1.0.29",
   "schema_version": 1,
   "last_updated": "2026-03-28T00:00:00Z",
   "agents": {
@@ -1008,6 +1008,45 @@
       },
       "metadata": {
         "vendor": "Alchemist Studios",
+        "license": "MIT"
+      }
+    },
+    "valyu-cli": {
+      "id": "valyu-cli",
+      "name": "Valyu CLI",
+      "description": "AI-native search CLI for DeepSearch, content extraction, and deep research",
+      "homepage": "https://www.valyu.ai",
+      "repository": "https://github.com/ed3t/valyu-cli",
+      "documentation": "https://docs.valyu.ai/home",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "valyu-cli",
+          "command": "npm install -g valyu-cli",
+          "update_cmd": "npm update -g valyu-cli",
+          "uninstall_cmd": "npm uninstall -g valyu-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        }
+      },
+      "detection": {
+        "executables": ["valyu"],
+        "version_cmd": "valyu --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g valyu-cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ed3t/valyu-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Valyu",
         "license": "MIT"
       }
     },
