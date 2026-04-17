@@ -161,15 +161,18 @@ func cachedLookPath(name string) (string, error) {
 	key := pathEnv + "\x00" + name
 
 	if v, ok := lookPathCache.Load(key); ok {
-		r := v.(lookPathResult)
-		return r.path, r.err
+		if r, ok := v.(lookPathResult); ok {
+			return r.path, r.err
+		}
 	}
 
 	path, err := exec.LookPath(name)
 	// LoadOrStore ensures only one entry wins under races.
 	actual, _ := lookPathCache.LoadOrStore(key, lookPathResult{path: path, err: err})
-	r := actual.(lookPathResult)
-	return r.path, r.err
+	if r, ok := actual.(lookPathResult); ok {
+		return r.path, r.err
+	}
+	return path, err
 }
 
 // resetLookPathCache clears the memoization cache. Intended for tests.

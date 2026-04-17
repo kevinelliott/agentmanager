@@ -646,7 +646,7 @@ func (m Model) settingsView() string {
 			return styles.StatusNotInstalled.Render("Disabled")
 		}(),
 		func() string {
-			if m.config.Catalog.RefreshOnStart {
+			if m.config.Catalog.RefreshOnStart { //nolint:staticcheck // deprecated: retained for backward-compat display
 				return styles.StatusInstalled.Render("Enabled")
 			}
 			return styles.StatusNotInstalled.Render("Disabled")

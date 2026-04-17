@@ -71,7 +71,7 @@ func CheckLatestVersions(
 		}
 
 		g.Go(func() error {
-			// Honour parent context cancellation between dispatches.
+			// Honor parent context cancellation between dispatches.
 			if err := gctx.Err(); err != nil {
 				errs[i] = err
 				return nil //nolint:nilerr // cancellation is recorded per-index, never aborts the group
@@ -90,7 +90,7 @@ func CheckLatestVersions(
 	}
 
 	// We never return a non-nil error from g.Go, so Wait will not fail.
-	_ = g.Wait()
+	_ = g.Wait() //nolint:errcheck // errors are recorded per-index in errs
 	return errs
 }
 

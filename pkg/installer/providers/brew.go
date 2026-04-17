@@ -23,14 +23,14 @@ const brewLatestVersionTTL = 5 * time.Minute
 // brewLatestVersionCache memoizes GetLatestVersion results process-wide.
 // Key format: "<cask?>:<package>" — see brewCacheKey.
 var (
-	brewLatestVersionCache   sync.Map // key -> brewLatestEntry
-	brewLatestVersionOnce    sync.Map // key -> *sync.Once (dedup concurrent lookups)
+	brewLatestVersionCache sync.Map // key -> brewLatestEntry
+	brewLatestVersionOnce  sync.Map // key -> *sync.Once (dedup concurrent lookups)
 )
 
 type brewLatestEntry struct {
-	version   agent.Version
-	err       error
-	cachedAt  time.Time
+	version  agent.Version
+	err      error
+	cachedAt time.Time
 }
 
 func brewCacheKey(pkg string, isCask bool) string {
@@ -256,15 +256,18 @@ func (p *BrewProvider) GetLatestVersion(ctx context.Context, method catalog.Inst
 
 	// Fast path: recently cached value.
 	if v, ok := brewLatestVersionCache.Load(key); ok {
-		entry := v.(brewLatestEntry)
-		if time.Since(entry.cachedAt) < brewLatestVersionTTL {
+		if entry, ok := v.(brewLatestEntry); ok && time.Since(entry.cachedAt) < brewLatestVersionTTL {
 			return entry.version, entry.err
 		}
 	}
 
 	// Coalesce concurrent lookups for the same key.
 	onceI, _ := brewLatestVersionOnce.LoadOrStore(key, &sync.Once{})
-	once := onceI.(*sync.Once)
+	once, ok := onceI.(*sync.Once)
+	if !ok {
+		// Fallback — recompute directly rather than risk a nil-pointer panic.
+		return p.fetchLatestVersionUncached(ctx, packageName, isCask)
+	}
 	once.Do(func() {
 		version, err := p.fetchLatestVersionUncached(ctx, packageName, isCask)
 		brewLatestVersionCache.Store(key, brewLatestEntry{
@@ -279,8 +282,9 @@ func (p *BrewProvider) GetLatestVersion(ctx context.Context, method catalog.Inst
 	// After Do returns, the cache entry is guaranteed to be populated (either
 	// by this goroutine or a concurrent one that used the same Once).
 	if v, ok := brewLatestVersionCache.Load(key); ok {
-		entry := v.(brewLatestEntry)
-		return entry.version, entry.err
+		if entry, ok := v.(brewLatestEntry); ok {
+			return entry.version, entry.err
+		}
 	}
 	// Extremely unlikely fallback — recompute directly.
 	return p.fetchLatestVersionUncached(ctx, packageName, isCask)

@@ -353,7 +353,7 @@ func (a *App) requestShutdown() {
 }
 
 // shutdownWatcher waits for either an explicit shutdown request or the app
-// context to be cancelled, then triggers systray.Quit(). Running Quit via a
+// context to be canceled, then triggers systray.Quit(). Running Quit via a
 // dedicated goroutine instead of a time.Sleep gives the IPC framework a
 // deterministic handshake: the shutdown IPC handler returns its response
 // first, the IPC framework writes it on the wire, and this watcher then
@@ -592,7 +592,7 @@ func (a *App) refreshAgentsWithCache(ctx context.Context, forceRefresh bool) err
 // checkUpdates checks for available updates by re-querying each installed
 // agent's package registry for the latest version.
 //
-// When cfg.Updates.AutoCheck is false, this reverts to the previous behaviour
+// When cfg.Updates.AutoCheck is false, this reverts to the previous behavior
 // of simply recounting HasUpdate() on the already-cached snapshot (used for
 // user-initiated triggers that should not hit the network).
 func (a *App) checkUpdates(ctx context.Context) error {

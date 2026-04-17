@@ -11,10 +11,11 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/sync/singleflight"
+
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/config"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
-	"golang.org/x/sync/singleflight"
 )
 
 // Manager manages the agent catalog.
@@ -100,7 +101,11 @@ func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 	if v == nil {
 		return nil, nil
 	}
-	return v.(*RefreshResult), nil
+	result, ok := v.(*RefreshResult)
+	if !ok {
+		return nil, fmt.Errorf("unexpected singleflight result type %T", v)
+	}
+	return result, nil
 }
 
 // doRefresh is the un-coalesced Refresh implementation. It must only be called

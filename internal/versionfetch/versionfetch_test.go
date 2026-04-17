@@ -173,8 +173,8 @@ func TestCheckLatestVersions_SkipsUnknownAgentOrMethod(t *testing.T) {
 
 	insts := []*agent.Installation{
 		mkInstall("a", "npm"),
-		mkInstall("ghost", "npm"),  // not in defs -> skipped
-		mkInstall("c", "missing"),  // method not in def -> skipped
+		mkInstall("ghost", "npm"), // not in defs -> skipped
+		mkInstall("c", "missing"), // method not in def -> skipped
 	}
 	defs := mkAgentDefs("a", "c")
 
