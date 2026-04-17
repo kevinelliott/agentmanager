@@ -12,6 +12,28 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
+// NoColor returns the single source of truth for "should output be
+// colorless?" given a config and an explicit flag. Callers should use this
+// helper instead of reading cfg.UI.UseColors, NO_COLOR, and --no-color
+// separately, which historically drifted between call sites.
+//
+// Order of precedence (any -> true):
+//   - NO_COLOR environment variable is set to a non-empty value
+//   - --no-color flag (caller passes this as explicitNoColor)
+//   - cfg.UI.UseColors is false
+func NoColor(cfg *config.Config, explicitNoColor bool) bool {
+	if explicitNoColor {
+		return true
+	}
+	if os.Getenv("NO_COLOR") != "" {
+		return true
+	}
+	if cfg != nil && !cfg.UI.UseColors {
+		return true
+	}
+	return false
+}
+
 // Printer handles colorized output for CLI commands.
 type Printer struct {
 	cfg      *config.Config
@@ -47,6 +69,13 @@ func NewPrinter(cfg *config.Config, noColor bool) *Printer {
 	}
 
 	return p
+}
+
+// NoColor returns true if the printer is configured to render without color.
+// Use this to propagate the same setting to spinners and other output helpers,
+// avoiding the need to re-derive from env / config at each call site.
+func (p *Printer) NoColor() bool {
+	return p.noColor
 }
 
 // SetOutput sets the output writer.

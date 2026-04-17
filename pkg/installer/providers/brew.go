@@ -7,12 +7,38 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
+
+// brewLatestVersionTTL bounds how long a cached `brew info --json=v2` result
+// is considered fresh. 5 minutes is a compromise between avoiding repeated
+// forks during a single agent run and still picking up new releases promptly.
+const brewLatestVersionTTL = 5 * time.Minute
+
+// brewLatestVersionCache memoizes GetLatestVersion results process-wide.
+// Key format: "<cask?>:<package>" — see brewCacheKey.
+var (
+	brewLatestVersionCache   sync.Map // key -> brewLatestEntry
+	brewLatestVersionOnce    sync.Map // key -> *sync.Once (dedup concurrent lookups)
+)
+
+type brewLatestEntry struct {
+	version   agent.Version
+	err       error
+	cachedAt  time.Time
+}
+
+func brewCacheKey(pkg string, isCask bool) string {
+	if isCask {
+		return "cask:" + pkg
+	}
+	return "formula:" + pkg
+}
 
 // BrewProvider handles Homebrew-based installations.
 type BrewProvider struct {
@@ -215,12 +241,53 @@ func (p *BrewProvider) getInstalledVersion(ctx context.Context, packageName stri
 }
 
 // GetLatestVersion returns the latest version of a brew package.
+//
+// Results are cached process-wide with a short TTL to avoid re-running
+// `brew info --json=v2 <pkg>` once per agent per refresh. Concurrent callers
+// for the same package coalesce via a per-key sync.Once so only one subprocess
+// is launched at a time.
 func (p *BrewProvider) GetLatestVersion(ctx context.Context, method catalog.InstallMethodDef) (agent.Version, error) {
 	packageName, isCask := p.parseBrewPackage(method)
 	if packageName == "" {
 		return agent.Version{}, fmt.Errorf("could not determine brew package name")
 	}
 
+	key := brewCacheKey(packageName, isCask)
+
+	// Fast path: recently cached value.
+	if v, ok := brewLatestVersionCache.Load(key); ok {
+		entry := v.(brewLatestEntry)
+		if time.Since(entry.cachedAt) < brewLatestVersionTTL {
+			return entry.version, entry.err
+		}
+	}
+
+	// Coalesce concurrent lookups for the same key.
+	onceI, _ := brewLatestVersionOnce.LoadOrStore(key, &sync.Once{})
+	once := onceI.(*sync.Once)
+	once.Do(func() {
+		version, err := p.fetchLatestVersionUncached(ctx, packageName, isCask)
+		brewLatestVersionCache.Store(key, brewLatestEntry{
+			version:  version,
+			err:      err,
+			cachedAt: time.Now(),
+		})
+		// Reset the once so a future TTL-expired call can refetch.
+		brewLatestVersionOnce.Delete(key)
+	})
+
+	// After Do returns, the cache entry is guaranteed to be populated (either
+	// by this goroutine or a concurrent one that used the same Once).
+	if v, ok := brewLatestVersionCache.Load(key); ok {
+		entry := v.(brewLatestEntry)
+		return entry.version, entry.err
+	}
+	// Extremely unlikely fallback — recompute directly.
+	return p.fetchLatestVersionUncached(ctx, packageName, isCask)
+}
+
+// fetchLatestVersionUncached performs the actual `brew info` subprocess call.
+func (p *BrewProvider) fetchLatestVersionUncached(ctx context.Context, packageName string, isCask bool) (agent.Version, error) {
 	args := []string{"info", "--json=v2"}
 	if isCask {
 		args = append(args, "--cask")

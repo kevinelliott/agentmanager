@@ -6,6 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -1318,5 +1323,101 @@ func TestGetStatusWithAgents(t *testing.T) {
 	}
 	if status.UpdatesAvailable != 1 {
 		t.Errorf("UpdatesAvailable = %d, want 1", status.UpdatesAvailable)
+	}
+}
+
+// TestRecoveryUnaryInterceptor exercises recoveryUnaryInterceptor directly
+// to verify that a panic inside a handler becomes a codes.Internal error
+// rather than crashing the process.
+func TestRecoveryUnaryInterceptor(t *testing.T) {
+	panicker := func(ctx context.Context, req interface{}) (interface{}, error) {
+		panic("boom")
+	}
+
+	info := &grpc.UnaryServerInfo{FullMethod: "/test.Service/Panic"}
+
+	resp, err := recoveryUnaryInterceptor(context.Background(), nil, info, panicker)
+	if err == nil {
+		t.Fatal("expected non-nil error from recovered panic")
+	}
+	if resp != nil {
+		t.Errorf("expected nil response, got %v", resp)
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected gRPC status error, got %T: %v", err, err)
+	}
+	if st.Code() != codes.Internal {
+		t.Errorf("code = %s, want Internal", st.Code())
+	}
+}
+
+func TestRecoveryUnaryInterceptor_PassThrough(t *testing.T) {
+	// Handlers that don't panic should be unaffected.
+	ok := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return "ok", nil
+	}
+	info := &grpc.UnaryServerInfo{FullMethod: "/test.Service/Ok"}
+
+	resp, err := recoveryUnaryInterceptor(context.Background(), nil, info, ok)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if s, _ := resp.(string); s != "ok" {
+		t.Errorf("resp = %v, want %q", resp, "ok")
+	}
+}
+
+// fakeServerStream is a minimal grpc.ServerStream for interceptor testing.
+type fakeServerStream struct {
+	ctx context.Context
+}
+
+func (f *fakeServerStream) SetHeader(metadata.MD) error  { return nil }
+func (f *fakeServerStream) SendHeader(metadata.MD) error { return nil }
+func (f *fakeServerStream) SetTrailer(metadata.MD)       {}
+func (f *fakeServerStream) Context() context.Context     { return f.ctx }
+func (f *fakeServerStream) SendMsg(m interface{}) error  { return nil }
+func (f *fakeServerStream) RecvMsg(m interface{}) error  { return nil }
+
+func TestRecoveryStreamInterceptor(t *testing.T) {
+	panicker := func(srv interface{}, ss grpc.ServerStream) error {
+		panic("stream boom")
+	}
+	info := &grpc.StreamServerInfo{FullMethod: "/test.Service/StreamPanic"}
+	ss := &fakeServerStream{ctx: context.Background()}
+
+	err := recoveryStreamInterceptor(nil, ss, info, panicker)
+	if err == nil {
+		t.Fatal("expected error from panic in stream handler")
+	}
+	st, ok := status.FromError(err)
+	if !ok {
+		t.Fatalf("expected gRPC status error, got %T: %v", err, err)
+	}
+	if st.Code() != codes.Internal {
+		t.Errorf("code = %s, want Internal", st.Code())
+	}
+}
+
+// TestServerWithVersionOption verifies that the WithVersion option wires
+// through to GetStatus.
+func TestServerWithVersionOption(t *testing.T) {
+	cat := createTestCatalog()
+	catalogJSON, _ := json.Marshal(cat)
+
+	cfg := newTestConfig()
+	store := &mockStore{catalogData: catalogJSON}
+	plat := &mockPlatform{}
+	catMgr := catalog.NewManager(cfg, store)
+
+	server := NewServer(cfg, plat, store, nil, catMgr, nil, WithVersion("v1.2.3"))
+
+	status, err := server.GetStatus(context.Background())
+	if err != nil {
+		t.Fatalf("GetStatus error: %v", err)
+	}
+	if status.Version != "v1.2.3" {
+		t.Errorf("Version = %q, want %q", status.Version, "v1.2.3")
 	}
 }

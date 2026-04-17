@@ -63,7 +63,7 @@ Examples:
   agentmgr upgrade --check   # Check for updates only
   agentmgr upgrade --force   # Force reinstall even if up to date`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			printer := output.NewPrinter(cfg, noColor)
+			printer := output.NewPrinter(cfg, output.NoColor(cfg, noColor))
 			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 			defer cancel()
 

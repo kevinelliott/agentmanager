@@ -8,8 +8,23 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
 )
+
+// isTerminal reports whether w is a TTY. Falls back to false for non-file writers.
+// Also honors the `TERM=dumb` convention as a belt-and-suspenders check.
+func isTerminal(w io.Writer) bool {
+	f, ok := w.(*os.File)
+	if !ok {
+		return false
+	}
+	if os.Getenv("TERM") == "dumb" {
+		return false
+	}
+	fd := f.Fd()
+	return isatty.IsTerminal(fd) || isatty.IsCygwinTerminal(fd)
+}
 
 // Spinner displays a loading animation in the terminal.
 type Spinner struct {
@@ -21,6 +36,7 @@ type Spinner struct {
 	done     chan struct{}
 	out      io.Writer
 	noColor  bool
+	isTTY    bool
 	style    lipgloss.Style
 }
 
@@ -75,9 +91,20 @@ func NewSpinner(opts ...SpinnerOption) *Spinner {
 		opt(s)
 	}
 
+	// NO_COLOR env var is equivalent to --no-color (honor either signal).
+	if os.Getenv("NO_COLOR") != "" {
+		s.noColor = true
+	}
+
+	// Detect whether the output is attached to a TTY. If not (e.g. piped
+	// output, redirected to file, CI log capture), the spinner must not
+	// render ANSI escape sequences at all — they corrupt non-terminal
+	// consumers.
+	s.isTTY = isTerminal(s.out)
+
 	// Setup style
 	r := lipgloss.NewRenderer(s.out)
-	if s.noColor || os.Getenv("NO_COLOR") != "" {
+	if s.noColor || !s.isTTY {
 		r.SetColorProfile(termenv.Ascii)
 		s.style = r.NewStyle()
 	} else {
@@ -88,9 +115,17 @@ func NewSpinner(opts ...SpinnerOption) *Spinner {
 }
 
 // Start starts the spinner animation.
+//
+// When the output is not a TTY (e.g. piped, redirected, captured in CI),
+// Start is a no-op. This prevents ANSI escape sequences from corrupting
+// downstream consumers.
 func (s *Spinner) Start() {
 	s.mu.Lock()
 	if s.active {
+		s.mu.Unlock()
+		return
+	}
+	if !s.isTTY {
 		s.mu.Unlock()
 		return
 	}
@@ -102,6 +137,9 @@ func (s *Spinner) Start() {
 }
 
 // Stop stops the spinner animation.
+//
+// When the spinner never started (non-TTY path), Stop is a no-op and the
+// clear-line escape sequence is not emitted.
 func (s *Spinner) Stop() {
 	s.mu.Lock()
 	if !s.active {
@@ -113,8 +151,10 @@ func (s *Spinner) Stop() {
 
 	close(s.done)
 
-	// Clear the line
-	fmt.Fprintf(s.out, "\r%s\r", clearLine())
+	// Clear the line (TTY only — safe because Start is a no-op otherwise).
+	if s.isTTY {
+		fmt.Fprintf(s.out, "\r%s\r", clearLine())
+	}
 }
 
 // UpdateMessage updates the spinner message while it's running.

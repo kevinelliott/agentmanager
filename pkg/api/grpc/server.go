@@ -4,13 +4,18 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
+	"runtime/debug"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -20,6 +25,10 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
+
+// maxGRPCMsgBytes is the default message size cap applied to both recv and
+// send directions on the gRPC server.
+const maxGRPCMsgBytes = 16 * 1024 * 1024 // 16 MiB
 
 // Server is the gRPC API server.
 type Server struct {
@@ -39,10 +48,32 @@ type Server struct {
 	startTime   time.Time
 	lastRefresh time.Time
 	lastCheck   time.Time
+	version     string
 
 	// Event subscribers
 	subscribers []chan *AgentEvent
 	subMu       sync.RWMutex
+}
+
+// Option configures a gRPC Server during construction.
+type Option func(*Server)
+
+// WithVersion sets the server version string reported by GetStatus.
+func WithVersion(v string) Option {
+	return func(s *Server) {
+		if v != "" {
+			s.version = v
+		}
+	}
+}
+
+// WithStartTime overrides the server's start time (primarily for tests).
+func WithStartTime(t time.Time) Option {
+	return func(s *Server) {
+		if !t.IsZero() {
+			s.startTime = t
+		}
+	}
 }
 
 // ServerConfig configures the gRPC server.
@@ -61,8 +92,9 @@ func NewServer(
 	det *detector.Detector,
 	cat *catalog.Manager,
 	inst *installer.Manager,
+	opts ...Option,
 ) *Server {
-	return &Server{
+	s := &Server{
 		config:      cfg,
 		platform:    plat,
 		store:       store,
@@ -70,8 +102,37 @@ func NewServer(
 		catalog:     cat,
 		installer:   inst,
 		startTime:   time.Now(),
+		version:     "dev",
 		subscribers: make([]chan *AgentEvent, 0),
 	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
+// recoveryUnaryInterceptor converts panics in handlers into gRPC Internal
+// errors and logs the stack trace via the standard log package.
+func recoveryUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("grpc: panic recovered in %s: %v\n%s", info.FullMethod, r, debug.Stack())
+			err = status.Errorf(codes.Internal, "internal server error")
+		}
+	}()
+	return handler(ctx, req)
+}
+
+// recoveryStreamInterceptor is the streaming counterpart to
+// recoveryUnaryInterceptor.
+func recoveryStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("grpc: panic recovered in stream %s: %v\n%s", info.FullMethod, r, debug.Stack())
+			err = status.Errorf(codes.Internal, "internal server error")
+		}
+	}()
+	return handler(srv, ss)
 }
 
 // Start starts the gRPC server.
@@ -82,8 +143,20 @@ func (s *Server) Start(ctx context.Context, cfg ServerConfig) error {
 	}
 	s.listener = listener
 
-	// Create gRPC server with options
-	opts := []grpc.ServerOption{}
+	// Create gRPC server with hardening options.
+	//   - Keepalive pings keep long-lived IPC connections healthy.
+	//   - Message-size caps bound memory for a single RPC.
+	//   - Recovery interceptors convert handler panics into codes.Internal.
+	opts := []grpc.ServerOption{
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			Time:    30 * time.Second,
+			Timeout: 10 * time.Second,
+		}),
+		grpc.MaxRecvMsgSize(maxGRPCMsgBytes),
+		grpc.MaxSendMsgSize(maxGRPCMsgBytes),
+		grpc.ChainUnaryInterceptor(recoveryUnaryInterceptor),
+		grpc.ChainStreamInterceptor(recoveryStreamInterceptor),
+	}
 
 	// Add TLS support if configured
 	if cfg.TLS && cfg.CertFile != "" && cfg.KeyFile != "" {
@@ -558,7 +631,7 @@ func (s *Server) GetStatus(ctx context.Context) (*StatusResponse, error) {
 		UpdatesAvailable:   updatesAvailable,
 		LastCatalogRefresh: s.lastRefresh,
 		LastUpdateCheck:    s.lastCheck,
-		Version:            "dev",
+		Version:            s.version,
 	}, nil
 }
 

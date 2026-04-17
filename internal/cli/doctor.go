@@ -55,7 +55,7 @@ Examples:
   agentmgr doctor              # Run all health checks
   agentmgr doctor --verbose    # Show detailed output`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			printer := output.NewPrinter(cfg, noColor)
+			printer := output.NewPrinter(cfg, output.NoColor(cfg, noColor))
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 

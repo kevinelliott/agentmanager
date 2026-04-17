@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os/exec"
 	"strings"
 	"time"
@@ -13,6 +14,12 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
+
+// pypiHTTPClient is a package-level shared client for PyPI metadata lookups.
+// Using a shared client enables connection reuse across repeated calls.
+var pypiHTTPClient = &http.Client{
+	Timeout: 15 * time.Second,
+}
 
 // PipProvider handles pip/pipx/uv-based installations.
 type PipProvider struct {
@@ -353,38 +360,47 @@ func (p *PipProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 }
 
 // getLatestFromPyPI fetches the latest version from PyPI JSON API.
+//
+// Previously this shelled out to `curl`, which forked a subprocess on every
+// call and silently lost context (timeouts / cancellation). The shared
+// http.Client reuses connections and honors ctx.
 func (p *PipProvider) getLatestFromPyPI(ctx context.Context, packageName string) (agent.Version, error) {
-	// Use curl to fetch from PyPI JSON API
 	url := fmt.Sprintf("https://pypi.org/pypi/%s/json", packageName)
-	cmd := exec.CommandContext(ctx, "curl", "-s", url)
-	output, err := cmd.Output()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return agent.Version{}, fmt.Errorf("failed to build PyPI request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "AgentManager/1.0")
+
+	resp, err := pypiHTTPClient.Do(req)
 	if err != nil {
 		return agent.Version{}, fmt.Errorf("failed to fetch from PyPI: %w", err)
 	}
+	defer resp.Body.Close()
 
-	// Simple JSON parsing to extract version
-	// Look for "version": "x.y.z"
-	outputStr := string(output)
-	if idx := strings.Index(outputStr, `"version"`); idx > 0 {
-		rest := outputStr[idx:]
-		if colonIdx := strings.Index(rest, ":"); colonIdx > 0 {
-			rest = rest[colonIdx+1:]
-			rest = strings.TrimSpace(rest)
-			if strings.HasPrefix(rest, `"`) {
-				rest = rest[1:]
-				if endIdx := strings.Index(rest, `"`); endIdx > 0 {
-					versionStr := rest[:endIdx]
-					version, err := agent.ParseVersion(versionStr)
-					if err != nil {
-						return agent.Version{}, err
-					}
-					return version, nil
-				}
-			}
-		}
+	if resp.StatusCode != http.StatusOK {
+		return agent.Version{}, fmt.Errorf("PyPI returned HTTP %d", resp.StatusCode)
 	}
 
-	return agent.Version{}, fmt.Errorf("could not parse PyPI response")
+	var payload struct {
+		Info struct {
+			Version string `json:"version"`
+		} `json:"info"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return agent.Version{}, fmt.Errorf("could not parse PyPI response: %w", err)
+	}
+	if payload.Info.Version == "" {
+		return agent.Version{}, fmt.Errorf("could not parse PyPI response: no version field")
+	}
+
+	version, err := agent.ParseVersion(payload.Info.Version)
+	if err != nil {
+		return agent.Version{}, err
+	}
+	return version, nil
 }
 
 // extractPipPackage extracts the package name from a pip install command.

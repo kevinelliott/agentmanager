@@ -1,3 +1,12 @@
+// SQLite implementation of the Store interface.
+//
+// Migrations are guarded by SQLite's `PRAGMA user_version`. The value
+// currentSchemaVersion represents the most recent schema. On Initialize,
+// migrate() reads PRAGMA user_version; if it already equals
+// currentSchemaVersion, all DDL is skipped. Otherwise the full migration set
+// runs (idempotent via `IF NOT EXISTS`) and user_version is bumped. Future
+// schema changes should increment currentSchemaVersion and append new DDL
+// blocks that bring older databases forward (v1 -> v2 -> ... -> N).
 package storage
 
 import (
@@ -13,6 +22,10 @@ import (
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
+
+// currentSchemaVersion is the latest schema version applied by migrate().
+// Bump this and append migration steps when the schema changes.
+const currentSchemaVersion = 1
 
 // SQLiteStore implements Store using SQLite.
 type SQLiteStore struct {
@@ -36,11 +49,22 @@ func (s *SQLiteStore) Initialize(ctx context.Context) error {
 		return fmt.Errorf("failed to create data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite3", s.dbPath+"?_journal_mode=WAL&_foreign_keys=ON")
+	// DSN tuning:
+	//   _journal_mode=WAL    — concurrent readers while a single writer commits.
+	//   _busy_timeout=5000   — wait up to 5s on a locked DB instead of immediate SQLITE_BUSY.
+	//   _synchronous=NORMAL  — safe with WAL; ~2-3x faster writes vs FULL.
+	//   _foreign_keys=ON     — enforce FK constraints.
+	db, err := sql.Open("sqlite3", s.dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_foreign_keys=ON")
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}
 	s.db = db
+
+	// SQLite works best with a single connection for writers; serialize
+	// everything through Go's pool and keep the connection warm.
+	s.db.SetMaxOpenConns(1)
+	s.db.SetMaxIdleConns(1)
+	s.db.SetConnMaxLifetime(0)
 
 	// Run migrations
 	if err := s.migrate(ctx); err != nil {
@@ -59,9 +83,24 @@ func (s *SQLiteStore) Close() error {
 }
 
 // migrate runs database migrations.
+//
+// The full migration list below is the canonical schema at
+// currentSchemaVersion. Each statement is idempotent (IF NOT EXISTS), so
+// re-applying them is safe — but on a warm DB we skip all DDL when
+// `PRAGMA user_version` already matches currentSchemaVersion, which is much
+// cheaper on startup.
 func (s *SQLiteStore) migrate(ctx context.Context) error {
+	// Fast path: skip DDL entirely when user_version is already current.
+	var userVersion int
+	if err := s.db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&userVersion); err != nil {
+		return fmt.Errorf("failed to read PRAGMA user_version: %w", err)
+	}
+	if userVersion == currentSchemaVersion {
+		return nil
+	}
+
 	migrations := []string{
-		// Schema version tracking
+		// Schema version tracking (legacy table; kept for backward compat).
 		`CREATE TABLE IF NOT EXISTS schema_migrations (
 			version INTEGER PRIMARY KEY,
 			applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -141,6 +180,13 @@ func (s *SQLiteStore) migrate(ctx context.Context) error {
 		if _, err := s.db.ExecContext(ctx, migration); err != nil {
 			return fmt.Errorf("migration failed: %w", err)
 		}
+	}
+
+	// Stamp the schema version. PRAGMA doesn't accept bound parameters, so
+	// we interpolate the integer constant directly (safe: not user input).
+	stampStmt := fmt.Sprintf("PRAGMA user_version = %d", currentSchemaVersion)
+	if _, err := s.db.ExecContext(ctx, stampStmt); err != nil {
+		return fmt.Errorf("failed to set PRAGMA user_version: %w", err)
 	}
 
 	return nil

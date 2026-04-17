@@ -11,11 +11,13 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/getlantern/systray v1.2.2
 	github.com/go-chi/chi/v5 v5.2.3
+	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/muesli/termenv v0.16.0
 	github.com/progrium/darwinkit v0.5.0
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
+	golang.org/x/sync v0.18.0
 	golang.org/x/sys v0.40.0
 	google.golang.org/grpc v1.78.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -43,7 +45,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect

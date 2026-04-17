@@ -115,6 +115,11 @@ func (c *connection) SetDeadline(t time.Time) error {
 	return c.conn.SetDeadline(t)
 }
 
+// SetReadDeadline sets the read deadline on the underlying connection.
+func (c *connection) SetReadDeadline(t time.Time) error {
+	return c.conn.SetReadDeadline(t)
+}
+
 // unixServer implements Server using Unix sockets.
 type unixServer struct {
 	socketPath string
@@ -356,7 +361,14 @@ func (c *unixClient) Connect(ctx context.Context) error {
 }
 
 // listenForNotifications listens for server-pushed notifications.
+//
+// To remain responsive to context cancellation while blocked in a read,
+// we set a short read deadline before each Receive() call. On deadline
+// timeout we re-check ctx.Done() and loop. This keeps shutdown latency
+// bounded to listenPollInterval without busy-spinning.
 func (c *unixClient) listenForNotifications(ctx context.Context) {
+	const listenPollInterval = 500 * time.Millisecond
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -372,8 +384,18 @@ func (c *unixClient) listenForNotifications(ctx context.Context) {
 		conn := c.conn
 		c.mu.RUnlock()
 
+		// Set a short read deadline so a pending Receive() unblocks
+		// periodically and we can observe ctx cancellation.
+		_ = conn.SetReadDeadline(time.Now().Add(listenPollInterval))
+
 		msg, err := conn.Receive()
 		if err != nil {
+			// Deadline-induced timeout: not a real error, just poll ctx.
+			var netErr net.Error
+			if errors.Is(err, os.ErrDeadlineExceeded) ||
+				(errors.As(err, &netErr) && netErr.Timeout()) {
+				continue
+			}
 			if err == io.EOF || errors.Is(err, net.ErrClosed) {
 				c.mu.Lock()
 				c.connected = false
@@ -382,6 +404,10 @@ func (c *unixClient) listenForNotifications(ctx context.Context) {
 			}
 			continue
 		}
+
+		// Reset the deadline after a successful read so future blocking
+		// Receive()s don't inherit a stale timeout from this iteration.
+		_ = conn.SetReadDeadline(time.Time{})
 
 		// Dispatch to subscribers
 		c.subMu.RLock()

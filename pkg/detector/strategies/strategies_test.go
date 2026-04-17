@@ -2,6 +2,7 @@ package strategies
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"testing"
 
@@ -1480,5 +1481,54 @@ func TestIsPackageManagerPath(t *testing.T) {
 				t.Errorf("isPackageManagerPath(%q) = %v, want %v", tt.path, result, tt.expected)
 			}
 		})
+	}
+}
+
+// TestBinaryStrategy_Detect_ParallelPreservesOrder runs Detect against many
+// agents that all resolve to an executable. With parallelization the
+// underlying goroutines finish in non-deterministic order, but the returned
+// slice must still be in input order — callers and dedup logic rely on this.
+func TestBinaryStrategy_Detect_ParallelPreservesOrder(t *testing.T) {
+	plat := newMockPlatform()
+	// Register a bunch of fake executables.
+	const n = 12
+	agents := make([]catalog.AgentDef, 0, n)
+	for i := 0; i < n; i++ {
+		name := fmt.Sprintf("agent-%02d", i)
+		plat.executablePaths[name] = "/usr/local/bin/" + name
+		agents = append(agents, catalog.AgentDef{
+			ID:   name,
+			Name: name,
+			InstallMethods: map[string]catalog.InstallMethodDef{
+				"native": {},
+			},
+			Detection: catalog.DetectionDef{
+				Executables: []string{name},
+				VersionCmd:  "", // skip subprocess; version extraction is a no-op
+			},
+		})
+	}
+
+	strategy := NewBinaryStrategy(plat)
+	ctx := context.Background()
+
+	// Run a few times to give a non-deterministic scheduler a chance to reorder.
+	for iter := 0; iter < 5; iter++ {
+		installations, err := strategy.Detect(ctx, agents)
+		if err != nil {
+			t.Fatalf("Detect() error: %v", err)
+		}
+		if len(installations) != n {
+			t.Fatalf("iter %d: got %d installations, want %d", iter, len(installations), n)
+		}
+		for i, inst := range installations {
+			if inst == nil {
+				t.Fatalf("iter %d: nil installation at index %d", iter, i)
+			}
+			want := fmt.Sprintf("agent-%02d", i)
+			if inst.AgentID != want {
+				t.Errorf("iter %d: index %d AgentID = %q, want %q", iter, i, inst.AgentID, want)
+			}
+		}
 	}
 }

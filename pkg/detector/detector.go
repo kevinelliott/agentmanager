@@ -91,15 +91,22 @@ func (d *Detector) DetectAll(ctx context.Context, agents []catalog.AgentDef) ([]
 	strategies := d.strategies
 	d.mu.RUnlock()
 
-	var wg sync.WaitGroup
-	resultsChan := make(chan []*agent.Installation, len(strategies))
-	errorsChan := make(chan error, len(strategies))
-
+	// Pre-filter applicable strategies so the result/error channel buffers
+	// match the number of goroutines that will actually send (previously
+	// sized to len(strategies), which over-allocated and, on the edge, risked
+	// a mismatch if senders outnumbered the buffer).
+	applicable := make([]Strategy, 0, len(strategies))
 	for _, s := range strategies {
-		if !s.IsApplicable(d.platform) {
-			continue
+		if s.IsApplicable(d.platform) {
+			applicable = append(applicable, s)
 		}
+	}
 
+	var wg sync.WaitGroup
+	resultsChan := make(chan []*agent.Installation, len(applicable))
+	errorsChan := make(chan error, len(applicable))
+
+	for _, s := range applicable {
 		wg.Add(1)
 		go func(strategy Strategy) {
 			defer wg.Done()

@@ -141,7 +141,7 @@ func (w *windowsPlatform) FindExecutable(name string) (string, error) {
 		name = name + ".exe"
 	}
 
-	path, err := exec.LookPath(name)
+	path, err := cachedLookPath(name)
 	if err != nil {
 		return "", fmt.Errorf("executable %q not found: %w", name, err)
 	}
@@ -175,7 +175,7 @@ func (w *windowsPlatform) IsExecutableInPath(name string) bool {
 	if !strings.HasSuffix(strings.ToLower(name), ".exe") {
 		name = name + ".exe"
 	}
-	_, err := exec.LookPath(name)
+	_, err := cachedLookPath(name)
 	return err == nil
 }
 

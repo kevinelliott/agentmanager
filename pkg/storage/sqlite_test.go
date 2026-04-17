@@ -614,3 +614,88 @@ func TestGetSettingNotFound(t *testing.T) {
 		t.Errorf("value should be empty for nonexistent key, got %q", value)
 	}
 }
+
+// TestMigrateStampsUserVersion verifies that Initialize stamps
+// PRAGMA user_version to currentSchemaVersion on a fresh DB.
+func TestMigrateStampsUserVersion(t *testing.T) {
+	store, cleanup := setupTestStore(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	var v int
+	if err := store.db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&v); err != nil {
+		t.Fatalf("read user_version: %v", err)
+	}
+	if v != currentSchemaVersion {
+		t.Errorf("user_version = %d, want %d", v, currentSchemaVersion)
+	}
+}
+
+// TestMigrateSkipsWhenCurrent covers the fast-path: on an already-migrated
+// database, migrate() should not execute any DDL. We prove this by dropping
+// a core table then calling migrate() again; if migrate() ran its DDL the
+// table would come back (CREATE IF NOT EXISTS). With the fast-path, the
+// table stays gone.
+func TestMigrateSkipsWhenCurrent(t *testing.T) {
+	store, cleanup := setupTestStore(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	// user_version is already currentSchemaVersion (set by Initialize).
+	// Drop the installations table behind migrate()'s back.
+	if _, err := store.db.ExecContext(ctx, "DROP TABLE installations"); err != nil {
+		t.Fatalf("drop table: %v", err)
+	}
+
+	// Calling migrate() should short-circuit without recreating it.
+	if err := store.migrate(ctx); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+
+	var name string
+	err := store.db.QueryRowContext(ctx,
+		"SELECT name FROM sqlite_master WHERE type='table' AND name='installations'",
+	).Scan(&name)
+	if err == nil {
+		t.Fatal("installations table should not exist after fast-path migrate")
+	}
+}
+
+// TestMigrateRunsWhenBehind verifies the reverse: when user_version is older
+// than currentSchemaVersion, the full migration set runs and the version is
+// stamped.
+func TestMigrateRunsWhenBehind(t *testing.T) {
+	store, cleanup := setupTestStore(t)
+	defer cleanup()
+	ctx := context.Background()
+
+	// Simulate an older DB by resetting user_version and dropping a table.
+	if _, err := store.db.ExecContext(ctx, "PRAGMA user_version = 0"); err != nil {
+		t.Fatalf("reset user_version: %v", err)
+	}
+	if _, err := store.db.ExecContext(ctx, "DROP TABLE installations"); err != nil {
+		t.Fatalf("drop table: %v", err)
+	}
+
+	if err := store.migrate(ctx); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+
+	// Table should be recreated.
+	var name string
+	err := store.db.QueryRowContext(ctx,
+		"SELECT name FROM sqlite_master WHERE type='table' AND name='installations'",
+	).Scan(&name)
+	if err != nil {
+		t.Fatalf("installations table should be recreated after full migrate: %v", err)
+	}
+
+	// Version should be stamped.
+	var v int
+	if err := store.db.QueryRowContext(ctx, "PRAGMA user_version").Scan(&v); err != nil {
+		t.Fatalf("read user_version: %v", err)
+	}
+	if v != currentSchemaVersion {
+		t.Errorf("user_version = %d, want %d", v, currentSchemaVersion)
+	}
+}

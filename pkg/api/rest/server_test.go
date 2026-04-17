@@ -42,6 +42,13 @@ func (m *mockPlatform) ShowChangelogDialog(a, b, c, d string) platform.DialogRes
 // mockStore implements storage.Store for testing
 type mockStore struct {
 	catalogData []byte
+
+	// detection cache state (used by tests that exercise getAgentsWithCache)
+	detCache       []*agent.Installation
+	detCachedAt    time.Time
+	detSaveCount   int
+	detCacheErr    error
+	detSaveErrHook func([]*agent.Installation) error
 }
 
 func (m *mockStore) Initialize(ctx context.Context) error { return nil }
@@ -73,10 +80,19 @@ func (m *mockStore) GetSetting(ctx context.Context, key string) (string, error) 
 func (m *mockStore) SetSetting(ctx context.Context, key, value string) error    { return nil }
 func (m *mockStore) DeleteSetting(ctx context.Context, key string) error        { return nil }
 func (m *mockStore) SaveDetectionCache(ctx context.Context, installations []*agent.Installation) error {
+	m.detSaveCount++
+	if m.detSaveErrHook != nil {
+		return m.detSaveErrHook(installations)
+	}
+	m.detCache = installations
+	m.detCachedAt = time.Now()
 	return nil
 }
 func (m *mockStore) GetDetectionCache(ctx context.Context) ([]*agent.Installation, time.Time, error) {
-	return nil, time.Time{}, nil
+	if m.detCacheErr != nil {
+		return nil, time.Time{}, m.detCacheErr
+	}
+	return m.detCache, m.detCachedAt, nil
 }
 func (m *mockStore) ClearDetectionCache(ctx context.Context) error { return nil }
 func (m *mockStore) GetDetectionCacheTime(ctx context.Context) (time.Time, error) {
@@ -185,10 +201,25 @@ func TestGetStatusEndpoint(t *testing.T) {
 
 	server.router.ServeHTTP(w, req)
 
-	// Without a detector, the handler panics and Recoverer returns 500
-	// This is expected behavior when detector is nil
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("Status = %d, want %d (without detector)", w.Code, http.StatusInternalServerError)
+	// handleGetStatus tolerates a missing detector by returning an empty
+	// agent list (via getAgentsWithCache), so status is always 200.
+	if w.Code != http.StatusOK {
+		t.Errorf("Status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]interface{}
+	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if running, _ := resp["running"].(bool); !running {
+		t.Error("running should be true")
+	}
+	if agentCount, _ := resp["agent_count"].(float64); agentCount != 0 {
+		t.Errorf("agent_count = %v, want 0 (no detector)", agentCount)
+	}
+	if version, _ := resp["version"].(string); version != "dev" {
+		t.Errorf("version = %q, want %q", version, "dev")
 	}
 }
 
@@ -728,5 +759,93 @@ func TestHandleOpenAPISpecJSON(t *testing.T) {
 
 	if _, ok := response["spec_url"]; !ok {
 		t.Error("response should contain spec_url")
+	}
+}
+
+// makeCachedInstallation returns a minimal *agent.Installation to place in
+// the detection cache for getAgentsWithCache tests.
+func makeCachedInstallation(id string) *agent.Installation {
+	v, _ := agent.ParseVersion("1.0.0")
+	return &agent.Installation{
+		AgentID:          id,
+		AgentName:        id,
+		Method:           agent.InstallMethodNPM,
+		InstalledVersion: v,
+	}
+}
+
+func TestGetAgentsWithCache_UsesFreshCache(t *testing.T) {
+	server := setupTestServer()
+	// Enable cache with a long duration.
+	server.config.Detection.CacheEnabled = true
+	server.config.Detection.CacheDuration = time.Hour
+
+	store := server.store.(*mockStore)
+	store.detCache = []*agent.Installation{makeCachedInstallation("cached-agent")}
+	store.detCachedAt = time.Now()
+
+	req := httptest.NewRequest("GET", "/api/v1/agents", nil)
+
+	agents, err := server.getAgentsWithCache(req, nil)
+	if err != nil {
+		t.Fatalf("getAgentsWithCache error = %v", err)
+	}
+	if len(agents) != 1 || agents[0].AgentID != "cached-agent" {
+		t.Fatalf("expected cached agent, got %+v", agents)
+	}
+	if store.detSaveCount != 0 {
+		t.Errorf("cache should not be rewritten when fresh; saves=%d", store.detSaveCount)
+	}
+}
+
+func TestGetAgentsWithCache_StaleCacheTriggersDetect(t *testing.T) {
+	server := setupTestServer()
+	server.config.Detection.CacheEnabled = true
+	server.config.Detection.CacheDuration = time.Minute
+
+	store := server.store.(*mockStore)
+	store.detCache = []*agent.Installation{makeCachedInstallation("stale-agent")}
+	store.detCachedAt = time.Now().Add(-10 * time.Minute) // older than CacheDuration
+
+	req := httptest.NewRequest("GET", "/api/v1/agents", nil)
+
+	// detector is nil in setupTestServer — helper should return error
+	// (proving it fell through to the detect path instead of using the cache).
+	_, err := server.getAgentsWithCache(req, nil)
+	if err == nil {
+		t.Fatal("expected error from nil detector on stale cache path")
+	}
+}
+
+func TestGetAgentsWithCache_RefreshParamBypasses(t *testing.T) {
+	server := setupTestServer()
+	server.config.Detection.CacheEnabled = true
+	server.config.Detection.CacheDuration = time.Hour
+
+	store := server.store.(*mockStore)
+	store.detCache = []*agent.Installation{makeCachedInstallation("cached-agent")}
+	store.detCachedAt = time.Now()
+
+	req := httptest.NewRequest("GET", "/api/v1/agents?refresh=true", nil)
+
+	_, err := server.getAgentsWithCache(req, nil)
+	if err == nil {
+		t.Fatal("expected error: refresh=true should bypass cache and hit nil detector")
+	}
+}
+
+func TestGetAgentsWithCache_CacheDisabled(t *testing.T) {
+	server := setupTestServer()
+	server.config.Detection.CacheEnabled = false
+
+	store := server.store.(*mockStore)
+	store.detCache = []*agent.Installation{makeCachedInstallation("cached-agent")}
+	store.detCachedAt = time.Now()
+
+	req := httptest.NewRequest("GET", "/api/v1/agents", nil)
+
+	_, err := server.getAgentsWithCache(req, nil)
+	if err == nil {
+		t.Fatal("expected error: disabled cache should bypass and hit nil detector")
 	}
 }

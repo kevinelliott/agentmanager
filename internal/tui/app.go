@@ -15,6 +15,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/kevinelliott/agentmanager/internal/tui/styles"
+	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -257,18 +258,10 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	if needUpdateCheck {
 		instMgr := installer.NewManager(m.platform)
 
-		// Check for latest versions
-		for _, inst := range installations {
-			if agentDef, ok := agentDefMap[inst.AgentID]; ok {
-				methodStr := string(inst.Method)
-				if method, ok := agentDef.InstallMethods[methodStr]; ok {
-					latestVer, err := instMgr.GetLatestVersion(ctx, method)
-					if err == nil {
-						inst.LatestVersion = &latestVer
-					}
-				}
-			}
-		}
+		// Check for latest versions in parallel. Errors are intentionally
+		// dropped here; the TUI surfaces them indirectly via HasUpdate() being
+		// false for unchecked installations.
+		_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
 
 		// Save last update check time
 		_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
