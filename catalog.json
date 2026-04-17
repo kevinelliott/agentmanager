@@ -1,5 +1,5 @@
 {
-  "version": "1.0.27",
+  "version": "1.0.28",
   "schema_version": 1,
   "last_updated": "2026-03-28T00:00:00Z",
   "agents": {
@@ -2000,6 +2000,53 @@
       "metadata": {
         "vendor": "Nano Collective",
         "license": "MIT"
+      }
+    },
+    "ona": {
+      "id": "ona",
+      "name": "Ona",
+      "description": "Background AI agent platform CLI for autonomous software development",
+      "homepage": "https://ona.com",
+      "repository": "https://github.com/gitpod-io",
+      "documentation": "https://ona.com/docs/ona/integrations/cli",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "gitpod-io/tap/ona",
+          "command": "brew install gitpod-io/tap/ona",
+          "update_cmd": "brew upgrade ona",
+          "uninstall_cmd": "brew uninstall ona",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "tap": "gitpod-io/tap"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "curl -o ona -fsSL https://app.gitpod.io/releases/cli/stable/gitpod-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/arm64/arm64/') && chmod +x ona && sudo mv ona /usr/local/bin",
+          "update_cmd": "ona version update",
+          "platforms": ["darwin", "linux", "windows"]
+        }
+      },
+      "detection": {
+        "executables": ["ona"],
+        "version_cmd": "ona version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list ona",
+            "paths": ["/opt/homebrew/bin/ona", "/usr/local/bin/ona"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://ona.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Ona (formerly Gitpod)",
+        "license": "AGPL-3.0"
       }
     },
     "dexter": {
