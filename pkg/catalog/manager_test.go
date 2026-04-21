@@ -1,12 +1,15 @@
 package catalog
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -14,6 +17,7 @@ import (
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/logging"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
@@ -717,7 +721,8 @@ func TestManagerRefresh_SendsIfNoneMatchAndHandles304(t *testing.T) {
 
 // TestManagerRefresh_LogsCacheSaveErrorButSucceeds verifies that a failing
 // SaveCatalogCache does not fail the whole Refresh — the in-memory catalog
-// should still be updated and the caller should get a success result.
+// should still be updated and the caller should get a success result, and
+// that the cache-save failure is reported via the context-scoped logger.
 func TestManagerRefresh_LogsCacheSaveErrorButSucceeds(t *testing.T) {
 	withEmbeddedJSON(t, nil)
 
@@ -736,7 +741,12 @@ func TestManagerRefresh_LogsCacheSaveErrorButSucceeds(t *testing.T) {
 	store := &mockStore{err: os.ErrPermission}
 	mgr := NewManager(cfg, store)
 
-	ctx := context.Background()
+	// Attach a test logger so we can assert the warn event fires on the
+	// ctx-scoped logger (not just slog.Default).
+	var logBuf bytes.Buffer
+	testLogger := slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	ctx := logging.WithContext(context.Background(), testLogger)
+
 	result, err := mgr.Refresh(ctx)
 	if err != nil {
 		t.Fatalf("Refresh() should succeed despite cache write error, got %v", err)
@@ -752,5 +762,13 @@ func TestManagerRefresh_LogsCacheSaveErrorButSucceeds(t *testing.T) {
 	}
 	if got.Version != catalog.Version {
 		t.Errorf("in-memory catalog version = %q, want %q", got.Version, catalog.Version)
+	}
+
+	// The warn event should have gone to the ctx-scoped logger.
+	if !strings.Contains(logBuf.String(), "catalog: failed to persist cache") {
+		t.Errorf("ctx-scoped logger did not receive the warn event:\n%s", logBuf.String())
+	}
+	if !strings.Contains(logBuf.String(), "level=WARN") {
+		t.Errorf("ctx-scoped log entry should be WARN level:\n%s", logBuf.String())
 	}
 }
