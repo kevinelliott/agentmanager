@@ -60,7 +60,9 @@ func New(cfg *config.Config) *slog.Logger {
 			format = f
 		}
 		if cfg.Logging.File != "" {
-			f, err := os.OpenFile(cfg.Logging.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+			// 0o600: log files can contain secrets/PII. Restrict to the
+			// owner rather than world-readable.
+			f, err := os.OpenFile(cfg.Logging.File, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 			if err == nil {
 				out = f
 			} else {
@@ -73,15 +75,20 @@ func New(cfg *config.Config) *slog.Logger {
 		}
 	}
 
+	return slog.New(buildHandler(out, level, format))
+}
+
+// buildHandler returns a slog.Handler for the given writer / level / format.
+// Extracted so tests can route output into a bytes.Buffer without holding
+// a file handle open (which breaks TempDir cleanup on Windows).
+func buildHandler(out io.Writer, level slog.Level, format string) slog.Handler {
 	opts := &slog.HandlerOptions{Level: level}
-	var h slog.Handler
 	switch format {
 	case "json":
-		h = slog.NewJSONHandler(out, opts)
+		return slog.NewJSONHandler(out, opts)
 	default:
-		h = slog.NewTextHandler(out, opts)
+		return slog.NewTextHandler(out, opts)
 	}
-	return slog.New(h)
 }
 
 // WithContext returns ctx carrying logger. A nil logger is a no-op to keep

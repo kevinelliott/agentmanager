@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"log/slog"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -50,41 +49,39 @@ func TestNew_LevelParsing(t *testing.T) {
 	}
 }
 
-func TestNew_JSONFormat(t *testing.T) {
-	// Capture output by routing through a pipe-backed file.
-	file := filepath.Join(t.TempDir(), "log.txt")
-	cfg := &config.Config{Logging: config.LoggingConfig{
-		Format: "json",
-		Level:  "info",
-		File:   file,
-	}}
-	l := New(cfg)
+func TestBuildHandler_JSONFormat(t *testing.T) {
+	// Route through a bytes.Buffer so the test doesn't hold any file
+	// handles — Windows TempDir cleanup fails if a file is still open
+	// when the test ends, so never hand a file to New() inside a test.
+	var buf bytes.Buffer
+	l := slog.New(buildHandler(&buf, slog.LevelInfo, "json"))
 	l.Info("hello world", "key", "value")
 
-	// Read the file back.
-	b, err := readFile(file)
-	if err != nil {
-		t.Fatalf("read %s: %v", file, err)
+	out := buf.Bytes()
+	if !bytes.Contains(out, []byte(`"msg":"hello world"`)) {
+		t.Errorf("expected JSON msg field, got:\n%s", out)
 	}
-	// JSON handler writes a leading `{` and a `"msg":"hello world"` pair.
-	if !bytes.Contains(b, []byte(`"msg":"hello world"`)) {
-		t.Errorf("expected JSON msg field, got:\n%s", b)
-	}
-	if !bytes.Contains(b, []byte(`"key":"value"`)) {
-		t.Errorf("expected JSON key field, got:\n%s", b)
+	if !bytes.Contains(out, []byte(`"key":"value"`)) {
+		t.Errorf("expected JSON key field, got:\n%s", out)
 	}
 }
 
-func TestNew_TextFormat(t *testing.T) {
-	file := filepath.Join(t.TempDir(), "log.txt")
-	cfg := &config.Config{Logging: config.LoggingConfig{Level: "info", File: file}} // Format defaults to text
-	l := New(cfg)
+func TestBuildHandler_TextFormat(t *testing.T) {
+	var buf bytes.Buffer
+	l := slog.New(buildHandler(&buf, slog.LevelInfo, ""))
 	l.Info("hello", "k", "v")
 
-	b, _ := readFile(file)
-	// Text handler emits `msg=hello` rather than JSON.
-	if !strings.Contains(string(b), "msg=hello") {
-		t.Errorf("expected text msg=hello, got:\n%s", b)
+	if !strings.Contains(buf.String(), "msg=hello") {
+		t.Errorf("expected text msg=hello, got:\n%s", buf.String())
+	}
+}
+
+func TestBuildHandler_UnknownFormatDefaultsToText(t *testing.T) {
+	var buf bytes.Buffer
+	l := slog.New(buildHandler(&buf, slog.LevelInfo, "garbage"))
+	l.Info("hello")
+	if !strings.Contains(buf.String(), "msg=hello") {
+		t.Errorf("unknown format should default to text handler, got:\n%s", buf.String())
 	}
 }
 
@@ -151,16 +148,4 @@ func TestInstall_NilIsNoop(t *testing.T) {
 	if slog.Default() != before {
 		t.Error("Install(nil) should not change slog.Default()")
 	}
-}
-
-// readFile is a tiny local helper so the test file stays dependency-free.
-func readFile(p string) ([]byte, error) {
-	f, err := openForRead(p)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(f)
-	return buf.Bytes(), err
 }
