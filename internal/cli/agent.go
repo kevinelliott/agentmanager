@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/kevinelliott/agentmanager/internal/cli/output"
+	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -48,7 +49,6 @@ detailed information about agents.`,
 	return cmd
 }
 
-//nolint:gocyclo // CLI command setup with many flags and options
 func newAgentListCommand(cfg *config.Config) *cobra.Command {
 	var (
 		showAll      bool
@@ -105,86 +105,35 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
+			det := detector.New(plat)
+			instMgr := installer.NewManager(plat)
+			pipeline := orchestrator.NewFromManagers(cfg, plat, store, catMgr, det, instMgr)
 
-			// Get agents for current platform
-			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
-			if err != nil {
-				spinner.Error("Failed to load catalog")
-				return fmt.Errorf("failed to load catalog: %w", err)
-			}
-
-			// Build a map of agent ID -> AgentDef for quick lookup
-			agentDefMap := make(map[string]catalog.AgentDef)
-			for _, def := range agentDefs {
-				agentDefMap[def.ID] = def
-			}
-
-			var installations []*agent.Installation
-			var usedDetectionCache bool
-			var needUpdateCheck bool
-
-			// Check if we can use cached detection results
+			// Update spinner message based on whether we expect to hit the cache.
 			if cfg.Detection.CacheEnabled && !refresh {
-				cachedInstallations, cachedAt, err := store.GetDetectionCache(ctx)
-				if err == nil && cachedInstallations != nil {
-					// Check if detection cache is still valid
-					if time.Since(cachedAt) < cfg.Detection.CacheDuration {
-						installations = cachedInstallations
-						usedDetectionCache = true
-						spinner.UpdateMessage("Loading from cache...")
-
-						// Check if we need to refresh update check
-						lastUpdateCheck, err := store.GetLastUpdateCheckTime(ctx)
-						if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= cfg.Detection.UpdateCheckCacheDuration {
-							needUpdateCheck = true
-						}
-					}
-				}
-			}
-
-			// If no cache or cache expired, detect agents
-			if !usedDetectionCache {
+				spinner.UpdateMessage("Loading from cache...")
+			} else {
 				spinner.UpdateMessage("Detecting agents...")
-
-				// Create detector and detect agents
-				det := detector.New(plat)
-				installations, err = det.DetectAll(ctx, agentDefs)
-				if err != nil {
-					spinner.Error("Agent detection failed")
-					return fmt.Errorf("detection failed: %w", err)
-				}
-
-				// Always check for updates on fresh detection
-				needUpdateCheck = true
 			}
 
-			// Check for updates if needed
-			if needUpdateCheck {
-				// Create installer manager for version checking
-				instMgr := installer.NewManager(plat)
-
-				// Update spinner for version checking
+			pipelineRes, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{
+				ForceRefresh: refresh,
+			})
+			if err != nil {
+				spinner.Error("Agent detection failed")
+				return err
+			}
+			if pipelineRes.RanVersionCheck {
 				spinner.UpdateMessage("Checking for updates...")
-
-				// Fetch latest versions in parallel. Errors are intentionally
-				// dropped here to preserve the existing silent-failure semantics
-				// of `agent list`.
-				_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
-
-				// Save last update check time
-				_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
-
-				// Save to cache if enabled (with updated version info)
-				if cfg.Detection.CacheEnabled {
-					if err := store.SaveDetectionCache(ctx, installations); err != nil {
-						// Log but don't fail
-						_ = err
-					}
-				}
 			}
+			installations := pipelineRes.Installations
 
 			// Stop spinner
 			spinner.Stop()
+
+			// agent list historically drops version-check errors silently so
+			// the table does not get interrupted by transient registry hiccups;
+			// pipelineRes.VersionCheckErrors is intentionally ignored here.
 
 			// Apply filters
 			var filtered []*agent.Installation
@@ -405,40 +354,29 @@ Use --all to update all agents at once.`,
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
-			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
-			if err != nil {
-				spinner.Error("Failed to load catalog")
-				return fmt.Errorf("failed to load catalog: %w", err)
-			}
-
-			spinner.UpdateMessage("Detecting agents...")
-
 			det := detector.New(plat)
-			installations, err := det.DetectAll(ctx, agentDefs)
+			inst := installer.NewManager(plat)
+			pipeline := orchestrator.NewFromManagers(cfg, plat, store, catMgr, det, inst)
+
+			// `agent update` has always done a fresh detect so it sees the very
+			// latest installed versions before choosing what to update. Preserve
+			// that by forcing the pipeline to bypass the detection cache.
+			spinner.UpdateMessage("Detecting agents...")
+			pipelineRes, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: true})
 			if err != nil {
 				spinner.Error("Detection failed")
-				return fmt.Errorf("detection failed: %w", err)
+				return err
 			}
+			installations := pipelineRes.Installations
 
-			inst := installer.NewManager(plat)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
 				spinner.Error("Failed to load catalog")
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
-			// Build agent lookup map for version checking
-			agentDefMap := make(map[string]catalog.AgentDef)
-			for _, def := range agentDefs {
-				agentDefMap[def.ID] = def
-			}
-
 			spinner.UpdateMessage("Checking for updates...")
-
-			// Check for latest versions in parallel so HasUpdate() works correctly.
-			// The returned per-index errors are aggregated and surfaced to the user.
-			perIndexErrs := versionfetch.CheckLatestVersions(ctx, inst, installations, agentDefMap, versionfetch.DefaultConcurrency)
-			versionCheckErrors := versionfetch.NonNilErrors(perIndexErrs)
+			versionCheckErrors := versionfetch.NonNilErrors(pipelineRes.VersionCheckErrors)
 
 			spinner.Stop()
 
