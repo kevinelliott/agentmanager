@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- `config.CatalogConfig.RefreshOnStart` field removed. Deprecated in
+  v1.1.0 and never wired to any startup behavior — catalog refresh
+  cadence is controlled by `RefreshInterval` + the manager's cache
+  TTL. Existing configs that still set `catalog.refresh_on_start`
+  will continue to load without error (viper ignores unknown keys);
+  the value is simply dropped.
+
 ## [1.1.0] - 2026-04-21
 
 Performance, reliability, and refactor release. Typical `agent list`
@@ -92,7 +101,7 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
   cadence is controlled by `RefreshInterval` + cache TTL). It is
   retained for backward compatibility with existing config files
   and will be removed once the sole remaining TUI display reference
-  is cleaned up.
+  is cleaned up. (Removed in [Unreleased].)
 
 ### Known Issues
 

@@ -137,7 +137,6 @@ func parseConfigValue(key, value string) interface{} {
 
 	// Boolean keys
 	boolKeys := []string{
-		"catalog.refresh_on_start",
 		"updates.auto_check", "updates.notify", "updates.auto_update",
 		"ui.show_hidden", "ui.use_colors", "ui.compact_mode",
 		"api.enable_grpc", "api.enable_rest", "api.require_auth",

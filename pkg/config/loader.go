@@ -161,7 +161,6 @@ func (l *Loader) setDefaults() {
 	// Catalog defaults
 	l.v.SetDefault("catalog.source_url", defaults.Catalog.SourceURL)
 	l.v.SetDefault("catalog.refresh_interval", defaults.Catalog.RefreshInterval)
-	l.v.SetDefault("catalog.refresh_on_start", defaults.Catalog.RefreshOnStart)
 	l.v.SetDefault("catalog.github_token", defaults.Catalog.GitHubToken)
 
 	// Update defaults

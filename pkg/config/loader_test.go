@@ -62,7 +62,6 @@ func TestLoaderLoadFromFile(t *testing.T) {
 	configContent := `
 catalog:
   source_url: "https://custom.example.com/catalog.json"
-  refresh_on_start: false
 ui:
   theme: "dark"
   page_size: 50
@@ -87,9 +86,6 @@ logging:
 	// Verify loaded values
 	if cfg.Catalog.SourceURL != "https://custom.example.com/catalog.json" {
 		t.Errorf("SourceURL = %q, want %q", cfg.Catalog.SourceURL, "https://custom.example.com/catalog.json")
-	}
-	if cfg.Catalog.RefreshOnStart {
-		t.Error("RefreshOnStart should be false")
 	}
 	if cfg.UI.Theme != "dark" {
 		t.Errorf("Theme = %q, want %q", cfg.UI.Theme, "dark")

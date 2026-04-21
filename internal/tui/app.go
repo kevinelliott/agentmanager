@@ -578,18 +578,11 @@ func (m Model) settingsView() string {
 	settings := styles.Box.Render(fmt.Sprintf(
 		"%s\n\n"+
 			"  Auto-check updates:    %s\n"+
-			"  Catalog auto-refresh:  %s\n"+
 			"  Notifications:         %s\n"+
 			"  Auto-update:           %s",
 		styles.Subtitle.Render("Update Settings"),
 		func() string {
 			if m.config.Updates.AutoCheck {
-				return styles.StatusInstalled.Render("Enabled")
-			}
-			return styles.StatusNotInstalled.Render("Disabled")
-		}(),
-		func() string {
-			if m.config.Catalog.RefreshOnStart { //nolint:staticcheck // deprecated: retained for backward-compat display
 				return styles.StatusInstalled.Render("Enabled")
 			}
 			return styles.StatusNotInstalled.Render("Disabled")

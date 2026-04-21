@@ -52,16 +52,6 @@ type CatalogConfig struct {
 	// RefreshInterval is how often to refresh in background
 	RefreshInterval time.Duration `yaml:"refresh_interval" json:"refresh_interval" mapstructure:"refresh_interval"`
 
-	// RefreshOnStart enables auto-refresh when the app starts.
-	//
-	// Deprecated: this field is not currently wired to any startup behavior
-	// and is retained only for backward compatibility with existing config
-	// files (reading a YAML config that sets it will not error). The catalog
-	// refresh cadence is controlled by RefreshInterval and the manager's
-	// cache TTL. Do not rely on this flag in new code — it is scheduled for
-	// removal once the TUI display reference is cleaned up.
-	RefreshOnStart bool `yaml:"refresh_on_start" json:"refresh_on_start" mapstructure:"refresh_on_start"`
-
 	// GitHubToken is an optional token for higher API rate limits
 	GitHubToken string `yaml:"github_token" json:"github_token" mapstructure:"github_token"`
 }
@@ -180,7 +170,6 @@ func Default() *Config {
 		Catalog: CatalogConfig{
 			SourceURL:       "https://raw.githubusercontent.com/kevinelliott/agentmanager/main/catalog.json",
 			RefreshInterval: time.Hour,
-			RefreshOnStart:  true,
 			GitHubToken:     "",
 		},
 		Detection: DetectionConfig{

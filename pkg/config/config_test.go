@@ -15,9 +15,6 @@ func TestDefault(t *testing.T) {
 	if cfg.Catalog.RefreshInterval != time.Hour {
 		t.Errorf("Catalog.RefreshInterval = %v, want %v", cfg.Catalog.RefreshInterval, time.Hour)
 	}
-	if !cfg.Catalog.RefreshOnStart {
-		t.Error("Catalog.RefreshOnStart should be true")
-	}
 
 	// Test update defaults
 	if !cfg.Updates.AutoCheck {
@@ -379,7 +376,6 @@ func TestCatalogConfig(t *testing.T) {
 	cfg := CatalogConfig{
 		SourceURL:       "https://example.com/catalog.json",
 		RefreshInterval: 2 * time.Hour,
-		RefreshOnStart:  false,
 		GitHubToken:     "test-token",
 	}
 
@@ -388,9 +384,6 @@ func TestCatalogConfig(t *testing.T) {
 	}
 	if cfg.RefreshInterval != 2*time.Hour {
 		t.Errorf("RefreshInterval = %v, want %v", cfg.RefreshInterval, 2*time.Hour)
-	}
-	if cfg.RefreshOnStart {
-		t.Error("RefreshOnStart should be false")
 	}
 	if cfg.GitHubToken != "test-token" {
 		t.Errorf("GitHubToken = %q, want %q", cfg.GitHubToken, "test-token")

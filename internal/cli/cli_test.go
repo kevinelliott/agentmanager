@@ -366,8 +366,8 @@ func TestParseConfigValue(t *testing.T) {
 		expected interface{}
 	}{
 		// Boolean keys
-		{"bool true lowercase", "catalog.refresh_on_start", "true", true},
-		{"bool true uppercase", "catalog.refresh_on_start", "TRUE", true},
+		{"bool true lowercase", "updates.auto_check", "true", true},
+		{"bool true uppercase", "updates.auto_check", "TRUE", true},
 		{"bool true yes", "updates.auto_check", "yes", true},
 		{"bool true 1", "updates.notify", "1", true},
 		{"bool false lowercase", "updates.auto_update", "false", false},
@@ -398,7 +398,7 @@ func TestParseConfigValue(t *testing.T) {
 		{"string with spaces", "some.key", "value with spaces", "value with spaces"},
 
 		// Case insensitive keys
-		{"case insensitive bool", "CATALOG.REFRESH_ON_START", "true", true},
+		{"case insensitive bool", "UPDATES.AUTO_CHECK", "true", true},
 		{"case insensitive int", "UI.PAGE_SIZE", "25", 25},
 		{"case insensitive duration", "CATALOG.REFRESH_INTERVAL", "2h", 2 * time.Hour},
 	}
@@ -416,7 +416,6 @@ func TestParseConfigValue(t *testing.T) {
 
 func TestParseConfigValueAllBoolKeys(t *testing.T) {
 	boolKeys := []string{
-		"catalog.refresh_on_start",
 		"updates.auto_check",
 		"updates.notify",
 		"updates.auto_update",
