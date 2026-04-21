@@ -4,6 +4,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,6 +15,7 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/config"
 	"github.com/kevinelliott/agentmanager/pkg/detector"
 	"github.com/kevinelliott/agentmanager/pkg/installer"
+	"github.com/kevinelliott/agentmanager/pkg/logging"
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
@@ -42,6 +44,12 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
+
+	// Configure the default logger from cfg.Logging. The helper is a
+	// long-running process so structured logs are especially valuable
+	// here; log sinks defined elsewhere (grpc recovery, catalog cache
+	// save failures) share the same handler via slog.Default.
+	logging.Install(logging.New(cfg))
 
 	// Initialize storage
 	dataDir := plat.GetDataDir()
@@ -77,7 +85,7 @@ func run() error {
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 		sig := <-sigChan
-		fmt.Printf("\nReceived signal %v, shutting down...\n", sig)
+		slog.Info("received shutdown signal", "signal", sig.String())
 		app.Quit()
 	}()
 

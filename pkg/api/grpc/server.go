@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"runtime/debug"
 	"sync"
@@ -112,11 +112,15 @@ func NewServer(
 }
 
 // recoveryUnaryInterceptor converts panics in handlers into gRPC Internal
-// errors and logs the stack trace via the standard log package.
+// errors and emits a structured log entry with the stack via slog.
 func recoveryUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("grpc: panic recovered in %s: %v\n%s", info.FullMethod, r, debug.Stack())
+			slog.Error("grpc: panic recovered",
+				"method", info.FullMethod,
+				"panic", r,
+				"stack", string(debug.Stack()),
+			)
 			err = status.Errorf(codes.Internal, "internal server error")
 		}
 	}()
@@ -128,7 +132,11 @@ func recoveryUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.U
 func recoveryStreamInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("grpc: panic recovered in stream %s: %v\n%s", info.FullMethod, r, debug.Stack())
+			slog.Error("grpc: panic recovered in stream",
+				"method", info.FullMethod,
+				"panic", r,
+				"stack", string(debug.Stack()),
+			)
 			err = status.Errorf(codes.Internal, "internal server error")
 		}
 	}()
