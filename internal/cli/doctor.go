@@ -3,8 +3,11 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -12,6 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/kevinelliott/agentmanager/internal/cli/output"
+	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
@@ -89,6 +93,14 @@ Examples:
 			storeResults := runStorageChecks(ctx, cfg, verbose)
 			results = append(results, storeResults...)
 			printResults(printer, storeResults)
+			printer.Println()
+
+			// Catalog source checks
+			printer.Print("Catalog Sources")
+			printer.Print("---------------")
+			catResults := runCatalogSourceChecks(ctx, cfg, verbose)
+			results = append(results, catResults...)
+			printResults(printer, catResults)
 			printer.Println()
 
 			// Configuration checks
@@ -436,6 +448,137 @@ func runConfigChecks(cfg *config.Config, _ bool) []CheckResult {
 			Name:    "Colors",
 			Status:  CheckOK,
 			Message: "disabled",
+		})
+	}
+
+	return results
+}
+
+// runCatalogSourceChecks reports the status of every catalog source the
+// manager consults so users can see which layer will serve their catalog.
+//
+// Sources, in resolution order:
+//  1. SQLite cache (the last remote fetch)
+//  2. User overrides ($HOME/.agentmgr/catalog.json, $HOME/.config/agentmgr/catalog.json)
+//  3. System-wide install share (/usr/local/share/agentmgr, /etc/agentmgr)
+//  4. Embedded baseline (//go:embed'd into the binary)
+//
+// The CWD is intentionally never probed.
+func runCatalogSourceChecks(ctx context.Context, cfg *config.Config, _ bool) []CheckResult {
+	var results []CheckResult
+
+	// 1. SQLite cache.
+	plat := platform.Current()
+	if store, err := storage.NewSQLiteStore(plat.GetDataDir()); err != nil {
+		results = append(results, CheckResult{
+			Name:    "SQLite Catalog Cache",
+			Status:  CheckWarning,
+			Message: fmt.Sprintf("could not open storage: %v", err),
+		})
+	} else {
+		defer store.Close()
+		if err := store.Initialize(ctx); err != nil {
+			results = append(results, CheckResult{
+				Name:    "SQLite Catalog Cache",
+				Status:  CheckWarning,
+				Message: fmt.Sprintf("could not initialize: %v", err),
+			})
+		} else {
+			data, _, cachedAt, err := store.GetCatalogCache(ctx)
+			switch {
+			case err != nil:
+				results = append(results, CheckResult{
+					Name:    "SQLite Catalog Cache",
+					Status:  CheckWarning,
+					Message: fmt.Sprintf("read failed: %v", err),
+				})
+			case data == nil:
+				results = append(results, CheckResult{
+					Name:    "SQLite Catalog Cache",
+					Status:  CheckOK,
+					Message: "empty (will fall back to embedded or user override)",
+				})
+			default:
+				var c catalog.Catalog
+				msg := fmt.Sprintf("cached %s ago", time.Since(cachedAt).Round(time.Second))
+				if err := json.Unmarshal(data, &c); err == nil {
+					msg = fmt.Sprintf("v%s, cached %s ago", c.Version, time.Since(cachedAt).Round(time.Second))
+				}
+				results = append(results, CheckResult{
+					Name:    "SQLite Catalog Cache",
+					Status:  CheckOK,
+					Message: msg,
+				})
+			}
+		}
+	}
+
+	// 2-3. File-based overrides. For each, report path and whether it exists
+	// (with version on hit). The resolution order mirrors
+	// catalog.Manager.loadEmbedded.
+	paths := []struct{ label, path string }{}
+	if home, err := os.UserHomeDir(); err == nil {
+		paths = append(paths,
+			struct{ label, path string }{"User override (dotdir)", filepath.Join(home, ".agentmgr", "catalog.json")},
+			struct{ label, path string }{"User override (XDG)", filepath.Join(home, ".config", "agentmgr", "catalog.json")},
+		)
+	}
+	paths = append(paths,
+		struct{ label, path string }{"System share", "/usr/local/share/agentmgr/catalog.json"},
+		struct{ label, path string }{"System etc", "/etc/agentmgr/catalog.json"},
+	)
+
+	for _, p := range paths {
+		data, err := os.ReadFile(p.path)
+		if err != nil {
+			if os.IsNotExist(err) {
+				results = append(results, CheckResult{
+					Name:    p.label,
+					Status:  CheckSkipped,
+					Message: fmt.Sprintf("not present: %s", p.path),
+				})
+				continue
+			}
+			results = append(results, CheckResult{
+				Name:    p.label,
+				Status:  CheckWarning,
+				Message: fmt.Sprintf("%s: %v", p.path, err),
+			})
+			continue
+		}
+		var c catalog.Catalog
+		var msg string
+		if err := json.Unmarshal(data, &c); err == nil {
+			msg = fmt.Sprintf("%s (v%s)", p.path, c.Version)
+		} else {
+			msg = fmt.Sprintf("%s (invalid JSON)", p.path)
+		}
+		results = append(results, CheckResult{
+			Name:    p.label,
+			Status:  CheckOK,
+			Message: msg,
+		})
+	}
+
+	// 4. Embedded baseline. Always present in builds from this repo.
+	embeddedJSON := catalog.EmbeddedJSON()
+	if len(embeddedJSON) == 0 {
+		results = append(results, CheckResult{
+			Name:    "Embedded baseline",
+			Status:  CheckError,
+			Message: "empty — the binary was built without a catalog",
+			Fix:     "run `make sync-catalog` before `go build` (or use `make build`)",
+		})
+	} else {
+		var c catalog.Catalog
+		msg := fmt.Sprintf("%d bytes", len(embeddedJSON))
+		if err := json.Unmarshal(embeddedJSON, &c); err == nil {
+			msg = fmt.Sprintf("v%s (%d bytes)", c.Version, len(embeddedJSON))
+		}
+		results = append(results, CheckResult{
+			Name:    "Embedded baseline",
+			Status:  CheckOK,
+			Message: msg,
 		})
 	}
 
