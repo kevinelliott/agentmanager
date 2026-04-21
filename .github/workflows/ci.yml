@@ -27,6 +27,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libayatana-appindicator3-dev
 
+      - name: Check catalog sync
+        run: make check-catalog-sync
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:

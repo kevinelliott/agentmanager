@@ -289,16 +289,24 @@ func (m *Manager) loadFromCache(ctx context.Context) (*Catalog, error) {
 	return &catalog, nil
 }
 
-// loadEmbedded loads the embedded default catalog.
+// loadEmbedded returns the baseline catalog that ships with the binary,
+// allowing user-scoped on-disk overrides to win when present.
+//
+// Resolution order:
+//  1. User-override paths ($HOME/.agentmgr/catalog.json,
+//     $HOME/.config/agentmgr/catalog.json) — lets power users pin a
+//     modified catalog without rebuilding.
+//  2. System-wide install share (/usr/local/share/agentmgr/catalog.json,
+//     /etc/agentmgr/catalog.json) — populated by goreleaser packaging.
+//  3. The go:embed'd catalog compiled into the binary (see embed.go).
+//
+// The current working directory is intentionally NOT probed. A stray
+// catalog.json in whatever directory the user happened to invoke agentmgr
+// from would silently shadow the real catalog.
 func (m *Manager) loadEmbedded() (*Catalog, error) {
-	// Try to read from file in current directory or known locations
-	paths := []string{
-		"catalog.json",
-		"/usr/local/share/agentmgr/catalog.json",
-		"/etc/agentmgr/catalog.json",
-	}
+	paths := make([]string, 0, 4)
 
-	// Add user home directory paths
+	// 1. User-scoped overrides.
 	if home, err := os.UserHomeDir(); err == nil {
 		paths = append(paths,
 			home+"/.agentmgr/catalog.json",
@@ -306,17 +314,30 @@ func (m *Manager) loadEmbedded() (*Catalog, error) {
 		)
 	}
 
+	// 2. System-wide install share.
+	paths = append(paths,
+		"/usr/local/share/agentmgr/catalog.json",
+		"/etc/agentmgr/catalog.json",
+	)
+
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
 		}
-
 		var catalog Catalog
 		if err := json.Unmarshal(data, &catalog); err != nil {
 			continue
 		}
+		return &catalog, nil
+	}
 
+	// 3. Baseline: the catalog compiled into the binary at build time.
+	if len(embeddedCatalogJSON) > 0 {
+		var catalog Catalog
+		if err := json.Unmarshal(embeddedCatalogJSON, &catalog); err != nil {
+			return nil, fmt.Errorf("invalid embedded catalog: %w", err)
+		}
 		return &catalog, nil
 	}
 
