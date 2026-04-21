@@ -143,10 +143,10 @@ func TestHandleGetAgent_InvalidPayload(t *testing.T) {
 
 func TestHandleGetStatus(t *testing.T) {
 	a := mkTestApp(
-		mkInstallation("a", "npm", "1.0.0", "1.0.1"),   // has update
-		mkInstallation("b", "brew", "2.0.0", "2.0.0"),  // no update (equal)
-		mkInstallation("c", "brew", "3.0.0", ""),       // unknown latest
-		mkInstallation("d", "npm", "0.1.0", "0.2.0"),   // has update
+		mkInstallation("a", "npm", "1.0.0", "1.0.1"),  // has update
+		mkInstallation("b", "brew", "2.0.0", "2.0.0"), // no update (equal)
+		mkInstallation("c", "brew", "3.0.0", ""),      // unknown latest
+		mkInstallation("d", "npm", "0.1.0", "0.2.0"),  // has update
 	)
 	a.lastRefresh = time.Now().Add(-5 * time.Minute)
 	a.lastCheck = time.Now().Add(-1 * time.Minute)
