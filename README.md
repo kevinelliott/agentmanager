@@ -14,10 +14,14 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 - **Agent Detection**: Automatically detect installed AI CLI agents (Claude Code, Amp, Aider, GitHub Copilot CLI, Gemini CLI, and more)
 - **Version Management**: Check for updates from package registries (npm, PyPI, Homebrew) and manage agent versions
 - **Multiple Installation Methods**: Support for npm, pip, pipx, uv, Homebrew, native installers, and more
-- **Beautiful CLI Output**: Colored output with animated spinners and properly aligned tables
+- **Fast Parallel Checks**: Version checks for dozens of installed agents run concurrently (10–20× faster than sequential)
+- **Offline-First Catalog**: A baseline catalog is embedded into the binary, so `agent list` works on a fresh `go install` before the first remote refresh
+- **Live Install Output**: Pass `-v` to `agent install` / `agent update` to stream live subprocess output (brew / npm / pip / native) instead of a silent spinner
+- **Beautiful CLI Output**: Colored output with animated spinners and properly aligned tables (honors `NO_COLOR`, `TERM=dumb`, and non-TTY pipes)
 - **Beautiful TUI**: Interactive terminal interface built with Bubble Tea
 - **Background Helper**: System tray application with notifications for available updates
 - **REST & gRPC APIs**: Expose agent management via HTTP and gRPC for integration
+- **Structured Logs**: `cfg.Logging` drives `log/slog` level / format / file destination across both binaries
 - **Cross-Platform**: Works on macOS, Linux, and Windows
 
 ## Installation
@@ -59,6 +63,9 @@ agentmgr agent install claude-code
 
 # Update all agents
 agentmgr agent update --all
+
+# Stream subprocess output during install/update (brew, npm, pip, native)
+agentmgr agent update -v aider
 
 # Launch the interactive TUI
 agentmgr tui
