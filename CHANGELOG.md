@@ -7,19 +7,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-04-21
+
+UX and operability release. Fresh `go install` users get a working
+catalog offline thanks to a `go:embed`'d baseline; long-running
+`install`/`update` operations can stream live subprocess output with
+`-v`; the helper now supports gRPC alongside REST; and the project
+ships its first cut of structured logging.
+
 ### Added
 
-- Systray helper now starts the gRPC API server when `API.EnableGRPC=true`
-  (default off, matching REST).
+- `-v/--verbose` on `agent install` and `agent update [--all]` now
+  **streams live subprocess output** (brew / npm / pip / native) to
+  stderr via a context-attached progress writer. Default (no `-v`)
+  is unchanged: compact spinner only. Providers always capture the
+  full output to `Result.Output`, so the change is invisible to
+  non-streaming callers.
+- **Embedded baseline catalog**: the binary now carries
+  `catalog.json` via `//go:embed`, so a first-run `agentmgr catalog
+  list` works offline even with no user-scoped override and no
+  remote refresh. Resolution order: user overrides
+  (`~/.agentmgr/catalog.json`, `~/.config/agentmgr/catalog.json`)
+  → system-wide paths (`/usr/local/share/agentmgr`,
+  `/etc/agentmgr`) → embedded bytes. The current working directory
+  is no longer probed.
+- `Makefile sync-catalog` + `check-catalog-sync` targets keep
+  `catalog.json` (repo root) and `pkg/catalog/catalog.json`
+  (build-time embed source) in sync; CI enforces it.
+- Systray helper now **starts the gRPC API server** when
+  `API.EnableGRPC=true` (default off, matching REST). Graceful
+  shutdown uses `GracefulStop` with a 2s bound and `ForceStop`
+  fallback. gRPC and REST can run concurrently on different ports.
+- **`pkg/logging`**: thin slog wrapper (`New`, `WithContext`,
+  `FromContext`, `Install`) driven by `cfg.Logging.{Level,Format,File}`.
+  Both `cmd/agentmgr` and `cmd/agentmgr-helper` now call
+  `logging.Install(logging.New(cfg))` so `slog.Default` respects
+  operator config. gRPC panic-recovery interceptors emit structured
+  `slog.Error` events with `method` / `panic` / `stack` fields.
+
+### Changed
+
+- **Dependency**: `github.com/charmbracelet/bubbles` v0.21.1 → v1.0.0.
+  The v1.0 release stabilizes the public API; the components we use
+  (`list`, `spinner`, `key`) are signature-compatible.
+- **Test coverage**: `internal/cli/output` 0% → 82% (colors, spinner,
+  table); `internal/systray` 0.2% → 3.2% (IPC handlers, menu
+  formatter, shutdown, dialog tracking).
+- `make lint` now **auto-installs** and runs `golangci-lint v1.64.8`
+  (matching CI) rather than whatever `latest` happens to be. CI also
+  pins v1.64.8 explicitly in the workflow.
+- `make build` now depends on `sync-catalog`, so `make build` alone
+  is sufficient to produce a binary with an up-to-date embedded
+  catalog after editing `catalog.json`.
+
+### Fixed
+
+- Darwin-only `uninstallCLI` moved to a build-tagged file
+  (`internal/systray/cli_uninstall_darwin.go`); the stale
+  `//nolint:unused` directive that `golangci-lint v1.64.8` flagged
+  on darwin is removed.
+- Helper shutdown-signal handler now emits a structured log event
+  rather than a bare `fmt.Printf`.
 
 ### Removed
 
 - `config.CatalogConfig.RefreshOnStart` field removed. Deprecated in
-  v1.1.0 and never wired to any startup behavior — catalog refresh
-  cadence is controlled by `RefreshInterval` + the manager's cache
-  TTL. Existing configs that still set `catalog.refresh_on_start`
-  will continue to load without error (viper ignores unknown keys);
-  the value is simply dropped.
+  v1.1.0 and never wired to any startup behavior. Existing configs
+  that still set `catalog.refresh_on_start` continue to load without
+  error (viper ignores unknown keys); the value is simply dropped.
 
 ## [1.1.0] - 2026-04-21
 
@@ -279,6 +334,7 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
+[1.2.0]: https://github.com/kevinelliott/agentmanager/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/kevinelliott/agentmanager/compare/v1.0.24...v1.1.0
 [1.0.13]: https://github.com/kevinelliott/agentmanager/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/kevinelliott/agentmanager/compare/v1.0.11...v1.0.12
