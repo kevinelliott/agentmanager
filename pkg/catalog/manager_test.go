@@ -454,19 +454,20 @@ func TestManagerGetChangelog(t *testing.T) {
 }
 
 func TestManagerLoadEmbedded(t *testing.T) {
-	// Create a temp directory with a catalog.json
-	tmpDir := t.TempDir()
+	// Place a catalog.json under a fake $HOME so loadEmbedded picks up the
+	// user-scoped path ($HOME/.config/agentmgr/catalog.json). CWD is NOT
+	// probed anymore — see loadEmbedded's docs for rationale.
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
+
+	configDir := filepath.Join(tmpHome, ".config", "agentmgr")
+	if err := os.MkdirAll(configDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
 	catalog := createTestCatalog()
 	data, _ := json.Marshal(catalog)
-
-	// Change to temp directory so loadEmbedded can find catalog.json
-	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
-
-	// Write catalog.json
-	err := os.WriteFile(filepath.Join(tmpDir, "catalog.json"), data, 0644)
-	if err != nil {
+	if err := os.WriteFile(filepath.Join(configDir, "catalog.json"), data, 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -482,6 +483,36 @@ func TestManagerLoadEmbedded(t *testing.T) {
 
 	if result.Version != catalog.Version {
 		t.Errorf("Version = %q, want %q", result.Version, catalog.Version)
+	}
+}
+
+// TestManagerDoesNotShadowCWDCatalog asserts that a stray catalog.json in
+// the current working directory is NEVER picked up — e.g., when the user
+// runs agentmgr from a repo that happens to have its own catalog.json.
+func TestManagerDoesNotShadowCWDCatalog(t *testing.T) {
+	// Redirect $HOME to an empty temp dir so the user-scoped paths miss.
+	t.Setenv("HOME", t.TempDir())
+
+	// Drop a bogus catalog.json in the current working directory.
+	tmpDir := t.TempDir()
+	oldWd, _ := os.Getwd()
+	if err := os.Chdir(tmpDir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(oldWd) })
+
+	bogus := []byte(`{"version":"0.0.0-bogus-cwd-shadow","agents":[]}`)
+	if err := os.WriteFile(filepath.Join(tmpDir, "catalog.json"), bogus, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := newTestConfig()
+	store := &mockStore{} // Empty cache — no cached catalog either.
+	mgr := NewManager(cfg, store)
+
+	ctx := context.Background()
+	if _, err := mgr.Get(ctx); err == nil {
+		t.Fatal("Get() unexpectedly succeeded; CWD catalog.json should not be loaded")
 	}
 }
 

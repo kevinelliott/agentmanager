@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Systray helper now starts the gRPC API server when `API.EnableGRPC=true`
   (default off, matching REST).
 
+### Changed
+
+- Catalog loader no longer probes the current working directory for a
+  `catalog.json` override (surprising shadow behavior). Use the embedded
+  catalog or the refresh-from-remote flow.
+
 ### Removed
 
 - `config.CatalogConfig.RefreshOnStart` field removed. Deprecated in

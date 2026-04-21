@@ -289,11 +289,32 @@ func (m *Manager) loadFromCache(ctx context.Context) (*Catalog, error) {
 	return &catalog, nil
 }
 
-// loadEmbedded loads the embedded default catalog.
+// loadEmbedded loads a fallback catalog from well-known, user- or
+// system-scoped filesystem paths.
+//
+// NOTE: despite the "embedded" name, this repo has no go:embed'd catalog —
+// the function probes disk for a committed catalog.json. The SQLite cache
+// (loadFromCache) is the primary source; this is a bootstrap fallback for
+// fresh installs before the first remote refresh succeeds.
+//
+// The probed paths are:
+//
+//   - /usr/local/share/agentmgr/catalog.json  (system-wide install share)
+//   - /etc/agentmgr/catalog.json               (system-wide etc override)
+//   - $HOME/.agentmgr/catalog.json             (legacy user dotdir)
+//   - $HOME/.config/agentmgr/catalog.json      (XDG-style user config)
+//
+// The current working directory is intentionally NOT probed. A bare
+// ./catalog.json in whatever directory the user happened to invoke
+// agentmgr from would silently shadow the real catalog (e.g. any
+// JSON-Schema-generating project that happens to have a file by that
+// name), producing confusing breakage. Users who want to pin a custom
+// catalog should drop it under their user config dir — on macOS that is
+// $HOME/Library/Preferences/AgentManager/catalog.json via
+// platform.GetConfigDir(); the legacy $HOME/.agentmgr and
+// $HOME/.config/agentmgr paths above are still honored for compatibility.
 func (m *Manager) loadEmbedded() (*Catalog, error) {
-	// Try to read from file in current directory or known locations
 	paths := []string{
-		"catalog.json",
 		"/usr/local/share/agentmgr/catalog.json",
 		"/etc/agentmgr/catalog.json",
 	}
