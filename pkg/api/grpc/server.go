@@ -197,6 +197,18 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
+// ForceStop immediately stops the gRPC server without waiting for in-flight
+// RPCs to complete. Intended as a fallback when a bounded GracefulStop does
+// not return in time (e.g. a wedged streaming handler during helper exit).
+func (s *Server) ForceStop() {
+	if s.grpcServer != nil {
+		s.grpcServer.Stop()
+	}
+	if s.listener != nil {
+		s.listener.Close()
+	}
+}
+
 // Address returns the server's listening address.
 func (s *Server) Address() string {
 	if s.listener != nil {

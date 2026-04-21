@@ -17,6 +17,7 @@ import (
 	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
+	grpcapi "github.com/kevinelliott/agentmanager/pkg/api/grpc"
 	"github.com/kevinelliott/agentmanager/pkg/api/rest"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -55,6 +56,9 @@ type App struct {
 
 	// REST API server (optional)
 	restServer *rest.Server
+
+	// gRPC API server (optional)
+	grpcServer *grpcapi.Server
 
 	// State
 	agents      []agent.Installation
@@ -135,6 +139,13 @@ func (a *App) Run() error {
 		}
 	}
 
+	// Start gRPC API server if enabled
+	if a.config.API.EnableGRPC {
+		if err := a.startGRPCServer(); err != nil {
+			return fmt.Errorf("failed to start gRPC server: %w", err)
+		}
+	}
+
 	// Run systray (blocks until quit)
 	// On macOS, this must run on the main thread
 	systray.Run(a.onReady, a.onExit)
@@ -155,6 +166,18 @@ func (a *App) startRESTServer() error {
 	)
 	return a.restServer.Start(a.ctx, rest.ServerConfig{
 		Address: fmt.Sprintf(":%d", a.config.API.RESTPort),
+	})
+}
+
+// startGRPCServer starts the gRPC API server.
+func (a *App) startGRPCServer() error {
+	a.grpcServer = grpcapi.NewServer(
+		a.config, a.platform, a.store, a.detector, a.catalog, a.installer,
+		grpcapi.WithVersion(a.version),
+		grpcapi.WithStartTime(a.startTime),
+	)
+	return a.grpcServer.Start(a.ctx, grpcapi.ServerConfig{
+		Address: fmt.Sprintf(":%d", a.config.API.GRPCPort),
 	})
 }
 
@@ -390,6 +413,24 @@ func (a *App) onExit() {
 	// Stop REST server
 	if a.restServer != nil {
 		a.restServer.Stop(ctx)
+	}
+
+	// Stop gRPC server: prefer GracefulStop with a short timeout; fall back
+	// to a hard Stop if graceful shutdown does not complete in time so a
+	// wedged in-flight RPC cannot block helper exit.
+	if a.grpcServer != nil {
+		graceCtx, graceCancel := context.WithTimeout(context.Background(), 2*time.Second)
+		gracefulDone := make(chan struct{})
+		go func() {
+			_ = a.grpcServer.Stop(graceCtx)
+			close(gracefulDone)
+		}()
+		select {
+		case <-gracefulDone:
+		case <-graceCtx.Done():
+			a.grpcServer.ForceStop()
+		}
+		graceCancel()
 	}
 
 	// Stop IPC server (drains in-flight handlers before returning).
