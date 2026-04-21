@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"sync"
@@ -85,9 +86,10 @@ func (p *BrewProvider) Install(ctx context.Context, agentDef catalog.AgentDef, m
 	args = append(args, packageName)
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, "brew", args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("brew install failed: %w\n%s%s", err, stderr.String(), FormatInstallError("brew", "install", stderr.String()))
@@ -129,9 +131,10 @@ func (p *BrewProvider) Update(ctx context.Context, inst *agent.Installation, age
 	args = append(args, packageName)
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, "brew", args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		// brew upgrade returns error if already up to date
