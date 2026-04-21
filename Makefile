@@ -1,6 +1,6 @@
 # AgentManager Makefile
 
-.PHONY: all build build-cli build-helper build-macos-app clean test test-verbose test-pkg test-unit test-coverage test-coverage-summary test-short test-integration benchmark lint install fmt vet deps
+.PHONY: all build build-cli build-helper build-macos-app clean test test-verbose test-pkg test-unit test-coverage test-coverage-summary test-short test-integration benchmark lint install fmt vet deps sync-catalog check-catalog-sync
 
 # Build variables
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -23,7 +23,25 @@ deps:
 	go mod tidy
 
 # Build both binaries
-build: build-cli build-helper
+build: sync-catalog build-cli build-helper
+
+# Keep the //go:embed copy in sync with the canonical catalog at repo root.
+# The repo-root catalog.json is the contributor-facing source AND the URL
+# endpoint served from the `main` branch; pkg/catalog/catalog.json is the
+# build-time copy baked into the binary via //go:embed. We sync here rather
+# than symlinking because go:embed does not follow symlinks outside its
+# package directory.
+sync-catalog:
+	@cp catalog.json pkg/catalog/catalog.json
+
+# CI guard: errors if the two copies drift. Run as its own step so
+# contributors who edit only one get a fast, deterministic nudge.
+check-catalog-sync:
+	@if ! diff -q catalog.json pkg/catalog/catalog.json >/dev/null; then \
+		echo "ERROR: catalog.json and pkg/catalog/catalog.json differ. Run 'make sync-catalog' and commit."; \
+		diff -u catalog.json pkg/catalog/catalog.json | head -60; \
+		exit 1; \
+	fi
 
 # Build CLI binary
 build-cli:

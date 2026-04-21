@@ -267,6 +267,11 @@ func TestManagerGetAgentsForPlatform(t *testing.T) {
 }
 
 func TestManagerRefresh(t *testing.T) {
+	// Clear the embedded baseline so Refresh's Updated= compare-vs-current
+	// logic only considers the remote vs cache, not the higher-versioned
+	// baseline shipped in the binary.
+	withEmbeddedJSON(t, nil)
+
 	catalog := createTestCatalog()
 	catalogJSON, _ := json.Marshal(catalog)
 
@@ -453,22 +458,29 @@ func TestManagerGetChangelog(t *testing.T) {
 	}
 }
 
-func TestManagerLoadEmbedded(t *testing.T) {
-	// Create a temp directory with a catalog.json
-	tmpDir := t.TempDir()
+// withEmbeddedJSON temporarily replaces the package-level embeddedCatalogJSON
+// for the duration of a test. This lets tests control the fallback behavior
+// precisely (set to nil to pretend the binary has no embedded catalog; set
+// to a specific catalog's JSON to stage a known baseline).
+func withEmbeddedJSON(t *testing.T, data []byte) {
+	t.Helper()
+	orig := embeddedCatalogJSON
+	embeddedCatalogJSON = data
+	t.Cleanup(func() { embeddedCatalogJSON = orig })
+}
+
+// TestManagerLoadEmbedded_UsesEmbeddedBaseline exercises the go:embed fallback
+// when there is no SQLite cache and no user-scoped override file.
+func TestManagerLoadEmbedded_UsesEmbeddedBaseline(t *testing.T) {
 	catalog := createTestCatalog()
 	data, _ := json.Marshal(catalog)
+	withEmbeddedJSON(t, data)
 
-	// Change to temp directory so loadEmbedded can find catalog.json
-	oldWd, _ := os.Getwd()
-	os.Chdir(tmpDir)
-	defer os.Chdir(oldWd)
-
-	// Write catalog.json
-	err := os.WriteFile(filepath.Join(tmpDir, "catalog.json"), data, 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Redirect $HOME (and USERPROFILE on Windows) so user-scoped overrides
+	// miss — we want to prove the embedded baseline is what gets returned.
+	empty := t.TempDir()
+	t.Setenv("HOME", empty)
+	t.Setenv("USERPROFILE", empty)
 
 	cfg := newTestConfig()
 	store := &mockStore{} // Empty cache
@@ -479,9 +491,85 @@ func TestManagerLoadEmbedded(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get() error = %v", err)
 	}
-
 	if result.Version != catalog.Version {
 		t.Errorf("Version = %q, want %q", result.Version, catalog.Version)
+	}
+}
+
+// TestManagerLoadEmbedded_UserOverrideWins shows that a user-scoped
+// catalog.json at $HOME/.agentmgr/catalog.json takes precedence over the
+// embedded baseline.
+func TestManagerLoadEmbedded_UserOverrideWins(t *testing.T) {
+	// Embedded baseline: a catalog with version "0.0.0-embedded".
+	embeddedCat := createTestCatalog()
+	embeddedCat.Version = "0.0.0-embedded"
+	embeddedData, _ := json.Marshal(embeddedCat)
+	withEmbeddedJSON(t, embeddedData)
+
+	// User override: a catalog with version "9.9.9-user".
+	tmpHome := t.TempDir()
+	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
+
+	userCat := createTestCatalog()
+	userCat.Version = "9.9.9-user"
+	userData, _ := json.Marshal(userCat)
+	if err := os.MkdirAll(filepath.Join(tmpHome, ".agentmgr"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(tmpHome, ".agentmgr", "catalog.json"), userData, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := newTestConfig()
+	mgr := NewManager(cfg, &mockStore{})
+
+	result, err := mgr.Get(context.Background())
+	if err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if result.Version != "9.9.9-user" {
+		t.Errorf("Version = %q, want user-override version %q", result.Version, "9.9.9-user")
+	}
+}
+
+// TestManagerLoadEmbedded_NoCWDShadow verifies that a stray catalog.json in
+// the current working directory is NEVER picked up — this is the "surprising
+// shadow" behavior we explicitly removed.
+func TestManagerLoadEmbedded_NoCWDShadow(t *testing.T) {
+	// Stage an embedded baseline so Get() always has something to return.
+	baseline := createTestCatalog()
+	baseline.Version = "baseline-should-win"
+	baselineData, _ := json.Marshal(baseline)
+	withEmbeddedJSON(t, baselineData)
+
+	// Redirect $HOME/USERPROFILE so user-scoped overrides don't fire.
+	empty := t.TempDir()
+	t.Setenv("HOME", empty)
+	t.Setenv("USERPROFILE", empty)
+
+	// Drop a bogus catalog.json in the current working directory.
+	cwd := t.TempDir()
+	oldWd, _ := os.Getwd()
+	if err := os.Chdir(cwd); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(oldWd) })
+
+	bogus := []byte(`{"version":"0.0.0-bogus-cwd-shadow","agents":[]}`)
+	if err := os.WriteFile(filepath.Join(cwd, "catalog.json"), bogus, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := newTestConfig()
+	mgr := NewManager(cfg, &mockStore{})
+
+	result, err := mgr.Get(context.Background())
+	if err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if result.Version != "baseline-should-win" {
+		t.Errorf("Version = %q, CWD catalog.json shadowed the baseline", result.Version)
 	}
 }
 
@@ -574,6 +662,8 @@ func TestManagerRefresh_SingleflightCoalesces(t *testing.T) {
 // after a successful 200 fetch we store the server's ETag, and the next
 // Refresh sends it back and handles a 304 without re-parsing the body.
 func TestManagerRefresh_SendsIfNoneMatchAndHandles304(t *testing.T) {
+	withEmbeddedJSON(t, nil)
+
 	catalog := createTestCatalog()
 	catalogJSON, _ := json.Marshal(catalog)
 	const etag = `"abc123"`
@@ -629,6 +719,8 @@ func TestManagerRefresh_SendsIfNoneMatchAndHandles304(t *testing.T) {
 // SaveCatalogCache does not fail the whole Refresh — the in-memory catalog
 // should still be updated and the caller should get a success result.
 func TestManagerRefresh_LogsCacheSaveErrorButSucceeds(t *testing.T) {
+	withEmbeddedJSON(t, nil)
+
 	catalog := createTestCatalog()
 	catalogJSON, _ := json.Marshal(catalog)
 

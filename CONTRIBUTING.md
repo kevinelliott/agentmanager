@@ -204,6 +204,12 @@ To add a new AI CLI agent to the catalog:
 
 6. **Increment the catalog version** in `catalog.json`
 
+7. **Sync the embedded copy.** `make build` does this automatically via the
+   `sync-catalog` target; if you edit `catalog.json` by hand and run
+   `go build` directly, also run `make sync-catalog` (or copy
+   `catalog.json` to `pkg/catalog/catalog.json`). CI enforces the copies
+   match via `make check-catalog-sync`.
+
 ### Supported Installation Methods
 
 - `npm` - Node.js package manager

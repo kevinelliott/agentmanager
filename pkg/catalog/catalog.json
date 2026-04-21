@@ -1,0 +1,2881 @@
+{
+  "version": "1.0.29",
+  "schema_version": 1,
+  "last_updated": "2026-03-28T00:00:00Z",
+  "agents": {
+    "amp": {
+      "id": "amp",
+      "name": "Amp",
+      "description": "Frontier coding agent by Sourcegraph for terminal and editor",
+      "homepage": "https://ampcode.com",
+      "repository": "https://github.com/sourcegraph/amp-cli",
+      "documentation": "https://ampcode.com/manual",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://ampcode.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["ripgrep"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "auto_update": "true"
+          }
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@sourcegraph/amp",
+          "command": "npm install -g @sourcegraph/amp",
+          "update_cmd": "npm update -g @sourcegraph/amp",
+          "uninstall_cmd": "npm uninstall -g @sourcegraph/amp",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "sourcegraph/amp-cli/amp",
+          "command": "brew install sourcegraph/amp-cli/amp",
+          "update_cmd": "brew upgrade amp",
+          "uninstall_cmd": "brew uninstall amp",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["ripgrep"]
+        },
+        "chocolatey": {
+          "method": "chocolatey",
+          "package": "amp",
+          "command": "choco install amp",
+          "update_cmd": "choco upgrade amp",
+          "uninstall_cmd": "choco uninstall amp",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["amp"],
+        "version_cmd": "amp --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @sourcegraph/amp --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "npm",
+        "url": "https://www.npmjs.com/package/@sourcegraph/amp",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Sourcegraph",
+        "license": "Proprietary"
+      }
+    },
+    "auggie": {
+      "id": "auggie",
+      "name": "Auggie",
+      "description": "AI agent bringing Augment Code's context engine to the terminal",
+      "homepage": "https://www.augmentcode.com/product/CLI",
+      "repository": "https://github.com/augmentcode/auggie",
+      "documentation": "https://docs.augmentcode.com/cli/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@augmentcode/auggie",
+          "command": "npm install -g @augmentcode/auggie",
+          "update_cmd": "npm update -g @augmentcode/auggie",
+          "uninstall_cmd": "npm uninstall -g @augmentcode/auggie",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 22"]
+        }
+      },
+      "detection": {
+        "executables": ["auggie"],
+        "version_cmd": "auggie --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @augmentcode/auggie --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/augmentcode/auggie/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Augment Code",
+        "license": "MIT"
+      }
+    },
+    "codebuff": {
+      "id": "codebuff",
+      "name": "Codebuff",
+      "description": "Open-source AI coding assistant with multi-agent architecture",
+      "homepage": "https://www.codebuff.com",
+      "repository": "https://github.com/CodebuffAI/codebuff",
+      "documentation": "https://www.codebuff.com/docs/help/quick-start",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "codebuff",
+          "command": "npm install -g codebuff",
+          "update_cmd": "npm update -g codebuff",
+          "uninstall_cmd": "npm uninstall -g codebuff",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node"]
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://github.com/CodebuffAI/codebuff/releases",
+            "artifact_darwin_arm64": "codebuff-macos-arm64.tar.gz",
+            "artifact_darwin_amd64": "codebuff-macos-x64.tar.gz",
+            "artifact_linux_amd64": "codebuff-linux-x64.tar.gz",
+            "artifact_linux_arm64": "codebuff-linux-arm64.tar.gz",
+            "artifact_windows_amd64": "codebuff-win32-x64.tar.gz"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["codebuff"],
+        "version_cmd": "codebuff --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g codebuff --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/CodebuffAI/codebuff/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Codebuff AI",
+        "license": "Apache-2.0"
+      }
+    },
+    "claude-code": {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "description": "Anthropic's official CLI for Claude AI pair programming",
+      "homepage": "https://claude.ai/claude-code",
+      "repository": "https://github.com/anthropics/claude-code",
+      "documentation": "https://docs.anthropic.com/claude-code",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@anthropic-ai/claude-code",
+          "command": "npm install -g @anthropic-ai/claude-code",
+          "update_cmd": "npm update -g @anthropic-ai/claude-code",
+          "uninstall_cmd": "npm uninstall -g @anthropic-ai/claude-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=18"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://claude.ai/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["claude", "claude-code"],
+        "version_cmd": "claude --version",
+        "version_regex": "claude-code version ([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @anthropic-ai/claude-code --json"
+          },
+          "native": {
+            "paths": ["~/.claude/bin/claude", "/usr/local/bin/claude"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/anthropics/claude-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Anthropic",
+        "license": "Proprietary"
+      }
+    },
+    "agent-cli": {
+      "id": "agent-cli",
+      "name": "Agent CLI",
+      "description": "Local-first AI-powered CLI with voice transcription and conversational agents",
+      "homepage": "https://github.com/basnijholt/agent-cli",
+      "repository": "https://github.com/basnijholt/agent-cli",
+      "documentation": "https://github.com/basnijholt/agent-cli#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "agent-cli",
+          "command": "uv tool install agent-cli",
+          "update_cmd": "uv tool upgrade agent-cli",
+          "uninstall_cmd": "uv tool uninstall agent-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["uv", "python>=3.11"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "agent-cli",
+          "command": "pip install agent-cli",
+          "update_cmd": "pip install --upgrade agent-cli",
+          "uninstall_cmd": "pip uninstall agent-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python>=3.11"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "agent-cli",
+          "command": "pipx install agent-cli",
+          "update_cmd": "pipx upgrade agent-cli",
+          "uninstall_cmd": "pipx uninstall agent-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["pipx", "python>=3.11"]
+        }
+      },
+      "detection": {
+        "executables": ["agent-cli", "agent", "ag"],
+        "version_cmd": "agent-cli --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/basnijholt/agent-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Bas Nijholt",
+        "license": "MIT"
+      }
+    },
+    "aichat": {
+      "id": "aichat",
+      "name": "AIChat",
+      "description": "All-in-one LLM CLI with shell assistant, RAG, AI agents, and 20+ providers",
+      "homepage": "https://github.com/sigoden/aichat",
+      "repository": "https://github.com/sigoden/aichat",
+      "documentation": "https://github.com/sigoden/aichat/wiki",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "aichat",
+          "command": "brew install aichat",
+          "update_cmd": "brew upgrade aichat",
+          "uninstall_cmd": "brew uninstall aichat",
+          "platforms": ["darwin", "linux"]
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "aichat",
+          "command": "cargo install aichat",
+          "update_cmd": "cargo install aichat",
+          "uninstall_cmd": "cargo uninstall aichat",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "artifact_darwin_arm64": "aichat-{version}-aarch64-apple-darwin.tar.gz",
+            "artifact_darwin_x64": "aichat-{version}-x86_64-apple-darwin.tar.gz",
+            "artifact_linux_arm64": "aichat-{version}-aarch64-unknown-linux-musl.tar.gz",
+            "artifact_linux_x64": "aichat-{version}-x86_64-unknown-linux-musl.tar.gz",
+            "artifact_windows_x64": "aichat-{version}-x86_64-pc-windows-msvc.zip",
+            "artifact_windows_arm64": "aichat-{version}-aarch64-pc-windows-msvc.zip"
+          }
+        },
+        "scoop": {
+          "method": "scoop",
+          "package": "aichat",
+          "command": "scoop install aichat",
+          "update_cmd": "scoop update aichat",
+          "uninstall_cmd": "scoop uninstall aichat",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["aichat"],
+        "version_cmd": "aichat --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list aichat",
+            "paths": ["/opt/homebrew/bin/aichat", "/usr/local/bin/aichat"]
+          },
+          "cargo": {
+            "check_cmd": "cargo install --list | grep aichat",
+            "paths": ["~/.cargo/bin/aichat"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sigoden/aichat/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "sigoden",
+        "license": "Apache-2.0 OR MIT"
+      }
+    },
+    "aider": {
+      "id": "aider",
+      "name": "Aider",
+      "description": "AI pair programming in your terminal",
+      "homepage": "https://aider.chat",
+      "repository": "https://github.com/Aider-AI/aider",
+      "documentation": "https://aider.chat/docs/",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "aider-chat",
+          "command": "pip install aider-chat",
+          "update_cmd": "pip install --upgrade aider-chat",
+          "uninstall_cmd": "pip uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.9"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "aider-chat",
+          "command": "pipx install aider-chat",
+          "update_cmd": "pipx upgrade aider-chat",
+          "uninstall_cmd": "pipx uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "aider-chat",
+          "command": "uv tool install aider-chat",
+          "update_cmd": "uv tool upgrade aider-chat",
+          "uninstall_cmd": "uv tool uninstall aider-chat",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv"]
+        }
+      },
+      "detection": {
+        "executables": ["aider"],
+        "version_cmd": "aider --version",
+        "version_regex": "aider ([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Aider-AI/aider/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Paul Gauthier",
+        "license": "Apache-2.0"
+      }
+    },
+    "copilot-cli": {
+      "id": "copilot-cli",
+      "name": "GitHub Copilot CLI",
+      "description": "GitHub Copilot in the command line",
+      "homepage": "https://github.com/features/copilot/cli",
+      "repository": "https://github.com/github/copilot-cli",
+      "documentation": "https://docs.github.com/en/copilot/github-copilot-in-the-cli",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@github/copilot",
+          "command": "npm install -g @github/copilot",
+          "update_cmd": "npm update -g @github/copilot",
+          "uninstall_cmd": "npm uninstall -g @github/copilot",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=22"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "copilot-cli@prerelease",
+          "command": "brew install copilot-cli@prerelease",
+          "update_cmd": "brew upgrade copilot-cli@prerelease",
+          "uninstall_cmd": "brew uninstall copilot-cli@prerelease",
+          "platforms": ["darwin", "linux"]
+        },
+        "winget": {
+          "method": "winget",
+          "package": "GitHub.Copilot",
+          "command": "winget install GitHub.Copilot",
+          "update_cmd": "winget upgrade GitHub.Copilot",
+          "uninstall_cmd": "winget uninstall GitHub.Copilot",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["copilot", "github-copilot-cli"],
+        "version_cmd": "copilot --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/github/copilot-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "GitHub",
+        "license": "Proprietary"
+      }
+    },
+    "goose": {
+      "id": "goose",
+      "name": "Goose",
+      "description": "Open source AI agent that automates engineering tasks",
+      "homepage": "https://block.github.io/goose/",
+      "repository": "https://github.com/block/goose",
+      "documentation": "https://block.github.io/goose/docs/getting-started/installation/",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash",
+          "update_cmd": "goose update",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "brew": {
+          "method": "brew",
+          "package": "block-goose-cli",
+          "command": "brew install block-goose-cli",
+          "update_cmd": "brew upgrade block-goose-cli",
+          "uninstall_cmd": "brew uninstall block-goose-cli",
+          "platforms": ["darwin", "linux"]
+        },
+        "brew-cask": {
+          "method": "brew",
+          "package": "block-goose",
+          "command": "brew install --cask block-goose",
+          "update_cmd": "brew upgrade --cask block-goose",
+          "uninstall_cmd": "brew uninstall --cask block-goose",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true",
+            "type": "desktop"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/block/goose/main/download_cli.ps1' -OutFile 'download_cli.ps1'; .\\download_cli.ps1",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["goose"],
+        "version_cmd": "goose --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list block-goose-cli"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/block/goose/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Block Inc.",
+        "license": "Apache-2.0"
+      }
+    },
+    "grok-cli": {
+      "id": "grok-cli",
+      "name": "Grok CLI",
+      "description": "AI agent bringing Grok into your terminal with file ops and MCP tools",
+      "homepage": "https://grokcli.io/",
+      "repository": "https://github.com/superagent-ai/grok-cli",
+      "documentation": "https://github.com/superagent-ai/grok-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@vibe-kit/grok-cli",
+          "command": "npm install -g @vibe-kit/grok-cli",
+          "update_cmd": "npm update -g @vibe-kit/grok-cli",
+          "uninstall_cmd": "npm uninstall -g @vibe-kit/grok-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        },
+        "bun": {
+          "method": "bun",
+          "package": "@vibe-kit/grok-cli",
+          "command": "bun add -g @vibe-kit/grok-cli",
+          "update_cmd": "bun add -g @vibe-kit/grok-cli",
+          "uninstall_cmd": "bun remove -g @vibe-kit/grok-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Bun >= 1.0"]
+        }
+      },
+      "detection": {
+        "executables": ["grok"],
+        "version_cmd": "grok --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @vibe-kit/grok-cli --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/superagent-ai/grok-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Superagent AI",
+        "license": "MIT"
+      }
+    },
+    "gemini-cli": {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "description": "Google's Gemini AI in your terminal",
+      "homepage": "https://developers.google.com/gemini-code-assist/docs/gemini-cli",
+      "repository": "https://github.com/google-gemini/gemini-cli",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@google-gemini/gemini-cli",
+          "command": "npm install -g @google-gemini/gemini-cli",
+          "update_cmd": "npm update -g @google-gemini/gemini-cli",
+          "uninstall_cmd": "npm uninstall -g @google-gemini/gemini-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["gemini", "gemini-cli"],
+        "version_cmd": "gemini --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/google-gemini/gemini-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Google",
+        "license": "Apache-2.0"
+      }
+    },
+    "continue-cli": {
+      "id": "continue-cli",
+      "name": "Continue CLI",
+      "description": "Open-source AI code assistant CLI",
+      "homepage": "https://continue.dev",
+      "repository": "https://github.com/continuedev/continue",
+      "documentation": "https://docs.continue.dev/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@continuedev/cli",
+          "command": "npm install -g @continuedev/cli",
+          "update_cmd": "npm update -g @continuedev/cli",
+          "uninstall_cmd": "npm uninstall -g @continuedev/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["cn", "continue"],
+        "version_cmd": "cn --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/continuedev/continue/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Continue",
+        "license": "Apache-2.0"
+      }
+    },
+    "opencode": {
+      "id": "opencode",
+      "name": "OpenCode",
+      "description": "The open source AI coding agent for your terminal",
+      "homepage": "https://opencode.ai",
+      "repository": "https://github.com/opencode-ai/opencode",
+      "documentation": "https://opencode.ai/docs/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "opencode-ai",
+          "command": "npm install -g opencode-ai",
+          "update_cmd": "npm update -g opencode-ai",
+          "uninstall_cmd": "npm uninstall -g opencode-ai",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "anomalyco/tap/opencode",
+          "command": "brew install anomalyco/tap/opencode",
+          "update_cmd": "brew upgrade opencode",
+          "uninstall_cmd": "brew uninstall opencode",
+          "platforms": ["darwin", "linux"]
+        },
+        "scoop": {
+          "method": "scoop",
+          "package": "opencode",
+          "command": "scoop bucket add extras && scoop install extras/opencode",
+          "update_cmd": "scoop update opencode",
+          "uninstall_cmd": "scoop uninstall opencode",
+          "platforms": ["windows"]
+        },
+        "chocolatey": {
+          "method": "chocolatey",
+          "package": "opencode",
+          "command": "choco install opencode",
+          "update_cmd": "choco upgrade opencode",
+          "uninstall_cmd": "choco uninstall opencode",
+          "platforms": ["windows"]
+        },
+        "curl": {
+          "method": "curl",
+          "command": "curl -fsSL https://opencode.ai/install | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["opencode"],
+        "version_cmd": "opencode --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/opencode-ai/opencode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Anomaly",
+        "license": "MIT"
+      }
+    },
+    "openclaw": {
+      "id": "openclaw",
+      "name": "OpenClaw",
+      "description": "Personal AI assistant with multi-channel inbox and multi-agent routing",
+      "homepage": "https://openclaw.ai",
+      "repository": "https://github.com/openclaw/openclaw",
+      "documentation": "https://docs.openclaw.ai",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "openclaw",
+          "command": "npm install -g openclaw",
+          "update_cmd": "npm update -g openclaw",
+          "uninstall_cmd": "npm uninstall -g openclaw",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "openclaw",
+          "command": "brew install openclaw",
+          "update_cmd": "brew upgrade openclaw",
+          "uninstall_cmd": "brew uninstall openclaw",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "Download .dmg from GitHub Releases",
+          "platforms": ["darwin"],
+          "metadata": {
+            "installer_type": "dmg",
+            "download_url": "https://github.com/openclaw/openclaw/releases"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["openclaw"],
+        "version_cmd": "openclaw --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g openclaw --json"
+          },
+          "brew": {
+            "paths": ["/opt/homebrew/Caskroom/openclaw"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openclaw/openclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "OpenClaw",
+        "license": "MIT"
+      }
+    },
+    "cursor-cli": {
+      "id": "cursor-cli",
+      "name": "Cursor CLI",
+      "description": "Cursor AI editor CLI agent",
+      "homepage": "https://cursor.com",
+      "documentation": "https://cursor.com/docs/cli/overview",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl https://cursor.com/install -fsSL | bash",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["cursor-agent", "cursor"],
+        "version_cmd": "cursor-agent --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://cursor.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Cursor",
+        "license": "Proprietary"
+      }
+    },
+    "qoder-cli": {
+      "id": "qoder-cli",
+      "name": "Qoder CLI",
+      "description": "Qoder AI coding assistant CLI",
+      "homepage": "https://qoder.com",
+      "documentation": "https://docs.qoder.com",
+      "install_methods": {
+        "binary": {
+          "method": "binary",
+          "command": "Download from https://qoder.com/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://qoder.com/cli",
+            "binary_name": "qoder"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["qoder"],
+        "version_cmd": "qoder --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://qoder.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Alibaba",
+        "license": "Proprietary"
+      }
+    },
+    "ra-aid": {
+      "id": "ra-aid",
+      "name": "RA.Aid",
+      "description": "Autonomous software development agent with research, planning, and implementation",
+      "homepage": "https://docs.ra-aid.ai/",
+      "repository": "https://github.com/ai-christianson/RA.Aid",
+      "documentation": "https://docs.ra-aid.ai/quickstart/installation/",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "ra-aid",
+          "command": "pip install ra-aid",
+          "update_cmd": "pip install --upgrade ra-aid",
+          "uninstall_cmd": "pip uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "ra-aid",
+          "command": "pipx install ra-aid",
+          "update_cmd": "pipx upgrade ra-aid",
+          "uninstall_cmd": "pipx uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "ra-aid",
+          "command": "uv pip install ra-aid",
+          "update_cmd": "uv pip install --upgrade ra-aid",
+          "uninstall_cmd": "uv pip uninstall ra-aid",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["Python >= 3.12"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "ra-aid",
+          "command": "brew tap ai-christianson/homebrew-ra-aid && brew install ra-aid",
+          "update_cmd": "brew upgrade ra-aid",
+          "uninstall_cmd": "brew uninstall ra-aid",
+          "platforms": ["darwin"],
+          "metadata": {
+            "tap": "ai-christianson/homebrew-ra-aid"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["ra-aid"],
+        "version_cmd": "ra-aid --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show ra-aid",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list ra-aid",
+            "paths": ["/opt/homebrew/bin/ra-aid", "/usr/local/bin/ra-aid"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ai-christianson/RA.Aid/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ai-christianson",
+        "license": "Apache-2.0"
+      }
+    },
+    "rallies-cli": {
+      "id": "rallies-cli",
+      "name": "Rallies CLI",
+      "description": "AI-powered investment research CLI with real-time financial market data",
+      "homepage": "https://rallies.ai",
+      "repository": "https://github.com/ralliesai/rallies-cli",
+      "documentation": "https://github.com/ralliesai/rallies-cli#readme",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "rallies",
+          "command": "pip install rallies",
+          "update_cmd": "pip install --upgrade rallies",
+          "uninstall_cmd": "pip uninstall rallies",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.8"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "rallies",
+          "command": "pipx install rallies",
+          "update_cmd": "pipx upgrade rallies",
+          "uninstall_cmd": "pipx uninstall rallies",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx", "python>=3.8"]
+        }
+      },
+      "detection": {
+        "executables": ["rallies"],
+        "version_cmd": "rallies --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ralliesai/rallies-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Rallies AI",
+        "license": "GPL-3.0"
+      }
+    },
+    "ralph-tui": {
+      "id": "ralph-tui",
+      "name": "Ralph TUI",
+      "description": "AI Agent Loop Orchestrator for autonomous task execution with AI coders",
+      "homepage": "https://github.com/subsy/ralph-tui",
+      "repository": "https://github.com/subsy/ralph-tui",
+      "documentation": "https://github.com/subsy/ralph-tui#readme",
+      "install_methods": {
+        "bun": {
+          "method": "bun",
+          "package": "ralph-tui",
+          "command": "bun install -g ralph-tui",
+          "update_cmd": "bun update -g ralph-tui",
+          "uninstall_cmd": "bun remove -g ralph-tui",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["bun>=1.0"]
+        },
+        "bunx": {
+          "method": "bunx",
+          "package": "ralph-tui",
+          "command": "bunx ralph-tui",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["bun>=1.0"],
+          "metadata": {
+            "ephemeral": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["ralph-tui"],
+        "version_cmd": "ralph-tui --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/subsy/ralph-tui/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "subsy",
+        "license": "MIT"
+      }
+    },
+    "tunacode-cli": {
+      "id": "tunacode-cli",
+      "name": "TunaCode CLI",
+      "description": "AI CLI coding agent with TUI, safe git branches, and multi-LLM support",
+      "homepage": "https://tunacode.xyz",
+      "repository": "https://github.com/alchemiststudiosDOTai/tunacode",
+      "documentation": "https://github.com/alchemiststudiosDOTai/tunacode#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "tunacode-cli",
+          "command": "uv tool install tunacode-cli",
+          "update_cmd": "uv tool upgrade tunacode-cli",
+          "uninstall_cmd": "uv tool uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["uv", "python>=3.11"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "tunacode-cli",
+          "command": "pip install tunacode-cli",
+          "update_cmd": "pip install --upgrade tunacode-cli",
+          "uninstall_cmd": "pip uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python>=3.11"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "tunacode-cli",
+          "command": "pipx install tunacode-cli",
+          "update_cmd": "pipx upgrade tunacode-cli",
+          "uninstall_cmd": "pipx uninstall tunacode-cli",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["pipx", "python>=3.11"]
+        }
+      },
+      "detection": {
+        "executables": ["tunacode"],
+        "version_cmd": "tunacode --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/alchemiststudiosDOTai/tunacode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Alchemist Studios",
+        "license": "MIT"
+      }
+    },
+    "valyu-cli": {
+      "id": "valyu-cli",
+      "name": "Valyu CLI",
+      "description": "AI-native search CLI for DeepSearch, content extraction, and deep research",
+      "homepage": "https://www.valyu.ai",
+      "repository": "https://github.com/ed3t/valyu-cli",
+      "documentation": "https://docs.valyu.ai/home",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "valyu-cli",
+          "command": "npm install -g valyu-cli",
+          "update_cmd": "npm update -g valyu-cli",
+          "uninstall_cmd": "npm uninstall -g valyu-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        }
+      },
+      "detection": {
+        "executables": ["valyu"],
+        "version_cmd": "valyu --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g valyu-cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ed3t/valyu-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Valyu",
+        "license": "MIT"
+      }
+    },
+    "tokscale": {
+      "id": "tokscale",
+      "name": "Tokscale",
+      "description": "High-performance CLI for monitoring AI coding assistant token usage and costs",
+      "homepage": "https://tokscale.dev",
+      "repository": "https://github.com/junhoyeo/tokscale",
+      "documentation": "https://github.com/junhoyeo/tokscale#readme",
+      "install_methods": {
+        "bun": {
+          "method": "bun",
+          "package": "tokscale",
+          "command": "bunx tokscale@latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["bun"]
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@tokscale/cli",
+          "command": "npx @tokscale/cli@latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "note": "Bun recommended for TUI with native modules"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["tokscale"],
+        "version_cmd": "tokscale --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/junhoyeo/tokscale/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Junho Yeo",
+        "license": "MIT"
+      }
+    },
+    "agent-deck": {
+      "id": "agent-deck",
+      "name": "Agent Deck",
+      "description": "Terminal session manager for AI coding agents with TUI built on Go + Bubble Tea",
+      "homepage": "https://github.com/asheshgoplani/agent-deck",
+      "repository": "https://github.com/asheshgoplani/agent-deck",
+      "documentation": "https://github.com/asheshgoplani/agent-deck#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "asheshgoplani/tap/agent-deck",
+          "command": "brew install asheshgoplani/tap/agent-deck",
+          "update_cmd": "brew upgrade agent-deck",
+          "uninstall_cmd": "brew uninstall agent-deck",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["tmux"]
+        },
+        "go": {
+          "method": "go",
+          "package": "github.com/asheshgoplani/agent-deck/cmd/agent-deck",
+          "command": "go install github.com/asheshgoplani/agent-deck/cmd/agent-deck@latest",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["go>=1.24", "tmux"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/asheshgoplani/agent-deck/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "windows_note": "Windows not supported, use WSL"
+          },
+          "prereqs": ["tmux"]
+        }
+      },
+      "detection": {
+        "executables": ["agent-deck"],
+        "version_cmd": "agent-deck --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/asheshgoplani/agent-deck/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Ashesh Goplani",
+        "license": "MIT"
+      }
+    },
+    "amazon-q": {
+      "id": "amazon-q",
+      "name": "Amazon Q Developer CLI",
+      "description": "Agentic chat experience in your terminal for building applications with natural language",
+      "homepage": "https://aws.amazon.com/developer/learning/q-developer-cli/",
+      "repository": "https://github.com/aws/amazon-q-developer-cli",
+      "documentation": "https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/command-line.html",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "amazon-q",
+          "command": "brew install --cask amazon-q",
+          "update_cmd": "brew upgrade --cask amazon-q",
+          "uninstall_cmd": "brew uninstall --cask amazon-q",
+          "platforms": ["darwin"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl --proto '=https' --tlsv1.2 -sSf 'https://desktop-release.q.us-east-1.amazonaws.com/latest/q-x86_64-linux.zip' -o q.zip && unzip q.zip && ./q/install.sh",
+          "platforms": ["linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "windows_note": "Windows requires WSL"
+          }
+        },
+        "dmg": {
+          "method": "dmg",
+          "command": "Download DMG from https://desktop-release.q.us-east-1.amazonaws.com/latest/Amazon%20Q.dmg",
+          "platforms": ["darwin"],
+          "metadata": {
+            "installer_type": "dmg",
+            "download_url": "https://desktop-release.q.us-east-1.amazonaws.com/latest/Amazon%20Q.dmg"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["q"],
+        "version_cmd": "q --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/aws/amazon-q-developer-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Amazon Web Services",
+        "license": "Apache-2.0 AND MIT"
+      }
+    },
+    "juno-code": {
+      "id": "juno-code",
+      "name": "Juno Code",
+      "description": "AI automation tool with Ralph Method for iterative code development",
+      "homepage": "https://github.com/askbudi/juno-code",
+      "repository": "https://github.com/askbudi/juno-code",
+      "documentation": "https://github.com/askbudi/juno-code#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "juno-code",
+          "command": "npm install -g juno-code",
+          "update_cmd": "npm update -g juno-code",
+          "uninstall_cmd": "npm uninstall -g juno-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node", "git"]
+        }
+      },
+      "detection": {
+        "executables": ["juno-code"],
+        "version_cmd": "juno-code --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g juno-code --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/askbudi/juno-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Juno AI INC.",
+        "license": "MIT"
+      }
+    },
+    "kimi-code": {
+      "id": "kimi-code",
+      "name": "Kimi Code",
+      "description": "AI terminal agent for software development and shell operations",
+      "homepage": "https://www.kimi.com/code",
+      "repository": "https://github.com/MoonshotAI/kimi-cli",
+      "documentation": "https://moonshotai.github.io/kimi-cli/en/guides/getting-started.html",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -L code.kimi.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "uv": {
+          "method": "uv",
+          "package": "kimi-cli",
+          "command": "uv tool install kimi-cli",
+          "update_cmd": "uv tool upgrade kimi-cli",
+          "uninstall_cmd": "uv tool uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv", "python>=3.12"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "kimi-cli",
+          "command": "pip install kimi-cli",
+          "update_cmd": "pip install --upgrade kimi-cli",
+          "uninstall_cmd": "pip uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.12"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "kimi-cli",
+          "command": "pipx install kimi-cli",
+          "update_cmd": "pipx upgrade kimi-cli",
+          "uninstall_cmd": "pipx uninstall kimi-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx", "python>=3.12"]
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://github.com/MoonshotAI/kimi-cli/releases",
+            "artifact_darwin_arm64": "kimi-VERSION-aarch64-apple-darwin.tar.gz",
+            "artifact_linux_arm64": "kimi-VERSION-aarch64-unknown-linux-gnu.tar.gz",
+            "artifact_windows_amd64": "kimi-VERSION-x86_64-pc-windows-msvc.zip"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["kimi"],
+        "version_cmd": "kimi --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/MoonshotAI/kimi-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Moonshot AI",
+        "license": "Apache-2.0"
+      }
+    },
+    "kilocode-cli": {
+      "id": "kilocode-cli",
+      "name": "Kilocode CLI",
+      "description": "Terminal UI for Kilo Code, the all-in-one agentic engineering platform",
+      "homepage": "https://kilo.ai",
+      "repository": "https://github.com/Kilo-Org/kilocode",
+      "documentation": "https://github.com/Kilo-Org/kilocode/tree/main/cli",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@kilocode/cli",
+          "command": "npm install -g @kilocode/cli",
+          "update_cmd": "npm update -g @kilocode/cli",
+          "uninstall_cmd": "npm uninstall -g @kilocode/cli",
+          "platforms": ["darwin", "linux"],
+          "global_flag": "-g",
+          "metadata": {
+            "windows_note": "Windows requires WSL"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["kilocode"],
+        "version_cmd": "kilocode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @kilocode/cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Kilo-Org/kilocode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Kilo",
+        "license": "Apache-2.0"
+      }
+    },
+    "kode-cli": {
+      "id": "kode-cli",
+      "name": "Kode CLI",
+      "description": "AI-powered terminal agent for coding, commands, and post-human workflows",
+      "homepage": "https://github.com/shareAI-lab/Kode-cli",
+      "repository": "https://github.com/shareAI-lab/Kode-cli",
+      "documentation": "https://github.com/shareAI-lab/Kode-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@shareai-lab/kode",
+          "command": "npm install -g @shareai-lab/kode",
+          "update_cmd": "npm update -g @shareai-lab/kode",
+          "uninstall_cmd": "npm uninstall -g @shareai-lab/kode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 18"]
+        }
+      },
+      "detection": {
+        "executables": ["kode", "kd", "kwa"],
+        "version_cmd": "kode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @shareai-lab/kode --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/shareAI-lab/Kode-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "shareAI-lab",
+        "license": "Apache-2.0"
+      }
+    },
+    "plandex": {
+      "id": "plandex",
+      "name": "Plandex",
+      "description": "Open source AI coding agent for large-scale development tasks",
+      "homepage": "https://plandex.ai",
+      "repository": "https://github.com/plandex-ai/plandex",
+      "documentation": "https://docs.plandex.ai",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -sL https://plandex.ai/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "windows_note": "Windows requires WSL"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["plandex", "pdx"],
+        "version_cmd": "plandex --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/plandex-ai/plandex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Plandex",
+        "license": "MIT"
+      }
+    },
+    "pi-coding-agent": {
+      "id": "pi-coding-agent",
+      "name": "Pi Coding Agent",
+      "description": "Terminal-based coding agent with multi-model support and session branching",
+      "homepage": "https://github.com/badlogic/pi-mono",
+      "repository": "https://github.com/badlogic/pi-mono",
+      "documentation": "https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@mariozechner/pi-coding-agent",
+          "command": "npm install -g @mariozechner/pi-coding-agent",
+          "update_cmd": "npm update -g @mariozechner/pi-coding-agent",
+          "uninstall_cmd": "npm uninstall -g @mariozechner/pi-coding-agent",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "download_url": "https://github.com/badlogic/pi-mono/releases",
+            "artifact_darwin_arm64": "pi-darwin-arm64.tar.gz",
+            "artifact_darwin_amd64": "pi-darwin-x64.tar.gz",
+            "artifact_linux_amd64": "pi-linux-x64.tar.gz",
+            "artifact_linux_arm64": "pi-linux-arm64.tar.gz",
+            "artifact_windows_amd64": "pi-windows-x64.zip",
+            "windows_note": "Requires bash shell (Git Bash, Cygwin, MSYS2, or WSL)"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["pi"],
+        "version_cmd": "pi --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @mariozechner/pi-coding-agent --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/badlogic/pi-mono/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Mario Zechner",
+        "license": "MIT"
+      }
+    },
+    "pi-agent-rust": {
+      "id": "pi-agent-rust",
+      "name": "Pi Agent Rust",
+      "description": "High-performance Rust port of Pi Agent with single binary and instant startup",
+      "homepage": "https://github.com/Dicklesworthstone/pi_agent_rust",
+      "repository": "https://github.com/Dicklesworthstone/pi_agent_rust",
+      "documentation": "https://github.com/Dicklesworthstone/pi_agent_rust#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Dicklesworthstone/pi_agent_rust/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "artifact_darwin": "pi",
+            "artifact_linux_x64": "pi-linux-x86_64.tar.xz"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["pi"],
+        "version_cmd": "pi --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "check_cmd": "which pi",
+            "paths": ["/usr/local/bin/pi", "~/.local/bin/pi"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/pi_agent_rust/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Jeff Emanuel",
+        "license": "MIT"
+      }
+    },
+    "qwen-code": {
+      "id": "qwen-code",
+      "name": "Qwen Code",
+      "description": "Open-source AI coding agent optimized for Qwen3-Coder model",
+      "homepage": "https://qwenlm.github.io/blog/qwen3-coder/",
+      "repository": "https://github.com/QwenLM/qwen-code",
+      "documentation": "https://qwenlm.github.io/qwen-code-docs/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@qwen-code/qwen-code",
+          "command": "npm install -g @qwen-code/qwen-code",
+          "update_cmd": "npm update -g @qwen-code/qwen-code",
+          "uninstall_cmd": "npm uninstall -g @qwen-code/qwen-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "qwen-code",
+          "command": "brew install qwen-code",
+          "update_cmd": "brew upgrade qwen-code",
+          "uninstall_cmd": "brew uninstall qwen-code",
+          "platforms": ["darwin", "linux"]
+        }
+      },
+      "detection": {
+        "executables": ["qwen"],
+        "version_cmd": "qwen --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @qwen-code/qwen-code --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/QwenLM/qwen-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Alibaba / Qwen",
+        "license": "Apache-2.0"
+      }
+    },
+    "openhands": {
+      "id": "openhands",
+      "name": "OpenHands CLI",
+      "description": "AI-driven development CLI with terminal UI for autonomous coding agents",
+      "homepage": "https://openhands.dev",
+      "repository": "https://github.com/OpenHands/OpenHands",
+      "documentation": "https://docs.openhands.dev/openhands/usage/cli/terminal",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "openhands",
+          "command": "uv tool install openhands --python 3.12",
+          "update_cmd": "uv tool upgrade openhands --python 3.12",
+          "uninstall_cmd": "uv tool uninstall openhands",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv", "python>=3.12"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "openhands",
+          "command": "pip install openhands",
+          "update_cmd": "pip install --upgrade openhands",
+          "uninstall_cmd": "pip uninstall openhands",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.12"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "openhands",
+          "command": "pipx install openhands --python python3.12",
+          "update_cmd": "pipx upgrade openhands",
+          "uninstall_cmd": "pipx uninstall openhands",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx", "python>=3.12"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://install.openhands.dev/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["openhands"],
+        "version_cmd": "openhands --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/OpenHands/OpenHands/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "OpenHands",
+        "license": "MIT"
+      }
+    },
+    "kubectl-ai": {
+      "id": "kubectl-ai",
+      "name": "kubectl-ai",
+      "description": "AI-powered Kubernetes Assistant that translates user intent into precise Kubernetes operations",
+      "homepage": "https://github.com/GoogleCloudPlatform/kubectl-ai",
+      "repository": "https://github.com/GoogleCloudPlatform/kubectl-ai",
+      "documentation": "https://github.com/GoogleCloudPlatform/kubectl-ai#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -sSL https://raw.githubusercontent.com/GoogleCloudPlatform/kubectl-ai/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "krew": {
+          "method": "krew",
+          "package": "ai",
+          "command": "kubectl krew install ai",
+          "update_cmd": "kubectl krew upgrade ai",
+          "uninstall_cmd": "kubectl krew uninstall ai",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["kubectl", "krew"],
+          "metadata": {
+            "note": "Invoke as 'kubectl ai' after installation"
+          }
+        },
+        "nix": {
+          "method": "nix",
+          "package": "kubectl-ai",
+          "command": "nix-shell -p kubectl-ai",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["nix"]
+        }
+      },
+      "detection": {
+        "executables": ["kubectl-ai"],
+        "version_cmd": "kubectl-ai version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/GoogleCloudPlatform/kubectl-ai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Google Cloud Platform",
+        "license": "Apache-2.0"
+      }
+    },
+    "mastracode": {
+      "id": "mastracode",
+      "name": "Mastra Code",
+      "description": "Terminal AI coding agent with observational memory, 70+ models, and multi-mode workflows",
+      "homepage": "https://code.mastra.ai/",
+      "repository": "https://github.com/mastra-ai/mastra",
+      "documentation": "https://mastra.ai/docs/mastra-code/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mastracode",
+          "command": "npm install -g mastracode",
+          "update_cmd": "npm update -g mastracode",
+          "uninstall_cmd": "npm uninstall -g mastracode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 22.13.0"]
+        }
+      },
+      "detection": {
+        "executables": ["mastracode"],
+        "version_cmd": "mastracode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g mastracode --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mastra-ai/mastra/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Mastra",
+        "license": "Apache-2.0"
+      }
+    },
+    "claude-squad": {
+      "id": "claude-squad",
+      "name": "Claude Squad",
+      "description": "Terminal application for managing multiple AI coding agents in isolated workspaces with parallel task execution",
+      "homepage": "https://github.com/smtg-ai/claude-squad",
+      "repository": "https://github.com/smtg-ai/claude-squad",
+      "documentation": "https://github.com/smtg-ai/claude-squad#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "claude-squad",
+          "command": "brew install claude-squad",
+          "update_cmd": "brew upgrade claude-squad",
+          "uninstall_cmd": "brew uninstall claude-squad",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["tmux", "gh"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/smtg-ai/claude-squad/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "install_path": "~/.local/bin"
+          },
+          "prereqs": ["tmux", "gh"]
+        }
+      },
+      "detection": {
+        "executables": ["cs", "claude-squad"],
+        "version_cmd": "cs version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/smtg-ai/claude-squad/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "SMTG AI",
+        "license": "AGPL-3.0"
+      }
+    },
+    "cline-cli": {
+      "id": "cline-cli",
+      "name": "Cline CLI",
+      "description": "Open-source AI coding agent with Plan/Act modes, MCP, and ACP support",
+      "homepage": "https://cline.bot/cli",
+      "repository": "https://github.com/cline/cline",
+      "documentation": "https://docs.cline.bot/cline-cli/getting-started",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "cline",
+          "command": "npm install -g cline",
+          "update_cmd": "npm update -g cline",
+          "uninstall_cmd": "npm uninstall -g cline",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Node.js >= 20"]
+        }
+      },
+      "detection": {
+        "executables": ["cline"],
+        "version_cmd": "cline version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g cline --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/cline/cline/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Cline Bot Inc.",
+        "license": "Apache-2.0"
+      }
+    },
+    "deepseek-cli": {
+      "id": "deepseek-cli",
+      "name": "DeepSeek CLI",
+      "description": "Command-line AI coding assistant leveraging DeepSeek Coder models for code generation and completion",
+      "homepage": "https://deepseek-cli.vercel.app",
+      "repository": "https://github.com/holasoymalva/deepseek-cli",
+      "documentation": "https://github.com/holasoymalva/deepseek-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "run-deepseek-cli",
+          "command": "npm install -g run-deepseek-cli",
+          "update_cmd": "npm update -g run-deepseek-cli",
+          "uninstall_cmd": "npm uninstall -g run-deepseek-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=18"]
+        }
+      },
+      "detection": {
+        "executables": ["deepseek"],
+        "version_cmd": "deepseek --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g run-deepseek-cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/holasoymalva/deepseek-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Martin Gonzalez",
+        "license": "MIT"
+      }
+    },
+    "elevenlabs-cli": {
+      "id": "elevenlabs-cli",
+      "name": "ElevenLabs CLI",
+      "description": "Manage ElevenLabs voice and conversational AI agents as code",
+      "homepage": "https://elevenlabs.io",
+      "repository": "https://github.com/elevenlabs/cli",
+      "documentation": "https://elevenlabs.io/docs/agents-platform/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@elevenlabs/cli",
+          "command": "npm install -g @elevenlabs/cli",
+          "update_cmd": "npm update -g @elevenlabs/cli",
+          "uninstall_cmd": "npm uninstall -g @elevenlabs/cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["elevenlabs"],
+        "version_cmd": "elevenlabs --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @elevenlabs/cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/elevenlabs/cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ElevenLabs",
+        "license": "MIT"
+      }
+    },
+    "blackbox-cli": {
+      "id": "blackbox-cli",
+      "name": "Blackbox CLI",
+      "description": "AI-powered CLI for natural language coding and multi-agent development",
+      "homepage": "https://www.blackbox.ai",
+      "repository": "https://github.com/blackboxaicode/cli",
+      "documentation": "https://docs.blackbox.ai/features/blackbox-cli/introduction",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@blackbox_ai/blackbox-cli",
+          "command": "npm install -g @blackbox_ai/blackbox-cli",
+          "update_cmd": "npm update -g @blackbox_ai/blackbox-cli",
+          "uninstall_cmd": "npm uninstall -g @blackbox_ai/blackbox-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "native": {
+          "method": "native",
+          "command": "bash <(curl -fsSL https://shell.blackbox.ai/api/scripts/blackbox-cli-v2/download.sh)",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "Invoke-WebRequest -Uri 'https://shell.blackbox.ai/api/scripts/blackbox-cli-v2/download.ps1' -OutFile 'download.ps1'; .\\download.ps1",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["blackbox"],
+        "version_cmd": "blackbox --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @blackbox_ai/blackbox-cli --json"
+          },
+          "native": {
+            "paths": ["~/.blackbox-cli-v2/blackbox", "~/.local/bin/blackbox"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/blackboxaicode/cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Blackbox AI",
+        "license": "GPL-3.0"
+      }
+    },
+    "crush": {
+      "id": "crush",
+      "name": "Crush",
+      "description": "Terminal-based AI coding agent from Charmbracelet with multi-model support and MCP integration",
+      "homepage": "https://github.com/charmbracelet/crush",
+      "repository": "https://github.com/charmbracelet/crush",
+      "documentation": "https://github.com/charmbracelet/crush#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "charmbracelet/tap/crush",
+          "command": "brew install charmbracelet/tap/crush",
+          "update_cmd": "brew upgrade crush",
+          "uninstall_cmd": "brew uninstall crush",
+          "platforms": ["darwin", "linux"]
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@charmland/crush",
+          "command": "npm install -g @charmland/crush",
+          "update_cmd": "npm update -g @charmland/crush",
+          "uninstall_cmd": "npm uninstall -g @charmland/crush",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "go": {
+          "method": "go",
+          "package": "github.com/charmbracelet/crush",
+          "command": "go install github.com/charmbracelet/crush@latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["go>=1.22"]
+        },
+        "winget": {
+          "method": "winget",
+          "package": "charmbracelet.crush",
+          "command": "winget install charmbracelet.crush",
+          "update_cmd": "winget upgrade charmbracelet.crush",
+          "uninstall_cmd": "winget uninstall charmbracelet.crush",
+          "platforms": ["windows"]
+        },
+        "scoop": {
+          "method": "scoop",
+          "package": "crush",
+          "command": "scoop install crush",
+          "update_cmd": "scoop update crush",
+          "uninstall_cmd": "scoop uninstall crush",
+          "platforms": ["windows"]
+        }
+      },
+      "detection": {
+        "executables": ["crush"],
+        "version_cmd": "crush --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @charmland/crush --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/charmbracelet/crush/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Charmbracelet",
+        "license": "FSL-1.1-MIT"
+      }
+    },
+    "nanocoder": {
+      "id": "nanocoder",
+      "name": "Nanocoder",
+      "description": "Community-driven local-first CLI coding agent with multi-provider support",
+      "homepage": "https://nanocollective.org",
+      "repository": "https://github.com/Nano-Collective/nanocoder",
+      "documentation": "https://github.com/Nano-Collective/nanocoder#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@nanocollective/nanocoder",
+          "command": "npm install -g @nanocollective/nanocoder",
+          "update_cmd": "npm update -g @nanocollective/nanocoder",
+          "uninstall_cmd": "npm uninstall -g @nanocollective/nanocoder",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "nano-collective/nanocoder/nanocoder",
+          "command": "brew tap nano-collective/nanocoder https://github.com/Nano-Collective/nanocoder && brew install nanocoder",
+          "update_cmd": "brew upgrade nanocoder",
+          "uninstall_cmd": "brew uninstall nanocoder",
+          "platforms": ["darwin", "linux"]
+        }
+      },
+      "detection": {
+        "executables": ["nanocoder"],
+        "version_cmd": "nanocoder --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @nanocollective/nanocoder --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Nano-Collective/nanocoder/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Nano Collective",
+        "license": "MIT"
+      }
+    },
+    "ona": {
+      "id": "ona",
+      "name": "Ona",
+      "description": "Background AI agent platform CLI for autonomous software development",
+      "homepage": "https://ona.com",
+      "repository": "https://github.com/gitpod-io",
+      "documentation": "https://ona.com/docs/ona/integrations/cli",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "gitpod-io/tap/ona",
+          "command": "brew install gitpod-io/tap/ona",
+          "update_cmd": "brew upgrade ona",
+          "uninstall_cmd": "brew uninstall ona",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "tap": "gitpod-io/tap"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "curl -o ona -fsSL https://app.gitpod.io/releases/cli/stable/gitpod-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/amd64/;s/arm64/arm64/') && chmod +x ona && sudo mv ona /usr/local/bin",
+          "update_cmd": "ona version update",
+          "platforms": ["darwin", "linux", "windows"]
+        }
+      },
+      "detection": {
+        "executables": ["ona"],
+        "version_cmd": "ona version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list ona",
+            "paths": ["/opt/homebrew/bin/ona", "/usr/local/bin/ona"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://ona.com/changelog",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Ona (formerly Gitpod)",
+        "license": "AGPL-3.0"
+      }
+    },
+    "dexter": {
+      "id": "dexter",
+      "name": "Dexter",
+      "description": "Autonomous agent for deep financial research and analysis",
+      "homepage": "https://github.com/virattt/dexter",
+      "repository": "https://github.com/virattt/dexter",
+      "documentation": "https://github.com/virattt/dexter#readme",
+      "install_methods": {
+        "git": {
+          "method": "git",
+          "command": "git clone https://github.com/virattt/dexter.git && cd dexter && bun install",
+          "update_cmd": "cd dexter && git pull && bun install",
+          "uninstall_cmd": "rm -rf dexter",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["bun>=1.0", "git"],
+          "metadata": {
+            "run_cmd": "bun start",
+            "dev_cmd": "bun dev"
+          }
+        }
+      },
+      "detection": {
+        "executables": [],
+        "version_cmd": "",
+        "version_regex": "",
+        "signatures": {
+          "git": {
+            "paths": ["dexter/package.json", "dexter/src/index.tsx"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/virattt/dexter/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Virat Singh",
+        "license": "MIT",
+        "category": "financial-research"
+      }
+    },
+    "droid": {
+      "id": "droid",
+      "name": "Droid",
+      "description": "AI-powered software engineering agent by Factory for terminal-based development",
+      "homepage": "https://factory.ai/product/cli",
+      "repository": "https://github.com/Factory-AI/factory",
+      "documentation": "https://docs.factory.ai/cli/getting-started/overview",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "droid",
+          "command": "brew install --cask droid",
+          "update_cmd": "brew upgrade --cask droid",
+          "uninstall_cmd": "brew uninstall --cask droid",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true",
+            "min_macos": "10.15"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://app.factory.ai/cli | sh",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["xdg-utils"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "linux_prereqs": "xdg-utils"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "irm https://app.factory.ai/cli/windows | iex",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["droid"],
+        "version_cmd": "droid --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Factory-AI/factory/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Factory AI",
+        "license": "Proprietary"
+      }
+    },
+    "codex": {
+      "id": "codex",
+      "name": "Codex",
+      "description": "Lightweight coding agent from OpenAI that runs in your terminal",
+      "homepage": "https://github.com/openai/codex",
+      "repository": "https://github.com/openai/codex",
+      "documentation": "https://github.com/openai/codex#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@openai/codex",
+          "command": "npm install -g @openai/codex",
+          "update_cmd": "npm update -g @openai/codex",
+          "uninstall_cmd": "npm uninstall -g @openai/codex",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "codex",
+          "command": "brew install --cask codex",
+          "update_cmd": "brew upgrade --cask codex",
+          "uninstall_cmd": "brew uninstall --cask codex",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "download_url": "https://github.com/openai/codex/releases/latest",
+            "artifact_darwin_arm64": "codex-aarch64-apple-darwin.tar.gz",
+            "artifact_darwin_amd64": "codex-x86_64-apple-darwin.tar.gz",
+            "artifact_linux_amd64": "codex-x86_64-unknown-linux-musl.tar.gz",
+            "artifact_linux_arm64": "codex-aarch64-unknown-linux-musl.tar.gz"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["codex"],
+        "version_cmd": "codex --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @openai/codex --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openai/codex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "OpenAI",
+        "license": "Apache-2.0"
+      }
+    },
+    "forge-cli": {
+      "id": "forge-cli",
+      "name": "Forge CLI",
+      "description": "Multi-agent TDD orchestrator that drives Claude Code with 6 agents",
+      "homepage": "https://redgreenlabs.github.io/forge-cli/",
+      "repository": "https://github.com/redgreenlabs/forge-cli",
+      "documentation": "https://redgreenlabs.github.io/forge-cli/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@redgreen-labs/forge-cli",
+          "command": "npm install -g @redgreen-labs/forge-cli",
+          "update_cmd": "npm update -g @redgreen-labs/forge-cli",
+          "uninstall_cmd": "npm uninstall -g @redgreen-labs/forge-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node22", "claude-code"]
+        }
+      },
+      "detection": {
+        "executables": ["forge"],
+        "version_cmd": "forge --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @redgreen-labs/forge-cli --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/redgreenlabs/forge-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Red Green Labs",
+        "license": "MIT"
+      }
+    },
+    "nono": {
+      "id": "nono",
+      "name": "nono",
+      "description": "Kernel-enforced capability-based sandbox for AI coding agents",
+      "homepage": "https://nono.sh",
+      "repository": "https://github.com/always-further/nono",
+      "documentation": "https://docs.nono.sh",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "nono",
+          "command": "brew install nono",
+          "update_cmd": "brew upgrade nono",
+          "uninstall_cmd": "brew uninstall nono",
+          "platforms": ["darwin", "linux"]
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "nono-cli",
+          "command": "cargo install nono-cli",
+          "update_cmd": "cargo install nono-cli --force",
+          "uninstall_cmd": "cargo uninstall nono-cli",
+          "platforms": ["darwin", "linux"]
+        }
+      },
+      "detection": {
+        "executables": ["nono"],
+        "version_cmd": "nono --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list nono"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/always-further/nono/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Always Further",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcp2cli": {
+      "id": "mcp2cli",
+      "name": "mcp2cli",
+      "description": "Turn any MCP server, OpenAPI spec, or GraphQL into a CLI at runtime",
+      "homepage": "https://github.com/knowsuchagency/mcp2cli",
+      "repository": "https://github.com/knowsuchagency/mcp2cli",
+      "documentation": "https://github.com/knowsuchagency/mcp2cli#readme",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "mcp2cli",
+          "command": "pip install mcp2cli",
+          "update_cmd": "pip install --upgrade mcp2cli",
+          "uninstall_cmd": "pip uninstall mcp2cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "mcp2cli",
+          "command": "uv tool install mcp2cli",
+          "update_cmd": "uv tool upgrade mcp2cli",
+          "uninstall_cmd": "uv tool uninstall mcp2cli",
+          "platforms": ["darwin", "linux", "windows"]
+        }
+      },
+      "detection": {
+        "executables": ["mcp2cli"],
+        "version_cmd": "mcp2cli --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show mcp2cli"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/knowsuchagency/mcp2cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "knowsuchagency",
+        "license": "MIT"
+      }
+    },
+    "junie-cli": {
+      "id": "junie-cli",
+      "name": "Junie CLI",
+      "description": "JetBrains LLM-agnostic coding agent for terminal, IDE, and CI/CD",
+      "homepage": "https://junie.jetbrains.com",
+      "repository": "https://github.com/JetBrains/junie",
+      "documentation": "https://junie.jetbrains.com/docs",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@jetbrains/junie",
+          "command": "npm install -g @jetbrains/junie",
+          "update_cmd": "npm update -g @jetbrains/junie",
+          "uninstall_cmd": "npm uninstall -g @jetbrains/junie",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "brew": {
+          "method": "brew",
+          "package": "jetbrains-junie/junie/junie",
+          "command": "brew tap jetbrains-junie/junie && brew install junie",
+          "update_cmd": "brew upgrade junie",
+          "uninstall_cmd": "brew uninstall junie",
+          "platforms": ["darwin"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://junie.jetbrains.com/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["junie"],
+        "version_cmd": "junie --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @jetbrains/junie --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/JetBrains/junie/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "JetBrains",
+        "license": "Proprietary"
+      }
+    },
+    "mistral-vibe": {
+      "id": "mistral-vibe",
+      "name": "Mistral Vibe",
+      "description": "Minimal CLI coding agent by Mistral powered by Devstral",
+      "homepage": "https://github.com/mistralai/mistral-vibe",
+      "repository": "https://github.com/mistralai/mistral-vibe",
+      "documentation": "https://github.com/mistralai/mistral-vibe#readme",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "mistral-vibe",
+          "command": "pip install mistral-vibe",
+          "update_cmd": "pip install --upgrade mistral-vibe",
+          "uninstall_cmd": "pip uninstall mistral-vibe",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "mistral-vibe",
+          "command": "uv tool install mistral-vibe",
+          "update_cmd": "uv tool upgrade mistral-vibe",
+          "uninstall_cmd": "uv tool uninstall mistral-vibe",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "mistral-vibe",
+          "command": "brew install mistral-vibe",
+          "update_cmd": "brew upgrade mistral-vibe",
+          "uninstall_cmd": "brew uninstall mistral-vibe",
+          "platforms": ["darwin", "linux"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -LsSf https://mistral.ai/vibe/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["vibe"],
+        "version_cmd": "vibe --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show mistral-vibe"
+          },
+          "brew": {
+            "check_cmd": "brew list mistral-vibe"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mistralai/mistral-vibe/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Mistral AI",
+        "license": "Apache-2.0"
+      }
+    },
+    "letta-code": {
+      "id": "letta-code",
+      "name": "Letta Code",
+      "description": "Memory-first coding agent that persists and learns across sessions",
+      "homepage": "https://letta.com",
+      "repository": "https://github.com/letta-ai/letta-code",
+      "documentation": "https://docs.letta.com/letta-code",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@letta-ai/letta-code",
+          "command": "npm install -g @letta-ai/letta-code",
+          "update_cmd": "npm update -g @letta-ai/letta-code",
+          "uninstall_cmd": "npm uninstall -g @letta-ai/letta-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["letta"],
+        "version_cmd": "letta --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @letta-ai/letta-code --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/letta-ai/letta-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Letta",
+        "license": "Apache-2.0"
+      }
+    },
+    "deepagents-cli": {
+      "id": "deepagents-cli",
+      "name": "Deep Agents CLI",
+      "description": "LangChain pre-built terminal coding agent with planning and subagents",
+      "homepage": "https://docs.langchain.com/oss/python/deepagents/overview",
+      "repository": "https://github.com/langchain-ai/deepagents",
+      "documentation": "https://docs.langchain.com/oss/python/deepagents/cli/overview",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "deepagents-cli",
+          "command": "pip install deepagents-cli",
+          "update_cmd": "pip install --upgrade deepagents-cli",
+          "uninstall_cmd": "pip uninstall deepagents-cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "deepagents-cli",
+          "command": "uv tool install deepagents-cli",
+          "update_cmd": "uv tool upgrade deepagents-cli",
+          "uninstall_cmd": "uv tool uninstall deepagents-cli",
+          "platforms": ["darwin", "linux", "windows"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/libs/cli/scripts/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["deepagents", "deepagents-cli"],
+        "version_cmd": "deepagents --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show deepagents-cli"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/langchain-ai/deepagents/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "LangChain",
+        "license": "MIT"
+      }
+    },
+    "trae-agent": {
+      "id": "trae-agent",
+      "name": "Trae Agent",
+      "description": "ByteDance LLM-based agent for software engineering tasks",
+      "homepage": "https://www.trae.ai",
+      "repository": "https://github.com/bytedance/trae-agent",
+      "documentation": "https://github.com/bytedance/trae-agent#readme",
+      "install_methods": {
+        "source": {
+          "method": "source",
+          "command": "git clone https://github.com/bytedance/trae-agent.git && cd trae-agent && uv sync --all-extras",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python3.12", "uv"]
+        }
+      },
+      "detection": {
+        "executables": ["trae-cli"],
+        "version_cmd": "trae-cli --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bytedance/trae-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ByteDance",
+        "license": "MIT"
+      }
+    },
+    "kiro-cli": {
+      "id": "kiro-cli",
+      "name": "Kiro CLI",
+      "description": "AWS AI-powered spec-driven coding agent for the terminal",
+      "homepage": "https://kiro.dev",
+      "documentation": "https://kiro.dev/docs/cli/",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "kiro-cli",
+          "command": "brew install --cask kiro-cli",
+          "update_cmd": "brew upgrade --cask kiro-cli",
+          "uninstall_cmd": "brew uninstall --cask kiro-cli",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://cli.kiro.dev/install | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["kiro-cli", "kiro"],
+        "version_cmd": "kiro-cli version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "paths": ["/opt/homebrew/Caskroom/kiro-cli"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://kiro.dev/docs/cli/",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Amazon Web Services",
+        "license": "Proprietary"
+      }
+    },
+    "forgecode": {
+      "id": "forgecode",
+      "name": "ForgeCode",
+      "description": "AI pair programmer supporting 300+ models, written in Rust",
+      "homepage": "https://forgecode.dev",
+      "repository": "https://github.com/antinomyhq/forgecode",
+      "documentation": "https://github.com/antinomyhq/forgecode#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "forgecode",
+          "command": "npm install -g forgecode",
+          "update_cmd": "npm update -g forgecode",
+          "uninstall_cmd": "npm uninstall -g forgecode",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://forgecode.dev/cli | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["forge"],
+        "version_cmd": "forge --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g forgecode --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/antinomyhq/forgecode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Antinomy HQ",
+        "license": "Apache-2.0"
+      }
+    },
+    "hermes-agent": {
+      "id": "hermes-agent",
+      "name": "Hermes Agent",
+      "description": "Self-improving AI agent with learning loop and multi-channel gateway",
+      "homepage": "https://hermes-agent.nousresearch.com",
+      "repository": "https://github.com/NousResearch/hermes-agent",
+      "documentation": "https://hermes-agent.nousresearch.com/docs/",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "source": {
+          "method": "source",
+          "command": "git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git && cd hermes-agent && uv venv venv --python 3.11 && source venv/bin/activate && uv pip install -e '.[all,dev]'",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["python3.11", "uv"]
+        }
+      },
+      "detection": {
+        "executables": ["hermes", "hermes-agent"],
+        "version_cmd": "hermes version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/NousResearch/hermes-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Nous Research",
+        "license": "MIT"
+      }
+    },
+    "roo-code-cli": {
+      "id": "roo-code-cli",
+      "name": "Roo Code CLI",
+      "description": "Multi-mode AI coding agent for the terminal by Roo Code",
+      "homepage": "https://roocode.com",
+      "repository": "https://github.com/RooCodeInc/Roo-Code",
+      "documentation": "https://docs.roocode.com",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/RooCodeInc/Roo-Code/main/apps/cli/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["roo"],
+        "version_cmd": "roo --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/RooCodeInc/Roo-Code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Roo Code Inc.",
+        "license": "Apache-2.0"
+      }
+    },
+    "tabnine-cli": {
+      "id": "tabnine-cli",
+      "name": "Tabnine CLI",
+      "description": "Enterprise AI coding agent for the terminal with autonomous mode",
+      "homepage": "https://www.tabnine.com",
+      "documentation": "https://docs.tabnine.com/main/getting-started/tabnine-cli",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl $TABNINE_HOST/update/cli/installer.mjs | node --input-type=module - $TABNINE_HOST",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["node22"],
+          "metadata": {
+            "installer_type": "node_script",
+            "requires_tabnine_host": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["tabnine"],
+        "version_cmd": "tabnine --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://docs.tabnine.com/main/getting-started/tabnine-cli",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Tabnine",
+        "license": "Proprietary"
+      }
+    },
+    "cortex-code": {
+      "id": "cortex-code",
+      "name": "Cortex Code",
+      "description": "Snowflake-native AI coding agent for data engineering and analytics",
+      "homepage": "https://www.snowflake.com/en/product/features/cortex-code/",
+      "documentation": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -LsS https://ai.snowflake.com/static/cc-scripts/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["cortex"],
+        "version_cmd": "cortex --version",
+        "version_regex": "([\\d.]+)"
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://docs.snowflake.com/en/user-guide/cortex-code/cortex-code-cli",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Snowflake",
+        "license": "Proprietary"
+      }
+    },
+    "fetchcoder": {
+      "id": "fetchcoder",
+      "name": "FetchCoder",
+      "description": "AI coding agent powered by ASI1 with MCP and Agentverse integration",
+      "homepage": "https://innovationlab.fetch.ai/resources/docs/fetchcoder/overview",
+      "repository": "https://github.com/fetchai/fetchcoder",
+      "documentation": "https://innovationlab.fetch.ai/resources/docs/fetchcoder/overview",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@fetchai/fetchcoder",
+          "command": "npm install -g @fetchai/fetchcoder",
+          "update_cmd": "npm update -g @fetchai/fetchcoder",
+          "uninstall_cmd": "npm uninstall -g @fetchai/fetchcoder",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g"
+        }
+      },
+      "detection": {
+        "executables": ["fetchcoder"],
+        "version_cmd": "fetchcoder --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @fetchai/fetchcoder --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/fetchai/fetchcoder/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Fetch.ai",
+        "license": "MIT"
+      }
+    }
+  }
+}
