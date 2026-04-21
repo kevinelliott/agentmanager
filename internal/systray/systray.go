@@ -1506,48 +1506,6 @@ func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
 	}
 }
 
-// uninstallCLI removes the CLI binary from the system path.
-func (a *App) uninstallCLI() bool { //nolint:unused // Reserved for future use
-	targetPath := "/usr/local/bin/agentmgr"
-
-	switch a.platform.ID() {
-	case platform.Darwin, platform.Linux:
-		// Use osascript to run sudo with password prompt
-		script := fmt.Sprintf(`
-do shell script "rm -f '%s'" with administrator privileges
-`, targetPath)
-
-		cmd := exec.Command("osascript", "-e", script)
-		err := cmd.Run()
-		if err != nil {
-			return false
-		}
-
-		// Clear config path
-		a.config.Helper.CLIPath = ""
-		if a.configLoader != nil {
-			_ = a.configLoader.SetAndSave("helper.cli_path", "")
-		}
-		return true
-
-	case platform.Windows:
-		// Try to remove directly on Windows
-		targetPath = filepath.Join(os.Getenv("LOCALAPPDATA"), "agentmgr", "agentmgr.exe")
-		if err := os.Remove(targetPath); err != nil {
-			return false
-		}
-
-		// Clear config path
-		a.config.Helper.CLIPath = ""
-		if a.configLoader != nil {
-			_ = a.configLoader.SetAndSave("helper.cli_path", "")
-		}
-		return true
-	}
-
-	return false
-}
-
 // showLinuxSettings shows the settings dialog on Linux.
 func (a *App) showLinuxSettings() {
 	// Try zenity first
