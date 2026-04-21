@@ -14,6 +14,7 @@ import (
 
 	"github.com/getlantern/systray"
 
+	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/api/rest"
@@ -506,73 +507,20 @@ func (a *App) forceRefreshAgents(ctx context.Context) error {
 
 // refreshAgentsWithCache refreshes agents, optionally bypassing the cache.
 func (a *App) refreshAgentsWithCache(ctx context.Context, forceRefresh bool) error {
-	// Get agent definitions from catalog
-	agentDefs, err := a.catalog.GetAgentsForPlatform(ctx, string(a.platform.ID()))
+	// Run the shared detect+version-check pipeline. Per-index version-check
+	// errors are intentionally ignored here; the systray surfaces failures
+	// implicitly via HasUpdate() returning false for agents whose registries
+	// could not be reached. TolerateCatalogError preserves the historical
+	// systray behavior of starting up even when the catalog fetch fails.
+	pipeline := orchestrator.NewFromManagers(a.config, a.platform, a.store, a.catalog, a.detector, a.installer)
+	res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{
+		ForceRefresh:         forceRefresh,
+		TolerateCatalogError: true,
+	})
 	if err != nil {
-		// If catalog fails, use empty list for detection
-		agentDefs = nil
+		return err
 	}
-
-	// Build a map of agent ID -> AgentDef for quick lookup
-	agentDefMap := make(map[string]catalog.AgentDef)
-	for _, def := range agentDefs {
-		agentDefMap[def.ID] = def
-	}
-
-	var detected []*agent.Installation
-	var usedDetectionCache bool
-	var needUpdateCheck bool
-
-	// Check if we can use cached detection results
-	if a.config.Detection.CacheEnabled && !forceRefresh {
-		cachedInstallations, cachedAt, err := a.store.GetDetectionCache(ctx)
-		if err == nil && cachedInstallations != nil {
-			// Check if detection cache is still valid
-			if time.Since(cachedAt) < a.config.Detection.CacheDuration {
-				detected = cachedInstallations
-				usedDetectionCache = true
-
-				// Check if we need to refresh update check
-				lastUpdateCheck, err := a.store.GetLastUpdateCheckTime(ctx)
-				if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= a.config.Detection.UpdateCheckCacheDuration {
-					needUpdateCheck = true
-				}
-			}
-		}
-	}
-
-	// If no cache or cache expired, detect agents
-	if !usedDetectionCache {
-		// Clear cache if forcing refresh
-		if forceRefresh {
-			_ = a.store.ClearDetectionCache(ctx)
-		}
-
-		// Detect agents
-		detected, err = a.detector.DetectAll(ctx, agentDefs)
-		if err != nil {
-			return err
-		}
-
-		// Always check for updates on fresh detection
-		needUpdateCheck = true
-	}
-
-	// Check for updates if needed
-	if needUpdateCheck {
-		// Fetch latest versions in parallel. Per-index errors are ignored here;
-		// the systray surfaces failures implicitly via HasUpdate() returning
-		// false for agents whose registries could not be reached.
-		_ = versionfetch.CheckLatestVersions(ctx, a.installer, detected, agentDefMap, versionfetch.DefaultConcurrency)
-
-		// Save last update check time
-		_ = a.store.SetLastUpdateCheckTime(ctx, time.Now())
-
-		// Save to cache if enabled (with updated version info)
-		if a.config.Detection.CacheEnabled {
-			_ = a.store.SaveDetectionCache(ctx, detected)
-		}
-	}
+	detected := res.Installations
 
 	// Convert []*agent.Installation to []agent.Installation
 	agents := make([]agent.Installation, len(detected))

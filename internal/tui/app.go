@@ -14,8 +14,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/tui/styles"
-	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -194,86 +194,29 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 		return dataLoadedMsg{err: fmt.Errorf("failed to initialize storage: %w", err)}
 	}
 
-	// Load catalog
+	// Load catalog (separately needed for the model — the pipeline returns the
+	// per-platform slice, not the full Catalog object the TUI renders in its
+	// catalog view).
 	catMgr := catalog.NewManager(m.config, store)
 	cat, err := catMgr.Get(ctx)
 	if err != nil {
 		return dataLoadedMsg{err: fmt.Errorf("failed to load catalog: %w", err)}
 	}
 
-	// Get agents for current platform
-	agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(m.platform.ID()))
+	// Run the shared detect+version-check pipeline. Version-check errors are
+	// intentionally dropped here; the TUI surfaces them indirectly via
+	// HasUpdate() being false for unchecked installations, matching the
+	// previous behavior.
+	det := detector.New(m.platform)
+	instMgr := installer.NewManager(m.platform)
+	pipeline := orchestrator.NewFromManagers(m.config, m.platform, store, catMgr, det, instMgr)
+	res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: forceRefresh})
 	if err != nil {
-		return dataLoadedMsg{err: fmt.Errorf("failed to get agents for platform: %w", err)}
-	}
-
-	// Build a map of agent ID -> AgentDef for quick lookup
-	agentDefMap := make(map[string]catalog.AgentDef)
-	for _, def := range agentDefs {
-		agentDefMap[def.ID] = def
-	}
-
-	var installations []*agent.Installation
-	var usedDetectionCache bool
-	var needUpdateCheck bool
-
-	// Check if we can use cached detection results
-	if m.config.Detection.CacheEnabled && !forceRefresh {
-		cachedInstallations, cachedAt, err := store.GetDetectionCache(ctx)
-		if err == nil && cachedInstallations != nil {
-			// Check if detection cache is still valid
-			if time.Since(cachedAt) < m.config.Detection.CacheDuration {
-				installations = cachedInstallations
-				usedDetectionCache = true
-
-				// Check if we need to refresh update check
-				lastUpdateCheck, err := store.GetLastUpdateCheckTime(ctx)
-				if err != nil || lastUpdateCheck.IsZero() || time.Since(lastUpdateCheck) >= m.config.Detection.UpdateCheckCacheDuration {
-					needUpdateCheck = true
-				}
-			}
-		}
-	}
-
-	// If no cache or cache expired, detect agents
-	if !usedDetectionCache {
-		// Clear cache if forcing refresh
-		if forceRefresh {
-			//nolint:errcheck // best-effort cache clear; will be refreshed on next detection
-			_ = store.ClearDetectionCache(ctx)
-		}
-
-		// Detect installed agents
-		det := detector.New(m.platform)
-		installations, err = det.DetectAll(ctx, agentDefs)
-		if err != nil {
-			return dataLoadedMsg{err: fmt.Errorf("detection failed: %w", err)}
-		}
-
-		// Always check for updates on fresh detection
-		needUpdateCheck = true
-	}
-
-	// Check for updates if needed
-	if needUpdateCheck {
-		instMgr := installer.NewManager(m.platform)
-
-		// Check for latest versions in parallel. Errors are intentionally
-		// dropped here; the TUI surfaces them indirectly via HasUpdate() being
-		// false for unchecked installations.
-		_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
-
-		// Save last update check time
-		_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
-
-		// Save to cache if enabled (with updated version info)
-		if m.config.Detection.CacheEnabled {
-			_ = store.SaveDetectionCache(ctx, installations) //nolint:errcheck // best-effort cache; agents will be redetected on next run
-		}
+		return dataLoadedMsg{err: err}
 	}
 
 	return dataLoadedMsg{
-		agents:  installations,
+		agents:  res.Installations,
 		catalog: cat,
 	}
 }
