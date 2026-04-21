@@ -30,7 +30,10 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          # Pinned to match the version used in the Makefile's `lint` target
+          # so local and CI lint runs report identical results. Bump both in
+          # the same change.
+          version: v1.64.8
           args: --timeout=5m
 
   test:

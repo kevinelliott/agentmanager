@@ -11,6 +11,9 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main
 # Go settings
 GOBIN ?= $(shell go env GOPATH)/bin
 
+# Pinned tool versions (keep in sync with .github/workflows/ci.yml)
+GOLANGCI_LINT_VERSION ?= v1.64.8
+
 # Default target
 all: build
 
@@ -93,9 +96,16 @@ benchmark:
 	go test -bench=. -benchmem ./...
 
 # Run linter
+# Pins to the same golangci-lint version CI uses; reinstalls if the local
+# binary is missing or on a different version, so `make lint` matches CI.
 lint:
-	@which golangci-lint > /dev/null || (echo "Installing golangci-lint..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest)
-	golangci-lint run
+	@installed=$$($(GOBIN)/golangci-lint version --format=short 2>/dev/null | sed 's/^v//'); \
+	want=$$(echo $(GOLANGCI_LINT_VERSION) | sed 's/^v//'); \
+	if [ "$$installed" != "$$want" ]; then \
+		echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION) (had: $${installed:-missing})..."; \
+		GOBIN=$(GOBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION); \
+	fi
+	$(GOBIN)/golangci-lint run --timeout=5m
 
 # Format code
 fmt:
