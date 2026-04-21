@@ -849,3 +849,42 @@ func TestGetAgentsWithCache_CacheDisabled(t *testing.T) {
 		t.Fatal("expected error: disabled cache should bypass and hit nil detector")
 	}
 }
+
+// BenchmarkRespondJSON exercises the hot JSON-encoding path shared by every
+// handler response. It's the most direct signal for the pool-based encoder
+// change because it isolates encode+write from router/middleware overhead.
+func BenchmarkRespondJSON(b *testing.B) {
+	server := setupTestServer()
+	payload := map[string]interface{}{
+		"agents": []map[string]interface{}{
+			{"id": "claude-code", "name": "Claude Code", "version": "1.2.3", "has_update": false},
+			{"id": "aider", "name": "Aider", "version": "0.42.0", "has_update": true},
+			{"id": "cursor", "name": "Cursor", "version": "0.35.1", "has_update": false},
+			{"id": "cline", "name": "Cline", "version": "3.1.0", "has_update": true},
+		},
+		"total": 4,
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		w := httptest.NewRecorder()
+		server.respondJSON(w, http.StatusOK, payload)
+	}
+}
+
+// BenchmarkHandleListCatalog exercises a representative end-to-end handler
+// path (router + middleware + catalog read + JSON response). handleListAgents
+// would be the natural target but returns 500 without a detector in the test
+// setup; handleListCatalog hits the full success path with a non-trivial body.
+func BenchmarkHandleListCatalog(b *testing.B) {
+	server := setupTestServer()
+	req := httptest.NewRequest("GET", "/api/v1/catalog", nil)
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		w := httptest.NewRecorder()
+		server.router.ServeHTTP(w, req)
+	}
+}

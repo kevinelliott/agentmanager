@@ -2,11 +2,13 @@
 package rest
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -20,6 +22,35 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
+
+// jsonBufferPool reuses *bytes.Buffer across handler responses so each request
+// doesn't allocate a fresh buffer for JSON encoding. Buffers are reset before
+// being returned to the pool. A cap guard prevents unbounded retention of
+// oversized buffers (e.g. one-off large catalog dumps shouldn't pin memory for
+// every small /health response thereafter).
+var jsonBufferPool = sync.Pool{
+	New: func() any {
+		return new(bytes.Buffer)
+	},
+}
+
+// maxPooledBufferSize caps the per-buffer capacity we retain in the pool.
+// Buffers that grew beyond this are dropped so the pool's steady-state memory
+// footprint tracks typical response sizes, not the largest response ever seen.
+const maxPooledBufferSize = 64 * 1024
+
+func getJSONBuffer() *bytes.Buffer {
+	buf, _ := jsonBufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	return buf
+}
+
+func putJSONBuffer(buf *bytes.Buffer) {
+	if buf == nil || buf.Cap() > maxPooledBufferSize {
+		return
+	}
+	jsonBufferPool.Put(buf)
+}
 
 // Server is the REST API server.
 type Server struct {
@@ -711,9 +742,50 @@ func (s *Server) handleGetChangelog(w http.ResponseWriter, r *http.Request) {
 
 // Helper methods
 
+// respondJSON encodes data as JSON into a pooled bytes.Buffer and writes the
+// full body to the response in a single Write.
+//
+// The pool lets a warm process reuse the same backing slice across requests,
+// skipping the buffer-growth allocations that fire on fresh buffers. It also
+// decouples the write path from the encoder internals: the body is fully
+// formed before any status/header bytes go to the socket, which matters if we
+// ever need to compute Content-Length, apply a size cap, or swap in a
+// compressed-stream writer without restructuring the helper.
+//
+// Notes:
+//   - json.Encoder.Encode appends a trailing newline. We drop it with
+//     bytes.TrimRight, which returns a subslice that shares the pooled
+//     buffer's backing array (no copy). Preserving the non-newline shape
+//     keeps the response byte-for-byte compatible with the previous helper;
+//     a number of tests and clients do exact comparisons on the body.
+//   - Content-Type is set by contentTypeMiddleware for every route in the
+//     router, so it is already present on w.Header() by the time this runs.
+//     We still guard-set it here (only when absent) so the helper is correct
+//     when invoked outside the middleware chain — notably unit tests that
+//     call respondJSON directly on a fresh httptest.ResponseRecorder.
+//   - Order: headers → WriteHeader(status) → Write(body). Writing body first
+//     would let Go's implicit WriteHeader(200) lock in a 200 before our
+//     caller-chosen status could be applied.
 func (s *Server) respondJSON(w http.ResponseWriter, status int, data interface{}) {
+	buf := getJSONBuffer()
+	defer putJSONBuffer(buf)
+
+	if err := json.NewEncoder(buf).Encode(data); err != nil {
+		// Body-less fallback; headers have not been written yet so switching
+		// to http.Error is safe. Handlers only encode simple maps/slices, so
+		// hitting this path in practice is essentially impossible.
+		http.Error(w, "encode error", http.StatusInternalServerError)
+		return
+	}
+
+	// Strip Encoder's trailing newline for byte-for-byte response compat.
+	body := bytes.TrimRight(buf.Bytes(), "\n")
+
+	if w.Header().Get("Content-Type") == "" {
+		w.Header().Set("Content-Type", "application/json")
+	}
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	_, _ = w.Write(body)
 }
 
 func (s *Server) respondError(w http.ResponseWriter, status int, message string, err error) {
@@ -724,8 +796,7 @@ func (s *Server) respondError(w http.ResponseWriter, status int, message string,
 	if err != nil {
 		response["details"] = err.Error()
 	}
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(response)
+	s.respondJSON(w, status, response)
 }
 
 func (s *Server) installationToMap(inst *agent.Installation) map[string]interface{} {
