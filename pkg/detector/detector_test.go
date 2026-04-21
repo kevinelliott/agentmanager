@@ -429,6 +429,53 @@ func TestResultRemovedInstallationsEmpty(t *testing.T) {
 	}
 }
 
+// TestDetectorDetectAll_ManyInapplicableStrategies exercises the fix for the
+// buffer-size bug where the channel was sized by total strategies but only
+// applicable ones sent. With this many strategies the previous implementation
+// would over-allocate buffers; now sizing matches the applicable count. The
+// test asserts DetectAll completes without deadlock and reports only the
+// installations from applicable strategies.
+func TestDetectorDetectAll_ManyInapplicableStrategies(t *testing.T) {
+	p := platform.Current()
+	d := &Detector{
+		platform:   p,
+		strategies: make([]Strategy, 0),
+	}
+
+	// One applicable strategy with a result.
+	d.RegisterStrategy(&mockStrategy{
+		name:       "applicable",
+		method:     agent.InstallMethodNPM,
+		applicable: true,
+		installations: []*agent.Installation{
+			{
+				AgentID:        "claude-code",
+				AgentName:      "Claude Code",
+				Method:         agent.InstallMethodNPM,
+				ExecutablePath: "/usr/local/bin/claude",
+			},
+		},
+	})
+
+	// Many inapplicable strategies — these must not send to the result chan.
+	for i := 0; i < 10; i++ {
+		d.RegisterStrategy(&mockStrategy{
+			name:       "inapplicable",
+			method:     agent.InstallMethodBrew,
+			applicable: false,
+		})
+	}
+
+	ctx := context.Background()
+	installations, err := d.DetectAll(ctx, nil)
+	if err != nil {
+		t.Fatalf("DetectAll() error = %v", err)
+	}
+	if len(installations) != 1 {
+		t.Errorf("DetectAll() = %d installations, want 1", len(installations))
+	}
+}
+
 func TestResultStruct(t *testing.T) {
 	result := &Result{
 		Installations: []*agent.Installation{

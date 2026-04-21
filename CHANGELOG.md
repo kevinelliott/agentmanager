@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `pkg/ipc`: `listenForNotifications` now responds to context cancellation
+  promptly by using a short read deadline (500ms) around each receive.
+  Previously the blocking `conn.Receive()` could leak the goroutine until
+  the connection was closed, causing `TestListenForNotificationsContextCanceled`
+  to flake on CI.
+- `internal/cli/output/spinner`: spinner now detects TTY via `go-isatty` at
+  construction. When stdout is piped/redirected/not a terminal (or
+  `TERM=dumb` / `NO_COLOR` is set), `Start` and `Stop` are no-ops so ANSI
+  escape sequences no longer corrupt piped output.
+- `internal/cli`: `--no-color` handling unified via `output.NoColor(cfg, flag)`
+  helper and `Printer.NoColor()` accessor. Previously three different code
+  paths (agent list, agent info, catalog list/search) derived the value
+  differently, which could leave the spinner colored while the printer was
+  monochrome (or vice versa).
+
+### Deprecated
+
+- `config.CatalogConfig.RefreshOnStart` is marked deprecated. The flag is
+  not wired to any startup behavior today (catalog refresh cadence is
+  controlled by `RefreshInterval` + cache TTL). It is retained for
+  backward compatibility with existing config files and will be removed
+  once the sole remaining TUI display reference is cleaned up.
+
+### Known Issues
+
+- The macOS linker emits `ld: warning: ignoring duplicate libraries:
+  '-lobjc'` when building `cmd/agentmgr-helper`. This is a cosmetic
+  warning from ld64 caused by Apple's clang auto-linking libobjc for both
+  `getlantern/systray` (which declares `-x objective-c` CFLAGS) and
+  `progrium/darwinkit` (Cocoa / Foundation frameworks). Neither
+  dependency declares `-lobjc` explicitly; the duplicate is injected by
+  the toolchain. Suppressing this cleanly would require dropping one
+  dependency or patching cgo directives upstream. The warning has no
+  runtime impact.
+
 ## [1.0.16] - 2026-01-16
 
 ### Fixed

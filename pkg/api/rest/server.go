@@ -35,6 +35,28 @@ type Server struct {
 
 	// State
 	startTime time.Time
+	version   string
+}
+
+// Option configures a Server during construction.
+type Option func(*Server)
+
+// WithVersion sets the server version string reported by /status.
+func WithVersion(v string) Option {
+	return func(s *Server) {
+		if v != "" {
+			s.version = v
+		}
+	}
+}
+
+// WithStartTime overrides the server's start time (primarily for tests).
+func WithStartTime(t time.Time) Option {
+	return func(s *Server) {
+		if !t.IsZero() {
+			s.startTime = t
+		}
+	}
 }
 
 // ServerConfig configures the REST server.
@@ -54,6 +76,7 @@ func NewServer(
 	det *detector.Detector,
 	cat *catalog.Manager,
 	inst *installer.Manager,
+	opts ...Option,
 ) *Server {
 	s := &Server{
 		config:    cfg,
@@ -63,6 +86,10 @@ func NewServer(
 		catalog:   cat,
 		installer: inst,
 		startTime: time.Now(),
+		version:   "dev",
+	}
+	for _, opt := range opts {
+		opt(s)
 	}
 
 	s.setupRoutes()
@@ -122,11 +149,13 @@ func (s *Server) setupRoutes() {
 // Start starts the REST server.
 func (s *Server) Start(ctx context.Context, cfg ServerConfig) error {
 	s.httpServer = &http.Server{
-		Addr:         cfg.Address,
-		Handler:      s.router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		Addr:              cfg.Address,
+		Handler:           s.router,
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    1 << 20, // 1 MiB
 	}
 
 	go func() {
@@ -191,12 +220,17 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetStatus(w http.ResponseWriter, r *http.Request) {
-	// Get agent definitions from catalog
 	ctx := r.Context()
+
+	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents
-	agents, _ := s.detector.DetectAll(ctx, agentDefs)
+	// Reuse the cache-aware helper. This can't fail meaningfully for status,
+	// so errors fall back to an empty list.
+	agents, err := s.getAgentsWithCache(r, agentDefs)
+	if err != nil {
+		agents = nil
+	}
 
 	agentCount := len(agents)
 	updatesAvailable := 0
@@ -206,15 +240,62 @@ func (s *Server) handleGetStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Pull timestamps from storage-backed caches instead of hardcoding zero.
+	var lastCatalogRefresh time.Time
+	if _, _, cachedAt, cerr := s.store.GetCatalogCache(ctx); cerr == nil {
+		lastCatalogRefresh = cachedAt
+	}
+	var lastUpdateCheck time.Time
+	if t, derr := s.store.GetDetectionCacheTime(ctx); derr == nil {
+		lastUpdateCheck = t
+	}
+
 	s.respondJSON(w, http.StatusOK, map[string]interface{}{
 		"running":              true,
 		"uptime_seconds":       int64(time.Since(s.startTime).Seconds()),
 		"agent_count":          agentCount,
 		"updates_available":    updatesAvailable,
-		"last_catalog_refresh": time.Time{},
-		"last_update_check":    time.Time{},
-		"version":              "dev",
+		"last_catalog_refresh": lastCatalogRefresh,
+		"last_update_check":    lastUpdateCheck,
+		"version":              s.version,
 	})
+}
+
+// getAgentsWithCache returns detected agents, preferring the on-disk
+// detection cache when it is fresher than cfg.Detection.CacheDuration.
+// Pass ?refresh=true on the inbound request to force a re-detection.
+func (s *Server) getAgentsWithCache(r *http.Request, defs []catalog.AgentDef) ([]*agent.Installation, error) {
+	ctx := r.Context()
+
+	refresh := r.URL.Query().Get("refresh") == "true"
+	cacheEnabled := s.config != nil && s.config.Detection.CacheEnabled
+	cacheDuration := time.Hour
+	if s.config != nil && s.config.Detection.CacheDuration > 0 {
+		cacheDuration = s.config.Detection.CacheDuration
+	}
+
+	if !refresh && cacheEnabled && s.store != nil {
+		cached, cachedAt, err := s.store.GetDetectionCache(ctx)
+		if err == nil && cached != nil && !cachedAt.IsZero() && time.Since(cachedAt) < cacheDuration {
+			return cached, nil
+		}
+	}
+
+	if s.detector == nil {
+		return nil, fmt.Errorf("detector not available")
+	}
+
+	agents, err := s.detector.DetectAll(ctx, defs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Best-effort save-back; failures here shouldn't block the response.
+	if cacheEnabled && s.store != nil {
+		_ = s.store.SaveDetectionCache(ctx, agents)
+	}
+
+	return agents, nil
 }
 
 func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
@@ -228,8 +309,8 @@ func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
 	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+	// Detect agents (using cache when fresh)
+	agents, err := s.getAgentsWithCache(r, agentDefs)
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return
@@ -263,8 +344,8 @@ func (s *Server) handleGetAgent(w http.ResponseWriter, r *http.Request) {
 	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+	// Detect agents (using cache when fresh)
+	agents, err := s.getAgentsWithCache(r, agentDefs)
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return
@@ -341,8 +422,8 @@ func (s *Server) handleUpdateAgent(w http.ResponseWriter, r *http.Request) {
 	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents to find the installation
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+	// Detect agents to find the installation (using cache when fresh)
+	agents, err := s.getAgentsWithCache(r, agentDefs)
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return
@@ -404,8 +485,8 @@ func (s *Server) handleUninstallAgent(w http.ResponseWriter, r *http.Request) {
 	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents to find the installation
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+	// Detect agents to find the installation (using cache when fresh)
+	agents, err := s.getAgentsWithCache(r, agentDefs)
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return
@@ -568,8 +649,8 @@ func (s *Server) handleCheckUpdates(w http.ResponseWriter, r *http.Request) {
 	// Get agent definitions from catalog
 	agentDefs, _ := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
 
-	// Detect agents
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+	// Detect agents (using cache when fresh)
+	agents, err := s.getAgentsWithCache(r, agentDefs)
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return

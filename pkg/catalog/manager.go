@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -24,6 +27,11 @@ type Manager struct {
 
 	// HTTP client for fetching remote catalog
 	httpClient *http.Client
+
+	// refreshGroup serializes concurrent Refresh() calls. Without it, two
+	// concurrent refreshes would both hit the network and race on the cache
+	// write — last writer wins.
+	refreshGroup singleflight.Group
 }
 
 // NewManager creates a new catalog manager.
@@ -80,10 +88,46 @@ type RefreshResult struct {
 // Refresh fetches the latest catalog from the remote source.
 // It only updates if the remote version is newer than the current version.
 // Returns a RefreshResult indicating whether an update occurred.
+//
+// Concurrent calls to Refresh coalesce via a singleflight group — only one
+// HTTP fetch runs at a time; other callers receive the same result.
 func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
-	remoteCatalog, err := m.fetchRemote(ctx)
+	v, err, _ := m.refreshGroup.Do("catalog-refresh", func() (interface{}, error) {
+		return m.doRefresh(ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if v == nil {
+		return nil, nil
+	}
+	result, ok := v.(*RefreshResult)
+	if !ok {
+		return nil, fmt.Errorf("unexpected singleflight result type %T", v)
+	}
+	return result, nil
+}
+
+// doRefresh is the un-coalesced Refresh implementation. It must only be called
+// via the singleflight group (see Refresh).
+func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
+	// Load the previous etag (if any) so we can send If-None-Match.
+	prevEtag := m.previousEtag(ctx)
+
+	remoteCatalog, newEtag, notModified, err := m.fetchRemote(ctx, prevEtag)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch remote catalog: %w", err)
+	}
+
+	// If the server responded 304, our cached copy is still fresh.
+	if notModified {
+		currentCatalog, _ := m.Get(ctx) //nolint:errcheck
+		result := &RefreshResult{Updated: false}
+		if currentCatalog != nil {
+			result.CurrentVersion = currentCatalog.Version
+			result.RemoteVersion = currentCatalog.Version
+		}
+		return result, nil
 	}
 
 	// Validate the remote catalog
@@ -115,9 +159,19 @@ func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 		}
 	}
 
-	// Save to cache
-	if err := m.saveToCache(ctx, remoteCatalog); err != nil {
-		// Log but don't fail - we have the catalog in memory
+	// Save to cache. Prefer the server-provided ETag (so subsequent Refresh
+	// calls can send If-None-Match); fall back to the catalog version to
+	// preserve the pre-existing behavior.
+	etagToStore := newEtag
+	if etagToStore == "" {
+		etagToStore = remoteCatalog.Version
+	}
+	if err := m.store.SaveCatalogCache(ctx, mustMarshal(remoteCatalog), etagToStore); err != nil {
+		// Non-fatal: we still have the catalog in memory.
+		slog.Warn("catalog: failed to persist cache",
+			"err", err,
+			"version", remoteCatalog.Version,
+		)
 	}
 
 	m.mu.Lock()
@@ -127,6 +181,29 @@ func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 	result.Updated = true
 	result.CurrentVersion = remoteCatalog.Version
 	return result, nil
+}
+
+// previousEtag best-effort reads the etag from the previous cache entry.
+// Missing / unreadable cache yields the empty string.
+func (m *Manager) previousEtag(ctx context.Context) string {
+	_, etag, _, err := m.store.GetCatalogCache(ctx)
+	if err != nil {
+		return ""
+	}
+	return etag
+}
+
+// mustMarshal is saveToCache's marshal step surfaced inline so we can log on
+// persistence failure while still writing the same bytes.
+func mustMarshal(c *Catalog) []byte {
+	data, err := json.Marshal(c)
+	if err != nil {
+		// Marshal can only fail on cycles / unsupported types, which Catalog
+		// is not. Log and return empty — the store layer will treat as empty.
+		slog.Warn("catalog: failed to marshal catalog", "err", err)
+		return nil
+	}
+	return data
 }
 
 // GetAgent returns a specific agent definition.
@@ -212,17 +289,6 @@ func (m *Manager) loadFromCache(ctx context.Context) (*Catalog, error) {
 	return &catalog, nil
 }
 
-// saveToCache saves the catalog to storage cache.
-func (m *Manager) saveToCache(ctx context.Context, catalog *Catalog) error {
-	data, err := json.Marshal(catalog)
-	if err != nil {
-		return err
-	}
-
-	// Use version as etag for cache validation
-	return m.store.SaveCatalogCache(ctx, data, catalog.Version)
-}
-
 // loadEmbedded loads the embedded default catalog.
 func (m *Manager) loadEmbedded() (*Catalog, error) {
 	// Try to read from file in current directory or known locations
@@ -257,20 +323,26 @@ func (m *Manager) loadEmbedded() (*Catalog, error) {
 	return nil, fmt.Errorf("no embedded catalog found")
 }
 
-// fetchRemote fetches the catalog from the remote URL.
-func (m *Manager) fetchRemote(ctx context.Context) (*Catalog, error) {
+// fetchRemote fetches the catalog from the remote URL. If prevEtag is
+// non-empty it is sent as If-None-Match so the server may respond 304 Not
+// Modified — in that case the returned catalog is nil and notModified=true.
+// On 200 the returned etag is the server's current ETag header (may be empty).
+func (m *Manager) fetchRemote(ctx context.Context, prevEtag string) (*Catalog, string, bool, error) {
 	url := m.config.Catalog.SourceURL
 	if url == "" {
-		return nil, fmt.Errorf("no catalog source URL configured")
+		return nil, "", false, fmt.Errorf("no catalog source URL configured")
 	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return nil, err
+		return nil, "", false, err
 	}
 
 	req.Header.Set("User-Agent", "AgentManager/1.0")
 	req.Header.Set("Accept", "application/json")
+	if prevEtag != "" {
+		req.Header.Set("If-None-Match", prevEtag)
+	}
 
 	// Add GitHub token if configured
 	if m.config.Catalog.GitHubToken != "" {
@@ -279,25 +351,30 @@ func (m *Manager) fetchRemote(ctx context.Context) (*Catalog, error) {
 
 	resp, err := m.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, "", false, err
 	}
 	defer resp.Body.Close()
 
+	// 304 Not Modified: caller should keep using its cached catalog.
+	if resp.StatusCode == http.StatusNotModified {
+		return nil, prevEtag, true, nil
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
+		return nil, "", false, fmt.Errorf("HTTP %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, "", false, err
 	}
 
 	var catalog Catalog
 	if err := json.Unmarshal(body, &catalog); err != nil {
-		return nil, err
+		return nil, "", false, err
 	}
 
-	return &catalog, nil
+	return &catalog, resp.Header.Get("ETag"), false, nil
 }
 
 // getLatestGitHubVersion fetches the latest version from GitHub releases.

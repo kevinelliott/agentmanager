@@ -3,7 +3,10 @@ package platform
 
 import (
 	"context"
+	"os"
+	"os/exec"
 	"runtime"
+	"sync"
 )
 
 // ID represents a platform identifier.
@@ -138,4 +141,41 @@ func TempDir() string {
 		return "C:\\Windows\\Temp"
 	}
 	return "/tmp"
+}
+
+// lookPathCache memoizes exec.LookPath results keyed by PATH + executable name.
+// It is process-global because PATH resolution is also process-global. Entries
+// are invalidated automatically when PATH changes (the key embeds PATH).
+var lookPathCache sync.Map // key: "<PATH>\x00<name>" -> lookPathResult
+
+type lookPathResult struct {
+	path string
+	err  error
+}
+
+// cachedLookPath returns a memoized exec.LookPath result. It is safe for
+// concurrent use. Callers should not retain the returned error across
+// environment changes other than PATH (which is part of the cache key).
+func cachedLookPath(name string) (string, error) {
+	pathEnv := os.Getenv("PATH")
+	key := pathEnv + "\x00" + name
+
+	if v, ok := lookPathCache.Load(key); ok {
+		if r, ok := v.(lookPathResult); ok {
+			return r.path, r.err
+		}
+	}
+
+	path, err := exec.LookPath(name)
+	// LoadOrStore ensures only one entry wins under races.
+	actual, _ := lookPathCache.LoadOrStore(key, lookPathResult{path: path, err: err})
+	if r, ok := actual.(lookPathResult); ok {
+		return r.path, r.err
+	}
+	return path, err
+}
+
+// resetLookPathCache clears the memoization cache. Intended for tests.
+func resetLookPathCache() {
+	lookPathCache = sync.Map{}
 }

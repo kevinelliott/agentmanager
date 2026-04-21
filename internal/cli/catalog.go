@@ -57,8 +57,11 @@ by platform compatibility.`,
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
+			// Single source of truth for no-color.
+			noColor := output.NoColor(cfg, false)
+
 			// Create printer for colored output
-			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+			printer := output.NewPrinter(cfg, noColor)
 
 			// Get current platform
 			plat := platform.Current()
@@ -69,7 +72,7 @@ by platform compatibility.`,
 			// Create spinner
 			spinner := output.NewSpinner(
 				output.WithMessage("Loading catalog..."),
-				output.WithNoColor(!cfg.UI.UseColors),
+				output.WithNoColor(noColor),
 			)
 			spinner.Start()
 
@@ -151,7 +154,7 @@ in configuration.`,
 			// Create spinner
 			spinner := output.NewSpinner(
 				output.WithMessage("Refreshing catalog from GitHub..."),
-				output.WithNoColor(!cfg.UI.UseColors),
+				output.WithNoColor(output.NoColor(cfg, false)),
 			)
 			spinner.Start()
 
@@ -215,8 +218,11 @@ func newCatalogSearchCommand(cfg *config.Config) *cobra.Command {
 			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			defer cancel()
 
+			// Single source of truth for no-color.
+			noColor := output.NoColor(cfg, false)
+
 			// Create printer for colored output
-			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+			printer := output.NewPrinter(cfg, noColor)
 
 			// Get current platform
 			plat := platform.Current()
@@ -224,7 +230,7 @@ func newCatalogSearchCommand(cfg *config.Config) *cobra.Command {
 			// Create spinner
 			spinner := output.NewSpinner(
 				output.WithMessage("Searching catalog..."),
-				output.WithNoColor(!cfg.UI.UseColors),
+				output.WithNoColor(noColor),
 			)
 			spinner.Start()
 

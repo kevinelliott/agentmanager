@@ -14,6 +14,7 @@ import (
 
 	"github.com/getlantern/systray"
 
+	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/api/rest"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -83,6 +84,16 @@ type App struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	done   chan struct{}
+
+	// shutdown coordination. shutdownCh is closed exactly once by
+	// requestShutdown(); a background goroutine launched in onReady watches
+	// it (and a.ctx.Done()) and calls systray.Quit() when either fires.
+	// This replaces an earlier time.Sleep(100ms) in the IPC shutdown handler
+	// with a deterministic context-cancel handshake. bgWG tracks background
+	// goroutines so onExit can wait for them to drain.
+	shutdownCh   chan struct{}
+	shutdownOnce sync.Once
+	bgWG         sync.WaitGroup
 }
 
 // Silence unused warning - reserved for future settings UI
@@ -104,6 +115,7 @@ func New(cfg *config.Config, cfgLoader *config.Loader, plat platform.Platform, s
 		ctx:          ctx,
 		cancel:       cancel,
 		done:         make(chan struct{}),
+		shutdownCh:   make(chan struct{}),
 	}
 }
 
@@ -135,7 +147,11 @@ func (a *App) Quit() {
 
 // startRESTServer starts the REST API server.
 func (a *App) startRESTServer() error {
-	a.restServer = rest.NewServer(a.config, a.platform, a.store, a.detector, a.catalog, a.installer)
+	a.restServer = rest.NewServer(
+		a.config, a.platform, a.store, a.detector, a.catalog, a.installer,
+		rest.WithVersion(a.version),
+		rest.WithStartTime(a.startTime),
+	)
 	return a.restServer.Start(a.ctx, rest.ServerConfig{
 		Address: fmt.Sprintf(":%d", a.config.API.RESTPort),
 	})
@@ -162,10 +178,10 @@ func (a *App) handleIPCMessage(ctx context.Context, msg *ipc.Message) (*ipc.Mess
 	case ipc.MessageTypeGetStatus:
 		return a.handleGetStatus(ctx, msg)
 	case ipc.MessageTypeShutdown:
-		go func() {
-			time.Sleep(100 * time.Millisecond)
-			systray.Quit()
-		}()
+		// Signal the background shutdown watcher. The response below is sent
+		// by the IPC framework before the watcher observes shutdownCh and
+		// triggers systray.Quit(), which avoids racing the caller's read.
+		a.requestShutdown()
 		return ipc.NewMessage(ipc.MessageTypeSuccess, nil)
 	default:
 		return ipc.NewMessage(ipc.MessageTypeError, ipc.ErrorResponse{
@@ -300,17 +316,65 @@ func (a *App) onReady() {
 	}
 
 	// Initial refresh
-	go a.refreshAgents(a.ctx)
+	a.bgWG.Add(1)
+	go func() {
+		defer a.bgWG.Done()
+		_ = a.refreshAgents(a.ctx)
+	}()
 
-	// Start background tasks
-	go a.backgroundLoop()
+	// Start background tasks (tracked for clean shutdown).
+	a.bgWG.Add(1)
+	go func() {
+		defer a.bgWG.Done()
+		a.backgroundLoop()
+	}()
 
-	// Handle menu clicks (all menu items in one goroutine)
-	go a.handleMenuClicks()
+	// Handle menu clicks (all menu items in one goroutine).
+	a.bgWG.Add(1)
+	go func() {
+		defer a.bgWG.Done()
+		a.handleMenuClicks()
+	}()
+
+	// Shutdown watcher: triggers systray.Quit() on request or ctx cancellation.
+	a.bgWG.Add(1)
+	go func() {
+		defer a.bgWG.Done()
+		a.shutdownWatcher()
+	}()
+}
+
+// requestShutdown signals the shutdown watcher to tear the helper down.
+// Safe to call from any goroutine and idempotent.
+func (a *App) requestShutdown() {
+	a.shutdownOnce.Do(func() {
+		close(a.shutdownCh)
+	})
+}
+
+// shutdownWatcher waits for either an explicit shutdown request or the app
+// context to be canceled, then triggers systray.Quit(). Running Quit via a
+// dedicated goroutine instead of a time.Sleep gives the IPC framework a
+// deterministic handshake: the shutdown IPC handler returns its response
+// first, the IPC framework writes it on the wire, and this watcher then
+// trips Quit — ordered solely by goroutine scheduling, not a magic delay.
+func (a *App) shutdownWatcher() {
+	select {
+	case <-a.shutdownCh:
+	case <-a.ctx.Done():
+	}
+	systray.Quit()
 }
 
 // onExit is called when systray is exiting.
 func (a *App) onExit() {
+	// Make sure the shutdown signal is set so any goroutines selecting on
+	// shutdownCh can exit even if Quit was invoked outside requestShutdown
+	// (e.g. via the Quit menu or a.Quit()).
+	a.requestShutdown()
+
+	// Cancel the app context so long-running goroutines (refresh, menu clicks,
+	// IPC/REST handlers) can unwind.
 	a.cancel()
 
 	// Close all native windows
@@ -327,9 +391,21 @@ func (a *App) onExit() {
 		a.restServer.Stop(ctx)
 	}
 
-	// Stop IPC server
+	// Stop IPC server (drains in-flight handlers before returning).
 	if a.ipcServer != nil {
 		a.ipcServer.Stop(ctx)
+	}
+
+	// Wait for our own background goroutines to exit, but bound the wait so
+	// a stuck goroutine cannot prevent the process from exiting.
+	waitDone := make(chan struct{})
+	go func() {
+		a.bgWG.Wait()
+		close(waitDone)
+	}()
+	select {
+	case <-waitDone:
+	case <-ctx.Done():
 	}
 
 	close(a.done)
@@ -484,18 +560,10 @@ func (a *App) refreshAgentsWithCache(ctx context.Context, forceRefresh bool) err
 
 	// Check for updates if needed
 	if needUpdateCheck {
-		// Check for latest versions
-		for _, inst := range detected {
-			if agentDef, ok := agentDefMap[inst.AgentID]; ok {
-				methodStr := string(inst.Method)
-				if method, ok := agentDef.InstallMethods[methodStr]; ok {
-					latestVer, err := a.installer.GetLatestVersion(ctx, method)
-					if err == nil {
-						inst.LatestVersion = &latestVer
-					}
-				}
-			}
-		}
+		// Fetch latest versions in parallel. Per-index errors are ignored here;
+		// the systray surfaces failures implicitly via HasUpdate() returning
+		// false for agents whose registries could not be reached.
+		_ = versionfetch.CheckLatestVersions(ctx, a.installer, detected, agentDefMap, versionfetch.DefaultConcurrency)
 
 		// Save last update check time
 		_ = a.store.SetLastUpdateCheckTime(ctx, time.Now())
@@ -521,14 +589,63 @@ func (a *App) refreshAgentsWithCache(ctx context.Context, forceRefresh bool) err
 	return nil
 }
 
-// checkUpdates checks for available updates.
+// checkUpdates checks for available updates by re-querying each installed
+// agent's package registry for the latest version.
+//
+// When cfg.Updates.AutoCheck is false, this reverts to the previous behavior
+// of simply recounting HasUpdate() on the already-cached snapshot (used for
+// user-initiated triggers that should not hit the network).
 func (a *App) checkUpdates(ctx context.Context) error {
 	a.agentsMu.Lock()
 	a.lastCheck = time.Now()
 	a.agentsMu.Unlock()
 
-	// In a real implementation, this would check the catalog for newer versions
-	// and update the LatestVersion field on each installation
+	if a.config.Updates.AutoCheck {
+		// Snapshot current agents under the read lock so we can mutate copies
+		// off-lock while the parallel fetcher runs.
+		a.agentsMu.RLock()
+		snapshot := make([]*agent.Installation, len(a.agents))
+		for i := range a.agents {
+			agCopy := a.agents[i]
+			snapshot[i] = &agCopy
+		}
+		a.agentsMu.RUnlock()
+
+		// Build the agent-def lookup required by the version fetcher.
+		agentDefs, err := a.catalog.GetAgentsForPlatform(ctx, string(a.platform.ID()))
+		if err == nil {
+			agentDefMap := make(map[string]catalog.AgentDef, len(agentDefs))
+			for _, def := range agentDefs {
+				agentDefMap[def.ID] = def
+			}
+
+			_ = versionfetch.CheckLatestVersions(ctx, a.installer, snapshot, agentDefMap, versionfetch.DefaultConcurrency)
+
+			// Write the refreshed LatestVersion fields back into the shared
+			// state under the write lock, matching snapshot ordering.
+			a.agentsMu.Lock()
+			for i := range snapshot {
+				if i >= len(a.agents) {
+					break
+				}
+				a.agents[i].LatestVersion = snapshot[i].LatestVersion
+			}
+			// Persist the refreshed snapshot so subsequent reads see the new
+			// versions on next restart.
+			if a.config.Detection.CacheEnabled {
+				toCache := make([]*agent.Installation, len(a.agents))
+				for i := range a.agents {
+					agCopy := a.agents[i]
+					toCache[i] = &agCopy
+				}
+				a.agentsMu.Unlock()
+				_ = a.store.SaveDetectionCache(ctx, toCache)
+				_ = a.store.SetLastUpdateCheckTime(ctx, time.Now())
+			} else {
+				a.agentsMu.Unlock()
+			}
+		}
+	}
 
 	// Only update the counts, not the full menu (to avoid menu jumping)
 	a.updateMenuCounts()

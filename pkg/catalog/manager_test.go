@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 
 // mockStore implements storage.Store for testing
 type mockStore struct {
+	mu          sync.Mutex
 	catalogData []byte
 	catalogEtag string
 	err         error
@@ -44,6 +47,8 @@ func (m *mockStore) GetUpdateHistory(ctx context.Context, agentID string, limit 
 }
 
 func (m *mockStore) GetCatalogCache(ctx context.Context) ([]byte, string, time.Time, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	if m.err != nil {
 		return nil, "", time.Time{}, m.err
 	}
@@ -51,6 +56,8 @@ func (m *mockStore) GetCatalogCache(ctx context.Context) ([]byte, string, time.T
 }
 
 func (m *mockStore) SaveCatalogCache(ctx context.Context, data []byte, etag string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.catalogData = data
 	m.catalogEtag = etag
 	return m.err
@@ -520,4 +527,139 @@ func containsHelper(s, substr string) bool {
 		}
 	}
 	return false
+}
+
+// TestManagerRefresh_SingleflightCoalesces asserts that concurrent Refresh
+// calls produce exactly one HTTP fetch. Without singleflight both callers
+// would race and both hit the network, the last writer wins on the cache.
+func TestManagerRefresh_SingleflightCoalesces(t *testing.T) {
+	catalog := createTestCatalog()
+	catalogJSON, _ := json.Marshal(catalog)
+
+	var requests int64
+	// Small delay so the second Refresh has time to catch up inside Do.
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt64(&requests, 1)
+		time.Sleep(50 * time.Millisecond)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(catalogJSON)
+	}))
+	defer server.Close()
+
+	cfg := newTestConfig()
+	cfg.Catalog.SourceURL = server.URL + "/catalog.json"
+	store := &mockStore{}
+	mgr := NewManager(cfg, store)
+
+	ctx := context.Background()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := mgr.Refresh(ctx); err != nil {
+				t.Errorf("Refresh() error: %v", err)
+			}
+		}()
+	}
+	wg.Wait()
+
+	got := atomic.LoadInt64(&requests)
+	if got != 1 {
+		t.Errorf("expected exactly 1 upstream request under singleflight, got %d", got)
+	}
+}
+
+// TestManagerRefresh_SendsIfNoneMatchAndHandles304 verifies the ETag round-trip:
+// after a successful 200 fetch we store the server's ETag, and the next
+// Refresh sends it back and handles a 304 without re-parsing the body.
+func TestManagerRefresh_SendsIfNoneMatchAndHandles304(t *testing.T) {
+	catalog := createTestCatalog()
+	catalogJSON, _ := json.Marshal(catalog)
+	const etag = `"abc123"`
+
+	var seenIfNoneMatch string
+	var call int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		call++
+		seenIfNoneMatch = r.Header.Get("If-None-Match")
+		if call == 1 {
+			w.Header().Set("ETag", etag)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(catalogJSON)
+			return
+		}
+		// Subsequent request should include the etag; reply 304.
+		w.WriteHeader(http.StatusNotModified)
+	}))
+	defer server.Close()
+
+	cfg := newTestConfig()
+	cfg.Catalog.SourceURL = server.URL + "/catalog.json"
+	store := &mockStore{}
+	mgr := NewManager(cfg, store)
+
+	ctx := context.Background()
+
+	// First refresh: 200 OK, ETag stored.
+	if _, err := mgr.Refresh(ctx); err != nil {
+		t.Fatalf("first Refresh() error: %v", err)
+	}
+	if store.catalogEtag != etag {
+		t.Errorf("store etag = %q, want %q", store.catalogEtag, etag)
+	}
+
+	// Second refresh: must send If-None-Match and accept 304.
+	result, err := mgr.Refresh(ctx)
+	if err != nil {
+		t.Fatalf("second Refresh() error: %v", err)
+	}
+	if seenIfNoneMatch != etag {
+		t.Errorf("server saw If-None-Match = %q, want %q", seenIfNoneMatch, etag)
+	}
+	if result == nil {
+		t.Fatal("second Refresh returned nil result")
+	}
+	if result.Updated {
+		t.Error("second Refresh should not report Updated on 304")
+	}
+}
+
+// TestManagerRefresh_LogsCacheSaveErrorButSucceeds verifies that a failing
+// SaveCatalogCache does not fail the whole Refresh — the in-memory catalog
+// should still be updated and the caller should get a success result.
+func TestManagerRefresh_LogsCacheSaveErrorButSucceeds(t *testing.T) {
+	catalog := createTestCatalog()
+	catalogJSON, _ := json.Marshal(catalog)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(catalogJSON)
+	}))
+	defer server.Close()
+
+	cfg := newTestConfig()
+	cfg.Catalog.SourceURL = server.URL + "/catalog.json"
+	// mockStore.err is returned from SaveCatalogCache — simulate persistence failure.
+	store := &mockStore{err: os.ErrPermission}
+	mgr := NewManager(cfg, store)
+
+	ctx := context.Background()
+	result, err := mgr.Refresh(ctx)
+	if err != nil {
+		t.Fatalf("Refresh() should succeed despite cache write error, got %v", err)
+	}
+	if result == nil || !result.Updated {
+		t.Error("Refresh() should report Updated=true when remote is newer")
+	}
+
+	// In-memory catalog should be populated.
+	got, err := mgr.Get(ctx)
+	if err != nil {
+		t.Fatalf("Get() after Refresh() error: %v", err)
+	}
+	if got.Version != catalog.Version {
+		t.Errorf("in-memory catalog version = %q, want %q", got.Version, catalog.Version)
+	}
 }

@@ -138,7 +138,7 @@ func (d *darwinPlatform) generateLaunchAgentPlist() string {
 }
 
 func (d *darwinPlatform) FindExecutable(name string) (string, error) {
-	path, err := exec.LookPath(name)
+	path, err := cachedLookPath(name)
 	if err != nil {
 		return "", fmt.Errorf("executable %q not found: %w", name, err)
 	}
@@ -164,7 +164,7 @@ func (d *darwinPlatform) FindExecutables(name string) ([]string, error) {
 }
 
 func (d *darwinPlatform) IsExecutableInPath(name string) bool {
-	_, err := exec.LookPath(name)
+	_, err := cachedLookPath(name)
 	return err == nil
 }
 

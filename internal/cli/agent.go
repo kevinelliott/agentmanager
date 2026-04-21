@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/kevinelliott/agentmanager/internal/cli/output"
+	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -74,8 +75,11 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 			ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 			defer cancel()
 
+			// Single source of truth for no-color.
+			noColor := output.NoColor(cfg, false)
+
 			// Create printer for colored output
-			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+			printer := output.NewPrinter(cfg, noColor)
 
 			// Get current platform
 			plat := platform.Current()
@@ -83,7 +87,7 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 			// Create spinner for loading
 			spinner := output.NewSpinner(
 				output.WithMessage("Loading..."),
-				output.WithNoColor(!cfg.UI.UseColors),
+				output.WithNoColor(noColor),
 			)
 			spinner.Start()
 
@@ -162,20 +166,10 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 				// Update spinner for version checking
 				spinner.UpdateMessage("Checking for updates...")
 
-				// Check for latest versions
-				for _, inst := range installations {
-					if agentDef, ok := agentDefMap[inst.AgentID]; ok {
-						// Find the matching install method
-						methodStr := string(inst.Method)
-						if method, ok := agentDef.InstallMethods[methodStr]; ok {
-							// Get latest version from package registry
-							latestVer, err := instMgr.GetLatestVersion(ctx, method)
-							if err == nil {
-								inst.LatestVersion = &latestVer
-							}
-						}
-					}
-				}
+				// Fetch latest versions in parallel. Errors are intentionally
+				// dropped here to preserve the existing silent-failure semantics
+				// of `agent list`.
+				_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
 
 				// Save last update check time
 				_ = store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort timestamp; non-critical if this fails
@@ -441,21 +435,10 @@ Use --all to update all agents at once.`,
 
 			spinner.UpdateMessage("Checking for updates...")
 
-			// Check for latest versions so HasUpdate() works correctly
-			var versionCheckErrors []string
-			for _, installation := range installations {
-				if agentDef, ok := agentDefMap[installation.AgentID]; ok {
-					methodStr := string(installation.Method)
-					if method, ok := agentDef.InstallMethods[methodStr]; ok {
-						latestVer, err := inst.GetLatestVersion(ctx, method)
-						if err == nil {
-							installation.LatestVersion = &latestVer
-						} else {
-							versionCheckErrors = append(versionCheckErrors, fmt.Sprintf("%s (%s): %v", installation.AgentName, methodStr, err))
-						}
-					}
-				}
-			}
+			// Check for latest versions in parallel so HasUpdate() works correctly.
+			// The returned per-index errors are aggregated and surfaced to the user.
+			perIndexErrs := versionfetch.CheckLatestVersions(ctx, inst, installations, agentDefMap, versionfetch.DefaultConcurrency)
+			versionCheckErrors := versionfetch.NonNilErrors(perIndexErrs)
 
 			spinner.Stop()
 
@@ -463,7 +446,7 @@ Use --all to update all agents at once.`,
 			if len(versionCheckErrors) > 0 && !force {
 				printer.Warning("Could not check latest version for %d agent(s):", len(versionCheckErrors))
 				for _, e := range versionCheckErrors {
-					printer.Print("  - %s", e)
+					printer.Print("  - %s", e.Error())
 				}
 				printer.Print("")
 			}
@@ -494,7 +477,7 @@ func updateAllAgents(ctx context.Context, installations []*agent.Installation, c
 
 	spinner := output.NewSpinner(
 		output.WithMessage("Checking for updates..."),
-		output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+		output.WithNoColor(printer.NoColor()),
 	)
 	spinner.Start()
 
@@ -546,7 +529,7 @@ func updateAllAgents(ctx context.Context, installations []*agent.Installation, c
 
 		spinner := output.NewSpinner(
 			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
-			output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+			output.WithNoColor(printer.NoColor()),
 		)
 		spinner.Start()
 
@@ -628,7 +611,7 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 
 		spinner := output.NewSpinner(
 			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
-			output.WithNoColor(os.Getenv("NO_COLOR") != ""),
+			output.WithNoColor(printer.NoColor()),
 		)
 		spinner.Start()
 
@@ -952,7 +935,7 @@ results. The new detection results are then cached for future use.`,
 			// Create spinner
 			spinner := output.NewSpinner(
 				output.WithMessage("Clearing cache..."),
-				output.WithNoColor(!cfg.UI.UseColors),
+				output.WithNoColor(output.NoColor(cfg, false)),
 			)
 			spinner.Start()
 
@@ -1005,18 +988,9 @@ results. The new detection results are then cached for future use.`,
 
 			spinner.UpdateMessage("Checking for updates...")
 
-			// Check for latest versions
-			for _, inst := range installations {
-				if agentDef, ok := agentDefMap[inst.AgentID]; ok {
-					methodStr := string(inst.Method)
-					if method, ok := agentDef.InstallMethods[methodStr]; ok {
-						latestVer, err := instMgr.GetLatestVersion(ctx, method)
-						if err == nil {
-							inst.LatestVersion = &latestVer
-						}
-					}
-				}
-			}
+			// Check for latest versions in parallel. Errors are intentionally
+			// dropped to preserve existing silent-failure semantics for refresh.
+			_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
 
 			// Save to cache
 			if cfg.Detection.CacheEnabled {
