@@ -42,6 +42,13 @@ type Model struct {
 	config   *config.Config
 	platform platform.Platform
 
+	// Shared resources owned by Run() for the Program's lifetime.
+	// loadDataWithRefresh reads from these rather than opening its own
+	// Store + Manager on every refresh (the old pattern re-ran 8 SQLite
+	// migrations per `r` keypress).
+	store  storage.Store
+	catMgr *catalog.Manager
+
 	// Data
 	agents      []*agent.Installation
 	catalog     *catalog.Catalog
@@ -137,7 +144,12 @@ func (i agentItem) Description() string { return i.installation.InstalledVersion
 func (i agentItem) FilterValue() string { return i.installation.AgentName }
 
 // New creates a new TUI model.
-func New(cfg *config.Config, plat platform.Platform) Model {
+// New constructs the TUI Model. Callers are responsible for opening the
+// Store (so Close can be deferred in the caller's scope after Program.Run
+// returns) and passing it in. The Model reuses that Store across every
+// refresh, avoiding the sql.Open + migrate churn the old per-refresh
+// pattern incurred.
+func New(cfg *config.Config, plat platform.Platform, store storage.Store) Model {
 	// Create spinner
 	s := spinner.New()
 	s.Spinner = spinner.Dot
@@ -157,6 +169,8 @@ func New(cfg *config.Config, plat platform.Platform) Model {
 	return Model{
 		config:      cfg,
 		platform:    plat,
+		store:       store,
+		catMgr:      catalog.NewManager(cfg, store),
 		currentView: ViewDashboard,
 		keys:        DefaultKeyMap(),
 		spinner:     s,
@@ -179,26 +193,18 @@ func (m Model) loadData() tea.Msg {
 }
 
 // loadDataWithRefresh loads data, optionally bypassing the cache.
+//
+// Uses the shared Store + catalog.Manager on the Model — open once in
+// Run() and reused across every refresh. Detector + installer.Manager
+// are cheap to construct, so we still build those per-refresh.
 func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	// Initialize storage
-	store, err := storage.NewSQLiteStore(m.platform.GetDataDir())
-	if err != nil {
-		return dataLoadedMsg{err: fmt.Errorf("failed to create storage: %w", err)}
-	}
-	defer store.Close()
-
-	if err := store.Initialize(ctx); err != nil {
-		return dataLoadedMsg{err: fmt.Errorf("failed to initialize storage: %w", err)}
-	}
-
 	// Load catalog (separately needed for the model — the pipeline returns the
 	// per-platform slice, not the full Catalog object the TUI renders in its
 	// catalog view).
-	catMgr := catalog.NewManager(m.config, store)
-	cat, err := catMgr.Get(ctx)
+	cat, err := m.catMgr.Get(ctx)
 	if err != nil {
 		return dataLoadedMsg{err: fmt.Errorf("failed to load catalog: %w", err)}
 	}
@@ -209,7 +215,7 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	// previous behavior.
 	det := detector.New(m.platform)
 	instMgr := installer.NewManager(m.platform)
-	pipeline := orchestrator.NewFromManagers(m.config, m.platform, store, catMgr, det, instMgr)
+	pipeline := orchestrator.NewFromManagers(m.config, m.platform, m.store, m.catMgr, det, instMgr)
 	res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: forceRefresh})
 	if err != nil {
 		return dataLoadedMsg{err: err}
@@ -609,12 +615,27 @@ func (m Model) settingsView() string {
 
 // Run starts the TUI.
 func Run(cfg *config.Config, plat platform.Platform) error {
+	// Open storage once for the Program's lifetime so every refresh reuses
+	// the same connection pool and migrations run a single time.
+	store, err := storage.NewSQLiteStore(plat.GetDataDir())
+	if err != nil {
+		return fmt.Errorf("failed to create storage: %w", err)
+	}
+	defer store.Close()
+
+	initCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	if err := store.Initialize(initCtx); err != nil {
+		cancel()
+		return fmt.Errorf("failed to initialize storage: %w", err)
+	}
+	cancel()
+
 	p := tea.NewProgram(
-		New(cfg, plat),
+		New(cfg, plat, store),
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)
 
-	_, err := p.Run()
+	_, err = p.Run()
 	return err
 }
