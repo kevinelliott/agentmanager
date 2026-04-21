@@ -92,7 +92,6 @@ func newTestConfig() *config.Config {
 		Catalog: config.CatalogConfig{
 			SourceURL:       "http://example.com/catalog.json",
 			RefreshInterval: time.Hour,
-			RefreshOnStart:  true,
 		},
 	}
 }
