@@ -15,6 +15,7 @@ import (
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/logging"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
 
@@ -167,8 +168,10 @@ func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
 		etagToStore = remoteCatalog.Version
 	}
 	if err := m.store.SaveCatalogCache(ctx, mustMarshal(remoteCatalog), etagToStore); err != nil {
-		// Non-fatal: we still have the catalog in memory.
-		slog.Warn("catalog: failed to persist cache",
+		// Non-fatal: we still have the catalog in memory. Use the
+		// request-scoped logger so operators can tag refresh events
+		// (e.g. with a trigger source) at the call site.
+		logging.FromContext(ctx).Warn("catalog: failed to persist cache",
 			"err", err,
 			"version", remoteCatalog.Version,
 		)
