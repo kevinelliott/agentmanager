@@ -457,8 +457,12 @@ func TestManagerLoadEmbedded(t *testing.T) {
 	// Place a catalog.json under a fake $HOME so loadEmbedded picks up the
 	// user-scoped path ($HOME/.config/agentmgr/catalog.json). CWD is NOT
 	// probed anymore — see loadEmbedded's docs for rationale.
+	//
+	// os.UserHomeDir reads USERPROFILE on Windows and HOME on Unix; set both
+	// so the test works on all CI platforms.
 	tmpHome := t.TempDir()
 	t.Setenv("HOME", tmpHome)
+	t.Setenv("USERPROFILE", tmpHome)
 
 	configDir := filepath.Join(tmpHome, ".config", "agentmgr")
 	if err := os.MkdirAll(configDir, 0o755); err != nil {
@@ -490,8 +494,12 @@ func TestManagerLoadEmbedded(t *testing.T) {
 // the current working directory is NEVER picked up — e.g., when the user
 // runs agentmgr from a repo that happens to have its own catalog.json.
 func TestManagerDoesNotShadowCWDCatalog(t *testing.T) {
-	// Redirect $HOME to an empty temp dir so the user-scoped paths miss.
-	t.Setenv("HOME", t.TempDir())
+	// Redirect $HOME (and USERPROFILE for Windows) to an empty temp dir so
+	// the user-scoped paths miss. os.UserHomeDir reads USERPROFILE first on
+	// Windows.
+	empty := t.TempDir()
+	t.Setenv("HOME", empty)
+	t.Setenv("USERPROFILE", empty)
 
 	// Drop a bogus catalog.json in the current working directory.
 	tmpDir := t.TempDir()
