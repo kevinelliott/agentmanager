@@ -20,9 +20,28 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/config"
 	"github.com/kevinelliott/agentmanager/pkg/detector"
 	"github.com/kevinelliott/agentmanager/pkg/installer"
+	"github.com/kevinelliott/agentmanager/pkg/installer/providers"
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
+
+// verboseInstallOutput returns true when the user has asked for verbose output
+// at the root level. The root PersistentPreRunE flips Logging.Level to "debug"
+// when `-v/--verbose` is passed. We use that as the single source of truth so
+// enabling verbose anywhere in the tree also enables install/update streaming.
+func verboseInstallOutput(cfg *config.Config) bool {
+	return strings.EqualFold(cfg.Logging.Level, "debug")
+}
+
+// withInstallProgress returns ctx annotated with a progress writer if the
+// user has asked for verbose output. The writer target is os.Stderr (so piped
+// stdout captures of structured output remain clean).
+func withInstallProgress(ctx context.Context, cfg *config.Config) context.Context {
+	if !verboseInstallOutput(cfg) {
+		return ctx
+	}
+	return providers.WithProgressWriter(ctx, os.Stderr)
+}
 
 // NewAgentCommand creates the agent management command group.
 func NewAgentCommand(cfg *config.Config) *cobra.Command {
@@ -287,17 +306,34 @@ will be used.`,
 				return fmt.Errorf("installation method %q not available for %q", method, agentID)
 			}
 
-			spinner.UpdateMessage(fmt.Sprintf("Installing %s via %s...", agentDef.Name, method))
-
-			// Create installer and install
+			// Create installer and install. In verbose mode, stop the spinner
+			// and stream the subprocess output directly (spinner ANSI would
+			// otherwise garble the interleaved output).
 			inst := installer.NewManager(plat)
-			result, err := inst.Install(ctx, agentDef, methodDef, force)
+			installCtx := withInstallProgress(ctx, cfg)
+			if verboseInstallOutput(cfg) {
+				spinner.Stop()
+				fmt.Fprintf(os.Stderr, "Installing %s via %s...\n", agentDef.Name, method)
+			} else {
+				spinner.UpdateMessage(fmt.Sprintf("Installing %s via %s...", agentDef.Name, method))
+			}
+
+			result, err := inst.Install(installCtx, agentDef, methodDef, force)
 			if err != nil {
-				spinner.Error(fmt.Sprintf("Failed to install %s", agentDef.Name))
+				if !verboseInstallOutput(cfg) {
+					spinner.Error(fmt.Sprintf("Failed to install %s", agentDef.Name))
+				} else {
+					fmt.Fprintf(os.Stderr, "Failed to install %s\n", agentDef.Name)
+				}
 				return fmt.Errorf("installation failed: %w", err)
 			}
 
-			spinner.Success(fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String()))
+			msg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String())
+			if verboseInstallOutput(cfg) {
+				fmt.Fprintln(os.Stderr, msg)
+			} else {
+				spinner.Success(msg)
+			}
 			return nil
 		},
 	}
@@ -390,7 +426,7 @@ Use --all to update all agents at once.`,
 			}
 
 			if all {
-				return updateAllAgents(ctx, installations, cat, inst, force, dryRun, printer)
+				return updateAllAgents(ctx, cfg, installations, cat, inst, force, dryRun, printer)
 			}
 
 			if len(args) == 0 {
@@ -398,7 +434,7 @@ Use --all to update all agents at once.`,
 				return fmt.Errorf("agent name required (or use --all)")
 			}
 
-			return updateSingleAgent(ctx, args[0], installations, cat, inst, force, dryRun, printer)
+			return updateSingleAgent(ctx, cfg, args[0], installations, cat, inst, force, dryRun, printer)
 		},
 	}
 
@@ -410,8 +446,9 @@ Use --all to update all agents at once.`,
 }
 
 // updateAllAgents handles the --all flag to update all agents with available updates.
-func updateAllAgents(ctx context.Context, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
+func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
 	styles := printer.Styles()
+	verbose := verboseInstallOutput(cfg)
 
 	spinner := output.NewSpinner(
 		output.WithMessage("Checking for updates..."),
@@ -465,26 +502,43 @@ func updateAllAgents(ctx context.Context, installations []*agent.Installation, c
 			continue
 		}
 
-		spinner := output.NewSpinner(
-			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
-			output.WithNoColor(printer.NoColor()),
-		)
-		spinner.Start()
+		updateCtx := withInstallProgress(ctx, cfg)
+		var spinner *output.Spinner
+		if verbose {
+			fmt.Fprintf(os.Stderr, "Updating %s via %s...\n", installation.AgentName, installation.Method)
+		} else {
+			spinner = output.NewSpinner(
+				output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
+				output.WithNoColor(printer.NoColor()),
+			)
+			spinner.Start()
+		}
 
-		result, err := inst.Update(ctx, installation, agentDef, methodDef)
+		result, err := inst.Update(updateCtx, installation, agentDef, methodDef)
 		if err != nil {
-			spinner.Error(fmt.Sprintf("Failed to update %s: %v", installation.AgentName, err))
+			msg := fmt.Sprintf("Failed to update %s: %v", installation.AgentName, err)
+			if verbose {
+				fmt.Fprintln(os.Stderr, msg)
+			} else {
+				spinner.Error(msg)
+			}
 			continue
 		}
-		spinner.Success(fmt.Sprintf("Updated %s to %s", installation.AgentName, result.Version.String()))
+		okMsg := fmt.Sprintf("Updated %s to %s", installation.AgentName, result.Version.String())
+		if verbose {
+			fmt.Fprintln(os.Stderr, okMsg)
+		} else {
+			spinner.Success(okMsg)
+		}
 	}
 
 	return nil
 }
 
 // updateSingleAgent handles updating a specific agent by ID.
-func updateSingleAgent(ctx context.Context, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
+func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
 	styles := printer.Styles()
+	verbose := verboseInstallOutput(cfg)
 
 	var agentInstallations []*agent.Installation
 	for _, installation := range installations {
@@ -547,19 +601,35 @@ func updateSingleAgent(ctx context.Context, agentID string, installations []*age
 			continue
 		}
 
-		spinner := output.NewSpinner(
-			output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
-			output.WithNoColor(printer.NoColor()),
-		)
-		spinner.Start()
+		updateCtx := withInstallProgress(ctx, cfg)
+		var spinner *output.Spinner
+		if verbose {
+			fmt.Fprintf(os.Stderr, "Updating %s via %s...\n", installation.AgentName, installation.Method)
+		} else {
+			spinner = output.NewSpinner(
+				output.WithMessage(fmt.Sprintf("Updating %s via %s...", installation.AgentName, installation.Method)),
+				output.WithNoColor(printer.NoColor()),
+			)
+			spinner.Start()
+		}
 
-		result, err := inst.Update(ctx, installation, agentDef, methodDef)
+		result, err := inst.Update(updateCtx, installation, agentDef, methodDef)
 		if err != nil {
-			spinner.Error(fmt.Sprintf("Failed to update %s via %s: %v", agentDef.Name, installation.Method, err))
+			msg := fmt.Sprintf("Failed to update %s via %s: %v", agentDef.Name, installation.Method, err)
+			if verbose {
+				fmt.Fprintln(os.Stderr, msg)
+			} else {
+				spinner.Error(msg)
+			}
 			lastErr = err
 			continue
 		}
-		spinner.Success(fmt.Sprintf("Updated %s to %s", agentDef.Name, result.Version.String()))
+		okMsg := fmt.Sprintf("Updated %s to %s", agentDef.Name, result.Version.String())
+		if verbose {
+			fmt.Fprintln(os.Stderr, okMsg)
+		} else {
+			spinner.Success(okMsg)
+		}
 	}
 
 	return lastErr

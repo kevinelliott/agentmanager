@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -59,9 +60,10 @@ func (p *PipProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 	}
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, manager, args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("%s install failed: %w\n%s%s", manager, err, stderr.String(), FormatInstallError(manager, "install", stderr.String()))
@@ -96,9 +98,10 @@ func (p *PipProvider) Update(ctx context.Context, inst *agent.Installation, agen
 	fromVersion := inst.InstalledVersion
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, manager, args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("%s update failed: %w\n%s%s", manager, err, stderr.String(), FormatInstallError(manager, "update", stderr.String()))

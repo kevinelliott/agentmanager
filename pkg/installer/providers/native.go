@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -134,15 +135,17 @@ func (p *NativeProvider) Uninstall(ctx context.Context, inst *agent.Installation
 	return nil
 }
 
-// executeCommand runs a shell command.
+// executeCommand runs a shell command, tee-ing output to any progress writer
+// attached to ctx via WithProgressWriter.
 func (p *NativeProvider) executeCommand(ctx context.Context, command string) (string, error) {
 	shell := p.platform.GetShell()
 	shellArg := p.platform.GetShellArg()
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, shell, shellArg, command)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("%w\n%s", err, stderr.String())

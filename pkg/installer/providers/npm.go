@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"time"
@@ -59,9 +60,10 @@ func (p *NPMProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 	args = append(args, packageName)
 
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, "npm", args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("npm install failed: %w\n%s%s", err, stderr.String(), formatNPMPermissionHint(stderr.String()))
@@ -100,9 +102,10 @@ func (p *NPMProvider) Update(ctx context.Context, inst *agent.Installation, agen
 
 	// Run update command
 	var stdout, stderr bytes.Buffer
+	progress := ProgressWriter(ctx)
 	cmd := exec.CommandContext(ctx, "npm", "update", "-g", packageName)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = io.MultiWriter(&stdout, progress)
+	cmd.Stderr = io.MultiWriter(&stderr, progress)
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("npm update failed: %w\n%s%s", err, stderr.String(), formatNPMPermissionHint(stderr.String()))
