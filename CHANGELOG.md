@@ -7,42 +7,104 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-04-21
+
+Performance, reliability, and refactor release. Typical `agent list`
+/ `agent update --all` / TUI first paint on machines with N installed
+agents is now 10–20× faster thanks to parallel version checks and a
+consolidated detect pipeline. Ships a critical gRPC CVE fix.
+
+### Security
+
+- Bump `google.golang.org/grpc` to v1.79.3 to pick up the fix for
+  CVE-2026-33186 (authorization bypass via missing leading slash in
+  `:path`). Transitive `golang.org/x/{net,sync,text}` bumps included.
+
+### Added
+
+- `internal/versionfetch`: concurrent latest-version check helper
+  (errgroup + semaphore, default concurrency 8).
+- `internal/orchestrator.Pipeline`: shared detect → version-check →
+  cache-save pipeline now used by CLI list/update, TUI, and the
+  systray helper. Eliminates ~205 lines of near-duplicated code.
+- REST `getAgentsWithCache` helper: honors `Detection.CacheDuration`
+  and a `?refresh=true` bypass.
+- gRPC server: keepalive (30s/10s), 16 MiB message-size limits, and
+  panic-recovery unary/stream interceptors.
+- SQLite migrations guarded by `PRAGMA user_version` so cold starts
+  skip DDL when the schema is current.
+- Platform `cachedLookPath` memoizes `exec.LookPath` keyed on `PATH`
+  + executable name (all three platforms).
+- Catalog `Refresh` coalesced via `singleflight`; `If-None-Match` /
+  HTTP 304 support using the previously-stored ETag.
+- Brew `GetLatestVersion` process-wide cache with per-key
+  `sync.Once` coalescing and 5-minute TTL.
+- `Makefile` `lint` target: pinned to golangci-lint v1.64.8 (matches
+  CI), auto-installs if missing or mismatched.
+
+### Changed
+
+- `GetLatestVersion` now runs concurrently (bounded to 8) at all four
+  call sites (CLI list, CLI update, TUI, systray). 10–20× faster on
+  typical N-agent workloads.
+- `BinaryStrategy.Detect` split into deterministic match phase +
+  parallel version extraction (concurrency 4).
+- pip PyPI fallback uses a shared `http.Client` instead of shelling
+  out to `curl`.
+- SQLite DSN adds `_busy_timeout=5000` and `_synchronous=NORMAL`;
+  connection pool clamped (`SetMaxOpenConns(1)`).
+- REST endpoints consume the detection cache instead of forcing
+  fresh `DetectAll` on every request.
+- REST server: `ReadHeaderTimeout: 5s`, `MaxHeaderBytes: 1 MiB`.
+- REST `/status`: exposes real server start-time, version, and
+  last-refresh timestamps (previously hardcoded `"dev"` / zero).
+- Systray shutdown: replaced `time.Sleep(100ms)` with a context +
+  `sync.WaitGroup` handshake.
+- Systray `checkUpdates`: performs real parallel version fetches
+  when `AutoCheck=true` (previously a placeholder).
+- Detector channel buffer now sized by the count of applicable
+  strategies rather than total (no over-allocation).
+- Catalog cache-save failures logged via `log/slog` instead of being
+  silently dropped.
+- Darwin-only `uninstallCLI` moved to build-tagged
+  `internal/systray/cli_uninstall_darwin.go`; stale `//nolint:unused`
+  removed.
+- CI `golangci-lint` pinned to v1.64.8 (was `latest`).
+
 ### Fixed
 
-- `pkg/ipc`: `listenForNotifications` now responds to context cancellation
-  promptly by using a short read deadline (500ms) around each receive.
-  Previously the blocking `conn.Receive()` could leak the goroutine until
-  the connection was closed, causing `TestListenForNotificationsContextCanceled`
-  to flake on CI.
-- `internal/cli/output/spinner`: spinner now detects TTY via `go-isatty` at
-  construction. When stdout is piped/redirected/not a terminal (or
-  `TERM=dumb` / `NO_COLOR` is set), `Start` and `Stop` are no-ops so ANSI
-  escape sequences no longer corrupt piped output.
-- `internal/cli`: `--no-color` handling unified via `output.NoColor(cfg, flag)`
-  helper and `Printer.NoColor()` accessor. Previously three different code
-  paths (agent list, agent info, catalog list/search) derived the value
-  differently, which could leave the spinner colored while the printer was
-  monochrome (or vice versa).
+- `TestListenForNotificationsContextCanceled` flake: `pkg/ipc`
+  `listenForNotifications` now responds to context cancellation
+  promptly by setting a short read deadline (500ms) around each
+  receive. Previously the blocking `conn.Receive()` could leak the
+  goroutine until the connection was closed.
+- Spinner ANSI escape sequences corrupting piped output when stdout
+  is not a TTY. `internal/cli/output/spinner` now detects TTY via
+  `go-isatty`; honors `NO_COLOR` and `TERM=dumb`.
+- `--no-color` inconsistency across `agent list`, `agent info`,
+  `catalog list`, and `catalog search` — unified via
+  `output.NoColor(cfg, flag)` + `Printer.NoColor()`.
 
 ### Deprecated
 
-- `config.CatalogConfig.RefreshOnStart` is marked deprecated. The flag is
-  not wired to any startup behavior today (catalog refresh cadence is
-  controlled by `RefreshInterval` + cache TTL). It is retained for
-  backward compatibility with existing config files and will be removed
-  once the sole remaining TUI display reference is cleaned up.
+- `config.CatalogConfig.RefreshOnStart` is marked deprecated. The
+  flag is not wired to any startup behavior today (catalog refresh
+  cadence is controlled by `RefreshInterval` + cache TTL). It is
+  retained for backward compatibility with existing config files
+  and will be removed once the sole remaining TUI display reference
+  is cleaned up.
 
 ### Known Issues
 
 - The macOS linker emits `ld: warning: ignoring duplicate libraries:
   '-lobjc'` when building `cmd/agentmgr-helper`. This is a cosmetic
-  warning from ld64 caused by Apple's clang auto-linking libobjc for both
-  `getlantern/systray` (which declares `-x objective-c` CFLAGS) and
-  `progrium/darwinkit` (Cocoa / Foundation frameworks). Neither
-  dependency declares `-lobjc` explicitly; the duplicate is injected by
-  the toolchain. Suppressing this cleanly would require dropping one
-  dependency or patching cgo directives upstream. The warning has no
-  runtime impact.
+  warning from ld64 caused by Apple's clang auto-linking libobjc for
+  both `getlantern/systray` (which declares `-x objective-c` CFLAGS)
+  and `progrium/darwinkit` (Cocoa / Foundation frameworks). Neither
+  dependency declares `-lobjc` explicitly; the duplicate is injected
+  by the toolchain. Suppressing this cleanly would require dropping
+  one dependency or patching cgo directives upstream. The warning
+  has no runtime impact.
 
 ## [1.0.16] - 2026-01-16
 
@@ -203,6 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration management
 - Makefile for common development tasks
 
+[1.1.0]: https://github.com/kevinelliott/agentmanager/compare/v1.0.24...v1.1.0
 [1.0.13]: https://github.com/kevinelliott/agentmanager/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/kevinelliott/agentmanager/compare/v1.0.11...v1.0.12
 [1.0.9]: https://github.com/kevinelliott/agentmanager/compare/v1.0.8...v1.0.9
