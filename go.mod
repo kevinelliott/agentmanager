@@ -1,8 +1,6 @@
 module github.com/kevinelliott/agentmanager
 
-go 1.24.2
-
-toolchain go1.24.11
+go 1.25.0
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
@@ -18,7 +16,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	golang.org/x/sync v0.19.0
-	golang.org/x/sys v0.41.0
+	golang.org/x/sys v0.43.0
 	google.golang.org/grpc v1.79.3
 	gopkg.in/yaml.v3 v3.0.1
 )
