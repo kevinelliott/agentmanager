@@ -12,7 +12,7 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main
 GOBIN ?= $(shell go env GOPATH)/bin
 
 # Pinned tool versions (keep in sync with .github/workflows/ci.yml)
-GOLANGCI_LINT_VERSION ?= v1.64.8
+GOLANGCI_LINT_VERSION ?= v2.11.4
 
 # Default target
 all: build
@@ -121,7 +121,7 @@ lint:
 	want=$$(echo $(GOLANGCI_LINT_VERSION) | sed 's/^v//'); \
 	if [ "$$installed" != "$$want" ]; then \
 		echo "Installing golangci-lint $(GOLANGCI_LINT_VERSION) (had: $${installed:-missing})..."; \
-		GOBIN=$(GOBIN) go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION); \
+		GOBIN=$(GOBIN) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION); \
 	fi
 	$(GOBIN)/golangci-lint run --timeout=5m
 

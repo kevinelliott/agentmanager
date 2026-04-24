@@ -37,7 +37,7 @@ This project follows a standard open-source code of conduct. Please be respectfu
 
 ### Prerequisites
 
-- **Go 1.24+** - [Download](https://go.dev/dl/)
+- **Go 1.25+** - [Download](https://go.dev/dl/)
 - **Make** - Usually pre-installed on macOS/Linux
 - **golangci-lint** - Installed automatically by `make lint`, or manually:
   ```bash

@@ -106,7 +106,9 @@ var _ = (*App).changeCLIPath
 
 // New creates a new systray application.
 func New(cfg *config.Config, cfgLoader *config.Loader, plat platform.Platform, store storage.Store, det *detector.Detector, cat *catalog.Manager, inst *installer.Manager, version string) *App {
-	ctx, cancel := context.WithCancel(context.Background())
+	// The cancel func is stashed on the App struct (a.cancel) and called
+	// from onExit during graceful shutdown. gosec G118 cannot see that.
+	ctx, cancel := context.WithCancel(context.Background()) //nolint:gosec // G118: cancel stored on struct + invoked in onExit
 	return &App{
 		config:       cfg,
 		configLoader: cfgLoader,
@@ -939,7 +941,6 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 				go a.updateSingleAgent(inst)
 			}
 		} else {
-			//nolint:gosec // G204: agent names come from trusted catalog, not user input
 			cmd := exec.Command("kdialog", "--msgbox", details, "--title", inst.AgentName)
 			_ = cmd.Run()
 		}
