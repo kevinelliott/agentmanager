@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-04-24
+
+Toolchain + dependency refresh. **Minimum Go is now 1.25** (bumped from
+1.24), along with `golangci-lint v2` and five dependency updates. Also
+includes a real TUI perf win (storage reuse across refreshes), a new
+`doctor` breakdown of catalog sources, and small logging + docs polish
+landed after v1.2.0.
+
+### Changed (potentially breaking)
+
+- **Minimum Go version: 1.25.** `golang.org/x/sync v0.20.0` requires
+  `go >= 1.25.0`. Rather than pin that sub-package to v0.19 and leave
+  four other bumps blocked, the module minimum was raised to match.
+  Users on Go 1.24 will see a clear `requires go >= 1.25` error on
+  `go install`; existing binaries are unaffected.
+- **Lint toolchain: golangci-lint v2.11.4** (was v1.64.8). The v1 line
+  is discontinued and can't lint Go 1.25 modules. `.golangci.yml`
+  migrated to v2 format. CI uses `golangci-lint-action@v7`. Three v2
+  rules were excluded as false-positive-heavy on this codebase:
+  `gocritic importShadow`, `gosec G703`, and `noctx` — see
+  `.golangci.yml` for the rationale.
+
+### Added
+
+- `agentmgr doctor` now reports a **Catalog Sources** section listing
+  every resolution layer (SQLite cache, user overrides, system share,
+  embedded baseline) with version + age so users can see at a glance
+  which layer will serve their catalog.
+- `pkg/catalog`: cache-save warn log now routes through
+  `logging.FromContext(ctx)`, letting callers inject a request-scoped
+  logger (and letting tests assert events fired via `logging.WithContext`).
+
+### Performance
+
+- **TUI refresh**: the Model now reuses `*storage.Store` and
+  `*catalog.Manager` for the Program's lifetime. Previously every
+  `r` keypress re-ran `sql.Open`, all 8 SQLite migrations, and a
+  catalog-manager construction (~80–120ms of warm-up before detection
+  started). Saved time lands in the refresh latency users see.
+
+### Dependencies
+
+- `google.golang.org/grpc`       v1.79.3  → v1.80.0
+- `golang.org/x/sync`             v0.19.0  → v0.20.0 (forces Go 1.25)
+- `github.com/mattn/go-isatty`    v0.0.20  → v0.0.21
+- `github.com/mattn/go-sqlite3`   v1.14.33 → v1.14.42
+- `golang.org/x/sys`              v0.40.0  → v0.43.0
+- `github.com/go-chi/chi/v5`      v5.2.3   → v5.2.4
+- `github.com/charmbracelet/x/ansi` transitive bumps
+
+### Docs
+
+- `README.md` feature list surfaces v1.2.0 UX (parallel checks,
+  embedded catalog, `-v` streaming, `NO_COLOR` / non-TTY handling,
+  structured logs). Prerequisites updated to Go 1.25+.
+- `CONTRIBUTING.md` prerequisites updated to Go 1.25+.
+
+### Fixed
+
+- `pkg/tui`: `fmt.Fprintf(&b, ...)` replaces a `WriteString(fmt.Sprintf(...))`
+  in the catalog summary renderer (staticcheck QF1012).
+- `internal/systray`: stale `//nolint:gosec` directive removed from
+  a kdialog call path that no longer matches the relevant rule.
+
 ## [1.2.0] - 2026-04-21
 
 UX and operability release. Fresh `go install` users get a working
@@ -334,6 +398,7 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
+[1.3.0]: https://github.com/kevinelliott/agentmanager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/kevinelliott/agentmanager/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/kevinelliott/agentmanager/compare/v1.0.24...v1.1.0
 [1.0.13]: https://github.com/kevinelliott/agentmanager/compare/v1.0.12...v1.0.13
