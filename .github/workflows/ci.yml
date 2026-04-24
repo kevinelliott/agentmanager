@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  GO_VERSION: '1.24'
+  GO_VERSION: '1.25'
 
 jobs:
   lint:
@@ -31,12 +31,12 @@ jobs:
         run: make check-catalog-sync
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           # Pinned to match the version used in the Makefile's `lint` target
           # so local and CI lint runs report identical results. Bump both in
-          # the same change.
-          version: v1.64.8
+          # the same change. v2 required once the module targets Go 1.25+.
+          version: v2.11.4
           args: --timeout=5m
 
   test:
@@ -45,7 +45,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        go-version: ['1.23', '1.24']
+        go-version: ['1.25']
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
         run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.24'
+        if: matrix.os == 'ubuntu-latest' && matrix.go-version == '1.25'
         uses: codecov/codecov-action@v4
         with:
           file: ./coverage.txt

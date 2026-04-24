@@ -569,7 +569,7 @@ func (m Model) catalogView() string {
 		b.WriteString(line)
 	}
 
-	b.WriteString(fmt.Sprintf("\n  %d agents available\n", len(agents)))
+	fmt.Fprintf(&b, "\n  %d agents available\n", len(agents))
 
 	return b.String()
 }
