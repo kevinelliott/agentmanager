@@ -223,37 +223,37 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 
 func newAgentInstallCommand(cfg *config.Config) *cobra.Command {
 	var (
-		method  string
-		version string
-		global  bool
-		force   bool
+		method          string
+		global          bool
+		force           bool
+		continueOnError bool
 	)
 
 	cmd := &cobra.Command{
-		Use:   "install <agent-name>",
-		Short: "Install an agent",
-		Long: `Install an AI development agent using the specified or default method.
+		Use:   "install <agent-name> [<agent-name>...]",
+		Short: "Install one or more agents",
+		Long: `Install one or more AI development agents using the specified or default method.
 
 If no method is specified, the preferred method from the catalog or config
-will be used.`,
-		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			agentID := args[0]
+will be used. The same --method applies to every agent passed; mix-and-match
+requires separate invocations.
 
+By default, the command stops at the first failure. Use --continue-on-error
+to attempt every agent and report a summary at the end.`,
+		Args: cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
-			// Get current platform
 			plat := platform.Current()
 
-			// Create spinner
+			// Open storage + catalog once and reuse across every agent.
 			spinner := output.NewSpinner(
 				output.WithMessage("Loading catalog..."),
 				output.WithNoColor(!cfg.UI.UseColors),
 			)
 			spinner.Start()
 
-			// Load catalog
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
 				spinner.Error("Failed to create storage")
@@ -273,73 +273,145 @@ will be used.`,
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
 
-			// Find agent in catalog
-			agentDef, ok := cat.GetAgent(agentID)
-			if !ok {
-				spinner.Error(fmt.Sprintf("Agent %q not found in catalog", agentID))
-				return fmt.Errorf("agent %q not found in catalog", agentID)
-			}
-
-			// Determine installation method
-			if method == "" {
-				// Use preferred method from config or first available
-				if preferred := cfg.GetAgentConfig(agentID).PreferredMethod; preferred != "" {
-					method = preferred
-				} else {
-					methods := agentDef.GetSupportedMethods(string(plat.ID()))
-					if len(methods) == 0 {
-						spinner.Error("No installation methods available")
-						return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
-					}
-					method = methods[0].Method
-				}
-			}
-
-			// Get method definition
-			methodDef, ok := agentDef.GetInstallMethod(method)
-			if !ok {
-				spinner.Error(fmt.Sprintf("Installation method %q not available", method))
-				return fmt.Errorf("installation method %q not available for %q", method, agentID)
-			}
-
-			// Create installer and install. In verbose mode, stop the spinner
-			// and stream the subprocess output directly (spinner ANSI would
-			// otherwise garble the interleaved output).
 			inst := installer.NewManager(plat)
 			installCtx := withInstallProgress(ctx, cfg)
-			if verboseInstallOutput(cfg) {
-				spinner.Stop()
-				fmt.Fprintf(os.Stderr, "Installing %s via %s...\n", agentDef.Name, method)
-			} else {
-				spinner.UpdateMessage(fmt.Sprintf("Installing %s via %s...", agentDef.Name, method))
-			}
+			verbose := verboseInstallOutput(cfg)
 
-			result, err := inst.Install(installCtx, agentDef, methodDef, force)
-			if err != nil {
-				if !verboseInstallOutput(cfg) {
-					spinner.Error(fmt.Sprintf("Failed to install %s", agentDef.Name))
-				} else {
-					fmt.Fprintf(os.Stderr, "Failed to install %s\n", agentDef.Name)
+			var (
+				succeeded []string
+				failed    []string
+			)
+
+			for _, agentID := range args {
+				if err := installOne(installCtx, cfg, plat, cat, inst, spinner, verbose, agentID, method, force); err != nil {
+					failed = append(failed, agentID)
+					if !continueOnError {
+						return err
+					}
+					continue
 				}
-				return fmt.Errorf("installation failed: %w", err)
+				succeeded = append(succeeded, agentID)
 			}
 
-			msg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String())
-			if verboseInstallOutput(cfg) {
-				fmt.Fprintln(os.Stderr, msg)
-			} else {
-				spinner.Success(msg)
+			// Multi-agent summary. For a single agent, the per-agent spinner
+			// already tells the user everything; no second line needed.
+			if len(args) > 1 {
+				summary := fmt.Sprintf("\nInstalled %d of %d agent(s)", len(succeeded), len(args))
+				if len(failed) > 0 {
+					summary += fmt.Sprintf("; %d failed: %s", len(failed), strings.Join(failed, ", "))
+				}
+				if verbose {
+					fmt.Fprintln(os.Stderr, summary)
+				} else {
+					fmt.Println(summary)
+				}
+			}
+
+			if len(failed) > 0 {
+				return fmt.Errorf("%d of %d agent(s) failed to install", len(failed), len(args))
 			}
 			return nil
 		},
 	}
 
 	cmd.Flags().StringVarP(&method, "method", "m", "", "installation method (npm, pip, brew, etc.)")
-	cmd.Flags().StringVarP(&version, "version", "V", "", "specific version to install")
 	cmd.Flags().BoolVarP(&global, "global", "g", true, "install globally")
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "force installation")
+	cmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "keep installing remaining agents after a failure (multi-agent only)")
 
 	return cmd
+}
+
+// installOne runs the install pipeline for a single agent: catalog
+// lookup → method resolution → installer.Install → spinner/log surface.
+// Extracted so newAgentInstallCommand can call it in a loop for bulk
+// installs without duplicating the per-agent flow.
+func installOne(
+	ctx context.Context,
+	cfg *config.Config,
+	plat platform.Platform,
+	cat *catalog.Catalog,
+	inst *installer.Manager,
+	spinner *output.Spinner,
+	verbose bool,
+	agentID string,
+	method string,
+	force bool,
+) error {
+	agentDef, ok := cat.GetAgent(agentID)
+	if !ok {
+		msg := fmt.Sprintf("Agent %q not found in catalog", agentID)
+		if verbose {
+			fmt.Fprintln(os.Stderr, msg)
+		} else {
+			spinner.Error(msg)
+		}
+		return fmt.Errorf("agent %q not found in catalog", agentID)
+	}
+
+	chosenMethod := method
+	if chosenMethod == "" {
+		if preferred := cfg.GetAgentConfig(agentID).PreferredMethod; preferred != "" {
+			chosenMethod = preferred
+		} else {
+			methods := agentDef.GetSupportedMethods(string(plat.ID()))
+			if len(methods) == 0 {
+				msg := fmt.Sprintf("No installation methods available for %q on %s", agentID, plat.ID())
+				if verbose {
+					fmt.Fprintln(os.Stderr, msg)
+				} else {
+					spinner.Error(msg)
+				}
+				return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
+			}
+			chosenMethod = methods[0].Method
+		}
+	}
+
+	methodDef, ok := agentDef.GetInstallMethod(chosenMethod)
+	if !ok {
+		msg := fmt.Sprintf("Installation method %q not available for %q", chosenMethod, agentID)
+		if verbose {
+			fmt.Fprintln(os.Stderr, msg)
+		} else {
+			spinner.Error(msg)
+		}
+		return fmt.Errorf("installation method %q not available for %q", chosenMethod, agentID)
+	}
+
+	if verbose {
+		// Stop the spinner before subprocess output streams; restart it
+		// before the next iteration would otherwise re-attach to the
+		// previous frame mid-stream.
+		spinner.Stop()
+		fmt.Fprintf(os.Stderr, "Installing %s via %s...\n", agentDef.Name, chosenMethod)
+	} else {
+		spinner.UpdateMessage(fmt.Sprintf("Installing %s via %s...", agentDef.Name, chosenMethod))
+	}
+
+	result, err := inst.Install(ctx, agentDef, methodDef, force)
+	if err != nil {
+		failMsg := fmt.Sprintf("Failed to install %s: %v", agentDef.Name, err)
+		if verbose {
+			fmt.Fprintln(os.Stderr, failMsg)
+		} else {
+			spinner.Error(failMsg)
+		}
+		return fmt.Errorf("install %s: %w", agentID, err)
+	}
+
+	okMsg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String())
+	if verbose {
+		fmt.Fprintln(os.Stderr, okMsg)
+	} else {
+		spinner.Success(okMsg)
+		// Restart spinner with a fresh "Loading..." message so the next
+		// iteration has something to update rather than re-using the
+		// previous Success state.
+		spinner.UpdateMessage("Loading...")
+		spinner.Start()
+	}
+	return nil
 }
 
 func newAgentUpdateCommand(cfg *config.Config) *cobra.Command {

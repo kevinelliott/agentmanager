@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -134,6 +135,18 @@ func TestNewAgentCommand(t *testing.T) {
 	installCmd := findSubcommand(cmd, "install")
 	if installCmd != nil {
 		assertFlagExists(t, installCmd, "method")
+		assertFlagExists(t, installCmd, "continue-on-error")
+		// Removed: "version" — installer.Manager.Install never accepted
+		// a version pin, so the flag was a silent no-op.
+		if installCmd.Flags().Lookup("version") != nil {
+			t.Error("flag \"version\" should have been removed from install command (was unwired)")
+		}
+		// install now accepts multiple positional args (bulk install). Probing
+		// Args is awkward — Cobra exposes it as a function — so validate via
+		// the Use line which is contracted with users via --help.
+		if !strings.Contains(installCmd.Use, "[<agent-name>...]") {
+			t.Errorf("install command Use string %q should advertise multi-arg form", installCmd.Use)
+		}
 	}
 
 	// Verify update subcommand
