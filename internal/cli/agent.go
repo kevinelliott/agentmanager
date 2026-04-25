@@ -422,13 +422,16 @@ func newAgentUpdateCommand(cfg *config.Config) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:   "update [agent-name]",
-		Short: "Update an agent or all agents",
-		Long: `Update a specific agent installation or all agents with available updates.
+		Use:   "update [agent-name [<agent-name>...]]",
+		Short: "Update one or more agents (or all)",
+		Long: `Update specific agent installations or all agents with available updates.
 
-When updating, the full changelog is displayed before confirming the update.
-Use --all to update all agents at once.`,
-		Args: cobra.MaximumNArgs(1),
+Pass one or more agent names to update them in turn, or pass --all to
+update every installed agent that has an available update.
+
+When updating, the full changelog is displayed before confirming each
+update.`,
+		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
@@ -494,6 +497,9 @@ Use --all to update all agents at once.`,
 			}
 
 			if all {
+				if len(args) > 0 {
+					printer.Warning("--all takes precedence; positional agent names are ignored")
+				}
 				return updateAllAgents(ctx, cfg, installations, cat, inst, force, dryRun, printer)
 			}
 
@@ -502,7 +508,19 @@ Use --all to update all agents at once.`,
 				return fmt.Errorf("agent name required (or use --all)")
 			}
 
-			return updateSingleAgent(ctx, cfg, args[0], installations, cat, inst, force, dryRun, printer)
+			// Multi-arg: update each named agent in turn. Reuses the same
+			// snapshot of installations so the helper doesn't re-detect.
+			var lastErr error
+			for _, agentID := range args {
+				if err := updateSingleAgent(ctx, cfg, agentID, installations, cat, inst, force, dryRun, printer); err != nil {
+					lastErr = err
+					if len(args) == 1 {
+						return err
+					}
+					printer.Warning("update %s: %v", agentID, err)
+				}
+			}
+			return lastErr
 		},
 	}
 
@@ -865,132 +883,191 @@ func outputAgentInfoJSON(agentDef catalog.AgentDef, installations []*agent.Insta
 
 func newAgentRemoveCommand(cfg *config.Config) *cobra.Command {
 	var (
-		force  bool
-		method string
+		force           bool
+		method          string
+		continueOnError bool
 	)
 
 	cmd := &cobra.Command{
-		Use:   "remove <agent-name>",
-		Short: "Remove an agent installation",
-		Long: `Remove an installed agent. By default, prompts for confirmation.
-Use --method to specify which installation to remove if multiple exist.`,
-		Aliases: []string{"rm", "uninstall"},
-		Args:    cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			agentID := args[0]
+		Use:   "remove <agent-name> [<agent-name>...]",
+		Short: "Remove one or more agent installations",
+		Long: `Remove one or more installed agents. By default, prompts once per
+agent for confirmation; pass --force to skip all prompts.
 
+Use --method to specify which installation to remove when multiple
+methods exist for the same agent. The same --method applies to every
+agent passed; mix-and-match requires separate invocations.
+
+By default, the command stops at the first failure. Use
+--continue-on-error to attempt every agent and report a summary.`,
+		Aliases: []string{"rm", "uninstall"},
+		Args:    cobra.MinimumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
-			// Get current platform
 			plat := platform.Current()
 
-			// Load catalog and storage
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
 			if err != nil {
 				return fmt.Errorf("failed to create storage: %w", err)
 			}
 			defer store.Close()
-
 			if err := store.Initialize(ctx); err != nil {
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
 			catMgr := catalog.NewManager(cfg, store)
-
-			// Get agents for current platform
 			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
 			if err != nil {
 				return fmt.Errorf("failed to load catalog: %w", err)
 			}
+			cat, err := catMgr.Get(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to load catalog: %w", err)
+			}
 
-			// Detect current installations
+			// Detect once and reuse the snapshot for every agent — running
+			// the full detector per arg would scan the system N times.
 			det := detector.New(plat)
 			installations, err := det.DetectAll(ctx, agentDefs)
 			if err != nil {
 				return fmt.Errorf("detection failed: %w", err)
 			}
 
-			// Get catalog for looking up agent definitions
-			cat, err := catMgr.Get(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to load catalog: %w", err)
-			}
-
-			// Find installations for this agent
-			var agentInstallations []*agent.Installation
-			for _, installation := range installations {
-				if installation.AgentID == agentID {
-					// Filter by method if specified
-					if method != "" && string(installation.Method) != method {
-						continue
-					}
-					agentInstallations = append(agentInstallations, installation)
-				}
-			}
-
-			if len(agentInstallations) == 0 {
-				if method != "" {
-					return fmt.Errorf("agent %q not installed via %s", agentID, method)
-				}
-				return fmt.Errorf("agent %q not installed", agentID)
-			}
-
-			// Get agent definition
-			agentDef, ok := cat.GetAgent(agentID)
-			if !ok {
-				return fmt.Errorf("agent %q not found in catalog", agentID)
-			}
-
-			// If multiple installations and no method specified, list them
-			if len(agentInstallations) > 1 && method == "" {
-				fmt.Printf("Multiple installations of %s found:\n", agentDef.Name)
-				for _, installation := range agentInstallations {
-					fmt.Printf("  - %s via %s (%s)\n",
-						installation.InstalledVersion.String(),
-						installation.Method,
-						installation.ExecutablePath)
-				}
-				fmt.Println("\nUse --method to specify which installation to remove.")
-				return nil
-			}
-
-			installation := agentInstallations[0]
-
-			if !force {
-				fmt.Printf("Are you sure you want to remove %s (%s via %s)? [y/N] ",
-					agentDef.Name, installation.InstalledVersion.String(), installation.Method)
-				var response string
-				fmt.Scanln(&response)
-				if !strings.EqualFold(response, "y") {
-					fmt.Println("Canceled")
-					return nil
-				}
-			}
-
-			// Get the install method definition
-			methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
-			if !ok {
-				return fmt.Errorf("install method %s not found in catalog for %s", installation.Method, agentID)
-			}
-
-			// Create installer and uninstall
 			inst := installer.NewManager(plat)
-			fmt.Printf("Removing %s via %s...\n", agentDef.Name, installation.Method)
 
-			if err := inst.Uninstall(ctx, installation, methodDef); err != nil {
-				return fmt.Errorf("removal failed: %w", err)
+			var (
+				succeeded []string
+				failed    []string
+				skipped   []string
+			)
+
+			for _, agentID := range args {
+				outcome, err := removeOne(ctx, cat, inst, installations, agentID, method, force)
+				switch {
+				case err != nil:
+					failed = append(failed, agentID)
+					if !continueOnError {
+						return err
+					}
+				case outcome == removeOutcomeSkippedMulti:
+					skipped = append(skipped, agentID)
+				case outcome == removeOutcomeCanceled:
+					skipped = append(skipped, agentID)
+				default:
+					succeeded = append(succeeded, agentID)
+				}
 			}
 
-			printSuccess("Removed %s successfully", agentDef.Name)
+			// Summary only when we processed multiple agents.
+			if len(args) > 1 {
+				fmt.Printf("\nRemoved %d of %d agent(s)", len(succeeded), len(args))
+				if len(failed) > 0 {
+					fmt.Printf("; %d failed: %s", len(failed), strings.Join(failed, ", "))
+				}
+				if len(skipped) > 0 {
+					fmt.Printf("; %d skipped: %s", len(skipped), strings.Join(skipped, ", "))
+				}
+				fmt.Println()
+			}
+
+			if len(failed) > 0 {
+				return fmt.Errorf("%d of %d agent(s) failed to remove", len(failed), len(args))
+			}
 			return nil
 		},
 	}
 
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "skip confirmation")
 	cmd.Flags().StringVarP(&method, "method", "m", "", "specific installation method to remove")
+	cmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "keep removing remaining agents after a failure (multi-agent only)")
 
 	return cmd
+}
+
+// removeOutcome distinguishes user-facing outcomes for removeOne so the
+// caller can tally them in a multi-agent summary.
+type removeOutcome int
+
+const (
+	removeOutcomeRemoved removeOutcome = iota
+	// removeOutcomeSkippedMulti means the agent has multiple installations
+	// and no --method was specified. The user is shown the list and we
+	// skip — same behavior as the old single-arg form.
+	removeOutcomeSkippedMulti
+	// removeOutcomeCanceled means the user answered no to the prompt.
+	removeOutcomeCanceled
+)
+
+func removeOne(
+	ctx context.Context,
+	cat *catalog.Catalog,
+	inst *installer.Manager,
+	installations []*agent.Installation,
+	agentID, method string,
+	force bool,
+) (removeOutcome, error) {
+	var matches []*agent.Installation
+	for _, installation := range installations {
+		if installation.AgentID != agentID {
+			continue
+		}
+		if method != "" && string(installation.Method) != method {
+			continue
+		}
+		matches = append(matches, installation)
+	}
+
+	if len(matches) == 0 {
+		if method != "" {
+			return 0, fmt.Errorf("agent %q not installed via %s", agentID, method)
+		}
+		return 0, fmt.Errorf("agent %q not installed", agentID)
+	}
+
+	agentDef, ok := cat.GetAgent(agentID)
+	if !ok {
+		return 0, fmt.Errorf("agent %q not found in catalog", agentID)
+	}
+
+	if len(matches) > 1 && method == "" {
+		fmt.Printf("Multiple installations of %s found:\n", agentDef.Name)
+		for _, installation := range matches {
+			fmt.Printf("  - %s via %s (%s)\n",
+				installation.InstalledVersion.String(),
+				installation.Method,
+				installation.ExecutablePath)
+		}
+		fmt.Println("Use --method to specify which installation to remove.")
+		return removeOutcomeSkippedMulti, nil
+	}
+
+	installation := matches[0]
+
+	if !force {
+		fmt.Printf("Are you sure you want to remove %s (%s via %s)? [y/N] ",
+			agentDef.Name, installation.InstalledVersion.String(), installation.Method)
+		var response string
+		_, _ = fmt.Scanln(&response)
+		if !strings.EqualFold(response, "y") {
+			fmt.Println("Canceled")
+			return removeOutcomeCanceled, nil
+		}
+	}
+
+	methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
+	if !ok {
+		return 0, fmt.Errorf("install method %s not found in catalog for %s", installation.Method, agentID)
+	}
+
+	fmt.Printf("Removing %s via %s...\n", agentDef.Name, installation.Method)
+	if err := inst.Uninstall(ctx, installation, methodDef); err != nil {
+		return 0, fmt.Errorf("remove %s: %w", agentID, err)
+	}
+
+	printSuccess("Removed %s successfully", agentDef.Name)
+	return removeOutcomeRemoved, nil
 }
 
 func newAgentRefreshCommand(cfg *config.Config) *cobra.Command {

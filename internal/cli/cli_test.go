@@ -154,6 +154,10 @@ func TestNewAgentCommand(t *testing.T) {
 	if updateCmd != nil {
 		assertFlagExists(t, updateCmd, "all")
 		assertFlagExists(t, updateCmd, "force")
+		// update now accepts arbitrary args (1..N) plus --all.
+		if !strings.Contains(updateCmd.Use, "[<agent-name>...]") {
+			t.Errorf("update command Use string %q should advertise multi-arg form", updateCmd.Use)
+		}
 	}
 
 	// Verify remove subcommand
@@ -161,6 +165,11 @@ func TestNewAgentCommand(t *testing.T) {
 	if removeCmd != nil {
 		assertFlagExists(t, removeCmd, "force")
 		assertFlagExists(t, removeCmd, "method")
+		assertFlagExists(t, removeCmd, "continue-on-error")
+		// remove also accepts multiple positional args now.
+		if !strings.Contains(removeCmd.Use, "[<agent-name>...]") {
+			t.Errorf("remove command Use string %q should advertise multi-arg form", removeCmd.Use)
+		}
 	}
 }
 
