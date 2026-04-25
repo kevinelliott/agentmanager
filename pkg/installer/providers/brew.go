@@ -185,13 +185,20 @@ func (p *BrewProvider) Uninstall(ctx context.Context, inst *agent.Installation, 
 }
 
 // parseBrewPackage extracts the package name and determines if it's a cask.
+//
+// Cask is detected from method.Metadata using either of two keys:
+//   - "type": "cask"  — canonical form, used by current catalog entries
+//   - "cask": "true"  — legacy form, accepted for back-compat with custom
+//     user catalogs and historical catalog entries
+//
+// Falls back to parsing the command string if no package name is set.
 func (p *BrewProvider) parseBrewPackage(method catalog.InstallMethodDef) (string, bool) {
 	packageName := method.Package
 	isCask := false
 
-	// Check metadata for cask indicator
+	// Check metadata for cask indicator (both canonical and legacy forms).
 	if method.Metadata != nil {
-		if method.Metadata["type"] == "cask" {
+		if method.Metadata["type"] == "cask" || method.Metadata["cask"] == "true" {
 			isCask = true
 		}
 	}

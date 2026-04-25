@@ -1028,13 +1028,45 @@ func TestBrewProviderParseBrewPackage(t *testing.T) {
 			wantIsCask: false,
 		},
 		{
-			name: "cask from metadata",
+			name: "cask from metadata (canonical type=cask)",
 			method: catalog.InstallMethodDef{
 				Package:  "visual-studio-code",
 				Metadata: map[string]string{"type": "cask"},
 			},
 			wantPkg:    "visual-studio-code",
 			wantIsCask: true,
+		},
+		{
+			// Some catalog entries (and user-customized catalogs) use the
+			// legacy form "cask: true" instead of "type: cask". Both should
+			// resolve to isCask=true so brew install gets the --cask flag.
+			name: "cask from metadata (legacy cask=true)",
+			method: catalog.InstallMethodDef{
+				Package:  "openclaw",
+				Metadata: map[string]string{"cask": "true"},
+			},
+			wantPkg:    "openclaw",
+			wantIsCask: true,
+		},
+		{
+			// type=cask wins regardless of cask= value.
+			name: "cask metadata both keys agree",
+			method: catalog.InstallMethodDef{
+				Package:  "firefox",
+				Metadata: map[string]string{"type": "cask", "cask": "true"},
+			},
+			wantPkg:    "firefox",
+			wantIsCask: true,
+		},
+		{
+			// Non-truthy cask value should NOT trigger cask handling.
+			name: "cask=false metadata not a cask",
+			method: catalog.InstallMethodDef{
+				Package:  "gh",
+				Metadata: map[string]string{"cask": "false"},
+			},
+			wantPkg:    "gh",
+			wantIsCask: false,
 		},
 		{
 			name: "extract from command",
