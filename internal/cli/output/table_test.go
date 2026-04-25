@@ -52,14 +52,16 @@ func TestTable_RenderBasic(t *testing.T) {
 	}
 
 	// Column count: each non-empty line should contain both columns.
+	// Every non-empty row should contain both columns on the same line —
+	// the shorter row should still have spaces between its first cell and
+	// the second column, proving the padding pass ran.
 	for _, line := range strings.Split(strings.TrimSpace(out), "\n") {
 		if line == "" {
 			continue
 		}
-		// Rough alignment sanity: the longest row (claude-code = 11 chars)
-		// should leave at least padding+1 spaces before the second column
-		// for shorter rows.
-		_ = line
+		if !strings.Contains(line, "  ") {
+			t.Errorf("line %q lacks inter-column padding", line)
+		}
 	}
 }
 

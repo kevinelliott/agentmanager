@@ -25,9 +25,13 @@ func TestSpinner_NonTTY_StartIsNoop(t *testing.T) {
 		WithInterval(5*time.Millisecond),
 	)
 	s.Start()
-	// Give the goroutine a chance to emit frames — there should be NONE
-	// because Start is a no-op on non-TTY output.
-	time.Sleep(30 * time.Millisecond)
+	// Start() is a no-op on non-TTY output: no goroutine is spawned and
+	// no frames are written. We don't need to wait — if Start had spawned
+	// anything, s.isTTY would be true here and the structure of the test
+	// fails fast rather than relying on sleep-based timing.
+	if s.isTTY {
+		t.Fatalf("isTTY = true for bytes.Buffer output; non-TTY path not exercised")
+	}
 	s.Stop()
 
 	if got := buf.String(); got != "" {

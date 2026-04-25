@@ -17,7 +17,9 @@ type progressWriterKey struct{}
 //
 // Passing nil is a no-op: the returned context is the input context, so a
 // previously attached writer is NOT cleared. To actually silence streaming
-// after one was attached, start from a context that never had one.
+// after one was attached, start from a context that never had one. This
+// asymmetry lets middleware attach a writer safely without worrying about
+// downstream code accidentally clobbering it with nil.
 //
 // Providers always still capture the full output into Result.Output, so
 // callers that ignore the stream lose no information.

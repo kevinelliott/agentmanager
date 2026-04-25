@@ -15,7 +15,7 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 - **Version Management**: Check for updates from package registries (npm, PyPI, Homebrew) and manage agent versions
 - **Multiple Installation Methods**: Support for npm, pip, pipx, uv, Homebrew, native installers, and more
 - **Fast Parallel Checks**: Version checks for dozens of installed agents run concurrently (10–20× faster than sequential)
-- **Offline-First Catalog**: A baseline catalog is embedded into the binary, so `agent list` works on a fresh `go install` before the first remote refresh
+- **Offline-First Catalog**: A baseline catalog is embedded into the binary, so `agentmgr agent list` works on a fresh `go install` before the first remote refresh
 - **Live Install Output**: Pass `-v` to `agent install` / `agent update` to stream live subprocess output (brew / npm / pip / native) instead of a silent spinner
 - **Beautiful CLI Output**: Colored output with animated spinners and properly aligned tables (honors `NO_COLOR`, `TERM=dumb`, and non-TTY pipes)
 - **Beautiful TUI**: Interactive terminal interface built with Bubble Tea

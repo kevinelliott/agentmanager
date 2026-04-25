@@ -45,7 +45,13 @@ func mkInstallation(agentID, method, installedVer, latestVer string) agent.Insta
 }
 
 func mustParseVersion(v string) agent.Version {
-	out, _ := agent.ParseVersion(v)
+	out, err := agent.ParseVersion(v)
+	if err != nil {
+		// Test setup bug — surface loudly so the failing test points at
+		// the invalid fixture string rather than silently proceeding with
+		// a zero-value Version that makes downstream assertions confusing.
+		panic("mustParseVersion: " + v + ": " + err.Error())
+	}
 	return out
 }
 
@@ -273,9 +279,12 @@ func TestRequestShutdown_ConcurrentSafe(t *testing.T) {
 func TestDialogTracking(t *testing.T) {
 	a := mkTestApp()
 
-	// Track a couple of inert commands (we never call .Run()).
-	cmd1 := exec.Command("true")
-	cmd2 := exec.Command("true")
+	// trackDialog/untrackDialog only inspect pointer identity, so bare
+	// *exec.Cmd values are sufficient. Using exec.Command("true") would
+	// trigger a PATH lookup (no `true` on Windows CI) without improving
+	// the test.
+	cmd1 := &exec.Cmd{}
+	cmd2 := &exec.Cmd{}
 
 	a.trackDialog(cmd1)
 	a.trackDialog(cmd2)
