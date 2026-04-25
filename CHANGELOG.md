@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-04-24
+
+Patch release addressing review feedback from v1.3.0. Includes one
+real shipping-bug fix (cask install for 5 catalog entries) plus a
+batch of correctness, doc, and test cleanups.
+
+### Fixed
+
+- **`brew install` for casks declared with the legacy `cask: "true"`
+  metadata key.** `parseBrewPackage` previously only recognized the
+  canonical `type: "cask"` form, so 5 catalog entries (block-goose,
+  openclaw, droid, claude-squad, amazon-q-cli) ran `brew install
+  <name>` without `--cask` and Homebrew rejected them as unknown
+  formulae. Now accepts both keys.
+- `pkg/platform`: `resetLookPathCache()` no longer reassigns the
+  package-level `sync.Map` (unsafe vs concurrent readers). Uses
+  `Range`+`Delete`.
+- `pkg/installer/providers/brew`: `GetLatestVersion` no longer caches
+  context-canceled / deadline-exceeded errors. A caller with a short
+  ctx previously poisoned the 5-min TTL for every later caller.
+- `pkg/installer/providers/progress`: progress writer now wraps an
+  `io.Writer` in a serializing lock so concurrent writes from
+  `cmd.Stdout` and `cmd.Stderr` (os/exec writes those from separate
+  goroutines) do not interleave bytes mid-call.
+- `pkg/catalog/embed`: `EmbeddedJSON()` returns a copy of the bytes
+  rather than the package-level slice — callers can no longer mutate
+  the baseline.
+- `pkg/catalog/manager`: `loadEmbedded` now also probes
+  `/usr/share/agentmgr/catalog.json` — the path goreleaser's nfpm
+  config installs to for `.deb`/`.rpm` users. Previously that file
+  was silently ignored at runtime.
+- `internal/cli/doctor`: Catalog Sources section mirrors the new
+  loader probe order.
+- `pkg/api/grpc/server`: explicit `_ = s.listener.Close()` in `Stop()`
+  and `ForceStop()` (silences gosec G104; close error during teardown
+  is not actionable).
+
+### Removed
+
+- `agent list` `--all` / `-a` and `--check-updates` flags. Both bound
+  to local vars that were never read; users setting them got a silent
+  no-op. The test now asserts both flags are absent to prevent
+  re-introduction.
+
+### Internal
+
+- `pkg/catalog/manager`: `Refresh` doc comments now explicitly note
+  that `singleflight` does not merge contexts — the first caller's
+  ctx governs the shared HTTP fetch for all coalesced callers.
+- `internal/systray/cli_uninstall_darwin.go`: removed dead Linux and
+  Windows branches (file is `//go:build darwin`-only, so
+  `platform.ID()` is always Darwin at runtime).
+- Test hardening: spinner non-TTY test asserts `s.isTTY=false`
+  directly instead of timing-based sleep; table ANSI test asserts
+  inter-column padding instead of discarding lines; systray
+  `mustParseVersion` panics on parse error so test-setup bugs
+  surface at the fixture; `TestDialogTracking` uses bare `*exec.Cmd`
+  values so Windows CI doesn't hit a PATH lookup for `true`.
+- README and CHANGELOG: trivial doc nits (command prefix, broken
+  shortcut reference link).
+
 ## [1.3.0] - 2026-04-24
 
 Toolchain + dependency refresh. **Minimum Go is now 1.25** (bumped from
@@ -398,6 +459,7 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
+[1.3.1]: https://github.com/kevinelliott/agentmanager/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/kevinelliott/agentmanager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/kevinelliott/agentmanager/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/kevinelliott/agentmanager/compare/v1.0.24...v1.1.0
