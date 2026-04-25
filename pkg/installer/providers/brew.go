@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
@@ -273,6 +274,15 @@ func (p *BrewProvider) GetLatestVersion(ctx context.Context, method catalog.Inst
 	}
 	once.Do(func() {
 		version, err := p.fetchLatestVersionUncached(ctx, packageName, isCask)
+		// Don't cache caller-specific context errors (canceled, deadline
+		// exceeded). A later caller with a healthy ctx would otherwise
+		// receive the first caller's transient failure for the full TTL.
+		// Leaving the cache empty and clearing the Once lets the next call
+		// refetch with its own ctx.
+		if err != nil && (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) {
+			brewLatestVersionOnce.Delete(key)
+			return
+		}
 		brewLatestVersionCache.Store(key, brewLatestEntry{
 			version:  version,
 			err:      err,

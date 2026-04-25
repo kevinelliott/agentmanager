@@ -317,8 +317,12 @@ func (m *Manager) loadEmbedded() (*Catalog, error) {
 		)
 	}
 
-	// 2. System-wide install share.
+	// 2. System-wide install share. `/usr/share/agentmgr/catalog.json` is
+	// where the goreleaser nfpm config installs the catalog for .deb/.rpm
+	// users; `/usr/local/share` is the common install prefix for manual
+	// installs; `/etc/agentmgr` is the system-wide override location.
 	paths = append(paths,
+		"/usr/share/agentmgr/catalog.json",
 		"/usr/local/share/agentmgr/catalog.json",
 		"/etc/agentmgr/catalog.json",
 	)

@@ -176,6 +176,14 @@ func cachedLookPath(name string) (string, error) {
 }
 
 // resetLookPathCache clears the memoization cache. Intended for tests.
+//
+// Uses Range+Delete rather than reassigning the package-level sync.Map —
+// struct assignment is not atomic with respect to concurrent readers, so
+// reassigning while cachedLookPath is running from another goroutine would
+// race on the zero value.
 func resetLookPathCache() {
-	lookPathCache = sync.Map{}
+	lookPathCache.Range(func(k, _ any) bool {
+		lookPathCache.Delete(k)
+		return true
+	})
 }
