@@ -200,7 +200,7 @@ func (s *Server) Stop(ctx context.Context) error {
 		s.grpcServer.GracefulStop()
 	}
 	if s.listener != nil {
-		s.listener.Close()
+		_ = s.listener.Close() // teardown: close error is not actionable
 	}
 	return nil
 }
@@ -213,7 +213,7 @@ func (s *Server) ForceStop() {
 		s.grpcServer.Stop()
 	}
 	if s.listener != nil {
-		s.listener.Close()
+		_ = s.listener.Close() // teardown: close error is not actionable
 	}
 }
 

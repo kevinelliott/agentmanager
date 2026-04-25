@@ -15,8 +15,15 @@ import _ "embed"
 //go:embed catalog.json
 var embeddedCatalogJSON []byte
 
-// EmbeddedJSON returns the raw JSON bytes of the embedded catalog.
-// Callers that want a parsed *Catalog should use Manager.Get instead.
+// EmbeddedJSON returns a copy of the raw JSON bytes of the embedded
+// catalog. Callers that want a parsed *Catalog should use Manager.Get
+// instead.
+//
+// Returns a copy rather than the package-level slice directly — []byte
+// is mutable, so handing out the backing storage lets a caller (or
+// concurrent caller) accidentally scribble over the baseline.
 func EmbeddedJSON() []byte {
-	return embeddedCatalogJSON
+	out := make([]byte, len(embeddedCatalogJSON))
+	copy(out, embeddedCatalogJSON)
+	return out
 }

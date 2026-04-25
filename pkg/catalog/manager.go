@@ -91,7 +91,12 @@ type RefreshResult struct {
 // Returns a RefreshResult indicating whether an update occurred.
 //
 // Concurrent calls to Refresh coalesce via a singleflight group — only one
-// HTTP fetch runs at a time; other callers receive the same result.
+// HTTP fetch runs at a time; other callers receive the same result. Note
+// that singleflight does not merge contexts: whichever ctx the first
+// caller passed is the one used by the shared doRefresh. A caller with a
+// short deadline can therefore cancel the in-flight fetch for all shared
+// callers. This is acceptable because Refresh is not on any user-facing
+// critical path and the next caller will simply retry.
 func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 	v, err, _ := m.refreshGroup.Do("catalog-refresh", func() (interface{}, error) {
 		return m.doRefresh(ctx)
@@ -317,8 +322,12 @@ func (m *Manager) loadEmbedded() (*Catalog, error) {
 		)
 	}
 
-	// 2. System-wide install share.
+	// 2. System-wide install share. `/usr/share/agentmgr/catalog.json` is
+	// where the goreleaser nfpm config installs the catalog for .deb/.rpm
+	// users; `/usr/local/share` is the common install prefix for manual
+	// installs; `/etc/agentmgr` is the system-wide override location.
 	paths = append(paths,
+		"/usr/share/agentmgr/catalog.json",
 		"/usr/local/share/agentmgr/catalog.json",
 		"/etc/agentmgr/catalog.json",
 	)

@@ -225,7 +225,7 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
   cadence is controlled by `RefreshInterval` + cache TTL). It is
   retained for backward compatibility with existing config files
   and will be removed once the sole remaining TUI display reference
-  is cleaned up. (Removed in [Unreleased].)
+  is cleaned up. (Removed in v1.2.0.)
 
 ### Known Issues
 

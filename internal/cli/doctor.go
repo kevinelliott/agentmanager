@@ -460,7 +460,8 @@ func runConfigChecks(cfg *config.Config, _ bool) []CheckResult {
 // Sources, in resolution order:
 //  1. SQLite cache (the last remote fetch)
 //  2. User overrides ($HOME/.agentmgr/catalog.json, $HOME/.config/agentmgr/catalog.json)
-//  3. System-wide install share (/usr/local/share/agentmgr, /etc/agentmgr)
+//  3. System-wide install share (/usr/share/agentmgr for .deb/.rpm,
+//     /usr/local/share/agentmgr for manual installs, /etc/agentmgr)
 //  4. Embedded baseline (//go:embed'd into the binary)
 //
 // The CWD is intentionally never probed.
@@ -524,7 +525,8 @@ func runCatalogSourceChecks(ctx context.Context, cfg *config.Config, _ bool) []C
 		)
 	}
 	paths = append(paths,
-		struct{ label, path string }{"System share", "/usr/local/share/agentmgr/catalog.json"},
+		struct{ label, path string }{"System share (.deb/.rpm)", "/usr/share/agentmgr/catalog.json"},
+		struct{ label, path string }{"System share (/usr/local)", "/usr/local/share/agentmgr/catalog.json"},
 		struct{ label, path string }{"System etc", "/etc/agentmgr/catalog.json"},
 	)
 

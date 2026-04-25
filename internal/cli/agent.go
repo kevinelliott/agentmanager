@@ -70,13 +70,11 @@ detailed information about agents.`,
 
 func newAgentListCommand(cfg *config.Config) *cobra.Command {
 	var (
-		showAll      bool
-		showHidden   bool
-		format       string
-		updatesOnly  bool
-		checkUpdates bool
-		refresh      bool
-		verify       bool
+		showHidden  bool
+		format      string
+		updatesOnly bool
+		refresh     bool
+		verify      bool
 	)
 
 	cmd := &cobra.Command{
@@ -214,11 +212,9 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 		},
 	}
 
-	cmd.Flags().BoolVarP(&showAll, "all", "a", false, "show all installations")
 	cmd.Flags().BoolVar(&showHidden, "hidden", false, "show hidden agents")
 	cmd.Flags().StringVarP(&format, "format", "f", "table", "output format (table, json)")
 	cmd.Flags().BoolVarP(&updatesOnly, "updates", "u", false, "show only agents with updates")
-	cmd.Flags().BoolVar(&checkUpdates, "check-updates", false, "check for available updates")
 	cmd.Flags().BoolVarP(&refresh, "refresh", "r", false, "force re-detection (ignore cache)")
 	cmd.Flags().BoolVar(&verify, "verify", false, "verify agents can execute (health check)")
 

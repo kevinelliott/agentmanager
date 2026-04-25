@@ -112,11 +112,17 @@ func TestNewAgentCommand(t *testing.T) {
 	// Verify list subcommand has expected flags
 	listCmd := findSubcommand(cmd, "list")
 	if listCmd != nil {
-		assertFlagExists(t, listCmd, "all")
 		assertFlagExists(t, listCmd, "hidden")
 		assertFlagExists(t, listCmd, "format")
 		assertFlagExists(t, listCmd, "updates")
 		assertFlagExists(t, listCmd, "refresh")
+		// Removed: "all" and "check-updates" — both bound to unused local
+		// vars (silent no-ops). Assert their absence to prevent reintro.
+		for _, removed := range []string{"all", "check-updates"} {
+			if listCmd.Flags().Lookup(removed) != nil {
+				t.Errorf("flag %q should have been removed from list command", removed)
+			}
+		}
 
 		// Check alias
 		if len(listCmd.Aliases) == 0 || listCmd.Aliases[0] != "ls" {
