@@ -1,7 +1,7 @@
 {
-  "version": "1.0.29",
+  "version": "1.0.30",
   "schema_version": 1,
-  "last_updated": "2026-03-28T00:00:00Z",
+  "last_updated": "2026-05-27T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -2875,6 +2875,76 @@
       "metadata": {
         "vendor": "Fetch.ai",
         "license": "MIT"
+      }
+    },
+    "herdr": {
+      "id": "herdr",
+      "name": "Herdr",
+      "description": "Terminal-native agent runtime with persistent sessions and mouse-native TUI for AI agents",
+      "homepage": "https://herdr.dev",
+      "repository": "https://github.com/ogulcancelik/herdr",
+      "documentation": "https://herdr.dev/docs/",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "herdr",
+          "command": "brew install herdr",
+          "update_cmd": "brew upgrade herdr",
+          "uninstall_cmd": "brew uninstall herdr",
+          "platforms": ["darwin", "linux"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://herdr.dev/install.sh | sh",
+          "update_cmd": "herdr update",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "install_path": "~/.local/bin"
+          }
+        },
+        "nix": {
+          "method": "nix",
+          "package": "github:ogulcancelik/herdr",
+          "command": "nix profile install github:ogulcancelik/herdr",
+          "platforms": ["darwin", "linux"],
+          "prereqs": ["nix"]
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "download_url": "https://github.com/ogulcancelik/herdr/releases",
+            "artifact_darwin_arm64": "herdr-macos-aarch64",
+            "artifact_darwin_amd64": "herdr-macos-x86_64",
+            "artifact_linux_amd64": "herdr-linux-x86_64",
+            "artifact_linux_arm64": "herdr-linux-aarch64"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["herdr"],
+        "version_cmd": "herdr --version",
+        "version_regex": "herdr ([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list herdr",
+            "paths": ["/opt/homebrew/bin/herdr", "/usr/local/bin/herdr"]
+          },
+          "native": {
+            "paths": ["~/.local/bin/herdr"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ogulcancelik/herdr/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Ogulcan Celik",
+        "license": "AGPL-3.0-or-later"
       }
     }
   }
