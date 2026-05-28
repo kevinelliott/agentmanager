@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"sort"
@@ -227,6 +228,7 @@ func newAgentInstallCommand(cfg *config.Config) *cobra.Command {
 		global          bool
 		force           bool
 		continueOnError bool
+		jsonOutput      bool
 	)
 
 	cmd := &cobra.Command{
@@ -239,19 +241,29 @@ will be used. The same --method applies to every agent passed; mix-and-match
 requires separate invocations.
 
 By default, the command stops at the first failure. Use --continue-on-error
-to attempt every agent and report a summary at the end.`,
+to attempt every agent and report a summary at the end.
+
+Pass --json to emit a single structured result document on stdout (one entry
+per agent, plus a summary). In --json mode, --continue-on-error is implied so
+scripts get a complete picture and the exit code reflects whether any agent
+failed.`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if jsonOutput {
+				// Keep stdout strictly JSON; suppress cobra's error/usage
+				// prints to stderr so downstream `jq` doesn't choke.
+				cmd.SilenceErrors = true
+				cmd.SilenceUsage = true
+				continueOnError = true
+			}
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
 			plat := platform.Current()
 
 			// Open storage + catalog once and reuse across every agent.
-			spinner := output.NewSpinner(
-				output.WithMessage("Loading catalog..."),
-				output.WithNoColor(!cfg.UI.UseColors),
-			)
+			spinner := newInstallSpinner(cfg, jsonOutput)
 			spinner.Start()
 
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
@@ -275,22 +287,43 @@ to attempt every agent and report a summary at the end.`,
 
 			inst := installer.NewManager(plat)
 			installCtx := withInstallProgress(ctx, cfg)
-			verbose := verboseInstallOutput(cfg)
+			verbose := verboseInstallOutput(cfg) && !jsonOutput
 
 			var (
 				succeeded []string
 				failed    []string
+				entries   []agentBatchEntry
 			)
 
 			for _, agentID := range args {
-				if err := installOne(installCtx, cfg, plat, cat, inst, spinner, verbose, agentID, method, force); err != nil {
+				chosenMethod, version, err := installOne(installCtx, cfg, plat, cat, inst, spinner, verbose, agentID, method, force)
+				if err != nil {
 					failed = append(failed, agentID)
+					entries = append(entries, agentBatchEntry{
+						Agent:  agentID,
+						Status: batchStatusError,
+						Method: chosenMethod,
+						Error:  err.Error(),
+					})
 					if !continueOnError {
+						if jsonOutput {
+							return emitAgentBatchJSON("install", entries)
+						}
 						return err
 					}
 					continue
 				}
 				succeeded = append(succeeded, agentID)
+				entries = append(entries, agentBatchEntry{
+					Agent:   agentID,
+					Status:  batchStatusSuccess,
+					Method:  chosenMethod,
+					Version: version,
+				})
+			}
+
+			if jsonOutput {
+				return emitAgentBatchJSON("install", entries)
 			}
 
 			// Multi-agent summary. For a single agent, the per-agent spinner
@@ -318,14 +351,31 @@ to attempt every agent and report a summary at the end.`,
 	cmd.Flags().BoolVarP(&global, "global", "g", true, "install globally")
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "force installation")
 	cmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "keep installing remaining agents after a failure (multi-agent only)")
+	cmd.Flags().BoolVar(&jsonOutput, "json", false, "emit a single JSON result document on stdout instead of human-readable output")
 
 	return cmd
 }
 
+// newInstallSpinner builds the spinner used by install/update/remove. When
+// jsonOutput is true, the spinner writes to io.Discard so animations and
+// per-iteration Success/Error lines never reach stdout/stderr — keeping
+// stdout strictly JSON.
+func newInstallSpinner(cfg *config.Config, jsonOutput bool) *output.Spinner {
+	opts := []output.SpinnerOption{
+		output.WithMessage("Loading catalog..."),
+		output.WithNoColor(!cfg.UI.UseColors),
+	}
+	if jsonOutput {
+		opts = append(opts, output.WithOutput(io.Discard))
+	}
+	return output.NewSpinner(opts...)
+}
+
 // installOne runs the install pipeline for a single agent: catalog
 // lookup → method resolution → installer.Install → spinner/log surface.
-// Extracted so newAgentInstallCommand can call it in a loop for bulk
-// installs without duplicating the per-agent flow.
+// Returns the resolved method and post-install version so the caller can
+// fold them into a structured JSON result; method may be non-empty even
+// when err != nil (e.g. when method resolution succeeded but Install failed).
 func installOne(
 	ctx context.Context,
 	cfg *config.Config,
@@ -337,7 +387,7 @@ func installOne(
 	agentID string,
 	method string,
 	force bool,
-) error {
+) (chosenMethod, version string, err error) {
 	agentDef, ok := cat.GetAgent(agentID)
 	if !ok {
 		msg := fmt.Sprintf("Agent %q not found in catalog", agentID)
@@ -346,10 +396,10 @@ func installOne(
 		} else {
 			spinner.Error(msg)
 		}
-		return fmt.Errorf("agent %q not found in catalog", agentID)
+		return "", "", fmt.Errorf("agent %q not found in catalog", agentID)
 	}
 
-	chosenMethod := method
+	chosenMethod = method
 	if chosenMethod == "" {
 		if preferred := cfg.GetAgentConfig(agentID).PreferredMethod; preferred != "" {
 			chosenMethod = preferred
@@ -362,7 +412,7 @@ func installOne(
 				} else {
 					spinner.Error(msg)
 				}
-				return fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
+				return "", "", fmt.Errorf("no installation methods available for %q on %s", agentID, plat.ID())
 			}
 			chosenMethod = methods[0].Method
 		}
@@ -376,7 +426,7 @@ func installOne(
 		} else {
 			spinner.Error(msg)
 		}
-		return fmt.Errorf("installation method %q not available for %q", chosenMethod, agentID)
+		return chosenMethod, "", fmt.Errorf("installation method %q not available for %q", chosenMethod, agentID)
 	}
 
 	if verbose {
@@ -397,10 +447,11 @@ func installOne(
 		} else {
 			spinner.Error(failMsg)
 		}
-		return fmt.Errorf("install %s: %w", agentID, err)
+		return chosenMethod, "", fmt.Errorf("install %s: %w", agentID, err)
 	}
 
-	okMsg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, result.Version.String())
+	version = result.Version.String()
+	okMsg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, version)
 	if verbose {
 		fmt.Fprintln(os.Stderr, okMsg)
 	} else {
@@ -411,14 +462,15 @@ func installOne(
 		spinner.UpdateMessage("Loading...")
 		spinner.Start()
 	}
-	return nil
+	return chosenMethod, version, nil
 }
 
 func newAgentUpdateCommand(cfg *config.Config) *cobra.Command {
 	var (
-		all    bool
-		force  bool
-		dryRun bool
+		all        bool
+		force      bool
+		dryRun     bool
+		jsonOutput bool
 	)
 
 	cmd := &cobra.Command{
@@ -430,22 +482,33 @@ Pass one or more agent names to update them in turn, or pass --all to
 update every installed agent that has an available update.
 
 When updating, the full changelog is displayed before confirming each
-update.`,
+update.
+
+Pass --json to emit a single structured result document on stdout (one entry
+per (agent, method) updated, plus a summary). Useful for scripting.`,
 		Args: cobra.ArbitraryArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if jsonOutput {
+				cmd.SilenceErrors = true
+				cmd.SilenceUsage = true
+			}
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
-			// Create printer for colored output
+			// Create printer for colored output. In --json mode, route both
+			// streams to io.Discard so prose doesn't pollute stdout; we still
+			// build the printer because update helpers take a *Printer.
 			printer := output.NewPrinter(cfg, cmd.Flag("no-color").Changed && cmd.Flag("no-color").Value.String() == "true")
+			if jsonOutput {
+				printer.SetOutput(io.Discard)
+				printer.SetErrorOutput(io.Discard)
+			}
 
 			plat := platform.Current()
 
-			// Create spinner
-			spinner := output.NewSpinner(
-				output.WithMessage("Loading catalog..."),
-				output.WithNoColor(!cfg.UI.UseColors),
-			)
+			// Create spinner (silent in --json mode so animations don't bleed onto stdout).
+			spinner := newInstallSpinner(cfg, jsonOutput)
 			spinner.Start()
 
 			store, err := storage.NewSQLiteStore(plat.GetDataDir())
@@ -500,25 +563,40 @@ update.`,
 				if len(args) > 0 {
 					printer.Warning("--all takes precedence; positional agent names are ignored")
 				}
-				return updateAllAgents(ctx, cfg, installations, cat, inst, force, dryRun, printer)
+				entries, err := updateAllAgents(ctx, cfg, installations, cat, inst, force, dryRun, printer)
+				if jsonOutput {
+					return emitAgentBatchJSON("update", entries)
+				}
+				return err
 			}
 
 			if len(args) == 0 {
 				printer.Error("agent name required (or use --all)")
+				if jsonOutput {
+					return emitAgentBatchJSON("update", nil)
+				}
 				return fmt.Errorf("agent name required (or use --all)")
 			}
 
 			// Multi-arg: update each named agent in turn. Reuses the same
 			// snapshot of installations so the helper doesn't re-detect.
-			var lastErr error
+			var (
+				lastErr    error
+				allEntries []agentBatchEntry
+			)
 			for _, agentID := range args {
-				if err := updateSingleAgent(ctx, cfg, agentID, installations, cat, inst, force, dryRun, printer); err != nil {
+				entries, err := updateSingleAgent(ctx, cfg, agentID, installations, cat, inst, force, dryRun, printer)
+				allEntries = append(allEntries, entries...)
+				if err != nil {
 					lastErr = err
-					if len(args) == 1 {
+					if !jsonOutput && len(args) == 1 {
 						return err
 					}
 					printer.Warning("update %s: %v", agentID, err)
 				}
+			}
+			if jsonOutput {
+				return emitAgentBatchJSON("update", allEntries)
 			}
 			return lastErr
 		},
@@ -527,12 +605,17 @@ update.`,
 	cmd.Flags().BoolVar(&all, "all", false, "update all agents")
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "force update")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "show what would be updated")
+	cmd.Flags().BoolVar(&jsonOutput, "json", false, "emit a single JSON result document on stdout instead of human-readable output")
 
 	return cmd
 }
 
-// updateAllAgents handles the --all flag to update all agents with available updates.
-func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
+// updateAllAgents handles the --all flag to update all agents with available
+// updates. Returns one batch entry per installation considered so callers can
+// emit a structured result (--json). Errors are reported on entries; the
+// returned error is the last fatal error, or nil if every installation
+// updated cleanly.
+func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) ([]agentBatchEntry, error) {
 	styles := printer.Styles()
 	verbose := verboseInstallOutput(cfg)
 
@@ -551,9 +634,11 @@ func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*a
 
 	spinner.Stop()
 
+	var entries []agentBatchEntry
+
 	if len(toUpdate) == 0 {
 		printer.Info("No updates available")
-		return nil
+		return entries, nil
 	}
 
 	printer.Print("\nFound %s with updates:", styles.Bold.Render(fmt.Sprintf("%d agent(s)", len(toUpdate))))
@@ -570,21 +655,51 @@ func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*a
 
 	if dryRun {
 		printer.Info("\nDry run - no changes made")
-		return nil
+		for _, installation := range toUpdate {
+			latestVer := "unknown"
+			if installation.LatestVersion != nil {
+				latestVer = installation.LatestVersion.String()
+			}
+			entries = append(entries, agentBatchEntry{
+				Agent:           installation.AgentID,
+				Status:          batchStatusNoop,
+				Method:          string(installation.Method),
+				PreviousVersion: installation.InstalledVersion.String(),
+				Version:         latestVer,
+				Reason:          "dry run",
+			})
+		}
+		return entries, nil
 	}
 
 	printer.Print("")
 
+	var lastErr error
 	for _, installation := range toUpdate {
+		previous := installation.InstalledVersion.String()
 		agentDef, ok := cat.GetAgent(installation.AgentID)
 		if !ok {
 			printer.Warning("Skipping %s: not found in catalog", installation.AgentName)
+			entries = append(entries, agentBatchEntry{
+				Agent:           installation.AgentID,
+				Status:          batchStatusSkipped,
+				Method:          string(installation.Method),
+				PreviousVersion: previous,
+				Reason:          "not found in catalog",
+			})
 			continue
 		}
 
 		methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
 		if !ok {
 			printer.Warning("Skipping %s: install method %s not found", installation.AgentName, installation.Method)
+			entries = append(entries, agentBatchEntry{
+				Agent:           installation.AgentID,
+				Status:          batchStatusSkipped,
+				Method:          string(installation.Method),
+				PreviousVersion: previous,
+				Reason:          fmt.Sprintf("install method %s not found", installation.Method),
+			})
 			continue
 		}
 
@@ -608,6 +723,14 @@ func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*a
 			} else {
 				spinner.Error(msg)
 			}
+			entries = append(entries, agentBatchEntry{
+				Agent:           installation.AgentID,
+				Status:          batchStatusError,
+				Method:          string(installation.Method),
+				PreviousVersion: previous,
+				Error:           err.Error(),
+			})
+			lastErr = err
 			continue
 		}
 		okMsg := fmt.Sprintf("Updated %s to %s", installation.AgentName, result.Version.String())
@@ -616,13 +739,23 @@ func updateAllAgents(ctx context.Context, cfg *config.Config, installations []*a
 		} else {
 			spinner.Success(okMsg)
 		}
+		entries = append(entries, agentBatchEntry{
+			Agent:           installation.AgentID,
+			Status:          batchStatusSuccess,
+			Method:          string(installation.Method),
+			PreviousVersion: previous,
+			Version:         result.Version.String(),
+		})
 	}
 
-	return nil
+	return entries, lastErr
 }
 
-// updateSingleAgent handles updating a specific agent by ID.
-func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) error {
+// updateSingleAgent handles updating a specific agent by ID. Returns one
+// batch entry per matching installation so callers can emit a structured
+// result; the returned error is the last fatal error (nil if every
+// installation updated or was a clean noop).
+func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, installations []*agent.Installation, cat *catalog.Catalog, inst *installer.Manager, force, dryRun bool, printer *output.Printer) ([]agentBatchEntry, error) {
 	styles := printer.Styles()
 	verbose := verboseInstallOutput(cfg)
 
@@ -635,13 +768,21 @@ func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, 
 
 	if len(agentInstallations) == 0 {
 		printer.Error("Agent %q not installed", agentID)
-		return fmt.Errorf("agent %q not installed", agentID)
+		return []agentBatchEntry{{
+			Agent:  agentID,
+			Status: batchStatusError,
+			Error:  fmt.Sprintf("agent %q not installed", agentID),
+		}}, fmt.Errorf("agent %q not installed", agentID)
 	}
 
 	agentDef, ok := cat.GetAgent(agentID)
 	if !ok {
 		printer.Error("Agent %q not found in catalog", agentID)
-		return fmt.Errorf("agent %q not found in catalog", agentID)
+		return []agentBatchEntry{{
+			Agent:  agentID,
+			Status: batchStatusError,
+			Error:  fmt.Sprintf("agent %q not found in catalog", agentID),
+		}}, fmt.Errorf("agent %q not found in catalog", agentID)
 	}
 
 	var hasUpdate bool
@@ -654,11 +795,23 @@ func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, 
 
 	if !hasUpdate {
 		printer.Info("%s is already up to date", agentDef.Name)
-		return nil
+		entries := make([]agentBatchEntry, 0, len(agentInstallations))
+		for _, installation := range agentInstallations {
+			entries = append(entries, agentBatchEntry{
+				Agent:           agentID,
+				Status:          batchStatusNoop,
+				Method:          string(installation.Method),
+				PreviousVersion: installation.InstalledVersion.String(),
+				Version:         installation.InstalledVersion.String(),
+				Reason:          "already up to date",
+			})
+		}
+		return entries, nil
 	}
 
 	if dryRun {
 		printer.Info("Would update %s (dry run)", agentDef.Name)
+		var entries []agentBatchEntry
 		for _, installation := range agentInstallations {
 			if installation.HasUpdate() || force {
 				latestVer := "latest"
@@ -670,20 +823,39 @@ func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, 
 					styles.FormatMethod(string(installation.Method)),
 					styles.FormatVersion(installation.InstalledVersion.String(), true),
 					styles.FormatVersion(latestVer, false))
+				entries = append(entries, agentBatchEntry{
+					Agent:           agentID,
+					Status:          batchStatusNoop,
+					Method:          string(installation.Method),
+					PreviousVersion: installation.InstalledVersion.String(),
+					Version:         latestVer,
+					Reason:          "dry run",
+				})
 			}
 		}
-		return nil
+		return entries, nil
 	}
 
-	var lastErr error
+	var (
+		lastErr error
+		entries []agentBatchEntry
+	)
 	for _, installation := range agentInstallations {
 		if !installation.HasUpdate() && !force {
 			continue
 		}
 
+		previous := installation.InstalledVersion.String()
 		methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
 		if !ok {
 			printer.Warning("Skipping %s via %s: method not in catalog", installation.AgentName, installation.Method)
+			entries = append(entries, agentBatchEntry{
+				Agent:           agentID,
+				Status:          batchStatusSkipped,
+				Method:          string(installation.Method),
+				PreviousVersion: previous,
+				Reason:          "method not in catalog",
+			})
 			continue
 		}
 
@@ -707,6 +879,13 @@ func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, 
 			} else {
 				spinner.Error(msg)
 			}
+			entries = append(entries, agentBatchEntry{
+				Agent:           agentID,
+				Status:          batchStatusError,
+				Method:          string(installation.Method),
+				PreviousVersion: previous,
+				Error:           err.Error(),
+			})
 			lastErr = err
 			continue
 		}
@@ -716,9 +895,16 @@ func updateSingleAgent(ctx context.Context, cfg *config.Config, agentID string, 
 		} else {
 			spinner.Success(okMsg)
 		}
+		entries = append(entries, agentBatchEntry{
+			Agent:           agentID,
+			Status:          batchStatusSuccess,
+			Method:          string(installation.Method),
+			PreviousVersion: previous,
+			Version:         result.Version.String(),
+		})
 	}
 
-	return lastErr
+	return entries, lastErr
 }
 
 func newAgentInfoCommand(cfg *config.Config) *cobra.Command {
@@ -886,6 +1072,7 @@ func newAgentRemoveCommand(cfg *config.Config) *cobra.Command {
 		force           bool
 		method          string
 		continueOnError bool
+		jsonOutput      bool
 	)
 
 	cmd := &cobra.Command{
@@ -899,10 +1086,21 @@ methods exist for the same agent. The same --method applies to every
 agent passed; mix-and-match requires separate invocations.
 
 By default, the command stops at the first failure. Use
---continue-on-error to attempt every agent and report a summary.`,
+--continue-on-error to attempt every agent and report a summary.
+
+Pass --json to emit a single structured result document on stdout. In
+--json mode, --force and --continue-on-error are implied (interactive
+prompts can't be answered from a script).`,
 		Aliases: []string{"rm", "uninstall"},
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if jsonOutput {
+				cmd.SilenceErrors = true
+				cmd.SilenceUsage = true
+				force = true
+				continueOnError = true
+			}
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
@@ -936,28 +1134,62 @@ By default, the command stops at the first failure. Use
 			}
 
 			inst := installer.NewManager(plat)
+			msgOut := os.Stdout
+			if jsonOutput {
+				msgOut = nil // signal "discard" to removeOne
+			}
 
 			var (
 				succeeded []string
 				failed    []string
 				skipped   []string
+				entries   []agentBatchEntry
 			)
 
 			for _, agentID := range args {
-				outcome, err := removeOne(ctx, cat, inst, installations, agentID, method, force)
+				result, err := removeOne(ctx, cat, inst, installations, agentID, method, force, msgOut)
 				switch {
 				case err != nil:
 					failed = append(failed, agentID)
+					entries = append(entries, agentBatchEntry{
+						Agent:   agentID,
+						Status:  batchStatusError,
+						Method:  result.Method,
+						Version: result.Version,
+						Error:   err.Error(),
+					})
 					if !continueOnError {
 						return err
 					}
-				case outcome == removeOutcomeSkippedMulti:
+				case result.Outcome == removeOutcomeSkippedMulti:
 					skipped = append(skipped, agentID)
-				case outcome == removeOutcomeCanceled:
+					entries = append(entries, agentBatchEntry{
+						Agent:  agentID,
+						Status: batchStatusSkipped,
+						Reason: "multiple installations; pass --method to disambiguate",
+					})
+				case result.Outcome == removeOutcomeCanceled:
 					skipped = append(skipped, agentID)
+					entries = append(entries, agentBatchEntry{
+						Agent:   agentID,
+						Status:  batchStatusSkipped,
+						Method:  result.Method,
+						Version: result.Version,
+						Reason:  "user canceled at prompt",
+					})
 				default:
 					succeeded = append(succeeded, agentID)
+					entries = append(entries, agentBatchEntry{
+						Agent:   agentID,
+						Status:  batchStatusSuccess,
+						Method:  result.Method,
+						Version: result.Version,
+					})
 				}
+			}
+
+			if jsonOutput {
+				return emitAgentBatchJSON("remove", entries)
 			}
 
 			// Summary only when we processed multiple agents.
@@ -982,6 +1214,7 @@ By default, the command stops at the first failure. Use
 	cmd.Flags().BoolVarP(&force, "force", "F", false, "skip confirmation")
 	cmd.Flags().StringVarP(&method, "method", "m", "", "specific installation method to remove")
 	cmd.Flags().BoolVar(&continueOnError, "continue-on-error", false, "keep removing remaining agents after a failure (multi-agent only)")
+	cmd.Flags().BoolVar(&jsonOutput, "json", false, "emit a single JSON result document on stdout instead of human-readable output")
 
 	return cmd
 }
@@ -1000,6 +1233,19 @@ const (
 	removeOutcomeCanceled
 )
 
+// removeOneResult captures both the human-facing outcome of removeOne and
+// the resolved installation metadata (method, version) so the caller can
+// emit a structured --json entry without re-scanning the installations.
+type removeOneResult struct {
+	Outcome removeOutcome
+	Method  string
+	Version string
+}
+
+// removeOne removes a single installation. When msgOut is nil all
+// human-facing prose (the "Multiple installations..." listing, the
+// confirmation prompt, the success line) is suppressed — that's the path
+// --json takes. msgOut == os.Stdout reproduces the historical behavior.
 func removeOne(
 	ctx context.Context,
 	cat *catalog.Catalog,
@@ -1007,7 +1253,15 @@ func removeOne(
 	installations []*agent.Installation,
 	agentID, method string,
 	force bool,
-) (removeOutcome, error) {
+	msgOut io.Writer,
+) (removeOneResult, error) {
+	emit := func(format string, a ...any) {
+		if msgOut == nil {
+			return
+		}
+		fmt.Fprintf(msgOut, format, a...)
+	}
+
 	var matches []*agent.Installation
 	for _, installation := range installations {
 		if installation.AgentID != agentID {
@@ -1021,53 +1275,61 @@ func removeOne(
 
 	if len(matches) == 0 {
 		if method != "" {
-			return 0, fmt.Errorf("agent %q not installed via %s", agentID, method)
+			return removeOneResult{Method: method}, fmt.Errorf("agent %q not installed via %s", agentID, method)
 		}
-		return 0, fmt.Errorf("agent %q not installed", agentID)
+		return removeOneResult{}, fmt.Errorf("agent %q not installed", agentID)
 	}
 
 	agentDef, ok := cat.GetAgent(agentID)
 	if !ok {
-		return 0, fmt.Errorf("agent %q not found in catalog", agentID)
+		return removeOneResult{}, fmt.Errorf("agent %q not found in catalog", agentID)
 	}
 
 	if len(matches) > 1 && method == "" {
-		fmt.Printf("Multiple installations of %s found:\n", agentDef.Name)
+		emit("Multiple installations of %s found:\n", agentDef.Name)
 		for _, installation := range matches {
-			fmt.Printf("  - %s via %s (%s)\n",
+			emit("  - %s via %s (%s)\n",
 				installation.InstalledVersion.String(),
 				installation.Method,
 				installation.ExecutablePath)
 		}
-		fmt.Println("Use --method to specify which installation to remove.")
-		return removeOutcomeSkippedMulti, nil
+		emit("Use --method to specify which installation to remove.\n")
+		return removeOneResult{Outcome: removeOutcomeSkippedMulti}, nil
 	}
 
 	installation := matches[0]
+	result := removeOneResult{
+		Method:  string(installation.Method),
+		Version: installation.InstalledVersion.String(),
+	}
 
 	if !force {
-		fmt.Printf("Are you sure you want to remove %s (%s via %s)? [y/N] ",
+		emit("Are you sure you want to remove %s (%s via %s)? [y/N] ",
 			agentDef.Name, installation.InstalledVersion.String(), installation.Method)
 		var response string
 		_, _ = fmt.Scanln(&response)
 		if !strings.EqualFold(response, "y") {
-			fmt.Println("Canceled")
-			return removeOutcomeCanceled, nil
+			emit("Canceled\n")
+			result.Outcome = removeOutcomeCanceled
+			return result, nil
 		}
 	}
 
 	methodDef, ok := agentDef.GetInstallMethod(string(installation.Method))
 	if !ok {
-		return 0, fmt.Errorf("install method %s not found in catalog for %s", installation.Method, agentID)
+		return result, fmt.Errorf("install method %s not found in catalog for %s", installation.Method, agentID)
 	}
 
-	fmt.Printf("Removing %s via %s...\n", agentDef.Name, installation.Method)
+	emit("Removing %s via %s...\n", agentDef.Name, installation.Method)
 	if err := inst.Uninstall(ctx, installation, methodDef); err != nil {
-		return 0, fmt.Errorf("remove %s: %w", agentID, err)
+		return result, fmt.Errorf("remove %s: %w", agentID, err)
 	}
 
-	printSuccess("Removed %s successfully", agentDef.Name)
-	return removeOutcomeRemoved, nil
+	if msgOut != nil {
+		printSuccess("Removed %s successfully", agentDef.Name)
+	}
+	result.Outcome = removeOutcomeRemoved
+	return result, nil
 }
 
 func newAgentRefreshCommand(cfg *config.Config) *cobra.Command {

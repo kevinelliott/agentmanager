@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -34,7 +35,13 @@ func main() {
 	// Create and execute root command
 	rootCmd := cli.NewRootCommand(cfg, version, commit, date)
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		// --json paths wrap their failure with cli.ErrSilent so the
+		// human-readable message has already been encoded into JSON on
+		// stdout. Print nothing extra to stderr in that case — but still
+		// exit non-zero so scripts can branch.
+		if !errors.Is(err, cli.ErrSilent) {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		}
 		os.Exit(1)
 	}
 }
