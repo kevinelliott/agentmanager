@@ -1,5 +1,5 @@
 {
-  "version": "1.0.33",
+  "version": "1.0.34",
   "schema_version": 1,
   "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
@@ -3001,6 +3001,46 @@
       "metadata": {
         "vendor": "Manaflow, Inc.",
         "license": "GPL-3.0-or-later"
+      }
+    },
+    "grok-build": {
+      "id": "grok-build",
+      "name": "Grok Build",
+      "description": "xAI's official agentic coding CLI powered by Grok models",
+      "homepage": "https://x.ai/cli",
+      "documentation": "https://docs.x.ai/build/overview",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://x.ai/cli/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "windows_note": "Windows via Git Bash / MSYS2 / WSL (uses Linux binary)",
+            "channel_env": "GROK_CHANNEL (stable|alpha|enterprise, default stable)",
+            "install_dir_env": "GROK_BIN_DIR",
+            "auto_update": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["grok"],
+        "version_cmd": "grok --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "paths": ["~/.grok/bin/grok", "~/.local/bin/grok"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "blog",
+        "url": "https://x.ai/news/grok-build-cli",
+        "file_format": "html"
+      },
+      "metadata": {
+        "vendor": "xAI",
+        "license": "Proprietary"
       }
     },
     "antigravity-cli": {
