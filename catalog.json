@@ -1,5 +1,5 @@
 {
-  "version": "1.0.32",
+  "version": "1.0.33",
   "schema_version": 1,
   "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
@@ -3001,6 +3001,71 @@
       "metadata": {
         "vendor": "Manaflow, Inc.",
         "license": "GPL-3.0-or-later"
+      }
+    },
+    "antigravity-cli": {
+      "id": "antigravity-cli",
+      "name": "Antigravity CLI",
+      "description": "Google's terminal agent powered by Gemini, successor to Gemini CLI",
+      "homepage": "https://antigravity.google/product/antigravity-cli",
+      "repository": "https://github.com/google-antigravity/antigravity-cli",
+      "documentation": "https://antigravity.google/docs/cli-overview",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://antigravity.google/cli/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "install_path": "~/.local/bin",
+            "auto_update": "true"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "irm https://antigravity.google/cli/install.ps1 | iex",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script",
+            "auto_update": "true"
+          }
+        },
+        "brew": {
+          "method": "brew",
+          "package": "antigravity-cli",
+          "command": "brew install --cask antigravity-cli",
+          "update_cmd": "brew upgrade --cask antigravity-cli",
+          "uninstall_cmd": "brew uninstall --cask antigravity-cli",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true",
+            "min_macos": "monterey",
+            "auto_update": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["agy", "antigravity"],
+        "version_cmd": "agy --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list --cask antigravity-cli",
+            "paths": ["/opt/homebrew/bin/agy", "/usr/local/bin/agy"]
+          },
+          "native": {
+            "paths": ["~/.local/bin/agy"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://github.com/google-antigravity/antigravity-cli/blob/main/CHANGELOG.md",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Google",
+        "license": "Proprietary"
       }
     },
     "vibemux": {
