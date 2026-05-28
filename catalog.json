@@ -1,5 +1,5 @@
 {
-  "version": "1.0.31",
+  "version": "1.0.32",
   "schema_version": 1,
   "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
@@ -2945,6 +2945,62 @@
       "metadata": {
         "vendor": "Ogulcan Celik",
         "license": "AGPL-3.0-or-later"
+      }
+    },
+    "cmux": {
+      "id": "cmux",
+      "name": "cmux",
+      "description": "Native macOS terminal on libghostty with vertical tabs for parallel AI coding agents",
+      "homepage": "https://cmux.com",
+      "repository": "https://github.com/manaflow-ai/cmux",
+      "documentation": "https://github.com/manaflow-ai/cmux#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "manaflow-ai/cmux/cmux",
+          "command": "brew install --cask manaflow-ai/cmux/cmux",
+          "update_cmd": "brew upgrade --cask cmux",
+          "uninstall_cmd": "brew uninstall --cask cmux",
+          "platforms": ["darwin"],
+          "metadata": {
+            "cask": "true",
+            "tap": "manaflow-ai/cmux",
+            "min_macos": "sonoma"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download cmux-macos.dmg from GitHub releases",
+          "platforms": ["darwin"],
+          "metadata": {
+            "download_url": "https://github.com/manaflow-ai/cmux/releases",
+            "artifact_darwin": "cmux-macos.dmg",
+            "min_macos": "sonoma"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["cmux"],
+        "version_cmd": "cmux --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list --cask cmux",
+            "paths": ["/Applications/cmux.app/Contents/Resources/bin/cmux"]
+          },
+          "binary": {
+            "paths": ["/Applications/cmux.app/Contents/Resources/bin/cmux", "/usr/local/bin/cmux"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/manaflow-ai/cmux/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Manaflow, Inc.",
+        "license": "GPL-3.0-or-later"
       }
     },
     "vibemux": {
