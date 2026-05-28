@@ -1,5 +1,5 @@
 {
-  "version": "1.0.35",
+  "version": "1.0.36",
   "schema_version": 1,
   "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
@@ -3060,6 +3060,56 @@
       "metadata": {
         "vendor": "Google",
         "license": "Apache-2.0"
+      }
+    },
+    "paperclip": {
+      "id": "paperclip",
+      "name": "Paperclip",
+      "description": "CLI to orchestrate AI agent teams as a self-hosted company (uses OpenClaw, Claude Code, etc. as workers)",
+      "homepage": "https://paperclip.ing",
+      "repository": "https://github.com/paperclipai/paperclip",
+      "documentation": "https://paperclip.ing/docs",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "paperclipai",
+          "command": "npm install -g paperclipai",
+          "update_cmd": "npm update -g paperclipai",
+          "uninstall_cmd": "npm uninstall -g paperclipai",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "paperclipai",
+          "command": "npx paperclipai onboard --yes",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["node>=20"],
+          "metadata": {
+            "ephemeral": "true",
+            "note": "npx fetches the package on each run; use npm -g for persistent install"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["paperclipai", "paperclip"],
+        "version_cmd": "paperclipai --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g paperclipai --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/paperclipai/paperclip/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Paperclip AI",
+        "license": "MIT"
       }
     },
     "grok-build": {
