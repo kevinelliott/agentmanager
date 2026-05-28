@@ -136,6 +136,7 @@ func TestNewAgentCommand(t *testing.T) {
 	if installCmd != nil {
 		assertFlagExists(t, installCmd, "method")
 		assertFlagExists(t, installCmd, "continue-on-error")
+		assertFlagExists(t, installCmd, "json")
 		// Removed: "version" — installer.Manager.Install never accepted
 		// a version pin, so the flag was a silent no-op.
 		if installCmd.Flags().Lookup("version") != nil {
@@ -154,6 +155,7 @@ func TestNewAgentCommand(t *testing.T) {
 	if updateCmd != nil {
 		assertFlagExists(t, updateCmd, "all")
 		assertFlagExists(t, updateCmd, "force")
+		assertFlagExists(t, updateCmd, "json")
 		// update now accepts arbitrary args (1..N) plus --all.
 		if !strings.Contains(updateCmd.Use, "[<agent-name>...]") {
 			t.Errorf("update command Use string %q should advertise multi-arg form", updateCmd.Use)
@@ -166,6 +168,7 @@ func TestNewAgentCommand(t *testing.T) {
 		assertFlagExists(t, removeCmd, "force")
 		assertFlagExists(t, removeCmd, "method")
 		assertFlagExists(t, removeCmd, "continue-on-error")
+		assertFlagExists(t, removeCmd, "json")
 		// remove also accepts multiple positional args now.
 		if !strings.Contains(removeCmd.Use, "[<agent-name>...]") {
 			t.Errorf("remove command Use string %q should advertise multi-arg form", removeCmd.Use)
