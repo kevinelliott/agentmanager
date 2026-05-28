@@ -102,7 +102,11 @@ func (s *Server) setupRoutes() {
 
 	// Middleware
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
+	// middleware.RealIP is intentionally omitted: chi deprecated it for
+	// GHSA-3fxj-6jh8-hvhx (and friends) because it rewrites r.RemoteAddr
+	// from spoofable X-Forwarded-For / X-Real-IP / True-Client-IP headers.
+	// Auth here is APIKey, not IP, and the server binds loopback by default,
+	// so the unmodified TCP peer in r.RemoteAddr is what we want logged.
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
