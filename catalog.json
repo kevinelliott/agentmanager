@@ -1,7 +1,7 @@
 {
-  "version": "1.0.30",
+  "version": "1.0.31",
   "schema_version": 1,
-  "last_updated": "2026-05-27T00:00:00Z",
+  "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -2945,6 +2945,58 @@
       "metadata": {
         "vendor": "Ogulcan Celik",
         "license": "AGPL-3.0-or-later"
+      }
+    },
+    "vibemux": {
+      "id": "vibemux",
+      "name": "VibeMux",
+      "description": "TUI for orchestrating parallel Claude Code and Codex agent sessions",
+      "homepage": "https://github.com/UgOrange/vibemux",
+      "repository": "https://github.com/UgOrange/vibemux",
+      "documentation": "https://github.com/UgOrange/vibemux#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/UgOrange/vibemux/refs/heads/main/scripts/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script",
+            "install_path": "~/.local/bin",
+            "windows_note": "Windows supported via WSL only"
+          },
+          "prereqs": ["claude-code or codex"]
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from GitHub releases",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "download_url": "https://github.com/UgOrange/vibemux/releases",
+            "artifact_darwin_arm64": "vibemux-darwin-arm64",
+            "artifact_darwin_amd64": "vibemux-darwin-amd64",
+            "artifact_linux_amd64": "vibemux-linux-amd64",
+            "artifact_linux_arm64": "vibemux-linux-arm64"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["vibemux"],
+        "version_cmd": "vibemux --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "paths": ["~/.local/bin/vibemux"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/UgOrange/vibemux/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "UgOrange",
+        "license": "Unspecified"
       }
     }
   }
