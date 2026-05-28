@@ -1,5 +1,5 @@
 {
-  "version": "1.0.34",
+  "version": "1.0.35",
   "schema_version": 1,
   "last_updated": "2026-05-28T00:00:00Z",
   "agents": {
@@ -3001,6 +3001,65 @@
       "metadata": {
         "vendor": "Manaflow, Inc.",
         "license": "GPL-3.0-or-later"
+      }
+    },
+    "agents-cli": {
+      "id": "agents-cli",
+      "name": "Agents CLI",
+      "description": "Google's CLI + skills toolkit for building, evaluating, and deploying ADK agents on Google Cloud",
+      "homepage": "https://google.github.io/agents-cli/",
+      "repository": "https://github.com/google/agents-cli",
+      "documentation": "https://google.github.io/agents-cli/",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "google-agents-cli",
+          "command": "uvx google-agents-cli setup",
+          "update_cmd": "uv tool upgrade google-agents-cli",
+          "uninstall_cmd": "uv tool uninstall google-agents-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv", "python>=3.11", "node"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "google-agents-cli",
+          "command": "pipx install google-agents-cli",
+          "update_cmd": "pipx upgrade google-agents-cli",
+          "uninstall_cmd": "pipx uninstall google-agents-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["pipx", "python>=3.11", "node"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "google-agents-cli",
+          "command": "pip install google-agents-cli",
+          "update_cmd": "pip install --upgrade google-agents-cli",
+          "uninstall_cmd": "pip uninstall google-agents-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.11", "node"]
+        }
+      },
+      "detection": {
+        "executables": ["agents-cli"],
+        "version_cmd": "agents-cli info",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show google-agents-cli"
+          },
+          "pipx": {
+            "check_cmd": "pipx list --json"
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/google/agents-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Google",
+        "license": "Apache-2.0"
       }
     },
     "grok-build": {
