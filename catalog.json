@@ -1,5 +1,5 @@
 {
-  "version": "1.0.37",
+  "version": "1.0.38",
   "schema_version": 1,
   "last_updated": "2026-06-05T00:00:00Z",
   "agents": {
@@ -2038,6 +2038,76 @@
       },
       "metadata": {
         "vendor": "Nano Collective",
+        "license": "MIT"
+      }
+    },
+    "oh-my-pi": {
+      "id": "oh-my-pi",
+      "name": "oh-my-pi",
+      "description": "Terminal AI coding agent with LSP, subagents, in-process ripgrep, and browser",
+      "homepage": "https://omp.sh",
+      "repository": "https://github.com/can1357/oh-my-pi",
+      "documentation": "https://omp.sh",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://omp.sh/install | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "irm https://omp.sh/install.ps1 | iex",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@oh-my-pi/pi-coding-agent",
+          "command": "npm install -g @oh-my-pi/pi-coding-agent",
+          "update_cmd": "npm update -g @oh-my-pi/pi-coding-agent",
+          "uninstall_cmd": "npm uninstall -g @oh-my-pi/pi-coding-agent",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node"]
+        },
+        "bun": {
+          "method": "bun",
+          "package": "@oh-my-pi/pi-coding-agent",
+          "command": "bun install -g @oh-my-pi/pi-coding-agent",
+          "update_cmd": "bun install -g @oh-my-pi/pi-coding-agent",
+          "uninstall_cmd": "bun remove -g @oh-my-pi/pi-coding-agent",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["Bun >= 1.0"]
+        }
+      },
+      "detection": {
+        "executables": ["omp"],
+        "version_cmd": "omp --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @oh-my-pi/pi-coding-agent --json",
+            "paths": []
+          },
+          "native": {
+            "check_cmd": "command -v omp",
+            "paths": ["~/.local/bin/omp", "/usr/local/bin/omp"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/can1357/oh-my-pi/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "can1357",
         "license": "MIT"
       }
     },
