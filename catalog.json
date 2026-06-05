@@ -1,7 +1,7 @@
 {
-  "version": "1.0.36",
+  "version": "1.0.37",
   "schema_version": 1,
-  "last_updated": "2026-05-28T00:00:00Z",
+  "last_updated": "2026-06-05T00:00:00Z",
   "agents": {
     "amp": {
       "id": "amp",
@@ -2740,6 +2740,62 @@
       },
       "metadata": {
         "vendor": "Nous Research",
+        "license": "MIT"
+      }
+    },
+    "reasonix": {
+      "id": "reasonix",
+      "name": "DeepSeek-Reasonix",
+      "description": "DeepSeek-native AI coding agent for the terminal, prefix-cache-stable",
+      "homepage": "https://esengine.github.io/DeepSeek-Reasonix/",
+      "repository": "https://github.com/esengine/DeepSeek-Reasonix",
+      "documentation": "https://esengine.github.io/DeepSeek-Reasonix/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "reasonix",
+          "command": "npm install -g reasonix",
+          "update_cmd": "npm update -g reasonix",
+          "uninstall_cmd": "npm uninstall -g reasonix",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node"]
+        },
+        "homebrew": {
+          "method": "homebrew",
+          "package": "esengine/reasonix/reasonix",
+          "command": "brew install esengine/reasonix/reasonix",
+          "update_cmd": "brew upgrade esengine/reasonix/reasonix",
+          "uninstall_cmd": "brew uninstall reasonix",
+          "platforms": ["darwin"],
+          "metadata": {
+            "tap": "esengine/reasonix",
+            "formula": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["reasonix", "dsnix"],
+        "version_cmd": "reasonix --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g reasonix --json",
+            "paths": []
+          },
+          "homebrew": {
+            "check_cmd": "brew list reasonix",
+            "paths": ["/opt/homebrew/bin/reasonix", "/usr/local/bin/reasonix"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/esengine/DeepSeek-Reasonix/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "esengine",
         "license": "MIT"
       }
     },
