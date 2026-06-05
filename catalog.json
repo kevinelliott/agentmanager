@@ -1,5 +1,5 @@
 {
-  "version": "1.0.38",
+  "version": "1.0.39",
   "schema_version": 1,
   "last_updated": "2026-06-05T00:00:00Z",
   "agents": {
@@ -611,6 +611,63 @@
       "metadata": {
         "vendor": "Continue",
         "license": "Apache-2.0"
+      }
+    },
+    "open-interpreter": {
+      "id": "open-interpreter",
+      "name": "Open Interpreter",
+      "description": "Natural-language interface that writes and runs code in your terminal",
+      "homepage": "https://openinterpreter.com",
+      "repository": "https://github.com/OpenInterpreter/open-interpreter",
+      "documentation": "https://docs.openinterpreter.com",
+      "install_methods": {
+        "pip": {
+          "method": "pip",
+          "package": "open-interpreter",
+          "command": "pip install open-interpreter",
+          "update_cmd": "pip install --upgrade open-interpreter",
+          "uninstall_cmd": "pip uninstall open-interpreter",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.9"]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "open-interpreter",
+          "command": "pipx install open-interpreter",
+          "update_cmd": "pipx upgrade open-interpreter",
+          "uninstall_cmd": "pipx uninstall open-interpreter",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.9", "pipx"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "open-interpreter",
+          "command": "uv tool install open-interpreter",
+          "update_cmd": "uv tool upgrade open-interpreter",
+          "uninstall_cmd": "uv tool uninstall open-interpreter",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv"]
+        }
+      },
+      "detection": {
+        "executables": ["interpreter", "i", "interpreter-classic"],
+        "version_cmd": "interpreter --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pip": {
+            "check_cmd": "pip show open-interpreter",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/OpenInterpreter/open-interpreter/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Open Interpreter",
+        "license": "AGPL-3.0"
       }
     },
     "opencode": {
