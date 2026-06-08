@@ -1,5 +1,5 @@
 {
-  "version": "1.0.55",
+  "version": "1.0.56",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -2347,6 +2347,58 @@
       "metadata": {
         "vendor": "Blackbox AI",
         "license": "GPL-3.0"
+      }
+    },
+    "byterover-cli": {
+      "id": "byterover-cli",
+      "name": "ByteRover CLI",
+      "description": "Portable memory layer CLI for autonomous coding agents (formerly Cipher)",
+      "homepage": "https://docs.byterover.dev",
+      "repository": "https://github.com/campfirein/byterover-cli",
+      "documentation": "https://docs.byterover.dev",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "byterover-cli",
+          "command": "npm install -g byterover-cli",
+          "update_cmd": "npm update -g byterover-cli",
+          "uninstall_cmd": "npm uninstall -g byterover-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://byterover.dev/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["brv"],
+        "version_cmd": "brv --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g byterover-cli --json",
+            "paths": []
+          },
+          "native": {
+            "check_cmd": "command -v brv",
+            "paths": ["~/.local/bin/brv", "/usr/local/bin/brv"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/campfirein/byterover-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "campfirein",
+        "license": "Elastic-2.0"
       }
     },
     "crush": {
