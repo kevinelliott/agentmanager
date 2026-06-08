@@ -1,5 +1,5 @@
 {
-  "version": "1.0.58",
+  "version": "1.0.59",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -4505,6 +4505,46 @@
       "metadata": {
         "vendor": "UgOrange",
         "license": "Unspecified"
+      }
+    },
+    "zeroshot": {
+      "id": "zeroshot",
+      "name": "Zeroshot",
+      "description": "Multi-agent coding orchestration CLI that implements, reviews, tests, and verifies",
+      "homepage": "https://github.com/covibes/zeroshot",
+      "repository": "https://github.com/covibes/zeroshot",
+      "documentation": "https://github.com/covibes/zeroshot#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@covibes/zeroshot",
+          "command": "npm install -g @covibes/zeroshot",
+          "update_cmd": "npm update -g @covibes/zeroshot",
+          "uninstall_cmd": "npm uninstall -g @covibes/zeroshot",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=18"]
+        }
+      },
+      "detection": {
+        "executables": ["zeroshot"],
+        "version_cmd": "zeroshot --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @covibes/zeroshot --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/covibes/zeroshot/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "covibes",
+        "license": "MIT"
       }
     },
     "zerostack": {
