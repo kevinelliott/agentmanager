@@ -34,6 +34,41 @@
       "repository": "https://github.com/code-yeongyu/lazycodex",
       "reason": "Not selected during 2026-06-08 research run; wrapper/installer for omo onto Codex, not a standalone agent",
       "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "whale",
+      "name": "Whale",
+      "repository": "https://github.com/usewhale/DeepSeek-Code-Whale",
+      "reason": "Surfaced and declined in two 2026-06-08 research runs (3m); user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "kimchi",
+      "name": "kimchi",
+      "repository": "https://github.com/getkimchi/kimchi",
+      "reason": "Surfaced and declined in two 2026-06-08 research runs (3m); user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "codemini-cli",
+      "name": "Codemini CLI",
+      "repository": "https://github.com/havingautism/Codemini-CLI",
+      "reason": "Surfaced and declined in two 2026-06-08 research runs (3m); user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "iosm-cli",
+      "name": "iosm-cli",
+      "repository": "https://github.com/rokoss21/iosm-cli",
+      "reason": "Surfaced and declined in two 2026-06-08 research runs (3m); user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "openseek",
+      "name": "OpenSeek",
+      "repository": "https://github.com/LichAmnesia/openseek",
+      "reason": "Surfaced and declined in two 2026-06-08 research runs (3m); early version (npm 0.0.5), user chose to ignore",
+      "ignored_at": "2026-06-08"
     }
   ]
 }
