@@ -313,6 +313,9 @@ func TestPipeline_CacheHitSkipsDetectionAndVersionCheckWhenFresh(t *testing.T) {
 	if det.calls != 0 {
 		t.Errorf("detector.DetectAll called %d times, want 0", det.calls)
 	}
+	if cat.calls != 0 {
+		t.Errorf("catalog.GetAgentsForPlatform called %d times, want 0 on warm fast path", cat.calls)
+	}
 	if store.saveCount != 0 {
 		t.Errorf("store.SaveDetectionCache called %d times, want 0", store.saveCount)
 	}

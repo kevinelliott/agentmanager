@@ -35,6 +35,13 @@ type Manager struct {
 	refreshGroup singleflight.Group
 }
 
+type cacheEntry struct {
+	catalog  *Catalog
+	data     []byte
+	etag     string
+	cachedAt time.Time
+}
+
 // NewManager creates a new catalog manager.
 func NewManager(cfg *config.Config, store storage.Store) *Manager {
 	return &Manager{
@@ -81,9 +88,18 @@ func (m *Manager) Get(ctx context.Context) (*Catalog, error) {
 
 // RefreshResult contains the result of a catalog refresh operation.
 type RefreshResult struct {
-	Updated        bool   // Whether the catalog was updated
-	CurrentVersion string // The current catalog version after refresh
-	RemoteVersion  string // The remote catalog version that was fetched
+	Updated        bool          // Whether the catalog was updated
+	CurrentVersion string        // The current catalog version after refresh
+	RemoteVersion  string        // The remote catalog version that was fetched
+	Cached         bool          // Whether refresh returned from a fresh local cache
+	CacheAge       time.Duration // Age of the cache when Cached is true
+}
+
+// RefreshOptions controls catalog refresh behavior.
+type RefreshOptions struct {
+	// Force bypasses the 24h catalog freshness window and checks the remote
+	// source immediately. Conditional ETag requests are still used.
+	Force bool
 }
 
 // Refresh fetches the latest catalog from the remote source.
@@ -98,8 +114,17 @@ type RefreshResult struct {
 // callers. This is acceptable because Refresh is not on any user-facing
 // critical path and the next caller will simply retry.
 func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
-	v, err, _ := m.refreshGroup.Do("catalog-refresh", func() (interface{}, error) {
-		return m.doRefresh(ctx)
+	return m.RefreshWithOptions(ctx, RefreshOptions{})
+}
+
+// RefreshWithOptions refreshes the catalog with caller-selected behavior.
+func (m *Manager) RefreshWithOptions(ctx context.Context, opts RefreshOptions) (*RefreshResult, error) {
+	key := "catalog-refresh"
+	if opts.Force {
+		key += ":force"
+	}
+	v, err, _ := m.refreshGroup.Do(key, func() (interface{}, error) {
+		return m.doRefresh(ctx, opts)
 	})
 	if err != nil {
 		return nil, err
@@ -116,9 +141,29 @@ func (m *Manager) Refresh(ctx context.Context) (*RefreshResult, error) {
 
 // doRefresh is the un-coalesced Refresh implementation. It must only be called
 // via the singleflight group (see Refresh).
-func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
+func (m *Manager) doRefresh(ctx context.Context, opts RefreshOptions) (*RefreshResult, error) {
+	cache, cacheErr := m.loadCacheEntry(ctx)
+	if !opts.Force && cacheErr == nil && cache != nil && m.cacheIsFresh(cache.cachedAt) {
+		m.mu.Lock()
+		if m.catalog == nil {
+			m.catalog = cache.catalog
+		}
+		m.mu.Unlock()
+
+		return &RefreshResult{
+			Updated:        false,
+			CurrentVersion: cache.catalog.Version,
+			RemoteVersion:  cache.catalog.Version,
+			Cached:         true,
+			CacheAge:       time.Since(cache.cachedAt),
+		}, nil
+	}
+
 	// Load the previous etag (if any) so we can send If-None-Match.
-	prevEtag := m.previousEtag(ctx)
+	prevEtag := ""
+	if cacheErr == nil && cache != nil {
+		prevEtag = cache.etag
+	}
 
 	remoteCatalog, newEtag, notModified, err := m.fetchRemote(ctx, prevEtag)
 	if err != nil {
@@ -127,6 +172,16 @@ func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
 
 	// If the server responded 304, our cached copy is still fresh.
 	if notModified {
+		if cache != nil && cache.catalog != nil {
+			m.mu.Lock()
+			m.catalog = cache.catalog
+			m.mu.Unlock()
+
+			// Bump cached_at so a stale-but-validated cache does not hit the
+			// remote again on the next command.
+			m.persistCache(ctx, cache.catalog, cache.data, newEtag)
+		}
+
 		currentCatalog, _ := m.Get(ctx) //nolint:errcheck
 		result := &RefreshResult{Updated: false}
 		if currentCatalog != nil {
@@ -157,7 +212,10 @@ func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
 			// Only skip update if both versions parse successfully and current is >= remote
 			if currentErr == nil && remoteErr == nil {
 				if !remoteVersion.IsNewerThan(currentVersion) {
-					// Remote is not newer, no update needed
+					// Remote is not newer, no update needed. Persist the
+					// current catalog bytes to advance cached_at, preventing
+					// repeated remote checks until the next freshness window.
+					m.persistCache(ctx, currentCatalog, nil, bestCatalogEtag(newEtag, remoteCatalog.Version))
 					result.Updated = false
 					return result, nil
 				}
@@ -168,19 +226,7 @@ func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
 	// Save to cache. Prefer the server-provided ETag (so subsequent Refresh
 	// calls can send If-None-Match); fall back to the catalog version to
 	// preserve the pre-existing behavior.
-	etagToStore := newEtag
-	if etagToStore == "" {
-		etagToStore = remoteCatalog.Version
-	}
-	if err := m.store.SaveCatalogCache(ctx, mustMarshal(remoteCatalog), etagToStore); err != nil {
-		// Non-fatal: we still have the catalog in memory. Use the
-		// request-scoped logger so operators can tag refresh events
-		// (e.g. with a trigger source) at the call site.
-		logging.FromContext(ctx).Warn("catalog: failed to persist cache",
-			"err", err,
-			"version", remoteCatalog.Version,
-		)
-	}
+	m.persistCache(ctx, remoteCatalog, nil, bestCatalogEtag(newEtag, remoteCatalog.Version))
 
 	m.mu.Lock()
 	m.catalog = remoteCatalog
@@ -191,14 +237,47 @@ func (m *Manager) doRefresh(ctx context.Context) (*RefreshResult, error) {
 	return result, nil
 }
 
-// previousEtag best-effort reads the etag from the previous cache entry.
-// Missing / unreadable cache yields the empty string.
-func (m *Manager) previousEtag(ctx context.Context) string {
-	_, etag, _, err := m.store.GetCatalogCache(ctx)
-	if err != nil {
-		return ""
+func (m *Manager) cacheIsFresh(cachedAt time.Time) bool {
+	if cachedAt.IsZero() {
+		return false
 	}
-	return etag
+	return time.Since(cachedAt) < m.refreshInterval()
+}
+
+func (m *Manager) refreshInterval() time.Duration {
+	if m.config == nil || m.config.Catalog.RefreshInterval <= 0 {
+		return config.DefaultCatalogRefreshInterval
+	}
+	if m.config.Catalog.RefreshInterval < config.DefaultCatalogRefreshInterval {
+		return config.DefaultCatalogRefreshInterval
+	}
+	return m.config.Catalog.RefreshInterval
+}
+
+func bestCatalogEtag(etag, version string) string {
+	if etag != "" {
+		return etag
+	}
+	return version
+}
+
+func (m *Manager) persistCache(ctx context.Context, catalog *Catalog, data []byte, etag string) {
+	if len(data) == 0 {
+		data = mustMarshal(catalog)
+	}
+	if err := m.store.SaveCatalogCache(ctx, data, etag); err != nil {
+		// Non-fatal: we still have the catalog in memory. Use the
+		// request-scoped logger so operators can tag refresh events
+		// (e.g. with a trigger source) at the call site.
+		version := ""
+		if catalog != nil {
+			version = catalog.Version
+		}
+		logging.FromContext(ctx).Warn("catalog: failed to persist cache",
+			"err", err,
+			"version", version,
+		)
+	}
 }
 
 // mustMarshal is saveToCache's marshal step surfaced inline so we can log on
@@ -281,12 +360,24 @@ func (m *Manager) GetAgentsForPlatform(ctx context.Context, platformID string) (
 
 // loadFromCache loads the catalog from storage cache.
 func (m *Manager) loadFromCache(ctx context.Context) (*Catalog, error) {
-	data, _, _, err := m.store.GetCatalogCache(ctx)
+	cache, err := m.loadCacheEntry(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if cache == nil || cache.catalog == nil {
+		return nil, fmt.Errorf("no cached catalog")
+	}
+
+	return cache.catalog, nil
+}
+
+func (m *Manager) loadCacheEntry(ctx context.Context) (*cacheEntry, error) {
+	data, etag, cachedAt, err := m.store.GetCatalogCache(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if data == nil {
-		return nil, fmt.Errorf("no cached catalog")
+		return nil, nil
 	}
 
 	var catalog Catalog
@@ -294,7 +385,12 @@ func (m *Manager) loadFromCache(ctx context.Context) (*Catalog, error) {
 		return nil, err
 	}
 
-	return &catalog, nil
+	return &cacheEntry{
+		catalog:  &catalog,
+		data:     data,
+		etag:     etag,
+		cachedAt: cachedAt,
+	}, nil
 }
 
 // loadEmbedded returns the baseline catalog that ships with the binary,

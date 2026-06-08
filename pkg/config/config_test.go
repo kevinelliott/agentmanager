@@ -12,8 +12,8 @@ func TestDefault(t *testing.T) {
 	if cfg.Catalog.SourceURL == "" {
 		t.Error("Catalog.SourceURL should not be empty")
 	}
-	if cfg.Catalog.RefreshInterval != time.Hour {
-		t.Errorf("Catalog.RefreshInterval = %v, want %v", cfg.Catalog.RefreshInterval, time.Hour)
+	if cfg.Catalog.RefreshInterval != DefaultCatalogRefreshInterval {
+		t.Errorf("Catalog.RefreshInterval = %v, want %v", cfg.Catalog.RefreshInterval, DefaultCatalogRefreshInterval)
 	}
 
 	// Test update defaults
@@ -93,8 +93,8 @@ func TestValidate(t *testing.T) {
 				c.Catalog.RefreshInterval = time.Second
 			},
 			check: func(c *Config) error {
-				if c.Catalog.RefreshInterval < time.Minute {
-					t.Errorf("RefreshInterval should be at least 1 minute, got %v", c.Catalog.RefreshInterval)
+				if c.Catalog.RefreshInterval < DefaultCatalogRefreshInterval {
+					t.Errorf("RefreshInterval should be at least %v, got %v", DefaultCatalogRefreshInterval, c.Catalog.RefreshInterval)
 				}
 				return nil
 			},

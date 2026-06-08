@@ -101,7 +101,7 @@ Examples:
   agentmgr config set updates.auto_check false
   agentmgr config set logging.level debug
   agentmgr config set ui.page_size 50
-  agentmgr config set catalog.refresh_interval 2h`,
+  agentmgr config set catalog.refresh_interval 24h`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			key := args[0]

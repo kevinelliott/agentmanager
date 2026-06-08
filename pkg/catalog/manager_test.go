@@ -26,6 +26,7 @@ type mockStore struct {
 	mu          sync.Mutex
 	catalogData []byte
 	catalogEtag string
+	cachedAt    time.Time
 	err         error
 }
 
@@ -56,7 +57,7 @@ func (m *mockStore) GetCatalogCache(ctx context.Context) ([]byte, string, time.T
 	if m.err != nil {
 		return nil, "", time.Time{}, m.err
 	}
-	return m.catalogData, m.catalogEtag, time.Now(), nil
+	return m.catalogData, m.catalogEtag, m.cachedAt, nil
 }
 
 func (m *mockStore) SaveCatalogCache(ctx context.Context, data []byte, etag string) error {
@@ -64,6 +65,7 @@ func (m *mockStore) SaveCatalogCache(ctx context.Context, data []byte, etag stri
 	defer m.mu.Unlock()
 	m.catalogData = data
 	m.catalogEtag = etag
+	m.cachedAt = time.Now()
 	return m.err
 }
 
@@ -95,7 +97,7 @@ func newTestConfig() *config.Config {
 	return &config.Config{
 		Catalog: config.CatalogConfig{
 			SourceURL:       "http://example.com/catalog.json",
-			RefreshInterval: time.Hour,
+			RefreshInterval: config.DefaultCatalogRefreshInterval,
 		},
 	}
 }
@@ -348,6 +350,44 @@ func TestManagerRefreshHTTPError(t *testing.T) {
 	_, err := mgr.Refresh(ctx)
 	if err == nil {
 		t.Error("Refresh() should return error on HTTP error")
+	}
+}
+
+func TestManagerRefresh_UsesFreshCacheWithin24HoursWithoutRemoteFetch(t *testing.T) {
+	catalog := createTestCatalog()
+	data, _ := json.Marshal(catalog)
+
+	var requests int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt64(&requests, 1)
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer server.Close()
+
+	cfg := newTestConfig()
+	cfg.Catalog.SourceURL = server.URL + "/catalog.json"
+	cfg.Catalog.RefreshInterval = time.Hour
+	store := &mockStore{
+		catalogData: data,
+		cachedAt:    time.Now().Add(-2 * time.Hour),
+	}
+	mgr := NewManager(cfg, store)
+
+	result, err := mgr.Refresh(context.Background())
+	if err != nil {
+		t.Fatalf("Refresh() error = %v", err)
+	}
+	if !result.Cached {
+		t.Fatal("Refresh() should report Cached=true for a fresh cache")
+	}
+	if result.Updated {
+		t.Fatal("Refresh() should not update when serving fresh cache")
+	}
+	if got := atomic.LoadInt64(&requests); got != 0 {
+		t.Fatalf("remote requests = %d, want 0", got)
+	}
+	if result.CurrentVersion != catalog.Version {
+		t.Errorf("CurrentVersion = %q, want %q", result.CurrentVersion, catalog.Version)
 	}
 }
 
@@ -704,7 +744,7 @@ func TestManagerRefresh_SendsIfNoneMatchAndHandles304(t *testing.T) {
 	}
 
 	// Second refresh: must send If-None-Match and accept 304.
-	result, err := mgr.Refresh(ctx)
+	result, err := mgr.RefreshWithOptions(ctx, RefreshOptions{Force: true})
 	if err != nil {
 		t.Fatalf("second Refresh() error: %v", err)
 	}

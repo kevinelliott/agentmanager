@@ -542,7 +542,9 @@ func (s *Server) RefreshCatalog(ctx context.Context) (*RefreshCatalogResponse, e
 	}
 
 	message := "Catalog already up to date"
-	if result.Updated {
+	if result.Cached {
+		message = "Catalog cache is fresh"
+	} else if result.Updated {
 		message = "Catalog updated successfully"
 	}
 

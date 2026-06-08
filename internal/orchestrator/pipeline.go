@@ -171,27 +171,15 @@ type Result struct {
 //     captured per index and returned to the caller, never aborting the
 //     pipeline.
 func (p *Pipeline) DetectAndCheckVersions(ctx context.Context, opts Options) (*Result, error) {
-	agentDefs, err := p.catalog.GetAgentsForPlatform(ctx, string(p.plat.ID()))
-	if err != nil {
-		if !opts.TolerateCatalogError {
-			return nil, fmt.Errorf("failed to load catalog: %w", err)
-		}
-		// Fall through with a nil slice; downstream handles that safely.
-		agentDefs = nil
-	}
-
-	agentDefMap := make(map[string]catalog.AgentDef, len(agentDefs))
-	for _, def := range agentDefs {
-		agentDefMap[def.ID] = def
-	}
-
 	var (
 		installations      []*agent.Installation
 		usedDetectionCache bool
 		needUpdateCheck    bool
 	)
 
-	// Try to use the detection cache unless we're forced to refresh.
+	// Try the detection cache before loading the catalog. On the fully warm
+	// path (fresh detection cache and fresh update-check TTL), agent list /
+	// systray refresh callers do not need catalog definitions at all.
 	if p.cfg.Detection.CacheEnabled && !opts.ForceRefresh {
 		cached, cachedAt, cacheErr := p.store.GetDetectionCache(ctx)
 		if cacheErr == nil && cached != nil && time.Since(cachedAt) < p.cfg.Detection.CacheDuration {
@@ -207,6 +195,31 @@ func (p *Pipeline) DetectAndCheckVersions(ctx context.Context, opts Options) (*R
 		}
 	}
 
+	result := &Result{
+		Installations:      installations,
+		UsedDetectionCache: usedDetectionCache,
+	}
+
+	if usedDetectionCache && (opts.SkipVersionCheck || !needUpdateCheck) {
+		return result, nil
+	}
+
+	agentDefs, err := p.catalog.GetAgentsForPlatform(ctx, string(p.plat.ID()))
+	if err != nil {
+		if !opts.TolerateCatalogError {
+			return nil, fmt.Errorf("failed to load catalog: %w", err)
+		}
+		// Fall through with a nil slice; downstream handles that safely.
+		agentDefs = nil
+	}
+
+	agentDefMap := make(map[string]catalog.AgentDef, len(agentDefs))
+	for _, def := range agentDefs {
+		agentDefMap[def.ID] = def
+	}
+	result.AgentDefs = agentDefs
+	result.AgentDefMap = agentDefMap
+
 	// Cold detect path (cache disabled, empty, expired, or forced).
 	if !usedDetectionCache {
 		if opts.ForceRefresh {
@@ -220,13 +233,7 @@ func (p *Pipeline) DetectAndCheckVersions(ctx context.Context, opts Options) (*R
 		}
 		// A fresh detection always warrants a version check.
 		needUpdateCheck = true
-	}
-
-	result := &Result{
-		Installations:      installations,
-		AgentDefs:          agentDefs,
-		AgentDefMap:        agentDefMap,
-		UsedDetectionCache: usedDetectionCache,
+		result.Installations = installations
 	}
 
 	if opts.SkipVersionCheck || !needUpdateCheck {

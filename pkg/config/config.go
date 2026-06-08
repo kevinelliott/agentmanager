@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+// DefaultCatalogRefreshInterval is the minimum cadence for checking the
+// remote catalog. The catalog is intentionally coarse-grained and should not
+// be fetched on every agent scan.
+const DefaultCatalogRefreshInterval = 24 * time.Hour
+
 // Config represents the application configuration.
 type Config struct {
 	// Catalog settings
@@ -49,7 +54,7 @@ type CatalogConfig struct {
 	// SourceURL is the URL to fetch the catalog from
 	SourceURL string `yaml:"source_url" json:"source_url" mapstructure:"source_url"`
 
-	// RefreshInterval is how often to refresh in background
+	// RefreshInterval is how often to check the remote catalog
 	RefreshInterval time.Duration `yaml:"refresh_interval" json:"refresh_interval" mapstructure:"refresh_interval"`
 
 	// GitHubToken is an optional token for higher API rate limits
@@ -169,7 +174,7 @@ func Default() *Config {
 	return &Config{
 		Catalog: CatalogConfig{
 			SourceURL:       "https://raw.githubusercontent.com/kevinelliott/agentmanager/main/catalog.json",
-			RefreshInterval: time.Hour,
+			RefreshInterval: DefaultCatalogRefreshInterval,
 			GitHubToken:     "",
 		},
 		Detection: DetectionConfig{
@@ -218,8 +223,8 @@ func Default() *Config {
 
 // Validate validates the configuration.
 func (c *Config) Validate() error {
-	if c.Catalog.RefreshInterval < time.Minute {
-		c.Catalog.RefreshInterval = time.Minute
+	if c.Catalog.RefreshInterval < DefaultCatalogRefreshInterval {
+		c.Catalog.RefreshInterval = DefaultCatalogRefreshInterval
 	}
 	if c.Detection.CacheDuration < time.Minute {
 		c.Detection.CacheDuration = time.Minute

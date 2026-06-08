@@ -587,7 +587,8 @@ func (s *Server) handleGetCatalogAgent(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleRefreshCatalog(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	result, err := s.catalog.Refresh(ctx)
+	force := r.URL.Query().Get("force") == "true"
+	result, err := s.catalog.RefreshWithOptions(ctx, catalog.RefreshOptions{Force: force})
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to refresh catalog", err)
 		return
@@ -604,7 +605,9 @@ func (s *Server) handleRefreshCatalog(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := "Catalog already up to date"
-	if result.Updated {
+	if result.Cached {
+		message = "Catalog cache is fresh"
+	} else if result.Updated {
 		message = "Catalog updated successfully"
 	}
 

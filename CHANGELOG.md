@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-06-08
+
 ### Added
 
 - **Twenty-five new agents in the catalog** (now 93 total): DeepSeek-Reasonix,
@@ -23,6 +25,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (Homebrew / `go install` first, source last), fixed the source-clone
   directory, added a post-install verification step, and added Platforms,
   Agents-in-Catalog, and PRs-Welcome badges.
+- **Catalog refresh cadence.** Remote catalog refresh checks now use a
+  24-hour freshness window by default. `agentmgr catalog refresh --force`
+  and REST `POST /catalog/refresh?force=true` bypass that cache explicitly.
+
+### Performance
+
+- **Warm agent scans avoid unnecessary catalog work.** The shared
+  detect-and-version-check pipeline now returns directly from fresh detection
+  and update-check caches before loading catalog definitions.
+- **Repeated catalog refreshes avoid network calls.** Fresh catalog cache
+  entries satisfy refresh requests locally, and validated stale caches have
+  their freshness timestamp advanced after a `304 Not Modified` or a
+  not-newer remote catalog response.
 
 ## [1.3.1] - 2026-04-24
 
@@ -476,6 +491,8 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
+[Unreleased]: https://github.com/kevinelliott/agentmanager/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/kevinelliott/agentmanager/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/kevinelliott/agentmanager/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/kevinelliott/agentmanager/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/kevinelliott/agentmanager/compare/v1.1.0...v1.2.0

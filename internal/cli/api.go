@@ -152,7 +152,7 @@ func newAPIEndpointsCommand(cfg *config.Config) *cobra.Command {
 				{"DELETE", "/api/v1/agents/{key}", "Uninstall an agent"},
 				{"GET", "/api/v1/catalog", "List agents in catalog"},
 				{"GET", "/api/v1/catalog/{agentID}", "Get catalog agent details"},
-				{"POST", "/api/v1/catalog/refresh", "Refresh catalog from remote"},
+				{"POST", "/api/v1/catalog/refresh?force=true", "Force refresh catalog from remote"},
 				{"GET", "/api/v1/catalog/search", "Search catalog (query: q)"},
 				{"GET", "/api/v1/updates", "Check for available updates"},
 				{"GET", "/api/v1/changelog/{agentID}", "Get changelog (query: from, to)"},
@@ -239,7 +239,7 @@ paths:
           description: Catalog agent details
   /catalog/refresh:
     post:
-      summary: Refresh catalog
+      summary: Refresh catalog when stale
       responses:
         "200":
           description: Catalog refreshed

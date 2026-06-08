@@ -573,9 +573,10 @@ AgentManager uses multi-level caching:
 |-------|-------------|---------|
 | Detection Cache | 1 hour | Avoid re-scanning for installed agents |
 | Update Check Cache | 15 minutes | Avoid repeated registry queries |
-| Catalog Cache | 1 hour | Cache remote catalog locally |
+| Catalog Cache | 24 hours | Cache remote catalog locally |
 
-Caches are stored in SQLite and can be invalidated with `--refresh` flags or by exceeding TTL.
+Caches are stored in SQLite and can be invalidated with agent `--refresh` flags,
+`catalog refresh --force`, or by exceeding TTL.
 
 ## Thread Safety
 

@@ -164,7 +164,7 @@ agentmgr agent remove <name>     # Remove an agent
 
 ```bash
 agentmgr catalog list            # List available agents
-agentmgr catalog refresh         # Refresh from remote
+agentmgr catalog refresh         # Refresh from remote if cache is stale
 agentmgr catalog search <query>  # Search catalog
 agentmgr catalog show <name>     # Show agent details
 ```
@@ -373,7 +373,7 @@ Example configuration:
 
 ```yaml
 catalog:
-  refresh_interval: 1h
+  refresh_interval: 24h
   github_token: ""  # Optional: for higher rate limits
 
 detection:

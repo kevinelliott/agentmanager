@@ -144,16 +144,21 @@ func newCatalogRefreshCommand(cfg *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "refresh",
 		Short: "Refresh the catalog from GitHub",
-		Long: `Fetch the latest catalog from the GitHub repository and update
-the local cache. This is done automatically on startup if enabled
-in configuration.`,
+		Long: `Fetch the latest catalog from the GitHub repository when the local
+cache is stale and update the local cache. Use --force to check immediately
+even when the cache is still fresh.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 			defer cancel()
 
+			spinnerMessage := "Checking catalog cache..."
+			if force {
+				spinnerMessage = "Refreshing catalog from GitHub..."
+			}
+
 			// Create spinner
 			spinner := output.NewSpinner(
-				output.WithMessage("Refreshing catalog from GitHub..."),
+				output.WithMessage(spinnerMessage),
 				output.WithNoColor(output.NoColor(cfg, false)),
 			)
 			spinner.Start()
@@ -176,8 +181,11 @@ in configuration.`,
 
 			catMgr := catalog.NewManager(cfg, store)
 
-			// Refresh catalog from remote
-			result, err := catMgr.Refresh(ctx)
+			// Refresh catalog from remote unless the local catalog cache is
+			// still fresh. --force bypasses that 24h freshness window.
+			result, err := catMgr.RefreshWithOptions(ctx, catalog.RefreshOptions{
+				Force: force,
+			})
 			if err != nil {
 				spinner.Error("Failed to refresh catalog")
 				return fmt.Errorf("failed to refresh catalog: %w", err)
@@ -190,7 +198,9 @@ in configuration.`,
 				return fmt.Errorf("failed to get catalog: %w", err)
 			}
 
-			if result.Updated {
+			if result.Cached {
+				spinner.Success(fmt.Sprintf("Catalog cache is fresh (version %s) - %d agents available", cat.Version, len(cat.Agents)))
+			} else if result.Updated {
 				spinner.Success(fmt.Sprintf("Catalog updated to version %s - %d agents available", cat.Version, len(cat.Agents)))
 			} else {
 				spinner.Success(fmt.Sprintf("Catalog already up to date (version %s) - %d agents available", cat.Version, len(cat.Agents)))

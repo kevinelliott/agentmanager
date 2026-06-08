@@ -9,9 +9,9 @@ class Agentmanager < Formula
   head "https://github.com/kevinelliott/agentmanager.git", branch: "main"
 
   # Stable release (update this when publishing releases)
-  # url "https://github.com/kevinelliott/agentmanager/archive/refs/tags/v1.0.9.tar.gz"
+  # url "https://github.com/kevinelliott/agentmanager/archive/refs/tags/v1.4.0.tar.gz"
   # sha256 "UPDATE_WITH_ACTUAL_SHA256"
-  # version "1.0.9"
+  # version "1.4.0"
 
   depends_on "go" => :build
 
