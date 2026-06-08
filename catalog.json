@@ -1,5 +1,5 @@
 {
-  "version": "1.0.56",
+  "version": "1.0.57",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -268,6 +268,46 @@
       },
       "metadata": {
         "vendor": "Hmbown",
+        "license": "MIT"
+      }
+    },
+    "caveman-code": {
+      "id": "caveman-code",
+      "name": "Caveman Code",
+      "description": "Token-efficient terminal coding agent (talks like a caveman), 20+ providers",
+      "homepage": "https://github.com/JuliusBrussee/caveman-code",
+      "repository": "https://github.com/JuliusBrussee/caveman-code",
+      "documentation": "https://github.com/JuliusBrussee/caveman-code#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@juliusbrussee/caveman-code",
+          "command": "npm install -g @juliusbrussee/caveman-code",
+          "update_cmd": "npm update -g @juliusbrussee/caveman-code",
+          "uninstall_cmd": "npm uninstall -g @juliusbrussee/caveman-code",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20.6.0"]
+        }
+      },
+      "detection": {
+        "executables": ["caveman-code", "caveman"],
+        "version_cmd": "caveman-code --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @juliusbrussee/caveman-code --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/JuliusBrussee/caveman-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "JuliusBrussee",
         "license": "MIT"
       }
     },
