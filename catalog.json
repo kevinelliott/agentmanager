@@ -1,5 +1,5 @@
 {
-  "version": "1.0.46",
+  "version": "1.0.47",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -3389,6 +3389,68 @@
       "metadata": {
         "vendor": "Snowflake",
         "license": "Proprietary"
+      }
+    },
+    "fence": {
+      "id": "fence",
+      "name": "fence",
+      "description": "Container-free sandbox to run agent commands under network and FS limits",
+      "homepage": "https://fencesandbox.com",
+      "repository": "https://github.com/fencesandbox/fence",
+      "documentation": "https://fencesandbox.com/docs",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "fencesandbox/tap/fence",
+          "command": "brew install fencesandbox/tap/fence",
+          "update_cmd": "brew upgrade fencesandbox/tap/fence",
+          "uninstall_cmd": "brew uninstall fence",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "tap": "fencesandbox/tap",
+            "formula": "true"
+          }
+        },
+        "go": {
+          "method": "go",
+          "package": "github.com/fencesandbox/fence/cmd/fence",
+          "command": "go install github.com/fencesandbox/fence/cmd/fence@latest",
+          "update_cmd": "go install github.com/fencesandbox/fence/cmd/fence@latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["go"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://cli.fencesandbox.com/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["fence"],
+        "version_cmd": "fence --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list fence",
+            "paths": ["/opt/homebrew/bin/fence", "/usr/local/bin/fence"]
+          },
+          "go": {
+            "check_cmd": "command -v fence",
+            "paths": ["~/go/bin/fence"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/fencesandbox/fence/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Fence Sandbox",
+        "license": "Apache-2.0"
       }
     },
     "fetchcoder": {
