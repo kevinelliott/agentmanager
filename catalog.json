@@ -1,5 +1,5 @@
 {
-  "version": "1.0.43",
+  "version": "1.0.44",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -2846,6 +2846,58 @@
       },
       "metadata": {
         "vendor": "Letta",
+        "license": "Apache-2.0"
+      }
+    },
+    "little-coder": {
+      "id": "little-coder",
+      "name": "little-coder",
+      "description": "Single-command terminal AI coding agent optimized for smaller LLMs",
+      "homepage": "https://itayinbarr.github.io/little-coder/",
+      "repository": "https://github.com/itayinbarr/little-coder",
+      "documentation": "https://itayinbarr.github.io/little-coder/",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "little-coder",
+          "command": "npm install -g little-coder",
+          "update_cmd": "npm update -g little-coder",
+          "uninstall_cmd": "npm uninstall -g little-coder",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=22.19.0"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/itayinbarr/little-coder/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["little-coder"],
+        "version_cmd": "little-coder --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g little-coder --json",
+            "paths": []
+          },
+          "native": {
+            "check_cmd": "command -v little-coder",
+            "paths": ["~/.local/bin/little-coder", "/usr/local/bin/little-coder"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/itayinbarr/little-coder/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "itayinbarr",
         "license": "Apache-2.0"
       }
     },
