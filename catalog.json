@@ -1,8 +1,67 @@
 {
-  "version": "1.0.41",
+  "version": "1.0.42",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
+    "abtop": {
+      "id": "abtop",
+      "name": "abtop",
+      "description": "htop-style TUI monitoring AI agent sessions, tokens, context, and rate limits",
+      "homepage": "https://github.com/graykode/abtop",
+      "repository": "https://github.com/graykode/abtop",
+      "documentation": "https://github.com/graykode/abtop#readme",
+      "install_methods": {
+        "cargo": {
+          "method": "cargo",
+          "package": "abtop",
+          "command": "cargo install abtop",
+          "update_cmd": "cargo install abtop",
+          "uninstall_cmd": "cargo uninstall abtop",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["rust", "cargo"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl --proto '=https' --tlsv1.2 -LsSf https://github.com/graykode/abtop/releases/latest/download/abtop-installer.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "powershell -c \"irm https://github.com/graykode/abtop/releases/latest/download/abtop-installer.ps1 | iex\"",
+          "platforms": ["windows"],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["abtop"],
+        "version_cmd": "abtop --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "cargo": {
+            "check_cmd": "cargo install --list",
+            "paths": ["~/.cargo/bin/abtop"]
+          },
+          "native": {
+            "check_cmd": "command -v abtop",
+            "paths": ["~/.local/bin/abtop", "/usr/local/bin/abtop"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/graykode/abtop/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "graykode",
+        "license": "MIT"
+      }
+    },
     "amp": {
       "id": "amp",
       "name": "Amp",
