@@ -1,5 +1,5 @@
 {
-  "version": "1.0.52",
+  "version": "1.0.53",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -3436,6 +3436,79 @@
       },
       "metadata": {
         "vendor": "Roo Code Inc.",
+        "license": "Apache-2.0"
+      }
+    },
+    "rtk": {
+      "id": "rtk",
+      "name": "rtk",
+      "description": "Single-binary CLI proxy that minimizes LLM token consumption on dev commands",
+      "homepage": "https://www.rtk-ai.app",
+      "repository": "https://github.com/rtk-ai/rtk",
+      "documentation": "https://www.rtk-ai.app",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "rtk",
+          "command": "brew install rtk",
+          "update_cmd": "brew upgrade rtk",
+          "uninstall_cmd": "brew uninstall rtk",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "formula": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "rtk",
+          "command": "cargo install --git https://github.com/rtk-ai/rtk",
+          "update_cmd": "cargo install --git https://github.com/rtk-ai/rtk",
+          "uninstall_cmd": "cargo uninstall rtk",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["rust", "cargo"],
+          "metadata": {
+            "source": "git"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from https://github.com/rtk-ai/rtk/releases/latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "source": "github_releases"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["rtk"],
+        "version_cmd": "rtk --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list rtk",
+            "paths": ["/opt/homebrew/bin/rtk", "/usr/local/bin/rtk"]
+          },
+          "native": {
+            "check_cmd": "command -v rtk",
+            "paths": ["~/.local/bin/rtk", "/usr/local/bin/rtk"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/rtk-ai/rtk/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "rtk-ai",
         "license": "Apache-2.0"
       }
     },
