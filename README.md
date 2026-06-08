@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-80-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-89-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 80 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 89 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -67,7 +67,7 @@ make install
 
 ```bash
 agentmgr doctor          # Check system health and configuration
-agentmgr catalog list    # Confirm the embedded catalog loads (80 agents)
+agentmgr catalog list    # Confirm the embedded catalog loads (89 agents)
 ```
 
 > **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
@@ -117,7 +117,7 @@ reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agen
 smallcode         SmallCode           native +3   Terminal-native coding agent built to…
 …
 
-80 agents available
+89 agents available
 ```
 
 ```console
@@ -231,7 +231,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **80 agents**, embedded in the binary and refreshable from the
+The catalog ships with **89 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -246,14 +246,19 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Amazon Q Developer CLI | `amazon-q` | brew, dmg, native |
 | Amp | `amp` | brew, chocolatey, native, npm |
 | Antigravity CLI | `antigravity-cli` | brew, native, powershell |
+| apfel | `apfel` | brew |
 | Auggie | `auggie` | npm |
+| Bernstein | `bernstein` | native, pip, pipx, uv |
 | Blackbox CLI | `blackbox-cli` | native, npm, powershell |
+| ByteRover CLI | `byterover-cli` | native, npm |
+| Caveman Code | `caveman-code` | npm |
 | Claude Code | `claude-code` | native, npm |
 | Claude Squad | `claude-squad` | brew, native |
 | Claw Orchestrator | `claw-orchestrator` | native, npm |
 | Cline CLI | `cline-cli` | npm |
 | cmux | `cmux` | binary, brew |
 | Codebuff | `codebuff` | binary, npm |
+| CodeWhale | `codewhale` | cargo, npm |
 | Codex | `codex` | binary, brew, npm |
 | Continue CLI | `continue-cli` | npm |
 | CoreCoder | `corecoder` | pip, pipx, uv |
@@ -286,6 +291,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Kiro CLI | `kiro-cli` | brew, native |
 | Kode CLI | `kode-cli` | npm |
 | kubectl-ai | `kubectl-ai` | krew, native, nix |
+| late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
 | little-coder | `little-coder` | native, npm |
 | Mastra Code | `mastracode` | npm |
@@ -309,8 +315,11 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Rallies CLI | `rallies-cli` | pip, pipx |
 | Ralph TUI | `ralph-tui` | bun, bunx |
 | Roo Code CLI | `roo-code-cli` | native |
+| rtk | `rtk` | binary, brew, cargo, native |
+| Ruflo | `ruflo` | native, npm, npx |
 | SmallCode | `smallcode` | native, npm, npx, powershell |
 | Tabnine CLI | `tabnine-cli` | native |
+| Tenere | `tenere` | brew, cargo, nix |
 | Tokscale | `tokscale` | bun, npm |
 | Trae Agent | `trae-agent` | source |
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
