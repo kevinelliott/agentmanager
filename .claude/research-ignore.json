@@ -6,6 +6,34 @@
       "repository": "https://github.com/maria-rcks/t1code",
       "reason": "Not selected during 2026-06-08 research run; user chose to ignore in future searches",
       "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "chatgpt-cli",
+      "name": "chatgpt-cli",
+      "repository": "https://github.com/kardolus/chatgpt-cli",
+      "reason": "Not selected during 2026-06-08 research run; general multi-provider LLM CLI, user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "cai",
+      "name": "cai",
+      "repository": "https://github.com/ad-si/cai",
+      "reason": "Not selected during 2026-06-08 research run; general AI-tasks CLI, user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "pie",
+      "name": "pie",
+      "repository": "https://github.com/c4pt0r/pie",
+      "reason": "Not selected during 2026-06-08 research run; source-only Rust pi harness port, user chose to ignore",
+      "ignored_at": "2026-06-08"
+    },
+    {
+      "id": "lazycodex",
+      "name": "lazycodex",
+      "repository": "https://github.com/code-yeongyu/lazycodex",
+      "reason": "Not selected during 2026-06-08 research run; wrapper/installer for omo onto Codex, not a standalone agent",
+      "ignored_at": "2026-06-08"
     }
   ]
 }
