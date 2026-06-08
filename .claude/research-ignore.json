@@ -1,0 +1,11 @@
+{
+  "ignored": [
+    {
+      "id": "t1code",
+      "name": "t1code",
+      "repository": "https://github.com/maria-rcks/t1code",
+      "reason": "Not selected during 2026-06-08 research run; user chose to ignore in future searches",
+      "ignored_at": "2026-06-08"
+    }
+  ]
+}
