@@ -245,7 +245,16 @@ func (p *Pipeline) DetectAndCheckVersions(ctx context.Context, opts Options) (*R
 		concurrency = versionfetch.DefaultConcurrency
 	}
 
-	errs := versionfetch.CheckLatestVersions(ctx, p.installer, installations, agentDefMap, concurrency)
+	fetcher := p.installer
+	if p.cfg != nil && p.store != nil && p.cfg.Detection.UpdateCheckCacheDuration > 0 {
+		fetcher = &cachedLatestVersionFetcher{
+			next:  p.installer,
+			store: p.store,
+			ttl:   p.cfg.Detection.UpdateCheckCacheDuration,
+		}
+	}
+
+	errs := versionfetch.CheckLatestVersions(ctx, fetcher, installations, agentDefMap, concurrency)
 	result.RanVersionCheck = true
 	result.VersionCheckErrors = errs
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -58,11 +59,22 @@ type brewCask struct {
 func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
 	var installations []*agent.Installation
 
-	// Get installed formulae
-	formulae := s.getInstalledFormulae(ctx)
+	var (
+		formulae map[string]brewFormula
+		casks    map[string]brewCask
+		wg       sync.WaitGroup
+	)
 
-	// Get installed casks
-	casks := s.getInstalledCasks(ctx)
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		formulae = s.getInstalledFormulae(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		casks = s.getInstalledCasks(ctx)
+	}()
+	wg.Wait()
 
 	for _, agentDef := range agents {
 		// Check brew method

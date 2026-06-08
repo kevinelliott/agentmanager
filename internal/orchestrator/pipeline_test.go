@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 	"testing"
@@ -122,6 +123,7 @@ type fakeStore struct {
 	lastUpdateErr    error
 	setLastUpdateAt  time.Time
 	setLastUpdateCnt int
+	settings         map[string]string
 }
 
 var _ storage.Store = (*fakeStore)(nil)
@@ -204,9 +206,28 @@ func (s *fakeStore) GetLastUpdateCheckTime(context.Context) (time.Time, error) {
 	return s.lastUpdateCheck, nil
 }
 
-func (s *fakeStore) GetSetting(context.Context, string) (string, error) { return "", nil }
-func (s *fakeStore) SetSetting(context.Context, string, string) error   { return nil }
-func (s *fakeStore) DeleteSetting(context.Context, string) error        { return nil }
+func (s *fakeStore) GetSetting(_ context.Context, key string) (string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.settings[key], nil
+}
+
+func (s *fakeStore) SetSetting(_ context.Context, key, value string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.settings == nil {
+		s.settings = make(map[string]string)
+	}
+	s.settings[key] = value
+	return nil
+}
+
+func (s *fakeStore) DeleteSetting(_ context.Context, key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.settings, key)
+	return nil
+}
 
 // --- helpers -------------------------------------------------------------
 
@@ -364,6 +385,40 @@ func TestPipeline_CacheHitWithStaleUpdateCheckRunsVersionCheckOnly(t *testing.T)
 	}
 	if fetcher.calls["a"] != 1 {
 		t.Errorf("fetcher.calls[a] = %d, want 1", fetcher.calls["a"])
+	}
+}
+
+func TestPipeline_PersistentLatestVersionCacheSkipsFetcher(t *testing.T) {
+	cfg := defaultConfig()
+	cat := &fakeCatalog{agents: []catalog.AgentDef{makeAgentDef("a")}}
+	det := &fakeDetector{installations: []*agent.Installation{makeInstallation("a")}}
+	fetcher := newFakeFetcher()
+
+	method := catalog.InstallMethodDef{Method: "npm", Package: "a"}
+	record, _ := json.Marshal(latestVersionCacheRecord{
+		Version:  "4.5.6",
+		CachedAt: time.Now(),
+	})
+	store := &fakeStore{
+		settings: map[string]string{
+			latestVersionCacheKey(method): string(record),
+		},
+	}
+
+	p := New(cfg, fakePlatform{}, store, cat, det, fetcher)
+
+	res, err := p.DetectAndCheckVersions(context.Background(), Options{})
+	if err != nil {
+		t.Fatalf("DetectAndCheckVersions: %v", err)
+	}
+	if !res.RanVersionCheck {
+		t.Fatalf("RanVersionCheck = false, want true")
+	}
+	if fetcher.calls["a"] != 0 {
+		t.Fatalf("fetcher.calls[a] = %d, want 0 with fresh persistent cache", fetcher.calls["a"])
+	}
+	if res.Installations[0].LatestVersion == nil || res.Installations[0].LatestVersion.String() != "4.5.6" {
+		t.Fatalf("LatestVersion = %v, want 4.5.6", res.Installations[0].LatestVersion)
 	}
 }
 

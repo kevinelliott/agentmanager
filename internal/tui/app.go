@@ -55,11 +55,13 @@ type Model struct {
 	selectedIdx int
 
 	// UI state
-	currentView View
-	width       int
-	height      int
-	loading     bool
-	err         error
+	currentView    View
+	width          int
+	height         int
+	loading        bool
+	err            error
+	catalogLoading bool
+	catalogErr     error
 
 	// Components
 	list    list.Model
@@ -201,14 +203,6 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	// Load catalog (separately needed for the model — the pipeline returns the
-	// per-platform slice, not the full Catalog object the TUI renders in its
-	// catalog view).
-	cat, err := m.catMgr.Get(ctx)
-	if err != nil {
-		return dataLoadedMsg{err: fmt.Errorf("failed to load catalog: %w", err)}
-	}
-
 	// Run the shared detect+version-check pipeline. Version-check errors are
 	// intentionally dropped here; the TUI surfaces them indirectly via
 	// HasUpdate() being false for unchecked installations, matching the
@@ -222,14 +216,36 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	}
 
 	return dataLoadedMsg{
-		agents:  res.Installations,
-		catalog: cat,
+		agents: res.Installations,
 	}
 }
 
 // dataLoadedMsg is sent when data has been loaded.
 type dataLoadedMsg struct {
 	agents  []*agent.Installation
+	catalog *catalog.Catalog
+	err     error
+}
+
+func (m Model) loadCatalog(forceRefresh bool) tea.Msg {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	if forceRefresh {
+		if _, err := m.catMgr.RefreshWithOptions(ctx, catalog.RefreshOptions{Force: true}); err != nil {
+			return catalogLoadedMsg{err: fmt.Errorf("failed to refresh catalog: %w", err)}
+		}
+	}
+
+	cat, err := m.catMgr.Get(ctx)
+	if err != nil {
+		return catalogLoadedMsg{err: fmt.Errorf("failed to load catalog: %w", err)}
+	}
+
+	return catalogLoadedMsg{catalog: cat}
+}
+
+type catalogLoadedMsg struct {
 	catalog *catalog.Catalog
 	err     error
 }
@@ -246,6 +262,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Tab):
 			m.currentView = (m.currentView + 1) % 5
+			if m.currentView == ViewCatalog && m.catalog == nil && !m.catalogLoading {
+				m.catalogLoading = true
+				m.catalogErr = nil
+				cmds = append(cmds, func() tea.Msg {
+					return m.loadCatalog(false)
+				})
+			}
 
 		case key.Matches(msg, m.keys.Back):
 			if m.currentView != ViewDashboard {
@@ -253,6 +276,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case key.Matches(msg, m.keys.Refresh):
+			if m.currentView == ViewCatalog {
+				m.catalogLoading = true
+				m.catalogErr = nil
+				return m, func() tea.Msg {
+					return m.loadCatalog(true)
+				}
+			}
 			m.loading = true
 			return m, func() tea.Msg {
 				return m.loadDataWithRefresh(true) // Force refresh, bypass cache
@@ -275,8 +305,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.err = msg.err
 		} else {
 			m.agents = msg.agents
-			m.catalog = msg.catalog
+			if msg.catalog != nil {
+				m.catalog = msg.catalog
+			}
 			m.updateList()
+		}
+
+	case catalogLoadedMsg:
+		m.catalogLoading = false
+		if msg.err != nil {
+			m.catalogErr = msg.err
+		} else {
+			m.catalogErr = nil
+			m.catalog = msg.catalog
 		}
 
 	case spinner.TickMsg:
@@ -509,12 +550,16 @@ func (m Model) agentDetailView() string {
 
 // catalogView renders the catalog browser.
 func (m Model) catalogView() string {
-	if m.loading {
+	if m.catalogLoading {
 		return fmt.Sprintf("\n  %s Loading catalog...\n", m.spinner.View())
 	}
 
+	if m.catalogErr != nil {
+		return styles.ErrorMessage.Render(fmt.Sprintf("\n  Error: %v\n", m.catalogErr))
+	}
+
 	if m.catalog == nil {
-		return styles.InfoMessage.Render("\n  Catalog not loaded. Press 'r' to refresh.\n")
+		return styles.InfoMessage.Render("\n  Catalog not loaded. Press 'r' to load.\n")
 	}
 
 	var b strings.Builder

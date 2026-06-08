@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -58,14 +59,27 @@ type pipxPackage struct {
 func (s *PipStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
 	var installations []*agent.Installation
 
-	// Get pip packages
-	pipPackages := s.getPipPackages(ctx)
+	var (
+		pipPackages  map[string]pipPackage
+		pipxPackages map[string]pipxPackage
+		uvPackages   map[string]pipPackage
+		wg           sync.WaitGroup
+	)
 
-	// Get pipx packages
-	pipxPackages := s.getPipxPackages(ctx)
-
-	// Get uv packages
-	uvPackages := s.getUVPackages(ctx)
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		pipPackages = s.getPipPackages(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		pipxPackages = s.getPipxPackages(ctx)
+	}()
+	go func() {
+		defer wg.Done()
+		uvPackages = s.getUVPackages(ctx)
+	}()
+	wg.Wait()
 
 	for _, agentDef := range agents {
 		// Check pip method

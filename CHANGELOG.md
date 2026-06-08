@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-06-08
+
+### Changed
+
+- `agentmgr agent refresh` now runs through the shared detect-and-version-check
+  pipeline instead of maintaining a separate hand-rolled flow.
+
+### Performance
+
+- The TUI now loads the catalog lazily when the Catalog tab is opened, so the
+  initial dashboard and agent-list views avoid unnecessary catalog work.
+- `agentmgr agent info <agent>` now uses a fresh detection cache when available
+  and falls back to detecting only the requested agent instead of scanning every
+  catalog entry.
+- npm and pip latest-version checks now use a short process-local TTL cache with
+  concurrent request coalescing, matching the existing Homebrew behavior.
+- pip, pipx, and uv cold-detection subprocesses now run concurrently.
+- Homebrew formula and cask cold-detection subprocesses now run concurrently.
+- Latest-version results are cached persistently through the existing SQLite
+  settings store, keyed by provider/package and bounded by the update-check TTL.
+
 ## [1.4.0] - 2026-06-08
 
 ### Added
@@ -491,7 +512,8 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
-[Unreleased]: https://github.com/kevinelliott/agentmanager/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/kevinelliott/agentmanager/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/kevinelliott/agentmanager/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/kevinelliott/agentmanager/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/kevinelliott/agentmanager/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/kevinelliott/agentmanager/compare/v1.2.0...v1.3.0

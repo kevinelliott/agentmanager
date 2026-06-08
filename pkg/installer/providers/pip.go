@@ -9,7 +9,10 @@ import (
 	"net/http"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -21,6 +24,11 @@ import (
 var pypiHTTPClient = &http.Client{
 	Timeout: 15 * time.Second,
 }
+
+var (
+	pipLatestVersionCache sync.Map // "<method>:<package>" -> latestVersionEntry
+	pipLatestVersionGroup singleflight.Group
+)
 
 // PipProvider handles pip/pipx/uv-based installations.
 type PipProvider struct {
@@ -306,7 +314,31 @@ func (p *PipProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 	}
 
 	methodName := method.Method
+	key := strings.ToLower(methodName + ":" + packageName)
+	if entry, ok := loadLatestVersionEntry(&pipLatestVersionCache, key); ok {
+		return entry.version, entry.err
+	}
 
+	v, _, _ := pipLatestVersionGroup.Do(key, func() (any, error) {
+		if entry, ok := loadLatestVersionEntry(&pipLatestVersionCache, key); ok {
+			return entry, nil
+		}
+		version, err := p.fetchLatestVersionUncached(ctx, methodName, packageName)
+		entry := latestVersionEntry{version: version, err: err, cachedAt: time.Now()}
+		if shouldCacheLatestVersionError(err) {
+			pipLatestVersionCache.Store(key, entry)
+		}
+		return entry, nil
+	})
+
+	entry, ok := v.(latestVersionEntry)
+	if !ok {
+		return p.fetchLatestVersionUncached(ctx, methodName, packageName)
+	}
+	return entry.version, entry.err
+}
+
+func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName, packageName string) (agent.Version, error) {
 	switch methodName {
 	case "pipx":
 		// pipx doesn't have a direct way to check latest version, use pip index

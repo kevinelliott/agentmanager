@@ -948,23 +948,9 @@ version information, changelog for available updates, and configuration.`,
 				return fmt.Errorf("agent %q not found in catalog", agentID)
 			}
 
-			// Detect installations of this agent
-			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
-			if err != nil {
-				return fmt.Errorf("failed to get agents: %w", err)
-			}
-			det := detector.New(plat)
-			allInstallations, err := det.DetectAll(ctx, agentDefs)
+			installations, err := detectInstallationsForAgentInfo(ctx, cfg, store, plat, agentDef)
 			if err != nil {
 				return fmt.Errorf("detection failed: %w", err)
-			}
-
-			// Filter for this agent
-			var installations []*agent.Installation
-			for _, inst := range allInstallations {
-				if inst.AgentID == agentID {
-					installations = append(installations, inst)
-				}
 			}
 
 			if format == "json" {
@@ -978,6 +964,24 @@ version information, changelog for available updates, and configuration.`,
 	cmd.Flags().StringVarP(&format, "format", "f", "text", "output format (text, json)")
 
 	return cmd
+}
+
+func detectInstallationsForAgentInfo(ctx context.Context, cfg *config.Config, store storage.Store, plat platform.Platform, agentDef catalog.AgentDef) ([]*agent.Installation, error) {
+	if cfg.Detection.CacheEnabled {
+		cached, cachedAt, err := store.GetDetectionCache(ctx)
+		if err == nil && cached != nil && time.Since(cachedAt) < cfg.Detection.CacheDuration {
+			installations := make([]*agent.Installation, 0, 1)
+			for _, inst := range cached {
+				if inst.AgentID == agentDef.ID {
+					installations = append(installations, inst)
+				}
+			}
+			return installations, nil
+		}
+	}
+
+	det := detector.New(plat)
+	return det.DetectAgent(ctx, agentDef)
 }
 
 func outputAgentInfoText(agentDef catalog.AgentDef, installations []*agent.Installation, plat platform.Platform) error {
@@ -1367,56 +1371,22 @@ results. The new detection results are then cached for future use.`,
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
-			// Clear the detection cache
-			if err := store.ClearDetectionCache(ctx); err != nil {
-				spinner.Error("Failed to clear cache")
-				return fmt.Errorf("failed to clear cache: %w", err)
-			}
-
 			catMgr := catalog.NewManager(cfg, store)
-
-			// Get agents for current platform
-			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
-			if err != nil {
-				spinner.Error("Failed to load catalog")
-				return fmt.Errorf("failed to load catalog: %w", err)
-			}
-
-			// Build a map of agent ID -> AgentDef for quick lookup
-			agentDefMap := make(map[string]catalog.AgentDef)
-			for _, def := range agentDefs {
-				agentDefMap[def.ID] = def
-			}
-
-			spinner.UpdateMessage("Detecting agents...")
-
-			// Create detector and detect agents
 			det := detector.New(plat)
-			installations, err := det.DetectAll(ctx, agentDefs)
+			instMgr := installer.NewManager(plat)
+			pipeline := orchestrator.NewFromManagers(cfg, plat, store, catMgr, det, instMgr)
+
+			spinner.UpdateMessage("Detecting agents and checking for updates...")
+			res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{
+				ForceRefresh: true,
+			})
 			if err != nil {
 				spinner.Error("Agent detection failed")
-				return fmt.Errorf("detection failed: %w", err)
+				return err
 			}
-
-			// Create installer manager for version checking
-			instMgr := installer.NewManager(plat)
-
-			spinner.UpdateMessage("Checking for updates...")
-
-			// Check for latest versions in parallel. Errors are intentionally
-			// dropped to preserve existing silent-failure semantics for refresh.
-			_ = versionfetch.CheckLatestVersions(ctx, instMgr, installations, agentDefMap, versionfetch.DefaultConcurrency)
-
-			// Save to cache
-			if cfg.Detection.CacheEnabled {
-				if err := store.SaveDetectionCache(ctx, installations); err != nil {
-					spinner.Error("Failed to save cache")
-					return fmt.Errorf("failed to save cache: %w", err)
-				}
-			}
-
 			// Count agents with updates
 			updateCount := 0
+			installations := res.Installations
 			for _, inst := range installations {
 				if inst.HasUpdate() {
 					updateCount++

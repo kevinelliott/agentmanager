@@ -8,7 +8,10 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
+
+	"golang.org/x/sync/singleflight"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -19,6 +22,11 @@ import (
 type NPMProvider struct {
 	platform platform.Platform
 }
+
+var (
+	npmLatestVersionCache sync.Map // package -> latestVersionEntry
+	npmLatestVersionGroup singleflight.Group
+)
 
 // NewNPMProvider creates a new NPM provider.
 func NewNPMProvider(p platform.Platform) *NPMProvider {
@@ -194,6 +202,31 @@ func (p *NPMProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 		return agent.Version{}, fmt.Errorf("could not determine npm package name")
 	}
 
+	key := strings.ToLower(packageName)
+	if entry, ok := loadLatestVersionEntry(&npmLatestVersionCache, key); ok {
+		return entry.version, entry.err
+	}
+
+	v, _, _ := npmLatestVersionGroup.Do(key, func() (any, error) {
+		if entry, ok := loadLatestVersionEntry(&npmLatestVersionCache, key); ok {
+			return entry, nil
+		}
+		version, err := p.fetchLatestVersionUncached(ctx, packageName)
+		entry := latestVersionEntry{version: version, err: err, cachedAt: time.Now()}
+		if shouldCacheLatestVersionError(err) {
+			npmLatestVersionCache.Store(key, entry)
+		}
+		return entry, nil
+	})
+
+	entry, ok := v.(latestVersionEntry)
+	if !ok {
+		return p.fetchLatestVersionUncached(ctx, packageName)
+	}
+	return entry.version, entry.err
+}
+
+func (p *NPMProvider) fetchLatestVersionUncached(ctx context.Context, packageName string) (agent.Version, error) {
 	// Use npm view to get the latest version
 	cmd := exec.CommandContext(ctx, "npm", "view", packageName, "version")
 	output, err := cmd.Output()
