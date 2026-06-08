@@ -1,5 +1,5 @@
 {
-  "version": "1.0.54",
+  "version": "1.0.55",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -4258,6 +4258,48 @@
       "metadata": {
         "vendor": "Google",
         "license": "Proprietary"
+      }
+    },
+    "apfel": {
+      "id": "apfel",
+      "name": "apfel",
+      "description": "Apple Intelligence from the command line with an OpenAI-compatible server",
+      "homepage": "https://apfel.franzai.com",
+      "repository": "https://github.com/Arthur-Ficial/apfel",
+      "documentation": "https://apfel.franzai.com",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "apfel",
+          "command": "brew install apfel",
+          "update_cmd": "brew upgrade apfel",
+          "uninstall_cmd": "brew uninstall apfel",
+          "platforms": ["darwin"],
+          "prereqs": ["macOS 26 Tahoe+", "Apple Silicon", "Apple Intelligence enabled"],
+          "metadata": {
+            "formula": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["apfel"],
+        "version_cmd": "apfel --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list apfel",
+            "paths": ["/opt/homebrew/bin/apfel"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Arthur-Ficial/apfel/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Franz AI",
+        "license": "MIT"
       }
     },
     "vibemux": {
