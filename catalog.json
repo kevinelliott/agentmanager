@@ -1,5 +1,5 @@
 {
-  "version": "1.0.40",
+  "version": "1.0.41",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -496,6 +496,78 @@
       "metadata": {
         "vendor": "Block Inc.",
         "license": "Apache-2.0"
+      }
+    },
+    "gptme": {
+      "id": "gptme",
+      "name": "gptme",
+      "description": "Terminal AI agent with local tools: writes code, runs the shell, browses the web",
+      "homepage": "https://gptme.org",
+      "repository": "https://github.com/gptme/gptme",
+      "documentation": "https://gptme.org/docs/",
+      "install_methods": {
+        "pipx": {
+          "method": "pipx",
+          "package": "gptme",
+          "command": "pipx install gptme",
+          "update_cmd": "pipx upgrade gptme",
+          "uninstall_cmd": "pipx uninstall gptme",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.10", "pipx"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "gptme",
+          "command": "pip install gptme",
+          "update_cmd": "pip install --upgrade gptme",
+          "uninstall_cmd": "pip uninstall gptme",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.10"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "gptme",
+          "command": "uv tool install gptme",
+          "update_cmd": "uv tool upgrade gptme",
+          "uninstall_cmd": "uv tool uninstall gptme",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv"]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "gptme",
+          "command": "brew install gptme",
+          "update_cmd": "brew upgrade gptme",
+          "uninstall_cmd": "brew uninstall gptme",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "formula": "true"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["gptme", "gptme-server", "gptme-acp"],
+        "version_cmd": "gptme --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pipx": {
+            "check_cmd": "pipx list --json",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list gptme",
+            "paths": ["/opt/homebrew/bin/gptme", "/usr/local/bin/gptme"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/gptme/gptme/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "gptme",
+        "license": "MIT"
       }
     },
     "grok-cli": {
