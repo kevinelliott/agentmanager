@@ -1,5 +1,5 @@
 {
-  "version": "1.0.59",
+  "version": "1.0.60",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -1328,6 +1328,53 @@
       },
       "metadata": {
         "vendor": "Valyu",
+        "license": "MIT"
+      }
+    },
+    "tokentracker": {
+      "id": "tokentracker",
+      "name": "TokenTracker",
+      "description": "CLI to track token usage across 22 AI coding tools",
+      "homepage": "https://github.com/mm7894215/TokenTracker",
+      "repository": "https://github.com/mm7894215/TokenTracker",
+      "documentation": "https://github.com/mm7894215/TokenTracker#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "tokentracker-cli",
+          "command": "npm install -g tokentracker-cli",
+          "update_cmd": "npm update -g tokentracker-cli",
+          "uninstall_cmd": "npm uninstall -g tokentracker-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node>=20"]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "tokentracker-cli",
+          "command": "npx tokentracker-cli",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["node>=20"]
+        }
+      },
+      "detection": {
+        "executables": ["tokentracker", "tracker", "tokentracker-cli"],
+        "version_cmd": "tokentracker --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g tokentracker-cli --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mm7894215/TokenTracker/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "mm7894215",
         "license": "MIT"
       }
     },
