@@ -10,7 +10,7 @@ require (
 	github.com/getlantern/systray v1.2.2
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/mattn/go-isatty v0.0.22
-	github.com/mattn/go-sqlite3 v1.14.44
+	github.com/mattn/go-sqlite3 v1.14.45
 	github.com/muesli/termenv v0.16.0
 	github.com/progrium/darwinkit v0.5.0
 	github.com/spf13/cobra v1.10.2
