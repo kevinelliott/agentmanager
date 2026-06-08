@@ -1,5 +1,5 @@
 {
-  "version": "1.0.51",
+  "version": "1.0.52",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -2983,6 +2983,68 @@
       "metadata": {
         "vendor": "Mistral AI",
         "license": "Apache-2.0"
+      }
+    },
+    "late-cli": {
+      "id": "late-cli",
+      "name": "late",
+      "description": "Single-binary AI dev-team orchestrator with ephemeral subagents, any model",
+      "homepage": "https://github.com/mlhher/late-cli",
+      "repository": "https://github.com/mlhher/late-cli",
+      "documentation": "https://github.com/mlhher/late-cli#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "mlhher/late/late",
+          "command": "brew install mlhher/late/late",
+          "update_cmd": "brew upgrade mlhher/late/late",
+          "uninstall_cmd": "brew uninstall late",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "tap": "mlhher/late",
+            "formula": "true"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -sfL https://raw.githubusercontent.com/mlhher/late-cli/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "binary": {
+          "method": "binary",
+          "command": "Download from https://github.com/mlhher/late-cli/releases/latest",
+          "platforms": ["darwin", "linux", "windows"],
+          "metadata": {
+            "source": "github_releases"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["late"],
+        "version_cmd": "late --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list late",
+            "paths": ["/opt/homebrew/bin/late", "/usr/local/bin/late"]
+          },
+          "native": {
+            "check_cmd": "command -v late",
+            "paths": ["~/.local/bin/late", "/usr/local/bin/late"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mlhher/late-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "mlhher",
+        "license": "BSL-1.1"
       }
     },
     "letta-code": {
