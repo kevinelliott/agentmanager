@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Seven new agents in the catalog** (now 75 total): DeepSeek-Reasonix,
-  oh-my-pi, Open Interpreter, jcode, gptme, abtop, and SmallCode.
+- **Twelve new agents in the catalog** (now 80 total): DeepSeek-Reasonix,
+  oh-my-pi, Open Interpreter, jcode, gptme, abtop, SmallCode, little-coder,
+  zerostack, CoreCoder, fence, and Claw Orchestrator.
 
 ### Changed
 
-- **README refresh.** Updated the Supported Agents table to list all 75
+- **README refresh.** Updated the Supported Agents table to list all 80
   catalog entries with their IDs and installation methods, refreshed the
   example `catalog list` output, reordered the installation instructions
   (Homebrew / `go install` first, source last), fixed the source-clone
