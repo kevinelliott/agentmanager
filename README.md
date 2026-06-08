@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-89-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-90-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 89 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 90 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -67,7 +67,7 @@ make install
 
 ```bash
 agentmgr doctor          # Check system health and configuration
-agentmgr catalog list    # Confirm the embedded catalog loads (89 agents)
+agentmgr catalog list    # Confirm the embedded catalog loads (90 agents)
 ```
 
 > **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
@@ -117,7 +117,7 @@ reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agen
 smallcode         SmallCode           native +3   Terminal-native coding agent built to…
 …
 
-89 agents available
+90 agents available
 ```
 
 ```console
@@ -231,7 +231,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **89 agents**, embedded in the binary and refreshable from the
+The catalog ships with **90 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -271,6 +271,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Dexter | `dexter` | git |
 | Droid | `droid` | brew, native, powershell |
 | ElevenLabs CLI | `elevenlabs-cli` | npm |
+| fast-agent | `fast-agent` | pip, pipx, uv |
 | fence | `fence` | brew, go, native |
 | FetchCoder | `fetchcoder` | npm |
 | Forge CLI | `forge-cli` | npm |

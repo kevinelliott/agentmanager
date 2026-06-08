@@ -9,14 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Twenty-one new agents in the catalog** (now 89 total): DeepSeek-Reasonix,
+- **Twenty-two new agents in the catalog** (now 90 total): DeepSeek-Reasonix,
   oh-my-pi, Open Interpreter, jcode, gptme, abtop, SmallCode, little-coder,
   zerostack, CoreCoder, fence, Claw Orchestrator, CodeWhale, Tenere,
-  Bernstein, late, rtk, Ruflo, apfel, ByteRover CLI, and Caveman Code.
+  Bernstein, late, rtk, Ruflo, apfel, ByteRover CLI, Caveman Code, and
+  fast-agent.
 
 ### Changed
 
-- **README refresh.** Updated the Supported Agents table to list all 89
+- **README refresh.** Updated the Supported Agents table to list all 90
   catalog entries with their IDs and installation methods, refreshed the
   example `catalog list` output, reordered the installation instructions
   (Homebrew / `go install` first, source last), fixed the source-clone
