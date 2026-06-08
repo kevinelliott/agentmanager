@@ -1,5 +1,5 @@
 {
-  "version": "1.0.47",
+  "version": "1.0.48",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -1998,6 +1998,58 @@
       "metadata": {
         "vendor": "SMTG AI",
         "license": "AGPL-3.0"
+      }
+    },
+    "claw-orchestrator": {
+      "id": "claw-orchestrator",
+      "name": "Claw Orchestrator",
+      "description": "Unified runtime to run Claude Code, Codex, Gemini, and Cursor as one",
+      "homepage": "https://github.com/Enderfga/claw-orchestrator",
+      "repository": "https://github.com/Enderfga/claw-orchestrator",
+      "documentation": "https://github.com/Enderfga/claw-orchestrator#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@enderfga/claw-orchestrator",
+          "command": "npm install -g @enderfga/claw-orchestrator",
+          "update_cmd": "npm update -g @enderfga/claw-orchestrator",
+          "uninstall_cmd": "npm uninstall -g @enderfga/claw-orchestrator",
+          "platforms": ["darwin", "linux", "windows"],
+          "global_flag": "-g",
+          "prereqs": ["node"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Enderfga/claw-orchestrator/main/install.sh | bash",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["clawo", "clawo-mcp"],
+        "version_cmd": "clawo --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @enderfga/claw-orchestrator --json",
+            "paths": []
+          },
+          "native": {
+            "check_cmd": "command -v clawo",
+            "paths": ["~/.local/bin/clawo", "/usr/local/bin/clawo"]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Enderfga/claw-orchestrator/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Enderfga",
+        "license": "MIT"
       }
     },
     "cline-cli": {
