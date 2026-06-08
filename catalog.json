@@ -1,5 +1,5 @@
 {
-  "version": "1.0.50",
+  "version": "1.0.51",
   "schema_version": 1,
   "last_updated": "2026-06-08T00:00:00Z",
   "agents": {
@@ -2220,6 +2220,75 @@
       "metadata": {
         "vendor": "ElevenLabs",
         "license": "MIT"
+      }
+    },
+    "bernstein": {
+      "id": "bernstein",
+      "name": "Bernstein",
+      "description": "Audit-grade multi-agent orchestrator for CLI coding agents",
+      "homepage": "https://bernstein.run",
+      "repository": "https://github.com/sipyourdrink-ltd/bernstein",
+      "documentation": "https://bernstein.run",
+      "install_methods": {
+        "pipx": {
+          "method": "pipx",
+          "package": "bernstein",
+          "command": "pipx install bernstein",
+          "update_cmd": "pipx upgrade bernstein",
+          "uninstall_cmd": "pipx uninstall bernstein",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.12", "pipx"]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "bernstein",
+          "command": "pip install bernstein",
+          "update_cmd": "pip install --upgrade bernstein",
+          "uninstall_cmd": "pip uninstall bernstein",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["python>=3.12"]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "bernstein",
+          "command": "uv tool install bernstein",
+          "update_cmd": "uv tool upgrade bernstein",
+          "uninstall_cmd": "uv tool uninstall bernstein",
+          "platforms": ["darwin", "linux", "windows"],
+          "prereqs": ["uv"]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://bernstein.run/install.sh | sh",
+          "platforms": ["darwin", "linux"],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": ["bernstein", "bernstein-worker"],
+        "version_cmd": "bernstein --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pipx": {
+            "check_cmd": "pipx list --json",
+            "paths": []
+          },
+          "pip": {
+            "check_cmd": "pip show bernstein",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sipyourdrink-ltd/bernstein/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Bernstein",
+        "license": "Apache-2.0"
       }
     },
     "blackbox-cli": {
