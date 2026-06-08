@@ -6,8 +6,13 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kevinelliott/agentmanager)](https://goreportcard.com/report/github.com/kevinelliott/agentmanager)
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-75-blueviolet)](#supported-agents)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
+
+> **Catalog:** 75 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -26,21 +31,9 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 
 ## Installation
 
-### From Source
+Pick whichever method fits your setup. After installing, verify with `agentmgr doctor`.
 
-```bash
-# Clone the repository
-git clone https://github.com/kevinelliott/agentmanager.git
-cd agentmgr
-
-# Build
-make build
-
-# Install to PATH
-make install
-```
-
-### Homebrew (macOS)
+### Homebrew (macOS / Linux)
 
 ```bash
 brew install kevinelliott/tap/agentmanager
@@ -48,9 +41,38 @@ brew install kevinelliott/tap/agentmanager
 
 ### Go Install
 
+Requires Go 1.25+. Installs the latest tagged release into `$(go env GOPATH)/bin`:
+
 ```bash
 go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest
 ```
+
+### From Source
+
+Requires Go 1.25+ and `make`:
+
+```bash
+# Clone the repository (creates ./agentmanager)
+git clone https://github.com/kevinelliott/agentmanager.git
+cd agentmanager
+
+# Build both binaries into ./bin
+make build
+
+# Install to PATH
+make install
+```
+
+### Verify the install
+
+```bash
+agentmgr doctor          # Check system health and configuration
+agentmgr catalog list    # Confirm the embedded catalog loads (75 agents)
+```
+
+> **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
+> and `agentmgr agent list` work immediately on a fresh install — no network required
+> until you run `agentmgr catalog refresh`.
 
 ## Quick Start
 
@@ -79,42 +101,23 @@ agentmgr --no-color agent list
 ```console
 $ agentmgr catalog list
 
-ID            NAME                    METHODS    DESCRIPTION
-------------  ----------------------  ---------  ----------------------------------------
-agent-cli     Agent CLI               npm        Unified CLI for interacting with multi...
-agent-deck    Agent Deck              go +2      Terminal session manager for AI codin...
-aider         Aider                   pip +2     AI pair programming in your terminal
-amazon-q      Amazon Q Developer CLI  brew +1    Agentic chat experience in your termi...
-amp           Amp                     native +3  Frontier coding agent by Sourcegraph ...
-blackbox-cli  Blackbox CLI            native +1  AI-powered CLI for natural language c...
-claude-code   Claude Code             npm +1     Anthropic's official CLI for Claude A...
-claude-squad  Claude Squad            brew +1    Terminal application for managing mul...
-codex         Codex                   npm +2     Lightweight coding agent from OpenAI ...
-continue-cli  Continue CLI            npm        Open-source AI code assistant CLI
-crush         Crush                   go +2      Terminal-based AI coding agent from C...
-cursor-cli    Cursor CLI              native     Cursor AI editor CLI agent
-deepseek-cli  DeepSeek CLI            npm        Command-line AI coding assistant leve...
-dexter        Dexter                  npm +2     AI coding agent built on Claude Code
-droid         Droid                   brew +1    AI-powered software engineering agent...
-gemini-cli    Gemini CLI              npm        Google's Gemini AI in your terminal
-goose         Goose                   native +3  Open-source AI agent from Block that ...
-copilot-cli   GitHub Copilot CLI      npm +1     GitHub Copilot in the command line
-juno-code     Juno Code               npm        AI coding agent with web interface
-kilocode-cli  Kilocode CLI            npm        Terminal UI for Kilo Code
-kubectl-ai    kubectl-ai              native +2  AI-powered Kubernetes Assistant
-nanocoder     Nanocoder               npm +1     Community-driven local-first CLI codi...
-opencode      OpenCode                npm +2     The open source AI coding agent
-openhands     OpenHands CLI           uv +3      AI-driven development CLI with termin...
-pi-coding-agent  Pi Coding Agent      npm        AI coding assistant from Pi
-plandex       Plandex                 native     Open source AI coding agent for large...
-qoder-cli     Qoder CLI               binary     Qoder AI coding assistant CLI
-qwen-code     Qwen Code               npm +1     Open-source AI coding agent
-rallies-cli   Rallies CLI             pip +1     AI-powered investment research CLI
-ralph-tui     Ralph TUI               native     Autonomous AI agent with TUI
-tokscale      Tokscale                bun +1     High-performance CLI for monitoring A...
-tunacode-cli  Tunacode CLI            npm        AI coding assistant CLI
+ID                NAME                METHODS     DESCRIPTION
+----------------- ------------------- ----------- ----------------------------------
+abtop             abtop               cargo +2    htop-style TUI monitoring AI agent se…
+aichat            AIChat              binary +3   All-in-one LLM CLI with shell assista…
+aider             Aider               pip +2      AI pair programming in your terminal
+claude-code       Claude Code         native +1   Anthropic's official CLI for Claude A…
+codex             Codex               binary +2   Lightweight coding agent from OpenAI …
+gptme             gptme               brew +3     Terminal AI agent with local tools: w…
+jcode             jcode               binary +2   Terminal AI coding agent with semanti…
+oh-my-pi          oh-my-pi            bun +3      Terminal AI coding agent with LSP, su…
+open-interpreter  Open Interpreter    pip +2      Natural-language interface that write…
+opencode          OpenCode            brew +4     The open source AI coding agent for y…
+reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agent for t…
+smallcode         SmallCode           native +3   Terminal-native coding agent built to…
+…
 
-32 agents available
+75 agents available
 ```
 
 ```console
@@ -228,40 +231,89 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-| Agent | Installation Methods |
-|-------|---------------------|
-| Agent CLI | npm |
-| Agent Deck | brew, go, native |
-| Aider | pip, pipx, uv |
-| Amazon Q Developer CLI | brew, native, dmg |
-| Amp | native, npm, brew, chocolatey |
-| Blackbox CLI | npm, native, powershell |
-| Claude Code | npm, native |
-| Claude Squad | brew, native |
-| Codex | npm, brew, binary |
-| Continue CLI | npm |
-| Crush | brew, npm, go, winget, scoop |
-| Cursor CLI | native |
-| DeepSeek CLI | npm |
-| Dexter | npm, brew, native |
-| Droid | brew, native, powershell |
-| Gemini CLI | npm |
-| GitHub Copilot CLI | npm, brew, winget |
-| Goose | native, brew, pip, cargo |
-| Juno Code | npm |
-| Kilocode CLI | npm |
-| kubectl-ai | native, krew, nix |
-| Nanocoder | npm, brew |
-| OpenCode | npm, brew, scoop, chocolatey, curl |
-| OpenHands CLI | uv, pip, pipx, native |
-| Pi Coding Agent | npm |
-| Plandex | native |
-| Qoder CLI | binary |
-| Qwen Code | npm, brew |
-| Rallies CLI | pip, pipx |
-| Ralph TUI | native |
-| Tokscale | bun, npm |
-| Tunacode CLI | npm |
+The catalog ships with **75 agents**, embedded in the binary and refreshable from the
+remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
+e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
+
+| Agent | ID | Installation Methods |
+|-------|----|----------------------|
+| abtop | `abtop` | cargo, native, powershell |
+| Agent CLI | `agent-cli` | pip, pipx, uv |
+| Agent Deck | `agent-deck` | brew, go, native |
+| Agents CLI | `agents-cli` | pip, pipx, uv |
+| AIChat | `aichat` | binary, brew, cargo, scoop |
+| Aider | `aider` | pip, pipx, uv |
+| Amazon Q Developer CLI | `amazon-q` | brew, dmg, native |
+| Amp | `amp` | brew, chocolatey, native, npm |
+| Antigravity CLI | `antigravity-cli` | brew, native, powershell |
+| Auggie | `auggie` | npm |
+| Blackbox CLI | `blackbox-cli` | native, npm, powershell |
+| Claude Code | `claude-code` | native, npm |
+| Claude Squad | `claude-squad` | brew, native |
+| Cline CLI | `cline-cli` | npm |
+| cmux | `cmux` | binary, brew |
+| Codebuff | `codebuff` | binary, npm |
+| Codex | `codex` | binary, brew, npm |
+| Continue CLI | `continue-cli` | npm |
+| Cortex Code | `cortex-code` | native |
+| Crush | `crush` | brew, go, npm, scoop, winget |
+| Cursor CLI | `cursor-cli` | native |
+| Deep Agents CLI | `deepagents-cli` | native, pip, uv |
+| DeepSeek CLI | `deepseek-cli` | npm |
+| DeepSeek-Reasonix | `reasonix` | homebrew, npm |
+| Dexter | `dexter` | git |
+| Droid | `droid` | brew, native, powershell |
+| ElevenLabs CLI | `elevenlabs-cli` | npm |
+| FetchCoder | `fetchcoder` | npm |
+| Forge CLI | `forge-cli` | npm |
+| ForgeCode | `forgecode` | native, npm |
+| Gemini CLI | `gemini-cli` | npm |
+| GitHub Copilot CLI | `copilot-cli` | brew, npm, winget |
+| Goose | `goose` | brew, brew-cask, native, powershell |
+| gptme | `gptme` | brew, pip, pipx, uv |
+| Grok Build | `grok-build` | native |
+| Grok CLI | `grok-cli` | bun, npm |
+| Herdr | `herdr` | binary, brew, native, nix |
+| Hermes Agent | `hermes-agent` | native, source |
+| jcode | `jcode` | binary, brew, native |
+| Junie CLI | `junie-cli` | brew, native, npm |
+| Juno Code | `juno-code` | npm |
+| Kilocode CLI | `kilocode-cli` | npm |
+| Kimi Code | `kimi-code` | binary, native, pip, pipx, uv |
+| Kiro CLI | `kiro-cli` | brew, native |
+| Kode CLI | `kode-cli` | npm |
+| kubectl-ai | `kubectl-ai` | krew, native, nix |
+| Letta Code | `letta-code` | npm |
+| Mastra Code | `mastracode` | npm |
+| mcp2cli | `mcp2cli` | pip, uv |
+| Mistral Vibe | `mistral-vibe` | brew, native, pip, uv |
+| Nanocoder | `nanocoder` | brew, npm |
+| nono | `nono` | brew, cargo |
+| oh-my-pi | `oh-my-pi` | bun, native, npm, powershell |
+| Ona | `ona` | binary, brew |
+| Open Interpreter | `open-interpreter` | pip, pipx, uv |
+| OpenClaw | `openclaw` | brew, native, npm |
+| OpenCode | `opencode` | brew, chocolatey, curl, npm, scoop |
+| OpenHands CLI | `openhands` | native, pip, pipx, uv |
+| Paperclip | `paperclip` | npm, npx |
+| Pi Agent Rust | `pi-agent-rust` | binary, native |
+| Pi Coding Agent | `pi-coding-agent` | binary, npm |
+| Plandex | `plandex` | native |
+| Qoder CLI | `qoder-cli` | binary |
+| Qwen Code | `qwen-code` | brew, npm |
+| RA.Aid | `ra-aid` | brew, pip, pipx, uv |
+| Rallies CLI | `rallies-cli` | pip, pipx |
+| Ralph TUI | `ralph-tui` | bun, bunx |
+| Roo Code CLI | `roo-code-cli` | native |
+| SmallCode | `smallcode` | native, npm, npx, powershell |
+| Tabnine CLI | `tabnine-cli` | native |
+| Tokscale | `tokscale` | bun, npm |
+| Trae Agent | `trae-agent` | source |
+| TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
+| Valyu CLI | `valyu-cli` | npm |
+| VibeMux | `vibemux` | binary, native |
+
+> Don't see your agent? [Contributions are welcome](CONTRIBUTING.md#adding-new-agents-to-the-catalog) — adding one is a single entry in `catalog.json`.
 
 ## Architecture
 
