@@ -1,8 +1,397 @@
 {
-  "version": "1.0.61",
+  "version": "1.0.67",
   "schema_version": 1,
-  "last_updated": "2026-06-08T00:00:00Z",
+  "last_updated": "2026-07-04T00:00:00Z",
   "agents": {
+    "openclaude": {
+      "id": "openclaude",
+      "name": "openclaude",
+      "description": "Portable Claude Code-compatible coding agent — runs anywhere, any model",
+      "homepage": "https://openclaude.gitlawb.com",
+      "repository": "https://github.com/Gitlawb/openclaude",
+      "documentation": "https://github.com/Gitlawb/openclaude#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@gitlawb/openclaude",
+          "command": "npm install -g @gitlawb/openclaude",
+          "update_cmd": "npm update -g @gitlawb/openclaude",
+          "uninstall_cmd": "npm uninstall -g @gitlawb/openclaude",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "@gitlawb/openclaude",
+          "command": "npx @gitlawb/openclaude",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "openclaude"
+        ],
+        "version_cmd": "openclaude --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @gitlawb/openclaude --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Gitlawb/openclaude/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Gitlawb",
+        "license": "Other (Claude Code derivative)"
+      }
+    },
+    "dao-code": {
+      "id": "dao-code",
+      "name": "dao-code",
+      "description": "TypeScript terminal coding agent optimized for DeepSeek-V4",
+      "homepage": "https://github.com/tigicion/dao-code",
+      "repository": "https://github.com/tigicion/dao-code",
+      "documentation": "https://github.com/tigicion/dao-code#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "dao-code",
+          "command": "npm install -g dao-code",
+          "update_cmd": "npm update -g dao-code",
+          "uninstall_cmd": "npm uninstall -g dao-code",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "dao-code",
+          "command": "npx dao-code",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/tigicion/dao-code/master/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "dao"
+        ],
+        "version_cmd": "dao --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g dao-code --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/tigicion/dao-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "tigicion",
+        "license": "MIT"
+      }
+    },
+    "omnigent": {
+      "id": "omnigent",
+      "name": "Omnigent",
+      "description": "Meta-harness orchestrating Claude Code, Codex, Cursor, and Pi agents",
+      "homepage": "https://omnigent.ai",
+      "repository": "https://github.com/omnigent-ai/omnigent",
+      "documentation": "https://github.com/omnigent-ai/omnigent#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "omnigent-ai/tap/omnigent",
+          "command": "brew install omnigent-ai/tap/omnigent",
+          "update_cmd": "brew upgrade omnigent-ai/tap/omnigent",
+          "uninstall_cmd": "brew uninstall omnigent",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "tap": "omnigent-ai/tap"
+          }
+        },
+        "uv": {
+          "method": "uv",
+          "package": "omnigent",
+          "command": "uv tool install omnigent",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "python"
+          ]
+        },
+        "pipx": {
+          "method": "pipx",
+          "package": "omnigent",
+          "command": "pipx install omnigent",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "python"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/omnigent-ai/omnigent/main/scripts/install_oss.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "omnigent",
+          "omni"
+        ],
+        "version_cmd": "omnigent --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list omnigent",
+            "paths": [
+              "/opt/homebrew/bin/omnigent",
+              "/usr/local/bin/omnigent"
+            ]
+          },
+          "pipx": {
+            "check_cmd": "pipx list --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/omnigent-ai/omnigent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Omnigent",
+        "license": "Apache-2.0"
+      }
+    },
+    "zero": {
+      "id": "zero",
+      "name": "zero",
+      "description": "Coding agent CLI — your model, your machine, your rules",
+      "homepage": "https://zero.gitlawb.com",
+      "repository": "https://github.com/Gitlawb/zero",
+      "documentation": "https://github.com/Gitlawb/zero#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@gitlawb/zero",
+          "command": "npm install -g @gitlawb/zero",
+          "update_cmd": "npm update -g @gitlawb/zero",
+          "uninstall_cmd": "npm uninstall -g @gitlawb/zero",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Gitlawb/zero/main/scripts/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "zero"
+        ],
+        "version_cmd": "zero --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @gitlawb/zero --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Gitlawb/zero/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Gitlawb",
+        "license": "MIT"
+      }
+    },
+    "claude-codex-bridge": {
+      "id": "claude-codex-bridge",
+      "name": "Claude-Codex Bridge",
+      "description": "Multi-agent CLI workspace mixing Codex, Claude, Gemini, Qwen, and more",
+      "homepage": "https://github.com/SeemSeam/claude_codex_bridge",
+      "repository": "https://github.com/SeemSeam/claude_codex_bridge",
+      "documentation": "https://github.com/SeemSeam/claude_codex_bridge#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@seemseam/ccb",
+          "command": "npm install -g @seemseam/ccb",
+          "update_cmd": "npm update -g @seemseam/ccb",
+          "uninstall_cmd": "npm uninstall -g @seemseam/ccb",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "@seemseam/ccb",
+          "command": "npx @seemseam/ccb",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ccb"
+        ],
+        "version_cmd": "ccb --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @seemseam/ccb --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/SeemSeam/claude_codex_bridge/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "SeemSeam",
+        "license": "AGPL-3.0-only"
+      }
+    },
+    "clawcodex": {
+      "id": "clawcodex",
+      "name": "ClawCodex",
+      "description": "Token-efficient Claude Code rebuild in pure Python",
+      "homepage": "https://clawcodex.app",
+      "repository": "https://github.com/agentforce314/clawcodex",
+      "documentation": "https://github.com/agentforce314/clawcodex#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://clawcodex.app/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "clawcodex"
+        ],
+        "version_cmd": "clawcodex --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "paths": [
+              "~/.local/bin/clawcodex",
+              "~/.clawcodex/bin/clawcodex"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/agentforce314/clawcodex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "AgentForce",
+        "license": "MIT"
+      }
+    },
     "abtop": {
       "id": "abtop",
       "name": "abtop",
