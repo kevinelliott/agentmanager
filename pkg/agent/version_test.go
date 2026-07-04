@@ -4,6 +4,28 @@ import (
 	"testing"
 )
 
+func TestCleanCaskVersion(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{"comma build suffix", "1.0.16,4893150192467968", "1.0.16"},
+		{"plain semver", "1.0.16", "1.0.16"},
+		{"comma with revision", "2.3.1,abc123:def456", "2.3.1"},
+		{"surrounding whitespace", "  1.2.3 , build ", "1.2.3"},
+		{"empty", "", ""},
+		{"leading comma", ",123", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CleanCaskVersion(tt.in); got != tt.want {
+				t.Errorf("CleanCaskVersion(%q) = %q, want %q", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseVersion(t *testing.T) {
 	tests := []struct {
 		name     string

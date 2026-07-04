@@ -75,6 +75,20 @@ func ParseVersion(s string) (Version, error) {
 	return v, nil
 }
 
+// CleanCaskVersion normalizes a Homebrew cask version string. Cask versions
+// frequently carry a comma-separated build/revision suffix (for example
+// "1.0.16,4893150192467968"); only the portion before the first comma is the
+// human-facing version. Stripping it keeps reported versions clean and keeps
+// installed-vs-latest comparisons consistent, since both sides must be
+// normalized identically before parsing.
+func CleanCaskVersion(s string) string {
+	s = strings.TrimSpace(s)
+	if i := strings.IndexByte(s, ','); i >= 0 {
+		return strings.TrimSpace(s[:i])
+	}
+	return s
+}
+
 // MustParseVersion parses a version string and panics on error.
 func MustParseVersion(s string) Version {
 	v, err := ParseVersion(s)

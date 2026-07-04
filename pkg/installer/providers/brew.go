@@ -242,7 +242,7 @@ func (p *BrewProvider) getInstalledVersion(ctx context.Context, packageName stri
 
 	var versionStr string
 	if isCask && len(result.Casks) > 0 {
-		versionStr = result.Casks[0].Installed
+		versionStr = agent.CleanCaskVersion(result.Casks[0].Installed)
 	} else if len(result.Formulae) > 0 && len(result.Formulae[0].Installed) > 0 {
 		versionStr = result.Formulae[0].Installed[0].Version
 	}
@@ -341,7 +341,7 @@ func (p *BrewProvider) fetchLatestVersionUncached(ctx context.Context, packageNa
 
 	var versionStr string
 	if isCask && len(result.Casks) > 0 {
-		versionStr = result.Casks[0].Version
+		versionStr = agent.CleanCaskVersion(result.Casks[0].Version)
 	} else if len(result.Formulae) > 0 {
 		versionStr = result.Formulae[0].Versions.Stable
 	}
@@ -418,7 +418,7 @@ func parseBrewInfoJSON(output []byte, isCask bool) agent.Version {
 
 	var versionStr string
 	if isCask && len(result.Casks) > 0 {
-		versionStr = result.Casks[0].Installed
+		versionStr = agent.CleanCaskVersion(result.Casks[0].Installed)
 	} else if len(result.Formulae) > 0 && len(result.Formulae[0].Installed) > 0 {
 		versionStr = result.Formulae[0].Installed[0].Version
 	}
@@ -446,7 +446,7 @@ func parseBrewLatestVersionJSON(output []byte, isCask bool) (agent.Version, erro
 
 	var versionStr string
 	if isCask && len(result.Casks) > 0 {
-		versionStr = result.Casks[0].Version
+		versionStr = agent.CleanCaskVersion(result.Casks[0].Version)
 	} else if len(result.Formulae) > 0 {
 		versionStr = result.Formulae[0].Versions.Stable
 	}

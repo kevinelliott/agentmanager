@@ -451,7 +451,12 @@ func installOne(
 	}
 
 	version = result.Version.String()
+	// Never surface a bogus "0.0.0" — if the provider couldn't determine a
+	// version, omit it rather than printing a misleading placeholder.
 	okMsg := fmt.Sprintf("Installed %s %s successfully", agentDef.Name, version)
+	if result.Version.IsZero() {
+		okMsg = fmt.Sprintf("Installed %s successfully", agentDef.Name)
+	}
 	if verbose {
 		fmt.Fprintln(os.Stderr, okMsg)
 	} else {

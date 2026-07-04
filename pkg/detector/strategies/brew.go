@@ -113,7 +113,7 @@ func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([
 
 		// Check if it's a cask
 		if cask, found := casks[strings.ToLower(packageName)]; found {
-			version, _ := agent.ParseVersion(cask.InstalledVersion)
+			version, _ := agent.ParseVersion(agent.CleanCaskVersion(cask.InstalledVersion))
 
 			installations = append(installations, &agent.Installation{
 				AgentID:          agentDef.ID,
