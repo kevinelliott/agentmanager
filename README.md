@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-93-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-99-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 93 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 99 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -67,7 +67,7 @@ make install
 
 ```bash
 agentmgr doctor          # Check system health and configuration
-agentmgr catalog list    # Confirm the embedded catalog loads (93 agents)
+agentmgr catalog list    # Confirm the embedded catalog loads (99 agents)
 ```
 
 > **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
@@ -117,7 +117,7 @@ reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agen
 smallcode         SmallCode           native +3   Terminal-native coding agent built to…
 …
 
-93 agents available
+99 agents available
 ```
 
 ```console
@@ -231,7 +231,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **93 agents**, embedded in the binary and refreshable from the
+The catalog ships with **99 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -254,10 +254,12 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Caveman Code | `caveman-code` | npm |
 | Claude Code | `claude-code` | native, npm |
 | Claude Squad | `claude-squad` | brew, native |
+| Claude-Codex Bridge | `claude-codex-bridge` | npm, npx |
 | Claw Orchestrator | `claw-orchestrator` | native, npm |
+| ClawCodex | `clawcodex` | native |
 | Cline CLI | `cline-cli` | npm |
 | cmux | `cmux` | binary, brew |
-| cocoindex-code | `cocoindex-code` | pip, pipx, uv |
+| CocoIndex Code | `cocoindex-code` | pip, pipx, uv |
 | Codebuff | `codebuff` | binary, npm |
 | CodeWhale | `codewhale` | cargo, npm |
 | Codex | `codex` | binary, brew, npm |
@@ -266,6 +268,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Cortex Code | `cortex-code` | native |
 | Crush | `crush` | brew, go, npm, scoop, winget |
 | Cursor CLI | `cursor-cli` | native |
+| dao-code | `dao-code` | native, npm, npx |
 | Deep Agents CLI | `deepagents-cli` | native, pip, uv |
 | DeepSeek CLI | `deepseek-cli` | npm |
 | DeepSeek-Reasonix | `reasonix` | homebrew, npm |
@@ -302,8 +305,10 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Nanocoder | `nanocoder` | brew, npm |
 | nono | `nono` | brew, cargo |
 | oh-my-pi | `oh-my-pi` | bun, native, npm, powershell |
+| Omnigent | `omnigent` | brew, native, pipx, uv |
 | Ona | `ona` | binary, brew |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
+| openclaude | `openclaude` | npm, npx |
 | OpenClaw | `openclaw` | brew, native, npm |
 | OpenCode | `opencode` | brew, chocolatey, curl, npm, scoop |
 | OpenHands CLI | `openhands` | native, pip, pipx, uv |
@@ -328,6 +333,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
 | Valyu CLI | `valyu-cli` | npm |
 | VibeMux | `vibemux` | binary, native |
+| zero | `zero` | native, npm |
 | Zeroshot | `zeroshot` | npm |
 | zerostack | `zerostack` | cargo, native |
 

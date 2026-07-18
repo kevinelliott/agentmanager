@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Six new agents in the catalog (now 99 total): openclaude, dao-code, Omnigent,
+  zero, Claude-Codex Bridge, and ClawCodex.
+
+### Fixed
+
+- Homebrew cask version detection no longer reports `0.0.0` or leaks the cask
+  `,<build-id>` suffix; cask versions are normalized to the clean value (for
+  example `1.0.16`) at every install and detection site.
+
 ## [1.5.0] - 2026-06-08
 
 ### Changed
