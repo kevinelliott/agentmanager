@@ -90,6 +90,27 @@
       "repository": "https://github.com/qwen-code-dev-bot/oh-my-cli",
       "reason": "Not selected during 2026-08-11 research run (1m); source-only install (npm link) and the npm name 'oh-my-cli' belongs to an unrelated OMO orchestration project",
       "ignored_at": "2026-08-11"
+    },
+    {
+      "id": "metaharness",
+      "name": "metaharness",
+      "repository": "https://github.com/ruvnet/agent-harness-generator",
+      "reason": "Not selected during 2026-08-11 research run (1m); scaffolds agent harnesses rather than being an agent",
+      "ignored_at": "2026-08-11"
+    },
+    {
+      "id": "senpi",
+      "name": "senpi",
+      "repository": "https://github.com/code-yeongyu/senpi",
+      "reason": "Not selected during 2026-08-11 research run (1m); small pi-derived coding agent",
+      "ignored_at": "2026-08-11"
+    },
+    {
+      "id": "rig",
+      "name": "rig (slopus)",
+      "repository": "https://github.com/slopus/rig",
+      "reason": "Not selected during 2026-08-11 research run (1m); only 15 stars and implausible 26.7k weekly npm downloads",
+      "ignored_at": "2026-08-11"
     }
   ]
 }

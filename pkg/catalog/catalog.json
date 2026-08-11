@@ -1,5 +1,5 @@
 {
-  "version": "1.0.74",
+  "version": "1.0.77",
   "schema_version": 1,
   "last_updated": "2026-08-11T00:00:00Z",
   "agents": {
@@ -4041,6 +4041,226 @@
       },
       "metadata": {
         "vendor": "BBARIT",
+        "license": "Other"
+      }
+    },
+    "claude-code-router": {
+      "id": "claude-code-router",
+      "name": "Claude Code Router",
+      "description": "Local control plane that routes agent requests across models and providers",
+      "homepage": "https://musistudio.github.io/claude-code-router/",
+      "repository": "https://github.com/musistudio/claude-code-router",
+      "documentation": "https://github.com/musistudio/claude-code-router#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@musistudio/claude-code-router",
+          "command": "npm install -g @musistudio/claude-code-router",
+          "update_cmd": "npm update -g @musistudio/claude-code-router",
+          "uninstall_cmd": "npm uninstall -g @musistudio/claude-code-router",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "@musistudio/claude-code-router",
+          "command": "npx @musistudio/claude-code-router",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "claude-code-router",
+          "command": "brew install claude-code-router",
+          "update_cmd": "brew upgrade claude-code-router",
+          "uninstall_cmd": "brew uninstall claude-code-router",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ccr"
+        ],
+        "version_cmd": "ccr --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @musistudio/claude-code-router --json",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list claude-code-router",
+            "paths": [
+              "/opt/homebrew/bin/ccr",
+              "/usr/local/bin/ccr"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/musistudio/claude-code-router/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "musistudio",
+        "license": "MIT"
+      }
+    },
+    "skills": {
+      "id": "skills",
+      "name": "skills",
+      "description": "Open agent skills tool for installing and managing agent skills",
+      "homepage": "https://github.com/vercel-labs/skills",
+      "repository": "https://github.com/vercel-labs/skills",
+      "documentation": "https://github.com/vercel-labs/skills#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "skills",
+          "command": "npm install -g skills",
+          "update_cmd": "npm update -g skills",
+          "uninstall_cmd": "npm uninstall -g skills",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "skills",
+          "command": "npx skills",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "skills",
+          "add-skill"
+        ],
+        "version_cmd": "skills --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g skills --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/vercel-labs/skills/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Vercel Labs",
+        "license": "MIT"
+      }
+    },
+    "ccusage": {
+      "id": "ccusage",
+      "name": "ccusage",
+      "description": "Analyzes coding agent CLI token usage and costs from local session data",
+      "homepage": "https://github.com/ccusage/ccusage",
+      "repository": "https://github.com/ccusage/ccusage",
+      "documentation": "https://github.com/ccusage/ccusage#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "ccusage",
+          "command": "npm install -g ccusage",
+          "update_cmd": "npm update -g ccusage",
+          "uninstall_cmd": "npm uninstall -g ccusage",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "ccusage",
+          "command": "npx ccusage",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "ccusage",
+          "command": "brew install ccusage",
+          "update_cmd": "brew upgrade ccusage",
+          "uninstall_cmd": "brew uninstall ccusage",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ccusage"
+        ],
+        "version_cmd": "ccusage --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g ccusage --json",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list ccusage",
+            "paths": [
+              "/opt/homebrew/bin/ccusage",
+              "/usr/local/bin/ccusage"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ccusage/ccusage/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "ccusage",
         "license": "Other"
       }
     },
