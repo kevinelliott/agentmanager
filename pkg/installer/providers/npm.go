@@ -207,6 +207,7 @@ func (p *NPMProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 		return entry.version, entry.err
 	}
 
+	//nolint:errcheck // the closure below always returns a nil error; failures ride inside latestVersionEntry.err
 	v, _, _ := npmLatestVersionGroup.Do(key, func() (any, error) {
 		if entry, ok := loadLatestVersionEntry(&npmLatestVersionCache, key); ok {
 			return entry, nil

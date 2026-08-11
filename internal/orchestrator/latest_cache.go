@@ -70,7 +70,8 @@ func (f *cachedLatestVersionFetcher) set(ctx context.Context, key string, versio
 	if err != nil {
 		return
 	}
-	_ = f.store.SetSetting(ctx, key, string(data)) // best-effort cache write
+	//nolint:errcheck // best-effort cache write; a miss just means the next call refetches
+	_ = f.store.SetSetting(ctx, key, string(data))
 }
 
 func latestVersionCacheKey(method catalog.InstallMethodDef) string {
