@@ -169,6 +169,10 @@ Generate a JSON entry for the catalog following this structure:
    - Match the primary command name when possible
    - Examples: `claude-code`, `aider`, `copilot-cli`
 
+8. **Always run `make sync-catalog` after editing `catalog.json`**, and commit
+   both `catalog.json` and `pkg/catalog/catalog.json`. CI fails the build if
+   they drift. See "Embedded Catalog Sync" below.
+
 ## Research Confidence Levels
 
 After researching, indicate confidence for each finding:
@@ -195,10 +199,41 @@ After researching, indicate confidence for each finding:
     - Patch bump: `1.0.0` → `1.0.1`
     - Minor bump: `1.0.0` → `1.1.0`
 11. Also update the `"last_updated"` field to the current date
-12. **Use the `AskUserQuestion` tool** to ask about committing the changes:
+12. **Sync the embedded catalog — REQUIRED, never skip this:**
+    ```bash
+    make sync-catalog        # copies catalog.json -> pkg/catalog/catalog.json
+    make check-catalog-sync  # CI runs this; must pass before you commit
+    ```
+    See "Embedded Catalog Sync" below for why this is mandatory.
+13. **Use the `AskUserQuestion` tool** to ask about committing the changes:
     - Question: "Commit the catalog.json changes?"
     - Options: "Yes, commit" / "No, don't commit"
-13. If commit requested, create a git commit with a message like "Add <agent-name> to catalog"
+14. If commit requested, create a git commit with a message like "Add <agent-name> to catalog".
+    **Stage both catalog copies**: `git add catalog.json pkg/catalog/catalog.json`
+
+## Embedded Catalog Sync
+
+The repository keeps **two** copies of the catalog:
+
+| Path | Role |
+|------|------|
+| `catalog.json` | Source of truth. Edit this one. |
+| `pkg/catalog/catalog.json` | `go:embed`'d into the binary as the offline baseline. Generated — never hand-edit. |
+
+After **any** change to `catalog.json` (adding an agent, bumping the version,
+editing `last_updated`), run `make sync-catalog` and commit both files together.
+
+**Why this is mandatory:**
+
+- CI's Lint job runs `make check-catalog-sync` and **fails the whole build** if
+  the two copies differ. Because Lint gates the Build and Integration Tests
+  jobs, a drift failure silently skips them too.
+- The embedded copy is what `agentmgr` falls back to with no network. If it
+  drifts, released binaries ship a **stale agent list** to offline users.
+
+This is not hypothetical: the copies drifted from v1.0.30/62 agents to
+v1.0.68/100 agents, breaking CI for two months and shipping a 38-agent-stale
+baseline in the v1.4.0 and v1.5.0 releases before it was caught.
 
 ## Using AskUserQuestion Tool
 
