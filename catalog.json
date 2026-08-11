@@ -1,7 +1,7 @@
 {
-  "version": "1.0.67",
+  "version": "1.0.68",
   "schema_version": 1,
-  "last_updated": "2026-07-04T00:00:00Z",
+  "last_updated": "2026-08-10T00:00:00Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -3572,6 +3572,52 @@
       "metadata": {
         "vendor": "Mistral AI",
         "license": "Apache-2.0"
+      }
+    },
+    "muse-code": {
+      "id": "muse-code",
+      "name": "Meta Muse Code",
+      "description": "Meta's terminal coding agent for large codebases, powered by Muse Spark",
+      "homepage": "https://developer.meta.com/ai/products/muse-code/",
+      "documentation": "https://dev.meta.ai/docs/",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://dev.meta.ai/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script",
+            "install_path": "~/.local/bin",
+            "auto_update": "true",
+            "architectures": "arm64, x86_64"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "muse"
+        ],
+        "version_cmd": "muse --version",
+        "version_regex": "([\\d]+\\.[\\d]+\\.[\\d]+(?:-R[\\d.]+)?)",
+        "signatures": {
+          "native": {
+            "paths": [
+              "~/.local/bin/muse"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "api",
+        "url": "https://api.meta.ai/muse-code/channels/muse-stable",
+        "file_format": "json"
+      },
+      "metadata": {
+        "vendor": "Meta",
+        "license": "Proprietary"
       }
     },
     "late-cli": {
