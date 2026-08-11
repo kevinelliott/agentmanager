@@ -83,6 +83,13 @@
       "repository": "https://github.com/earendil-works/pi",
       "reason": "Not selected during 2026-07-03 research run (1m); overlaps existing cataloged pi-coding-agent (different org, @earendil-works npm scope)",
       "ignored_at": "2026-07-03"
+    },
+    {
+      "id": "oh-my-cli",
+      "name": "oh-my-cli (qwen-code-dev-bot)",
+      "repository": "https://github.com/qwen-code-dev-bot/oh-my-cli",
+      "reason": "Not selected during 2026-08-11 research run (1m); source-only install (npm link) and the npm name 'oh-my-cli' belongs to an unrelated OMO orchestration project",
+      "ignored_at": "2026-08-11"
     }
   ]
 }

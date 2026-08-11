@@ -1,7 +1,7 @@
 {
-  "version": "1.0.68",
+  "version": "1.0.74",
   "schema_version": 1,
-  "last_updated": "2026-08-10T00:00:00Z",
+  "last_updated": "2026-08-11T00:00:00Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -3618,6 +3618,430 @@
       "metadata": {
         "vendor": "Meta",
         "license": "Proprietary"
+      }
+    },
+    "ouroboros": {
+      "id": "ouroboros",
+      "name": "Ouroboros",
+      "description": "Spec-driven agent OS that gates specs on an ambiguity score before running",
+      "homepage": "https://ouroboros.page/",
+      "repository": "https://github.com/Q00/ouroboros",
+      "documentation": "https://github.com/Q00/ouroboros#readme",
+      "install_methods": {
+        "pipx": {
+          "method": "pipx",
+          "package": "ouroboros-ai",
+          "command": "pipx install ouroboros-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "python"
+          ]
+        },
+        "pip": {
+          "method": "pip",
+          "package": "ouroboros-ai",
+          "command": "pip install ouroboros-ai",
+          "update_cmd": "pip install --upgrade ouroboros-ai",
+          "uninstall_cmd": "pip uninstall ouroboros-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "python"
+          ]
+        },
+        "uv": {
+          "method": "uv",
+          "package": "ouroboros-ai",
+          "command": "uv tool install ouroboros-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "python"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Q00/ouroboros/main/scripts/install.sh | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "ouroboros",
+          "ooo"
+        ],
+        "version_cmd": "ouroboros --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "pipx": {
+            "check_cmd": "pipx list --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Q00/ouroboros/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Q00",
+        "license": "MIT"
+      }
+    },
+    "rmux": {
+      "id": "rmux",
+      "name": "rmux",
+      "description": "Rust terminal multiplexer with a typed SDK for driving CLI and TUI agents",
+      "homepage": "https://rmux.io",
+      "repository": "https://github.com/Helvesec/rmux",
+      "documentation": "https://github.com/Helvesec/rmux#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "rmux",
+          "command": "brew install rmux",
+          "update_cmd": "brew upgrade rmux",
+          "uninstall_cmd": "brew uninstall rmux",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "cargo": {
+          "method": "cargo",
+          "package": "rmux",
+          "command": "cargo install rmux",
+          "update_cmd": "cargo install rmux --force",
+          "uninstall_cmd": "cargo uninstall rmux",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "rust"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "rmux"
+        ],
+        "version_cmd": "rmux --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "brew": {
+            "check_cmd": "brew list rmux",
+            "paths": [
+              "/opt/homebrew/bin/rmux",
+              "/usr/local/bin/rmux"
+            ]
+          },
+          "cargo": {
+            "paths": [
+              "~/.cargo/bin/rmux"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Helvesec/rmux/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Helvesec",
+        "license": "Other"
+      }
+    },
+    "atomic-agent": {
+      "id": "atomic-agent",
+      "name": "Atomic Agent",
+      "description": "Local-first coding agent TUI optimized for local models and long context",
+      "homepage": "https://atomicagent.io",
+      "repository": "https://github.com/AtomicBot-ai/atomic-agent",
+      "documentation": "https://github.com/AtomicBot-ai/atomic-agent#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://atomicagent.io/install | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "irm https://atomicagent.io/install.ps1 | iex",
+          "platforms": [
+            "windows"
+          ],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "atomic-agent"
+        ],
+        "version_cmd": "atomic-agent --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "paths": [
+              "~/.local/bin/atomic-agent"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/AtomicBot-ai/atomic-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "AtomicBot",
+        "license": "MIT"
+      }
+    },
+    "penguin-harness": {
+      "id": "penguin-harness",
+      "name": "Penguin Harness",
+      "description": "Agent builder that scaffolds self-evolving agents across multiple providers",
+      "homepage": "https://penguin.ooo/",
+      "repository": "https://github.com/Prism-Shadow/penguin-harness",
+      "documentation": "https://github.com/Prism-Shadow/penguin-harness#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@prismshadow/penguin-cli",
+          "command": "npm install -g @prismshadow/penguin-cli",
+          "update_cmd": "npm update -g @prismshadow/penguin-cli",
+          "uninstall_cmd": "npm uninstall -g @prismshadow/penguin-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "@prismshadow/penguin-cli",
+          "command": "npx @prismshadow/penguin-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://penguin.ooo/install.sh | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "penguin"
+        ],
+        "version_cmd": "penguin --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @prismshadow/penguin-cli --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Prism-Shadow/penguin-harness/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "Prism Shadow",
+        "license": "Apache-2.0"
+      }
+    },
+    "klaatcode": {
+      "id": "klaatcode",
+      "name": "KlaatCode",
+      "description": "Terminal coding agent with smart model routing across providers",
+      "homepage": "https://klaatai.com",
+      "repository": "https://github.com/KlaatAI/klaatcode",
+      "documentation": "https://github.com/KlaatAI/klaatcode#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "klaatcode",
+          "command": "npm install -g klaatcode",
+          "update_cmd": "npm update -g klaatcode",
+          "uninstall_cmd": "npm uninstall -g klaatcode",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "klaatcode",
+          "command": "npx klaatcode",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node"
+          ]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "KlaatAI/klaatcode/klaatcode",
+          "command": "brew install KlaatAI/klaatcode/klaatcode",
+          "update_cmd": "brew upgrade klaatcode",
+          "uninstall_cmd": "brew uninstall klaatcode",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "tap": "KlaatAI/klaatcode"
+          }
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://klaatai.com/api/install | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "klaatcode",
+          "klaatai"
+        ],
+        "version_cmd": "klaatcode --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g klaatcode --json",
+            "paths": []
+          },
+          "brew": {
+            "check_cmd": "brew list klaatcode",
+            "paths": [
+              "/opt/homebrew/bin/klaatcode"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/KlaatAI/klaatcode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "KlaatAI",
+        "license": "Other"
+      }
+    },
+    "bbarit-agent": {
+      "id": "bbarit-agent",
+      "name": "BBARIT Agent",
+      "description": "Single-binary Rust terminal coding agent supporting 15+ LLM providers",
+      "homepage": "https://bbarit.com",
+      "repository": "https://github.com/bbarit/bbarit-agent-oss",
+      "documentation": "https://github.com/bbarit/bbarit-agent-oss#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://bbarit.com/agent/install.sh | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "irm https://bbarit.com/agent/install.ps1 | iex",
+          "platforms": [
+            "windows"
+          ],
+          "metadata": {
+            "installer_type": "powershell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "bbarit-oss"
+        ],
+        "version_cmd": "bbarit-oss --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "native": {
+            "paths": [
+              "~/.local/bin/bbarit-oss"
+            ]
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bbarit/bbarit-agent-oss/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "BBARIT",
+        "license": "Other"
       }
     },
     "late-cli": {

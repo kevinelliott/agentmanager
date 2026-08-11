@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Seven new agents in the catalog (now 100 total): openclaude, dao-code,
-  Omnigent, zero, Claude-Codex Bridge, ClawCodex, and Meta Muse Code.
+- Thirteen new agents in the catalog (now 106 total): openclaude, dao-code,
+  Omnigent, zero, Claude-Codex Bridge, ClawCodex, Meta Muse Code, Ouroboros,
+  rmux, Atomic Agent, Penguin Harness, KlaatCode, and BBARIT Agent.
 
 ### Fixed
 
