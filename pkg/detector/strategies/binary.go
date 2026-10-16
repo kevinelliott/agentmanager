@@ -45,8 +45,8 @@ func (s *BinaryStrategy) IsApplicable(p platform.Platform) bool {
 }
 
 // binaryMethods are the install method names that represent binary/native installations.
-// The order matters - we check in this order and use the first one found in the catalog.
-var binaryMethods = []string{"native", "binary", "curl"}
+// The order is the fallback preference outside recognized package-manager paths.
+var binaryMethods = []string{"native", "binary", "curl", "cargo"}
 
 // Detect scans for installed agents and returns found installations.
 //
@@ -86,12 +86,19 @@ func (s *BinaryStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) 
 			if err != nil {
 				continue // Not found, try next executable
 			}
+			matchedMethod := methodName
 			if isPackageManagerPath(path) {
-				continue
+				// Cargo has no separate inventory strategy. Recognize its bin
+				// directory only for agents that declare a Cargo install method.
+				normalized := strings.ToLower(strings.ReplaceAll(path, "\\", "/"))
+				if _, hasCargo := agentDef.InstallMethods["cargo"]; !hasCargo || !strings.Contains(normalized, "/.cargo/bin/") {
+					continue
+				}
+				matchedMethod = "cargo"
 			}
 			pendings = append(pendings, pending{
 				agentDef:   agentDef,
-				methodName: methodName,
+				methodName: matchedMethod,
 				executable: executable,
 				path:       path,
 			})

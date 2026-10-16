@@ -199,6 +199,8 @@ func (p *BrewProvider) Uninstall(ctx context.Context, inst *agent.Installation, 
 //   - "cask": "true"  — legacy form, accepted for back-compat with custom
 //     user catalogs and historical catalog entries
 //
+// An explicit --cask flag in the catalog command is also preserved.
+//
 // Falls back to parsing the command string if no package name is set.
 func (p *BrewProvider) parseBrewPackage(method catalog.InstallMethodDef) (string, bool) {
 	packageName := method.Package
@@ -211,9 +213,10 @@ func (p *BrewProvider) parseBrewPackage(method catalog.InstallMethodDef) (string
 		}
 	}
 
+	commandPackage, commandCask := extractBrewPackageFromCommand(method.Command)
+	isCask = isCask || commandCask
 	if packageName == "" {
-		// Extract from command
-		packageName, isCask = extractBrewPackageFromCommand(method.Command)
+		packageName = commandPackage
 	}
 
 	return packageName, isCask
