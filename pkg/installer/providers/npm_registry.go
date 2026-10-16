@@ -160,7 +160,7 @@ func NPMConfigFingerprint() string {
 		_, _ = fmt.Fprintln(hash, path)
 		// Configuration paths are explicitly chosen by npm's user/environment.
 		// Hash bounded regular-file contents; never return or log their bytes.
-		info, err := os.Stat(path)
+		info, err := os.Stat(path) // #nosec G703 -- Caller-selected npm configuration metadata is hashed locally, never returned.
 		if err != nil || !info.Mode().IsRegular() {
 			continue
 		}

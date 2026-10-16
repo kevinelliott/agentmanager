@@ -239,7 +239,7 @@ func (p *NPMProvider) fetchLatestVersionUncached(ctx context.Context, packageNam
 	}
 
 	// Use npm view to get the latest version
-	cmd := exec.CommandContext(ctx, "npm", "view", packageName, "version")
+	cmd := exec.CommandContext(ctx, "npm", "view", packageName, "version") // #nosec G204 -- Package metadata comes from the trusted catalog and is passed as separate arguments, without a shell.
 	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
@@ -259,6 +259,7 @@ func (p *NPMProvider) fetchLatestVersionUncached(ctx context.Context, packageNam
 }
 
 // extractNPMPackage extracts the package name from an npm install command.
+
 func extractNPMPackage(command string) string {
 	parts := strings.Fields(command)
 	for i, part := range parts {
