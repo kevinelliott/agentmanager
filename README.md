@@ -67,7 +67,7 @@ make install
 
 ```bash
 agentmgr doctor          # Check system health and configuration
-agentmgr catalog list    # Confirm the embedded catalog loads (149 agents)
+agentmgr catalog list    # Confirm the embedded catalog loads
 ```
 
 > **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
@@ -98,8 +98,10 @@ agentmgr --no-color agent list
 
 ### Example Output
 
+Catalog listings show tools supported on the selected platform; this example uses Linux.
+
 ```console
-$ agentmgr catalog list
+$ agentmgr catalog list --platform linux
 
 ID                NAME                METHODS     DESCRIPTION
 ----------------- ------------------- ----------- ----------------------------------
@@ -117,7 +119,7 @@ reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agen
 smallcode         SmallCode           native +3   Terminal-native coding agent built to…
 …
 
-149 agents available
+145 agents available
 ```
 
 ```console

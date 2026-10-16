@@ -1085,6 +1085,24 @@ func TestBrewProviderParseBrewPackage(t *testing.T) {
 			wantIsCask: true,
 		},
 		{
+			name: "explicit cask flag with package field",
+			method: catalog.InstallMethodDef{
+				Package: "amazon-q",
+				Command: "brew install --cask amazon-q",
+			},
+			wantPkg:    "amazon-q",
+			wantIsCask: true,
+		},
+		{
+			name: "metadata cask preserved when extracting package",
+			method: catalog.InstallMethodDef{
+				Command:  "brew install firefox",
+				Metadata: map[string]string{"type": "cask"},
+			},
+			wantPkg:    "firefox",
+			wantIsCask: true,
+		},
+		{
 			name: "tap format",
 			method: catalog.InstallMethodDef{
 				Command: "brew install user/tap/myformula",

@@ -128,3 +128,30 @@ func TestCargoPathOverridesNativeInstallMethod(t *testing.T) {
 		t.Fatalf("a Cargo path must route to Cargo even with a native installer available: %+v", got)
 	}
 }
+
+func TestHomebrewFormulaAndCaskNamesDoNotCrossMatch(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("POSIX Homebrew fixture")
+	}
+	dir := t.TempDir()
+	// A formula and a cask may have the same name but different update commands.
+	fixture := `#!/bin/sh
+case "$*" in
+  *--cask*) printf '%s\n' '{"casks":[{"token":"moltis","installed":"1.0.0"}]}' ;;
+  *) printf '%s\n' '{"formulae":[{"name":"unreal-agent","full_name":"unreallabsai/tap/unreal-agent","installed":[{"version":"0.3.1"}]}]}' ;;
+esac
+`
+	if err := os.WriteFile(filepath.Join(dir, "brew"), []byte(fixture), 0700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	got, err := NewBrewStrategy(newMockPlatform()).Detect(context.Background(), []catalog.AgentDef{
+		embeddedAgent(t, "moltis"), embeddedAgent(t, "unreal-agent"),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("formula and cask identities must stay separate: %+v", got)
+	}
+}

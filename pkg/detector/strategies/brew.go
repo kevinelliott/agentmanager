@@ -93,9 +93,16 @@ func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([
 		if packageName == "" {
 			continue
 		}
+		isCask := brewMethod.Metadata["type"] == "cask" || brewMethod.Metadata["cask"] == "true"
+		for _, arg := range strings.Fields(brewMethod.Command) {
+			if arg == "--cask" {
+				isCask = true
+				break
+			}
+		}
 
 		// Check if it's a formula
-		if formula, found := formulae[strings.ToLower(packageName)]; found {
+		if formula, found := formulae[strings.ToLower(packageName)]; found && !isCask {
 			var versionStr string
 			if len(formula.InstalledVersions) > 0 {
 				versionStr = formula.InstalledVersions[0].Version
@@ -114,6 +121,9 @@ func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([
 					"package_type": "formula",
 				},
 			})
+			continue
+		}
+		if !isCask {
 			continue
 		}
 
