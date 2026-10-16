@@ -1,7 +1,7 @@
 {
-  "version": "1.0.79",
+  "version": "1.0.80",
   "schema_version": 1,
-  "last_updated": "2026-10-16T04:36:19Z",
+  "last_updated": "2026-10-16T06:54:31Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -5833,6 +5833,772 @@
       "metadata": {
         "vendor": "gi-dellav",
         "license": "GPL-3.0"
+      }
+    },
+    "minimax-code": {
+      "id": "minimax-code",
+      "name": "MiniMax Code",
+      "description": "Official MiniMax terminal coding agent with planning, subagents, MCP, and custom model providers",
+      "category": "coding",
+      "homepage": "https://github.com/MiniMax-AI/minimax-code",
+      "repository": "https://github.com/MiniMax-AI/minimax-code",
+      "documentation": "https://github.com/MiniMax-AI/minimax-code#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://filecdn.minimax.chat/public/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        },
+        "powershell": {
+          "method": "powershell",
+          "command": "powershell -NoProfile -Command \"irm https://filecdn.minimax.chat/public/install.ps1 | iex\"",
+          "platforms": [
+            "windows"
+          ],
+          "prereqs": [
+            "powershell"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcode"
+        ],
+        "version_cmd": "mcode --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/MiniMax-AI/minimax-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2035",
+        "github_stars_checked_at": "2026-10-16T06:48:07.222926+00:00",
+        "license": "MIT",
+        "vendor": "MiniMax",
+        "install_note": "The POSIX installer supports macOS, glibc Linux, and WSL; Alpine/musl Linux is not supported."
+      }
+    },
+    "command-code": {
+      "id": "command-code",
+      "name": "Command Code",
+      "description": "Multi-model terminal coding agent that learns project preferences and supports ACP, MCP, and subagents",
+      "category": "coding",
+      "homepage": "https://commandcode.ai",
+      "repository": "https://github.com/CommandCodeAI/command-code",
+      "documentation": "https://commandcode.ai/docs/quickstart",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "command-code",
+          "command": "npm install -g command-code",
+          "update_cmd": "npm update -g command-code",
+          "uninstall_cmd": "npm uninstall -g command-code",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=22"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "command-code"
+        ],
+        "version_cmd": "command-code --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "metadata": {
+        "github_stars": "4136",
+        "github_stars_checked_at": "2026-10-16T06:48:07.224484+00:00",
+        "vendor": "Command Code",
+        "license": "Proprietary",
+        "changelog_url": "https://commandcode.ai/changelog"
+      }
+    },
+    "agent-of-empires": {
+      "id": "agent-of-empires",
+      "name": "Agent of Empires",
+      "description": "TUI session manager for parallel coding agents with persistent tmux sessions, worktrees, and diff review",
+      "category": "productivity",
+      "homepage": "https://github.com/agent-of-empires/agent-of-empires",
+      "repository": "https://github.com/agent-of-empires/agent-of-empires",
+      "documentation": "https://github.com/agent-of-empires/agent-of-empires#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "aoe",
+          "command": "brew install aoe",
+          "update_cmd": "brew upgrade aoe",
+          "uninstall_cmd": "brew uninstall aoe",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "tmux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/agent-of-empires/agent-of-empires/main/scripts/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash",
+            "tmux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "aoe"
+        ],
+        "version_cmd": "aoe --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/agent-of-empires/agent-of-empires/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3356",
+        "github_stars_checked_at": "2026-10-16T06:48:07.324576+00:00",
+        "license": "MIT",
+        "vendor": "Agent of Empires",
+        "windows_note": "Use WSL2; native Windows is not supported"
+      }
+    },
+    "tuios": {
+      "id": "tuios",
+      "name": "TUIOS",
+      "description": "Agent-aware terminal window manager with persistent sessions, status tracking, and a shared inbox",
+      "category": "terminal",
+      "homepage": "https://tuios.dev",
+      "repository": "https://github.com/Gaurav-Gosain/tuios",
+      "documentation": "https://github.com/Gaurav-Gosain/tuios#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "tuios",
+          "command": "brew install tuios",
+          "update_cmd": "brew upgrade tuios",
+          "uninstall_cmd": "brew uninstall tuios",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/Gaurav-Gosain/tuios/main/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash"
+          ],
+          "update_cmd": "tuios update"
+        }
+      },
+      "detection": {
+        "executables": [
+          "tuios"
+        ],
+        "version_cmd": "tuios --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Gaurav-Gosain/tuios/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5399",
+        "github_stars_checked_at": "2026-10-16T06:48:07.219262+00:00",
+        "license": "MIT",
+        "vendor": "Gaurav Gosain"
+      }
+    },
+    "deepseek-harness": {
+      "id": "deepseek-harness",
+      "name": "DeepSeek Harness",
+      "description": "Official DeepSeek plugin-based agent harness with headless CLI, ACP, and a browser interface",
+      "category": "coding",
+      "homepage": "https://github.com/deepseek-ai/deepseek-harness",
+      "repository": "https://github.com/deepseek-ai/deepseek-harness",
+      "documentation": "https://github.com/deepseek-ai/deepseek-harness#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@deepseek-ai/dsh",
+          "command": "npm install -g @deepseek-ai/dsh",
+          "update_cmd": "npm update -g @deepseek-ai/dsh",
+          "uninstall_cmd": "npm uninstall -g @deepseek-ai/dsh",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "dsh"
+        ],
+        "version_cmd": "dsh --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/deepseek-ai/deepseek-harness/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "250669",
+        "github_stars_checked_at": "2026-10-16T06:48:07.278200+00:00",
+        "license": "MIT",
+        "vendor": "DeepSeek",
+        "release_channel": "developer_preview"
+      }
+    },
+    "zcode": {
+      "id": "zcode",
+      "name": "ZCode",
+      "description": "Z.ai coding agent with terminal UI, extensible tools, and workflow orchestration",
+      "category": "coding",
+      "homepage": "https://zcode.z.ai",
+      "repository": "https://github.com/zai-org/ZCode",
+      "documentation": "https://github.com/zai-org/ZCode#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\nif [ -e \"$HOME/.local/bin/zcode\" ] || [ -L \"$HOME/.local/bin/zcode\" ]; then\n  printf \"%s\\n\" \"zcode already exists in ~/.local/bin; use its existing installation to update\" >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_zcode_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_zcode_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_zcode_source\" remote get-url origin)\" = \"https://github.com/zai-org/ZCode.git\"\nelse\n  git clone --depth 1 https://github.com/zai-org/ZCode.git \"$agentmgr_zcode_source\"\nfi\ncd \"$agentmgr_zcode_source\"\npnpm install --frozen-lockfile\npnpm --filter @zcode/cli... build\nln -s \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" \"$HOME/.local/bin/zcode\"",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "git",
+            "node>=24.14.0",
+            "pnpm>=10.33.2"
+          ],
+          "update_cmd": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\ncd \"$agentmgr_zcode_source\"\ngit pull --ff-only\npnpm install --frozen-lockfile\npnpm --filter @zcode/cli... build",
+          "metadata": {
+            "installer_type": "source_build",
+            "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "zcode"
+        ],
+        "version_cmd": "zcode --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/zai-org/ZCode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7873",
+        "github_stars_checked_at": "2026-10-16T06:48:07.247876+00:00",
+        "license": "Apache-2.0",
+        "vendor": "Z.ai",
+        "install_note": "Builds the CLI from source into the AgentManager data directory and links ~/.local/bin/zcode; requires Node.js and pnpm. Published desktop assets are not CLI installers."
+      }
+    },
+    "whipcode": {
+      "id": "whipcode",
+      "name": "WhipCode",
+      "description": "Terminal coding agent with recursive delegation, persistent daemon sessions, and model-provider routing",
+      "category": "coding",
+      "homepage": "https://github.com/context-labs/whip",
+      "repository": "https://github.com/context-labs/whip",
+      "documentation": "https://github.com/context-labs/whip#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/context-labs/whip/main/install.sh | WHIPCODE_CHANNEL=prerelease sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "python3",
+            "sh"
+          ],
+          "update_cmd": "curl -fsSL https://raw.githubusercontent.com/context-labs/whip/main/install.sh | WHIPCODE_CHANNEL=prerelease sh",
+          "metadata": {
+            "installer_type": "shell_script",
+            "channel": "prerelease"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "whipcode"
+        ],
+        "version_cmd": "whipcode --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/context-labs/whip/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1095",
+        "github_stars_checked_at": "2026-10-16T06:48:07.829493+00:00",
+        "license": "Apache-2.0",
+        "vendor": "Context Labs",
+        "release_channel": "prerelease"
+      }
+    },
+    "frontier-agent": {
+      "id": "frontier-agent",
+      "name": "FrontierAgent",
+      "description": "Terminal agent with ReAct and coordinated agent-team workflows for coding and research",
+      "category": "coding",
+      "homepage": "https://github.com/ApodexAI/FrontierAgent",
+      "repository": "https://github.com/ApodexAI/FrontierAgent",
+      "documentation": "https://github.com/ApodexAI/FrontierAgent#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "uv tool install --python 3.12 git+https://github.com/ApodexAI/FrontierAgent.git",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "uv",
+            "git"
+          ],
+          "update_cmd": "uv tool upgrade frontier-agent",
+          "uninstall_cmd": "uv tool uninstall frontier-agent",
+          "metadata": {
+            "installer_type": "uv_git",
+            "python": "3.12"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "frontier-agent"
+        ],
+        "version_cmd": "frontier-agent --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "metadata": {
+        "github_stars": "5273",
+        "github_stars_checked_at": "2026-10-16T06:48:07.898293+00:00",
+        "license": "Apache-2.0",
+        "vendor": "Apodex AI"
+      }
+    },
+    "dscode": {
+      "id": "dscode",
+      "name": "DSCODE",
+      "description": "DeepSeek Harness terminal agent with persistent shell, subagents, and local or remote session runtimes",
+      "category": "coding",
+      "homepage": "https://github.com/qiz029/dscode",
+      "repository": "https://github.com/qiz029/dscode",
+      "documentation": "https://github.com/qiz029/dscode#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/qiz029/dscode/main/install.sh | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh",
+            "git"
+          ],
+          "update_cmd": "dscode update",
+          "metadata": {
+            "installer_type": "shell_script",
+            "architectures": "amd64,arm64",
+            "macos_min_version": "14",
+            "linux_libc": "glibc"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "dscode"
+        ],
+        "version_cmd": "dscode --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/qiz029/dscode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "995",
+        "github_stars_checked_at": "2026-10-16T06:48:07.752871+00:00",
+        "license": "MIT",
+        "vendor": "DSCODE",
+        "install_note": "Requires macOS 14+ or 64-bit glibc Linux. Linux sandboxed commands require bubblewrap or usable Landlock."
+      }
+    },
+    "agent-browser": {
+      "id": "agent-browser",
+      "name": "agent-browser",
+      "description": "Browser automation CLI for AI agents with structured snapshots, interaction, and MCP support",
+      "category": "productivity",
+      "homepage": "https://agent-browser.dev",
+      "repository": "https://github.com/vercel-labs/agent-browser",
+      "documentation": "https://github.com/vercel-labs/agent-browser#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "agent-browser",
+          "command": "npm install -g agent-browser",
+          "update_cmd": "npm update -g agent-browser",
+          "uninstall_cmd": "npm uninstall -g agent-browser",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=24"
+          ]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "agent-browser",
+          "command": "brew install agent-browser",
+          "update_cmd": "brew upgrade agent-browser",
+          "uninstall_cmd": "brew uninstall agent-browser",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agent-browser"
+        ],
+        "version_cmd": "agent-browser --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/vercel-labs/agent-browser/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "44063",
+        "github_stars_checked_at": "2026-10-16T06:48:07.801513+00:00",
+        "license": "Apache-2.0",
+        "vendor": "Vercel Labs",
+        "post_install": "Run agent-browser install to download Chrome when no compatible browser is installed; on Linux use agent-browser install --with-deps for system libraries."
+      }
+    },
+    "engram": {
+      "id": "engram",
+      "name": "Engram",
+      "description": "Persistent memory for coding agents with CLI, terminal UI, MCP, and local full-text search",
+      "category": "productivity",
+      "homepage": "https://github.com/Gentleman-Programming/engram",
+      "repository": "https://github.com/Gentleman-Programming/engram",
+      "documentation": "https://github.com/Gentleman-Programming/engram#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "gentleman-programming/tap/engram",
+          "command": "brew install gentleman-programming/tap/engram",
+          "update_cmd": "brew upgrade gentleman-programming/tap/engram",
+          "uninstall_cmd": "brew uninstall gentleman-programming/tap/engram",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "engram"
+        ],
+        "version_cmd": "engram version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Gentleman-Programming/engram/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7287",
+        "github_stars_checked_at": "2026-10-16T06:48:07.857401+00:00",
+        "license": "MIT",
+        "vendor": "Gentleman Programming"
+      }
+    },
+    "jevgrep": {
+      "id": "jevgrep",
+      "name": "jevgrep",
+      "description": "Natural-language code-search CLI that retrieves relevant files and source context for coding agents",
+      "category": "productivity",
+      "homepage": "https://github.com/dzhng/jevgrep",
+      "repository": "https://github.com/dzhng/jevgrep",
+      "documentation": "https://github.com/dzhng/jevgrep#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@dzhng/jevgrep",
+          "command": "npm install -g @dzhng/jevgrep",
+          "update_cmd": "npm update -g @dzhng/jevgrep",
+          "uninstall_cmd": "npm uninstall -g @dzhng/jevgrep",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=22"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "jg"
+        ],
+        "version_cmd": "jg --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/dzhng/jevgrep/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2729",
+        "github_stars_checked_at": "2026-10-16T06:48:07.813050+00:00",
+        "license": "MIT",
+        "vendor": "David Zhang"
+      }
+    },
+    "cloudflare-cf": {
+      "id": "cloudflare-cf",
+      "name": "Cloudflare cf",
+      "description": "Agent-oriented Cloudflare API CLI with command discovery, JSON output, and typed configuration",
+      "category": "devops",
+      "homepage": "https://developers.cloudflare.com/cf/",
+      "repository": "https://github.com/cloudflare/cf",
+      "documentation": "https://github.com/cloudflare/cf#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "cf",
+          "command": "npm install -g cf",
+          "update_cmd": "npm update -g cf",
+          "uninstall_cmd": "npm uninstall -g cf",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=22"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "cf"
+        ],
+        "version_cmd": "cf --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/cloudflare/cf/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "879",
+        "github_stars_checked_at": "2026-10-16T06:48:08.409590+00:00",
+        "license": "MIT OR Apache-2.0",
+        "vendor": "Cloudflare",
+        "release_channel": "beta"
+      }
+    },
+    "hunk": {
+      "id": "hunk",
+      "name": "Hunk",
+      "description": "Terminal diff viewer for reviewing coding-agent changes and sending structured feedback",
+      "category": "productivity",
+      "homepage": "https://hunk.dev",
+      "repository": "https://github.com/modem-dev/hunk",
+      "documentation": "https://github.com/modem-dev/hunk#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "hunkdiff",
+          "command": "npm install -g hunkdiff",
+          "update_cmd": "npm update -g hunkdiff",
+          "uninstall_cmd": "npm uninstall -g hunkdiff",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=22"
+          ]
+        },
+        "brew": {
+          "method": "brew",
+          "package": "hunk",
+          "command": "brew install hunk",
+          "update_cmd": "brew upgrade hunk",
+          "uninstall_cmd": "brew uninstall hunk",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://hunk.dev/install.sh | sh",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "hunk"
+        ],
+        "version_cmd": "hunk --version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/modem-dev/hunk/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "9612",
+        "github_stars_checked_at": "2026-10-16T06:48:08.392177+00:00",
+        "license": "MIT",
+        "vendor": "Modem"
+      }
+    },
+    "beads": {
+      "id": "beads",
+      "name": "Beads",
+      "description": "Persistent task and dependency tracker that gives coding agents shared, version-controlled work context",
+      "category": "productivity",
+      "homepage": "https://github.com/gastownhall/beads",
+      "repository": "https://github.com/gastownhall/beads",
+      "documentation": "https://github.com/gastownhall/beads#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "beads",
+          "command": "brew install beads",
+          "update_cmd": "brew upgrade beads",
+          "uninstall_cmd": "brew uninstall beads",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@beads/bd",
+          "command": "npm install -g @beads/bd",
+          "update_cmd": "npm update -g @beads/bd",
+          "uninstall_cmd": "npm uninstall -g @beads/bd",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=14",
+            "git"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "curl -fsSL https://raw.githubusercontent.com/gastownhall/beads/main/scripts/install.sh | bash",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash",
+            "git"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "bd"
+        ],
+        "version_cmd": "bd version",
+        "version_regex": "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/gastownhall/beads/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "27925",
+        "github_stars_checked_at": "2026-10-16T06:48:08.448413+00:00",
+        "license": "MIT",
+        "vendor": "Gas Town"
       }
     }
   }
