@@ -245,6 +245,10 @@ func (p *Pipeline) checkVersions(ctx context.Context, opts Options, result *Resu
 	if p.cfg.Detection.CacheEnabled {
 		if updater, ok := p.store.(storage.DetectionCacheUpdater); ok {
 			_ = updater.UpdateDetectionVersions(ctx, result.Installations) //nolint:errcheck // preserve scan timestamp; cache is best-effort
+		} else if !scoped {
+			// Preserve version persistence for existing third-party Store implementations.
+			// The optional updater is needed only to preserve their scan timestamps too.
+			_ = p.store.SaveDetectionCache(ctx, result.Installations) //nolint:errcheck // best-effort legacy cache persistence
 		}
 	}
 	slog.DebugContext(ctx, "version checks completed", "duration", time.Since(versionStart), "total_duration", time.Since(started), "installations", len(result.Installations))

@@ -170,3 +170,21 @@ func TestUnavailableCoordinationDoesNotPreventDetection(t *testing.T) {
 		t.Fatalf("optional coordination blocked a usable scan: %v", err)
 	}
 }
+
+type legacyStore struct{ storage.Store }
+
+func TestLegacyStoreStillPersistsLatestVersions(t *testing.T) {
+	backing := &fakeStore{}
+	store := legacyStore{Store: backing}
+	p := New(defaultConfig(), fakePlatform{}, store, &fakeCatalog{agents: []catalog.AgentDef{makeAgentDef("a")}}, &fakeDetector{installations: []*agent.Installation{makeInstallation("a")}}, newFakeFetcher())
+	if _, err := p.DetectAndCheckVersions(t.Context(), Options{}); err != nil {
+		t.Fatal(err)
+	}
+	warm, err := p.DetectAndCheckVersions(t.Context(), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !warm.UsedDetectionCache || len(warm.Installations) != 1 || warm.Installations[0].LatestVersion == nil {
+		t.Fatal("legacy Store lost version metadata on the warm path")
+	}
+}
