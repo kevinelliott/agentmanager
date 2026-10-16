@@ -616,7 +616,6 @@ func (a *App) checkUpdates(ctx context.Context) error {
 			}
 			a.agentsMu.Unlock()
 		}
-
 	}
 
 	// Only update the counts, not the full menu (to avoid menu jumping)

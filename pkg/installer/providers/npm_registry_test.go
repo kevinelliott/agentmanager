@@ -4,6 +4,8 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -101,5 +103,25 @@ func TestNPMRegistryReloadsChangedConfiguration(t *testing.T) {
 	}
 	if configCalls != 2 || requests != 1 {
 		t.Fatalf("config=%d requests=%d", configCalls, requests)
+	}
+}
+
+func TestNPMFingerprintTracksConfigurationFileContents(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "npmrc")
+	t.Setenv("NPM_CONFIG_USERCONFIG", path)
+	if err := os.WriteFile(path, []byte("tag=latest\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	before := NPMConfigFingerprint()
+	if err := os.WriteFile(path, []byte("tag=next\n"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if after := NPMConfigFingerprint(); before == after {
+		t.Fatal("changed npm configuration reused a registry cache namespace")
+	}
+	// Non-regular configured paths are never opened by the fingerprint reader.
+	t.Setenv("NPM_CONFIG_USERCONFIG", filepath.Dir(path))
+	if NPMConfigFingerprint() == "" {
+		t.Fatal("invalid fingerprint")
 	}
 }

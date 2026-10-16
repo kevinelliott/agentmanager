@@ -277,20 +277,24 @@ func (p *Pipeline) detect(ctx context.Context, opts Options, started time.Time, 
 	if p.cfg.Detection.CacheEnabled && !scoped {
 		if locker, ok := p.store.(storage.RefreshLocker); ok {
 			release, err := locker.AcquireRefreshLock(detectCtx, "detection:"+string(p.plat.ID()))
-			if err != nil {
+			if err != nil && detectCtx.Err() != nil {
 				return fmt.Errorf("waiting for detection: %w", err)
 			}
-			defer release()
-			// A scan completed while this request waited. Forced refreshes may share
-			// only a scan newer than their own start, never an older cached snapshot.
-			newerThan := time.Time{}
-			if opts.ForceRefresh {
-				newerThan = started
-			}
-			if cached, fresh := p.cachedInstallations(detectCtx, newerThan); fresh {
-				result.Installations = cached
-				result.UsedDetectionCache = true
-				return nil
+			if err != nil {
+				slog.DebugContext(ctx, "inventory coordination unavailable", "error", err)
+			} else {
+				defer release()
+				// A scan completed while this request waited. Forced refreshes may share
+				// only a scan newer than their own start, never an older cached snapshot.
+				newerThan := time.Time{}
+				if opts.ForceRefresh {
+					newerThan = started
+				}
+				if cached, fresh := p.cachedInstallations(detectCtx, newerThan); fresh {
+					result.Installations = cached
+					result.UsedDetectionCache = true
+					return nil
+				}
 			}
 		}
 	}

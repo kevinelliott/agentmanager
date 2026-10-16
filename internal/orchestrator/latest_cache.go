@@ -3,6 +3,7 @@ package orchestrator
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -44,12 +45,16 @@ func (f *cachedLatestVersionFetcher) GetLatestVersion(ctx context.Context, metho
 	if key != "" {
 		if locker, ok := f.store.(storage.RefreshLocker); ok {
 			release, err := locker.AcquireRefreshLock(ctx, key)
-			if err != nil {
-				return agent.Version{}, err
+			if err != nil && ctx.Err() != nil {
+				return agent.Version{}, ctx.Err()
 			}
-			defer release()
-			if version, fresh := f.get(ctx, key); fresh {
-				return version, nil
+			if err != nil {
+				slog.DebugContext(ctx, "registry coordination unavailable", "error", err)
+			} else {
+				defer release()
+				if version, fresh := f.get(ctx, key); fresh {
+					return version, nil
+				}
 			}
 		}
 	}

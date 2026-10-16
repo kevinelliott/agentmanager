@@ -24,7 +24,7 @@ func (s *SQLiteStore) AcquireRefreshLock(ctx context.Context, key string) (func(
 		return nil, err
 	}
 	name := fmt.Sprintf("%x.lock", sha256.Sum256([]byte(key)))
-	file, err := os.OpenFile(filepath.Join(dir, name), os.O_CREATE|os.O_RDWR, 0600)
+	file, err := os.OpenFile(filepath.Join(dir, name), os.O_CREATE|os.O_RDWR, 0600) // #nosec G304 -- Caller-owned database directory; lock basename is a SHA-256 digest, never a path.
 	if err != nil {
 		return nil, err
 	}

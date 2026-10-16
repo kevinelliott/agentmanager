@@ -156,8 +156,19 @@ func NPMConfigFingerprint() string {
 	}
 	for _, path := range paths {
 		_, _ = fmt.Fprintln(hash, path)
-		if data, err := os.ReadFile(path); err == nil {
-			_, _ = hash.Write(data)
+		// Configuration paths are explicitly chosen by npm's user/environment.
+		// Hash bounded regular-file contents; never return or log their bytes.
+		info, err := os.Stat(path)
+		if err != nil || !info.Mode().IsRegular() {
+			continue
+		}
+		_, _ = fmt.Fprintln(hash, info.Size(), info.ModTime().UnixNano())
+		file, err := os.Open(path) // #nosec G304 G703 -- Reads caller-selected npm configuration only; contents are hashed locally, never exposed.
+		if err == nil {
+			if _, err := io.Copy(hash, io.LimitReader(file, 64<<10)); err != nil {
+				_, _ = fmt.Fprint(hash, "unreadable")
+			}
+			_ = file.Close()
 		}
 	}
 	return fmt.Sprintf("%x", hash.Sum(nil))

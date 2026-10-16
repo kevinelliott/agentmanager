@@ -2,6 +2,7 @@ package orchestrator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -150,5 +151,22 @@ func TestLocalPhaseReportsWhetherVersionWorkIsDue(t *testing.T) {
 	}
 	if !result.NeedsVersionCheck || len(fetcher.calls) != 0 {
 		t.Fatal("expired versions were not deferred until after local display")
+	}
+}
+
+type unavailableLockStore struct{ *fakeStore }
+
+func (*unavailableLockStore) AcquireRefreshLock(context.Context, string) (func(), error) {
+	return nil, errors.New("locking unsupported")
+}
+
+func TestUnavailableCoordinationDoesNotPreventDetection(t *testing.T) {
+	store := &unavailableLockStore{fakeStore: &fakeStore{}}
+	det := &fakeDetector{installations: []*agent.Installation{makeInstallation("a")}}
+	fetcher := newFakeFetcher()
+	p := New(defaultConfig(), fakePlatform{}, store, &fakeCatalog{agents: []catalog.AgentDef{makeAgentDef("a")}}, det, fetcher)
+	result, err := p.DetectAndCheckVersions(t.Context(), Options{})
+	if err != nil || len(result.Installations) != 1 || det.calls != 1 || fetcher.calls["a"] != 1 {
+		t.Fatalf("optional coordination blocked a usable scan: %v", err)
 	}
 }
