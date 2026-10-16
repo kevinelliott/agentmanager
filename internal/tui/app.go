@@ -526,11 +526,11 @@ func (m Model) dashboardView() string {
 			if m.versionsLoading {
 				return styles.InfoMessage.Render("Checking updates…")
 			}
-			if m.versionsErr != nil {
-				return styles.ErrorMessage.Render("Check incomplete")
-			}
 			if updatesAvailable > 0 {
 				return styles.StatusUpdateAvailable.Render(fmt.Sprintf("%d available", updatesAvailable))
+			}
+			if m.versionsErr != nil {
+				return styles.ErrorMessage.Render("Check incomplete")
 			}
 			return styles.StatusInstalled.Render("All up to date")
 		}(),

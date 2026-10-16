@@ -102,6 +102,11 @@ func TestVersionFailurePreservesLocalResultsAndShowsError(t *testing.T) {
 	}
 	latest := agent.MustParseVersion("2.0.0")
 	refreshed := &agent.Installation{AgentID: "a", AgentName: "A", LatestVersion: &latest}
+	next, _ = m.Update(versionsLoadedMsg{agents: []*agent.Installation{refreshed}, err: failure})
+	m = next.(Model)
+	if !strings.Contains(m.dashboardView(), "1 available") || !strings.Contains(m.footerView(), failure.Error()) {
+		t.Fatal("partial failure hid successful update results or the warning")
+	}
 	next, _ = m.Update(versionsLoadedMsg{agents: []*agent.Installation{refreshed}})
 	m = next.(Model)
 	if m.versionsErr != nil || m.agents[0].LatestVersion == nil || strings.Contains(m.footerView(), failure.Error()) {
