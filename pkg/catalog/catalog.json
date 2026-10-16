@@ -1,7 +1,7 @@
 {
-  "version": "1.0.77",
+  "version": "1.0.78",
   "schema_version": 1,
-  "last_updated": "2026-08-11T00:00:00Z",
+  "last_updated": "2026-09-13T00:00:00Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -5692,6 +5692,70 @@
       "metadata": {
         "vendor": "UgOrange",
         "license": "Unspecified"
+      }
+    },
+    "yylo": {
+      "id": "yylo",
+      "name": "YYLO",
+      "description": "Command-line orchestrator for coding agents, repeatable workflows, and receipt-backed repository changes",
+      "homepage": "https://github.com/yylo-dev/yylo",
+      "repository": "https://github.com/yylo-dev/yylo",
+      "documentation": "https://github.com/yylo-dev/yylo#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@yylo/cli",
+          "command": "npm install -g @yylo/cli",
+          "update_cmd": "npm update -g @yylo/cli",
+          "uninstall_cmd": "npm uninstall -g @yylo/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=20.10",
+            "git"
+          ]
+        },
+        "npx": {
+          "method": "npx",
+          "package": "@yylo/cli",
+          "command": "npx @yylo/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "node>=20.10",
+            "git"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "yylo",
+          "yy"
+        ],
+        "version_cmd": "yylo --version",
+        "version_regex": "([\\d.]+)",
+        "signatures": {
+          "npm": {
+            "check_cmd": "npm list -g @yylo/cli --json",
+            "paths": []
+          }
+        }
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/yylo-dev/yylo/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "vendor": "YYLO",
+        "license": "MIT"
       }
     },
     "zeroshot": {
