@@ -176,7 +176,7 @@ Environment variables available to the script:
 			// Create plugins directory if needed
 			plat := platform.Current()
 			pluginsDir := filepath.Join(plat.GetConfigDir(), "plugins")
-			if err := os.MkdirAll(pluginsDir, 0755); err != nil {
+			if err := os.MkdirAll(pluginsDir, 0700); err != nil {
 				return fmt.Errorf("failed to create plugins directory: %w", err)
 			}
 
@@ -186,7 +186,7 @@ Environment variables available to the script:
 			if err != nil {
 				return fmt.Errorf("failed to marshal plugin config: %w", err)
 			}
-			if err := os.WriteFile(pluginPath, data, 0644); err != nil {
+			if err := config.WritePrivateFile(pluginPath, data); err != nil {
 				return fmt.Errorf("failed to write plugin file: %w", err)
 			}
 
@@ -214,6 +214,7 @@ func newPluginValidateCommand(cfg *config.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			path := args[0]
 
+			// #nosec G304 -- Reads a local plugin selected by the user; named plugin paths are validated before joining.
 			data, err := os.ReadFile(path)
 			if err != nil {
 				return fmt.Errorf("failed to read plugin file: %w", err)
@@ -259,10 +260,14 @@ func newPluginDisableCommand(cfg *config.Config) *cobra.Command {
 }
 
 func setPluginEnabled(name string, enabled bool) error {
+	if err := detector.ValidatePluginName(name); err != nil {
+		return err
+	}
 	plat := platform.Current()
 	pluginsDir := filepath.Join(plat.GetConfigDir(), "plugins")
 	pluginPath := filepath.Join(pluginsDir, name+".plugin.json")
 
+	// #nosec G304 -- Reads a local plugin selected by the user; named plugin paths are validated before joining.
 	data, err := os.ReadFile(pluginPath)
 	if err != nil {
 		return fmt.Errorf("plugin not found: %s", name)
@@ -279,7 +284,7 @@ func setPluginEnabled(name string, enabled bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal plugin config: %w", err)
 	}
-	if err := os.WriteFile(pluginPath, data, 0644); err != nil {
+	if err := config.WritePrivateFile(pluginPath, data); err != nil {
 		return fmt.Errorf("failed to write plugin file: %w", err)
 	}
 

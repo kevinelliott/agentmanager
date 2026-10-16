@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"sync"
@@ -154,7 +155,9 @@ func (s *unixServer) cleanupStaleSocket() error {
 	conn, err := net.DialTimeout("unix", s.socketPath, 500*time.Millisecond)
 	if err == nil {
 		// Another server is running, close our test connection
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			slog.Debug("close IPC probe", "error", err)
+		}
 		return errors.New("another server is already running on this socket")
 	}
 
@@ -226,7 +229,9 @@ func (s *unixServer) acceptLoop(ctx context.Context) {
 // handleConnection processes messages from a single connection.
 func (s *unixServer) handleConnection(ctx context.Context, conn *connection) {
 	defer func() {
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			slog.Debug("close IPC connection", "error", err)
+		}
 		s.connsMu.Lock()
 		delete(s.conns, conn)
 		s.connsMu.Unlock()
@@ -282,20 +287,25 @@ func (s *unixServer) Stop(ctx context.Context) error {
 	close(s.done)
 	s.mu.Unlock()
 
+	var closeErr error
 	// Close listener
 	if s.listener != nil {
-		s.listener.Close()
+		if err := s.listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			closeErr = errors.Join(closeErr, err)
+		}
 	}
 
 	// Close all connections
 	s.connsMu.Lock()
 	for conn := range s.conns {
-		conn.Close()
+		if err := conn.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+			closeErr = errors.Join(closeErr, err)
+		}
 	}
 	s.conns = make(map[*connection]bool)
 	s.connsMu.Unlock()
 
-	return nil
+	return closeErr
 }
 
 // SetHandler sets the message handler.
@@ -450,8 +460,14 @@ func (c *unixClient) Send(ctx context.Context, msg *Message) (*Message, error) {
 
 	// Set deadline from context
 	if deadline, ok := ctx.Deadline(); ok {
-		conn.SetDeadline(deadline)
-		defer conn.SetDeadline(time.Time{})
+		if err := conn.SetDeadline(deadline); err != nil {
+			return nil, fmt.Errorf("set IPC deadline: %w", err)
+		}
+		defer func() {
+			if err := conn.SetDeadline(time.Time{}); err != nil {
+				slog.Debug("reset IPC deadline", "error", err)
+			}
+		}()
 	}
 
 	if err := conn.Send(msg); err != nil {

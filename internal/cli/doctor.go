@@ -269,6 +269,7 @@ func checkCommand(ctx context.Context, name, cmd string, args []string, installH
 	cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	// #nosec G204 -- Command and arguments come from the hardcoded prerequisite list; no shell is used.
 	execCmd := exec.CommandContext(cmdCtx, cmd, args...)
 	out, err := execCmd.CombinedOutput()
 

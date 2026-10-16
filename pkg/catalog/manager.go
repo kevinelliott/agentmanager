@@ -429,6 +429,7 @@ func (m *Manager) loadEmbedded() (*Catalog, error) {
 	)
 
 	for _, path := range paths {
+		// #nosec G304 -- Loads a catalog from explicit local configuration or known installation locations.
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue

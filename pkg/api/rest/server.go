@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -736,8 +737,16 @@ func (s *Server) handleGetChangelog(w http.ResponseWriter, r *http.Request) {
 // Helper methods
 
 func (s *Server) respondJSON(w http.ResponseWriter, status int, data interface{}) {
+	body, err := json.Marshal(data)
+	if err != nil {
+		slog.Error("encode API response", "error", err)
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(data)
+	if _, err := w.Write(append(body, '\n')); err != nil {
+		slog.Debug("write API response", "error", err)
+	}
 }
 
 func (s *Server) respondError(w http.ResponseWriter, status int, message string, err error) {
@@ -748,8 +757,7 @@ func (s *Server) respondError(w http.ResponseWriter, status int, message string,
 	if err != nil {
 		response["details"] = err.Error()
 	}
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(response)
+	s.respondJSON(w, status, response)
 }
 
 func (s *Server) installationToMap(inst *agent.Installation) map[string]interface{} {
@@ -802,7 +810,9 @@ func (s *Server) catalogAgentToMap(def *catalog.AgentDef) map[string]interface{}
 // handleOpenAPISpec serves the OpenAPI specification in YAML format.
 func (s *Server) handleOpenAPISpec(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-yaml")
-	w.Write([]byte(openAPISpec))
+	if _, err := w.Write([]byte(openAPISpec)); err != nil {
+		slog.Debug("write OpenAPI specification", "error", err)
+	}
 }
 
 // handleOpenAPISpecJSON serves the OpenAPI specification in JSON format.

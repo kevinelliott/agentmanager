@@ -1536,6 +1536,7 @@ func verifyAgentHealth(ctx context.Context, execPath string) (bool, string) {
 
 	for _, flag := range flags {
 		cmdCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		// #nosec G204 -- Health check runs the detected executable with a fixed version/help flag, without a shell.
 		cmd := exec.CommandContext(cmdCtx, execPath, flag)
 		err := cmd.Run()
 		cancel()

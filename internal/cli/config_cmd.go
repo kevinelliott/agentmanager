@@ -248,7 +248,7 @@ Examples:
 			}
 
 			filename := args[0]
-			if err := os.WriteFile(filename, data, 0644); err != nil {
+			if err := config.WritePrivateFile(filename, data); err != nil {
 				return fmt.Errorf("failed to write config file: %w", err)
 			}
 
@@ -280,6 +280,7 @@ Examples:
 		RunE: func(cmd *cobra.Command, args []string) error {
 			filename := args[0]
 
+			// #nosec G304 -- Import intentionally reads the file explicitly selected by the CLI user.
 			data, err := os.ReadFile(filename)
 			if err != nil {
 				return fmt.Errorf("failed to read config file: %w", err)

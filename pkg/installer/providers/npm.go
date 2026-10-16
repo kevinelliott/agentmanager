@@ -116,6 +116,7 @@ func (p *NPMProvider) Update(ctx context.Context, inst *agent.Installation, agen
 	// Run update command
 	var stdout, stderr bytes.Buffer
 	progress := ProgressWriter(ctx)
+	// #nosec G204 -- Catalog-selected package is passed as one npm argument, without a shell.
 	cmd := exec.CommandContext(ctx, "npm", "update", "-g", packageName)
 	cmd.Stdout = io.MultiWriter(&stdout, progress)
 	cmd.Stderr = io.MultiWriter(&stderr, progress)
@@ -155,6 +156,7 @@ func (p *NPMProvider) Uninstall(ctx context.Context, inst *agent.Installation, m
 	}
 
 	var stderr bytes.Buffer
+	// #nosec G204 -- Catalog-selected package is passed as one npm argument, without a shell.
 	cmd := exec.CommandContext(ctx, "npm", "uninstall", "-g", packageName)
 	cmd.Stderr = &stderr
 
@@ -167,6 +169,7 @@ func (p *NPMProvider) Uninstall(ctx context.Context, inst *agent.Installation, m
 
 // getInstalledVersion gets the installed version of an npm package.
 func (p *NPMProvider) getInstalledVersion(ctx context.Context, packageName string) agent.Version {
+	// #nosec G204 -- Catalog-selected package is passed as one npm argument, without a shell.
 	cmd := exec.CommandContext(ctx, "npm", "list", "-g", "--depth=0", packageName)
 	output, err := cmd.Output()
 	if err != nil {

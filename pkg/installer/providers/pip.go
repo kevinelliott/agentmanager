@@ -69,6 +69,7 @@ func (p *PipProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 
 	var stdout, stderr bytes.Buffer
 	progress := ProgressWriter(ctx)
+	// #nosec G204 -- Manager comes from the pip/pip3/pipx/uv builders and arguments are passed without a shell.
 	cmd := exec.CommandContext(ctx, manager, args...)
 	cmd.Stdout = io.MultiWriter(&stdout, progress)
 	cmd.Stderr = io.MultiWriter(&stderr, progress)
@@ -107,6 +108,7 @@ func (p *PipProvider) Update(ctx context.Context, inst *agent.Installation, agen
 
 	var stdout, stderr bytes.Buffer
 	progress := ProgressWriter(ctx)
+	// #nosec G204 -- Manager comes from the pip/pip3/pipx/uv builders and arguments are passed without a shell.
 	cmd := exec.CommandContext(ctx, manager, args...)
 	cmd.Stdout = io.MultiWriter(&stdout, progress)
 	cmd.Stderr = io.MultiWriter(&stderr, progress)
@@ -139,6 +141,7 @@ func (p *PipProvider) Uninstall(ctx context.Context, inst *agent.Installation, m
 	}
 
 	var stderr bytes.Buffer
+	// #nosec G204 -- Manager comes from the pip/pip3/pipx/uv builders and arguments are passed without a shell.
 	cmd := exec.CommandContext(ctx, manager, args...)
 	cmd.Stderr = &stderr
 
@@ -267,6 +270,7 @@ func (p *PipProvider) getInstalledVersion(ctx context.Context, manager, packageN
 	case "uv":
 		cmd = exec.CommandContext(ctx, "uv", "tool", "list")
 	default:
+		// #nosec G204 -- Manager comes from the pip/pip3/pipx/uv builders and arguments are passed without a shell.
 		cmd = exec.CommandContext(ctx, manager, "show", packageName)
 	}
 

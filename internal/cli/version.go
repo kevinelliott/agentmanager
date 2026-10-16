@@ -16,7 +16,7 @@ func NewVersionCommand(version, commit, date string) *cobra.Command {
 		Use:   "version",
 		Short: "Show version information",
 		Long:  `Display the version, commit hash, build date, and platform information.`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			info := VersionInfo{
 				Version:   version,
 				Commit:    commit,
@@ -28,8 +28,7 @@ func NewVersionCommand(version, commit, date string) *cobra.Command {
 			if outputJSON {
 				encoder := json.NewEncoder(cmd.OutOrStdout())
 				encoder.SetIndent("", "  ")
-				encoder.Encode(info)
-				return
+				return encoder.Encode(info)
 			}
 
 			fmt.Printf("AgentManager %s\n", info.Version)
@@ -37,6 +36,7 @@ func NewVersionCommand(version, commit, date string) *cobra.Command {
 			fmt.Printf("  Built:      %s\n", info.BuildDate)
 			fmt.Printf("  Go version: %s\n", info.GoVersion)
 			fmt.Printf("  Platform:   %s\n", info.Platform)
+			return nil
 		},
 	}
 

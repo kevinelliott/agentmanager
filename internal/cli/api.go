@@ -116,6 +116,7 @@ func newAPISpecCommand(cfg *config.Config) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Read the full spec from the api directory if available
 			specPath := filepath.Join("api", "openapi.yaml")
+			// #nosec G304 -- Reads the OpenAPI spec from the documented current-directory location.
 			if data, err := os.ReadFile(specPath); err == nil {
 				fmt.Print(string(data))
 				return nil
