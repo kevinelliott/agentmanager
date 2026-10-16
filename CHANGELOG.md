@@ -14,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rmux, Atomic Agent, Penguin Harness, KlaatCode, BBARIT Agent, Claude Code
   Router, skills, and ccusage.
 - YYLO agent in the catalog (now 110 total).
+- Fifteen researched CLI and TUI additions (now 125 total): MiniMax Code,
+  Command Code, Agent of Empires, TUIOS, DeepSeek Harness, ZCode, WhipCode,
+  FrontierAgent, DSCODE, agent-browser, Engram, jevgrep, Cloudflare cf, Hunk,
+  and Beads. Each new entry has at least 100 GitHub stars, verified on
+  October 16, 2026, with the count and verification time recorded in metadata.
+  Install methods include explicit preview channels and a ZCode source build.
+- Required agent-browser runtime setup runs after npm and Homebrew installs and
+  updates, with setup failures reported. Linux system libraries are an explicit
+  user step to keep package operations free of hidden sudo prompts.
 
 ### Performance
 

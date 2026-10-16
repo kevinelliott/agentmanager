@@ -196,6 +196,12 @@ To add a new AI CLI agent to the catalog:
    }
    ```
 
+   npm and Homebrew methods can declare required runtime setup in `metadata`:
+   `post_install_cmd` runs after successful installs and updates. A platform key
+   such as `post_install_cmd_linux` overrides it on that platform. Setup commands
+   use the platform shell, share cancellation and verbose output, and must
+   succeed before the operation is reported as successful.
+
 5. **Test detection** by running:
    ```bash
    make build

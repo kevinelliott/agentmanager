@@ -95,6 +95,10 @@ func (p *BrewProvider) Install(ctx context.Context, agentDef catalog.AgentDef, m
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("brew install failed: %w\n%s%s", err, stderr.String(), FormatInstallError("brew", "install", stderr.String()))
 	}
+	setupOutput, err := runPostInstall(ctx, p.platform, method)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get installed version
 	version := p.getInstalledVersion(ctx, packageName, isCask)
@@ -109,7 +113,7 @@ func (p *BrewProvider) Install(ctx context.Context, agentDef catalog.AgentDef, m
 		Version:        version,
 		ExecutablePath: execPath,
 		Duration:       time.Since(start),
-		Output:         stdout.String(),
+		Output:         stdout.String() + setupOutput,
 	}, nil
 }
 
@@ -143,6 +147,10 @@ func (p *BrewProvider) Update(ctx context.Context, inst *agent.Installation, age
 			return nil, fmt.Errorf("brew upgrade failed: %w\n%s%s", err, stderr.String(), FormatInstallError("brew", "upgrade", stderr.String()))
 		}
 	}
+	setupOutput, err := runPostInstall(ctx, p.platform, method)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get new version
 	toVersion := p.getInstalledVersion(ctx, packageName, isCask)
@@ -154,7 +162,7 @@ func (p *BrewProvider) Update(ctx context.Context, inst *agent.Installation, age
 		FromVersion:    fromVersion,
 		Version:        toVersion,
 		Duration:       time.Since(start),
-		Output:         stdout.String(),
+		Output:         stdout.String() + setupOutput,
 		WasUpdated:     toVersion.IsNewerThan(fromVersion),
 		ExecutablePath: inst.ExecutablePath,
 	}, nil
