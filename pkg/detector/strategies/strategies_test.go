@@ -704,7 +704,7 @@ func TestParseUVTextOutput_EdgeCases(t *testing.T) {
 // ========== Binary Methods Variable Test ==========
 
 func TestBinaryMethods(t *testing.T) {
-	expected := []string{"native", "binary", "curl"}
+	expected := []string{"native", "binary", "curl", "cargo"}
 	if len(binaryMethods) != len(expected) {
 		t.Errorf("binaryMethods length = %d, want %d", len(binaryMethods), len(expected))
 	}

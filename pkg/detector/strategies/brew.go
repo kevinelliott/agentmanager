@@ -115,8 +115,10 @@ func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([
 			continue
 		}
 
-		// Check if it's a cask
-		if cask, found := casks[strings.ToLower(packageName)]; found {
+		// Cask inventory uses the short token even when installation needs
+		// a fully qualified tap/package name.
+		caskName := packageName[strings.LastIndex(packageName, "/")+1:]
+		if cask, found := casks[strings.ToLower(caskName)]; found {
 			version, _ := agent.ParseVersion(agent.CleanCaskVersion(cask.InstalledVersion))
 
 			installations = append(installations, &agent.Installation{

@@ -325,7 +325,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | kubectl-ai | `kubectl-ai` | krew, native, nix |
 | late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
-| Leviathan | `leviathan` | native |
+| Leviathan | `leviathan` | cargo |
 | little-coder | `little-coder` | native, npm |
 | macOS Harness | `macos-harness` | uv |
 | Mastra Code | `mastracode` | npm |
@@ -376,7 +376,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | tsk | `tsk` | brew, native |
 | TUIOS | `tuios` | brew, native |
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
-| Unreal Agent | `unreal-agent` | brew-cask, native |
+| Unreal Agent | `unreal-agent` | brew, native |
 | Valyu CLI | `valyu-cli` | npm |
 | VibeMux | `vibemux` | binary, native |
 | VT Code | `vtcode` | brew, native |

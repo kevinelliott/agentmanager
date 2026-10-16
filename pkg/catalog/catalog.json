@@ -1,7 +1,7 @@
 {
   "version": "1.0.81",
   "schema_version": 1,
-  "last_updated": "2026-10-16T13:40:28Z",
+  "last_updated": "2026-10-16T13:50:40Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -6936,15 +6936,18 @@
       "repository": "https://github.com/unreallabsai/unreal-agent",
       "documentation": "https://github.com/unreallabsai/unreal-agent#readme",
       "install_methods": {
-        "brew-cask": {
-          "method": "brew-cask",
+        "brew": {
+          "method": "brew",
           "package": "unreallabsai/tap/unreal-agent",
           "command": "brew install --cask unreallabsai/tap/unreal-agent",
           "update_cmd": "brew upgrade --cask unreallabsai/tap/unreal-agent",
           "uninstall_cmd": "brew uninstall --cask unreallabsai/tap/unreal-agent",
           "platforms": [
             "darwin"
-          ]
+          ],
+          "metadata": {
+            "type": "cask"
+          }
         },
         "native": {
           "method": "native",
@@ -7535,8 +7538,8 @@
       "repository": "https://github.com/elstongun/leviathan",
       "documentation": "https://github.com/elstongun/leviathan#readme",
       "install_methods": {
-        "native": {
-          "method": "native",
+        "cargo": {
+          "method": "cargo",
           "command": "cargo install --locked leviathan-index",
           "platforms": [
             "darwin",
@@ -7548,10 +7551,7 @@
             "cargo"
           ],
           "update_cmd": "cargo install --locked --force leviathan-index",
-          "uninstall_cmd": "cargo uninstall leviathan-index",
-          "metadata": {
-            "installer_type": "source_build"
-          }
+          "uninstall_cmd": "cargo uninstall leviathan-index"
         }
       },
       "detection": {
@@ -7855,7 +7855,7 @@
       "install_methods": {
         "native": {
           "method": "native",
-          "command": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\nif [ -e \"$HOME/.local/bin/graft\" ] || [ -L \"$HOME/.local/bin/graft\" ]; then\n  printf '%s\\n' 'graft already exists in ~/.local/bin; use its existing installation to update' >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_open_scion_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_open_scion_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/open_scion.git\"\n  git -C \"$agentmgr_open_scion_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/feder-cr/open_scion.git \"$agentmgr_open_scion_source\"\nfi\ncd \"$agentmgr_open_scion_source\"\nmake build\ntest -x \"$agentmgr_open_scion_source/_build/bin/graft\"\nln -s \"$agentmgr_open_scion_source/_build/bin/graft\" \"$HOME/.local/bin/graft\"\n",
+          "command": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\nif [ -e \"$HOME/.local/bin/graft\" ] || [ -L \"$HOME/.local/bin/graft\" ]; then\n  printf '%s\\n' 'graft already exists in ~/.local/bin; use its existing installation to update' >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_open_scion_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_open_scion_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/git-ai.git\"\n  git -C \"$agentmgr_open_scion_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/feder-cr/git-ai.git \"$agentmgr_open_scion_source\"\nfi\ncd \"$agentmgr_open_scion_source\"\nmake build\ntest -x \"$agentmgr_open_scion_source/_build/bin/graft\"\nln -s \"$agentmgr_open_scion_source/_build/bin/graft\" \"$HOME/.local/bin/graft\"\n",
           "platforms": [
             "darwin",
             "linux"
@@ -7868,7 +7868,7 @@
             "meson",
             "ninja"
           ],
-          "update_cmd": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\ntest \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/open_scion.git\"\ncd \"$agentmgr_open_scion_source\"\ngit pull --ff-only\nmake build",
+          "update_cmd": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\ntest \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/git-ai.git\"\ncd \"$agentmgr_open_scion_source\"\ngit pull --ff-only\nmake build",
           "metadata": {
             "installer_type": "source_build",
             "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion"
@@ -7892,7 +7892,7 @@
         "github_stars": "1031",
         "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
         "recent_activity_date": "2026-10-15",
-        "recent_activity_url": "https://github.com/feder-cr/open_scion/releases/tag/v0.1.0",
+        "recent_activity_url": "https://github.com/feder-cr/git-ai/releases/tag/v0.1.0",
         "vendor": "feder-cr",
         "install_note": "Early v0.1.0 source build; not Anthropic Scion. Builds bundled Git and links graft into ~/.local/bin. Requires Go 1.26, a C toolchain, Meson and Ninja. Configure and run a Graft server separately; no version probe is run."
       }
