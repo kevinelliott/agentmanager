@@ -77,6 +77,10 @@ func (p *NPMProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("npm install failed: %w\n%s%s", err, stderr.String(), formatNPMPermissionHint(stderr.String()))
 	}
+	setupOutput, err := runPostInstall(ctx, p.platform, method)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get installed version
 	version := p.getInstalledVersion(ctx, packageName)
@@ -91,7 +95,7 @@ func (p *NPMProvider) Install(ctx context.Context, agentDef catalog.AgentDef, me
 		Version:        version,
 		ExecutablePath: execPath,
 		Duration:       time.Since(start),
-		Output:         stdout.String(),
+		Output:         stdout.String() + setupOutput,
 	}, nil
 }
 
@@ -119,6 +123,10 @@ func (p *NPMProvider) Update(ctx context.Context, inst *agent.Installation, agen
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("npm update failed: %w\n%s%s", err, stderr.String(), formatNPMPermissionHint(stderr.String()))
 	}
+	setupOutput, err := runPostInstall(ctx, p.platform, method)
+	if err != nil {
+		return nil, err
+	}
 
 	// Get new version
 	toVersion := p.getInstalledVersion(ctx, packageName)
@@ -130,7 +138,7 @@ func (p *NPMProvider) Update(ctx context.Context, inst *agent.Installation, agen
 		FromVersion:    fromVersion,
 		Version:        toVersion,
 		Duration:       time.Since(start),
-		Output:         stdout.String(),
+		Output:         stdout.String() + setupOutput,
 		WasUpdated:     toVersion.IsNewerThan(fromVersion),
 		ExecutablePath: inst.ExecutablePath,
 	}, nil

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and Beads. Each new entry has at least 100 GitHub stars, verified on
   October 16, 2026, with the count and verification time recorded in metadata.
   Install methods include explicit preview channels and a ZCode source build.
+- Required agent-browser runtime setup runs after npm and Homebrew installs and
+  updates, with platform-specific setup commands and setup failures reported.
 
 ### Performance
 
