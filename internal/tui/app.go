@@ -16,6 +16,7 @@ import (
 
 	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/tui/styles"
+	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -65,6 +66,7 @@ type Model struct {
 	catalogLoading  bool
 	catalogErr      error
 	versionsLoading bool
+	versionsErr     error
 	catalogRows     []string
 	catalogOffset   int
 
@@ -210,10 +212,7 @@ func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
 	ctx, cancel := context.WithTimeout(m.ctx, 60*time.Second)
 	defer cancel()
 
-	// Run the shared detect+version-check pipeline. Version-check errors are
-	// intentionally dropped here; the TUI surfaces them indirectly via
-	// HasUpdate() being false for unchecked installations, matching the
-	// previous behavior.
+	// Show the local snapshot before the separate registry metadata phase.
 	det := detector.New(m.platform)
 	instMgr := installer.NewManager(m.platform)
 	pipeline := orchestrator.NewFromManagers(m.config, m.platform, m.store, m.catMgr, det, instMgr)
@@ -237,7 +236,10 @@ func (m Model) loadVersions() tea.Msg {
 	if err != nil {
 		return versionsLoadedMsg{err: err}
 	}
-	return versionsLoadedMsg{agents: res.Installations}
+	if errs := versionfetch.NonNilErrors(res.VersionCheckErrors); len(errs) > 0 {
+		err = fmt.Errorf("%d update check(s) failed: %w", len(errs), errs[0])
+	}
+	return versionsLoadedMsg{agents: res.Installations, err: err}
 }
 
 type versionsLoadedMsg struct {
@@ -298,6 +300,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.err = msg.err
 		} else {
 			m.err = nil
+			m.versionsErr = nil
 			m.agents = msg.agents
 			if msg.catalog != nil {
 				m.catalog = msg.catalog
@@ -312,7 +315,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case versionsLoadedMsg:
 		m.versionsLoading = false
-		if msg.err == nil {
+		m.versionsErr = msg.err
+		if msg.agents != nil {
 			m.agents = msg.agents
 			m.updateList()
 			m.rebuildCatalogRows()
@@ -480,6 +484,8 @@ func (m Model) footerView() string {
 
 	if m.versionsLoading {
 		helpKeys = append(helpKeys, styles.Help.Render(m.spinner.View()+" Checking updates…"))
+	} else if m.versionsErr != nil {
+		helpKeys = append(helpKeys, styles.ErrorMessage.Render("Update check failed: "+m.versionsErr.Error()))
 	}
 	help := strings.Join(helpKeys, "  ")
 
@@ -517,6 +523,12 @@ func (m Model) dashboardView() string {
 		styles.Subtitle.Render("Agent Statistics"),
 		styles.Version.Render(fmt.Sprintf("%d", installed)),
 		func() string {
+			if m.versionsLoading {
+				return styles.InfoMessage.Render("Checking updates…")
+			}
+			if m.versionsErr != nil {
+				return styles.ErrorMessage.Render("Check incomplete")
+			}
 			if updatesAvailable > 0 {
 				return styles.StatusUpdateAvailable.Render(fmt.Sprintf("%d available", updatesAvailable))
 			}

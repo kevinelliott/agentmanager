@@ -298,7 +298,7 @@ func (s *Server) getAgentsWithCache(r *http.Request, defs []catalog.AgentDef) ([
 		cfg.Detection.CacheDuration = time.Hour
 	}
 	pipeline := orchestrator.NewFromManagers(cfg, s.platform, s.store, s.catalog, s.detector, s.installer)
-	result, err := pipeline.DetectAndCheckVersions(r.Context(), orchestrator.Options{SkipVersionCheck: true, ForceRefresh: r.URL.Query().Get("refresh") == queryTrue})
+	result, err := pipeline.DetectAndCheckVersions(r.Context(), orchestrator.Options{SkipVersionCheck: true, TolerateCatalogError: true, ForceRefresh: r.URL.Query().Get("refresh") == queryTrue})
 	if err != nil {
 		return nil, err
 	}

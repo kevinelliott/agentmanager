@@ -55,7 +55,11 @@ func (r *npmRegistry) latest(ctx context.Context, name string) (agent.Version, b
 	r.mu.Lock()
 	if r.fingerprint != identity || time.Since(r.checkedAt) >= registryLatestVersionTTL {
 		data, err := r.config(ctx)
-		r.public = err == nil && publicNPMConfig(data)
+		if err != nil || ctx.Err() != nil {
+			r.mu.Unlock()
+			return agent.Version{}, false
+		}
+		r.public = publicNPMConfig(data)
 		r.fingerprint = identity
 		r.checkedAt = time.Now()
 	}

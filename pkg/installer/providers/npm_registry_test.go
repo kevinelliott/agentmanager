@@ -2,6 +2,7 @@ package providers
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -75,6 +76,35 @@ func TestCustomNPMRegistryNeverUsesPublicEndpoint(t *testing.T) {
 	}
 	if _, ok := registry.latest(t.Context(), "@private/package"); ok {
 		t.Fatal("custom registry should use npm fallback")
+	}
+}
+
+func TestNPMRegistryRetriesFailedConfiguration(t *testing.T) {
+	for _, failure := range []error{errors.New("temporary npm failure"), context.Canceled} {
+		t.Run(failure.Error(), func(t *testing.T) {
+			t.Setenv("NODE_EXTRA_CA_CERTS", "")
+			configCalls, requests := 0, 0
+			registry := &npmRegistry{
+				config: func(context.Context) ([]byte, error) {
+					configCalls++
+					if configCalls == 1 {
+						return nil, failure
+					}
+					return []byte(`{"registry":"https://registry.npmjs.org/"}`), nil
+				},
+				client: &http.Client{Transport: registryRoundTrip(func(*http.Request) (*http.Response, error) {
+					requests++
+					return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(strings.NewReader(`{"version":"2.3.4"}`)), Header: make(http.Header)}, nil
+				})},
+			}
+			if _, ok := registry.latest(t.Context(), "example"); ok || requests != 0 {
+				t.Fatal("failed configuration must use npm fallback")
+			}
+			version, ok := registry.latest(t.Context(), "example")
+			if !ok || version.String() != "2.3.4" || configCalls != 2 || requests != 1 {
+				t.Fatalf("configuration failure blocked recovery: version=%v ok=%v config=%d requests=%d", version, ok, configCalls, requests)
+			}
+		})
 	}
 }
 

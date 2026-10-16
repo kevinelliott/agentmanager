@@ -2,6 +2,7 @@ package tui
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -79,6 +80,32 @@ func TestCatalogScrollAndResizeKeepRowsVisible(t *testing.T) {
 	m = next.(Model)
 	if m.catalogOffset+m.catalogPageSize() > len(m.catalogRows) {
 		t.Fatal("resize left an invalid viewport")
+	}
+}
+
+func TestVersionFailurePreservesLocalResultsAndShowsError(t *testing.T) {
+	m := New(config.Default(), platform.Current(), nil)
+	defer m.cancel()
+	m.loading = false
+	m.width = 120
+	m.versionsLoading = true
+	inst := &agent.Installation{AgentID: "a", AgentName: "A"}
+	m.agents = []*agent.Installation{inst}
+	failure := errors.New("catalog unavailable")
+	next, _ := m.Update(versionsLoadedMsg{err: failure})
+	m = next.(Model)
+	if m.versionsLoading || !errors.Is(m.versionsErr, failure) || len(m.agents) != 1 || m.agents[0] != inst {
+		t.Fatal("background failure discarded local results or error")
+	}
+	if strings.Contains(m.dashboardView(), "All up to date") || !strings.Contains(m.footerView(), failure.Error()) {
+		t.Fatal("failed metadata check was presented as up to date")
+	}
+	latest := agent.MustParseVersion("2.0.0")
+	refreshed := &agent.Installation{AgentID: "a", AgentName: "A", LatestVersion: &latest}
+	next, _ = m.Update(versionsLoadedMsg{agents: []*agent.Installation{refreshed}})
+	m = next.(Model)
+	if m.versionsErr != nil || m.agents[0].LatestVersion == nil || strings.Contains(m.footerView(), failure.Error()) {
+		t.Fatal("successful metadata retry did not clear the failure")
 	}
 }
 
