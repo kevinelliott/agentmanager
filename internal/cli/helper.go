@@ -64,6 +64,7 @@ to agent status and updates.`,
 
 			if foreground {
 				fmt.Println("Starting helper in foreground...")
+				// #nosec G204 -- Launches the helper found in PATH or known install locations, without shell interpolation.
 				c := exec.Command(helperPath)
 				c.Stdout = os.Stdout
 				c.Stderr = os.Stderr
@@ -78,9 +79,11 @@ to agent status and updates.`,
 			var c *exec.Cmd
 			if isAppBundle {
 				// Use 'open' command for .app bundles on macOS
+				// #nosec G204 -- Launches the helper found in PATH or known install locations, without shell interpolation.
 				c = exec.Command("open", helperPath)
 			} else {
 				// Start helper as background process
+				// #nosec G204 -- Launches the helper found in PATH or known install locations, without shell interpolation.
 				c = exec.Command(helperPath)
 				c.Stdout = nil
 				c.Stderr = nil
@@ -339,6 +342,7 @@ func findHelperBinary() (string, error) {
 
 	// Check each path
 	for _, path := range paths {
+		// #nosec G703 -- Only probes user-controlled helper install locations with Stat; no file content is read or written.
 		if _, err := os.Stat(path); err == nil {
 			return path, nil
 		}

@@ -146,6 +146,7 @@ func (s *PluginStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) 
 		// Run inline script
 		shell := s.platform.GetShell()
 		shellArg := s.platform.GetShellArg()
+		// #nosec G204 -- Opt-in local plugins intentionally execute the user-configured detection command or script.
 		cmd = exec.CommandContext(ctx, shell, shellArg, s.config.DetectScript)
 	} else if s.config.DetectCommand != "" {
 		// Run external command
@@ -155,7 +156,8 @@ func (s *PluginStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) 
 		if len(parts) == 0 {
 			return nil, fmt.Errorf("empty detect command")
 		}
-		cmd = exec.CommandContext(ctx, parts[0], parts[1:]...) //nolint:gosec // intentional: plugins execute user-defined commands
+		// #nosec G204 -- Opt-in local plugins intentionally execute the user-configured detection command or script.
+		cmd = exec.CommandContext(ctx, parts[0], parts[1:]...)
 	} else {
 		return nil, fmt.Errorf("plugin %s has no detect_command or detect_script", s.config.Name)
 	}
@@ -306,6 +308,7 @@ func (r *PluginRegistry) LoadPluginsFromDir(dir string) error {
 		}
 
 		path := filepath.Join(dir, name)
+		// #nosec G304 -- Reads a plugin directory entry; entry names cannot contain path separators.
 		data, err := os.ReadFile(path)
 		if err != nil {
 			continue
@@ -326,17 +329,25 @@ func (r *PluginRegistry) LoadPluginsFromDir(dir string) error {
 
 // ValidatePlugin validates a plugin configuration.
 func ValidatePlugin(cfg PluginConfig) error {
-	if cfg.Name == "" {
-		return fmt.Errorf("plugin name is required")
-	}
-	if !regexp.MustCompile(`^[a-z][a-z0-9_-]*$`).MatchString(cfg.Name) {
-		return fmt.Errorf("plugin name must start with a letter and contain only lowercase letters, numbers, hyphens, and underscores")
+	if err := ValidatePluginName(cfg.Name); err != nil {
+		return err
 	}
 	if cfg.Method == "" {
 		return fmt.Errorf("plugin method is required")
 	}
 	if cfg.DetectCommand == "" && cfg.DetectScript == "" {
 		return fmt.Errorf("plugin must have detect_command or detect_script")
+	}
+	return nil
+}
+
+// ValidatePluginName ensures a plugin name is a single safe filename component.
+func ValidatePluginName(name string) error {
+	if name == "" {
+		return fmt.Errorf("plugin name is required")
+	}
+	if !regexp.MustCompile(`^[a-z][a-z0-9_-]*$`).MatchString(name) {
+		return fmt.Errorf("plugin name must start with a letter and contain only lowercase letters, numbers, hyphens, and underscores")
 	}
 	return nil
 }

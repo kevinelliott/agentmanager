@@ -4,6 +4,7 @@ package systray
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -391,6 +392,17 @@ func (a *App) shutdownWatcher() {
 	systray.Quit()
 }
 
+// reportError records asynchronous failures that cannot be returned to a caller.
+func (a *App) reportError(operation string, err error) {
+	if err != nil {
+		slog.Error(operation, "error", err)
+	}
+}
+
+func (a *App) notify(title, message string) {
+	a.reportError("show desktop notification", a.platform.ShowNotification(title, message))
+}
+
 // onExit is called when systray is exiting.
 func (a *App) onExit() {
 	// Make sure the shutdown signal is set so any goroutines selecting on
@@ -413,7 +425,7 @@ func (a *App) onExit() {
 
 	// Stop REST server
 	if a.restServer != nil {
-		a.restServer.Stop(ctx)
+		a.reportError("stop REST server", a.restServer.Stop(ctx))
 	}
 
 	// Stop gRPC server: prefer GracefulStop with a short timeout; fall back
@@ -436,7 +448,7 @@ func (a *App) onExit() {
 
 	// Stop IPC server (drains in-flight handlers before returning).
 	if a.ipcServer != nil {
-		a.ipcServer.Stop(ctx)
+		a.reportError("stop IPC server", a.ipcServer.Stop(ctx))
 	}
 
 	// Wait for our own background goroutines to exit, but bound the wait so
@@ -528,10 +540,10 @@ func (a *App) backgroundLoop() {
 		case <-a.ctx.Done():
 			return
 		case <-refreshTicker.C:
-			a.refreshAgents(a.ctx)
+			a.reportError("refresh agents", a.refreshAgents(a.ctx))
 		case <-checkTicker.C:
 			if a.config.Updates.AutoCheck {
-				a.checkUpdates(a.ctx)
+				a.reportError("check updates", a.checkUpdates(a.ctx))
 			}
 		}
 	}
@@ -632,7 +644,7 @@ func (a *App) checkUpdates(ctx context.Context) error {
 	a.agentsMu.RUnlock()
 
 	if updatesAvailable > 0 && a.config.Updates.Notify {
-		a.platform.ShowNotification(
+		a.notify(
 			"Updates Available",
 			fmt.Sprintf("%d agent update(s) available", updatesAvailable),
 		)
@@ -847,7 +859,7 @@ func (a *App) showAgentDetails(inst agent.Installation) {
 		a.showWindowsAgentDialog(inst, details, hasUpdate)
 	default:
 		// Fallback: show notification
-		a.platform.ShowNotification(inst.AgentName, details)
+		a.notify(inst.AgentName, details)
 	}
 }
 
@@ -875,6 +887,7 @@ return "close"
 `, details, inst.AgentName)
 	}
 
+	// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 	cmd := exec.Command("osascript", "-e", script)
 	output, err := cmd.Output()
 	if err != nil {
@@ -894,13 +907,15 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 	if _, err := exec.LookPath("zenity"); err == nil {
 		var cmd *exec.Cmd
 		if hasUpdate {
-			cmd = exec.Command("zenity", "--question", //nolint:gosec // G204: agent names from trusted catalog
+			// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
+			cmd = exec.Command("zenity", "--question",
 				"--title="+inst.AgentName,
 				"--text="+details+"\n\nDo you want to update?",
 				"--ok-label=Update",
 				"--cancel-label=Close")
 		} else {
-			cmd = exec.Command("zenity", "--info", //nolint:gosec // G204: agent names from trusted catalog
+			// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
+			cmd = exec.Command("zenity", "--info",
 				"--title="+inst.AgentName,
 				"--text="+details)
 		}
@@ -914,13 +929,14 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 	// Try kdialog
 	if _, err := exec.LookPath("kdialog"); err == nil {
 		if hasUpdate {
-			//nolint:gosec // G204: agent names come from trusted catalog, not user input
+			// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 			cmd := exec.Command("kdialog", "--yesno", details+"\n\nDo you want to update?", "--title", inst.AgentName)
 			err := cmd.Run()
 			if err == nil {
 				go a.updateSingleAgent(inst)
 			}
 		} else {
+			// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 			cmd := exec.Command("kdialog", "--msgbox", details, "--title", inst.AgentName)
 			_ = cmd.Run()
 		}
@@ -928,7 +944,7 @@ func (a *App) showLinuxAgentDialog(inst agent.Installation, details string, hasU
 	}
 
 	// Fallback to notification
-	a.platform.ShowNotification(inst.AgentName, details)
+	a.notify(inst.AgentName, details)
 }
 
 // showWindowsAgentDialog shows an agent details dialog on Windows using PowerShell.
@@ -937,17 +953,18 @@ func (a *App) showWindowsAgentDialog(inst agent.Installation, details string, ha
 	if hasUpdate {
 		script = fmt.Sprintf(`
 Add-Type -AssemblyName System.Windows.Forms
-$result = [System.Windows.Forms.MessageBox]::Show('%s', '%s', 'YesNo', 'Information')
+$result = [System.Windows.Forms.MessageBox]::Show(%s, %s, 'YesNo', 'Information')
 if ($result -eq 'Yes') { Write-Output 'update' } else { Write-Output 'close' }
-`, details+"\n\nDo you want to update?", inst.AgentName)
+`, powerShellQuote(details+"\n\nDo you want to update?"), powerShellQuote(inst.AgentName))
 	} else {
 		script = fmt.Sprintf(`
 Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.MessageBox]::Show('%s', '%s', 'OK', 'Information')
+[System.Windows.Forms.MessageBox]::Show(%s, %s, 'OK', 'Information')
 Write-Output 'close'
-`, details, inst.AgentName)
+`, powerShellQuote(details), powerShellQuote(inst.AgentName))
 	}
 
+	// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 	cmd := exec.Command("powershell", "-Command", script)
 	output, err := cmd.Output()
 	if err != nil {
@@ -962,7 +979,7 @@ Write-Output 'close'
 
 // updateSingleAgent updates a single agent installation.
 func (a *App) updateSingleAgent(inst agent.Installation) {
-	a.platform.ShowNotification(
+	a.notify(
 		"Update Started",
 		fmt.Sprintf("Updating %s...", inst.AgentName),
 	)
@@ -973,7 +990,7 @@ func (a *App) updateSingleAgent(inst agent.Installation) {
 	// Get agent definition from catalog
 	agentDef, err := a.catalog.GetAgent(ctx, inst.AgentID)
 	if err != nil {
-		a.platform.ShowNotification(
+		a.notify(
 			"Update Failed",
 			fmt.Sprintf("Failed to find %s in catalog: %v", inst.AgentName, err),
 		)
@@ -983,7 +1000,7 @@ func (a *App) updateSingleAgent(inst agent.Installation) {
 	// Find the install method
 	methodDef, ok := agentDef.GetInstallMethod(string(inst.Method))
 	if !ok {
-		a.platform.ShowNotification(
+		a.notify(
 			"Update Failed",
 			fmt.Sprintf("Install method %s not available for %s", inst.Method, inst.AgentName),
 		)
@@ -993,21 +1010,21 @@ func (a *App) updateSingleAgent(inst agent.Installation) {
 	// Perform the update
 	result, err := a.installer.Update(ctx, &inst, *agentDef, methodDef)
 	if err != nil {
-		a.platform.ShowNotification(
+		a.notify(
 			"Update Failed",
 			fmt.Sprintf("Failed to update %s: %v", inst.AgentName, err),
 		)
 		return
 	}
 
-	a.platform.ShowNotification(
+	a.notify(
 		"Update Complete",
 		fmt.Sprintf("%s updated to %s", inst.AgentName, result.Version.String()),
 	)
 
 	// Refresh agent list
 	_ = a.store.ClearDetectionCache(ctx)
-	a.refreshAgents(ctx)
+	a.reportError("refresh agents", a.refreshAgents(ctx))
 }
 
 // updateAllAgents updates all agents with available updates.
@@ -1025,7 +1042,7 @@ func (a *App) updateAllAgents(ctx context.Context) {
 		return
 	}
 
-	a.platform.ShowNotification(
+	a.notify(
 		"Updating Agents",
 		fmt.Sprintf("Updating %d agents...", len(toUpdate)),
 	)
@@ -1063,12 +1080,12 @@ func (a *App) updateAllAgents(ctx context.Context) {
 
 	// Show completion notification
 	if failed == 0 {
-		a.platform.ShowNotification(
+		a.notify(
 			"Updates Complete",
 			fmt.Sprintf("Successfully updated %d agents", succeeded),
 		)
 	} else {
-		a.platform.ShowNotification(
+		a.notify(
 			"Updates Complete",
 			fmt.Sprintf("Updated %d agents, %d failed", succeeded, failed),
 		)
@@ -1076,7 +1093,7 @@ func (a *App) updateAllAgents(ctx context.Context) {
 
 	// Refresh agent list
 	_ = a.store.ClearDetectionCache(ctx)
-	a.refreshAgents(ctx)
+	a.reportError("refresh agents", a.refreshAgents(ctx))
 }
 
 // openTUI launches the TUI application in a new terminal window.
@@ -1084,7 +1101,7 @@ func (a *App) openTUI() {
 	// Find the agentmgr binary
 	agentmgrPath, err := findAgentMgrBinary()
 	if err != nil {
-		a.platform.ShowNotification("Error", "Could not find agentmgr binary")
+		a.notify("Error", "Could not find agentmgr binary")
 		return
 	}
 
@@ -1093,10 +1110,8 @@ func (a *App) openTUI() {
 	switch a.platform.ID() {
 	case platform.Darwin:
 		// Use osascript to open Terminal with the TUI command
-		script := fmt.Sprintf(`tell application "Terminal"
-			activate
-			do script "%s tui"
-		end tell`, agentmgrPath)
+		script := terminalAppleScript(agentmgrPath)
+		// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 		cmd = exec.Command("osascript", "-e", script)
 	case platform.Linux:
 		// Try common terminal emulators in order of preference
@@ -1106,36 +1121,38 @@ func (a *App) openTUI() {
 		}{
 			{"gnome-terminal", []string{"--", agentmgrPath, "tui"}},
 			{"konsole", []string{"-e", agentmgrPath, "tui"}},
-			{"xfce4-terminal", []string{"-e", agentmgrPath + " tui"}},
+			{"xfce4-terminal", []string{"-e", shellQuote(agentmgrPath) + " tui"}},
 			{"xterm", []string{"-e", agentmgrPath, "tui"}},
 		}
 		for _, term := range terminals {
 			if _, err := exec.LookPath(term.name); err == nil {
-				cmd = exec.Command(term.name, term.args...) //nolint:gosec // Safe: iterating hardcoded terminal list
+				// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
+				cmd = exec.Command(term.name, term.args...)
 				break
 			}
 		}
 		if cmd == nil {
-			a.platform.ShowNotification("Error", "No supported terminal emulator found")
+			a.notify("Error", "No supported terminal emulator found")
 			return
 		}
 	case platform.Windows:
-		// Use cmd.exe to open a new window with the TUI
-		cmd = exec.Command("cmd", "/c", "start", "cmd", "/k", agentmgrPath, "tui")
+		// PowerShell single-quoted literals keep path metacharacters out of code.
+		// #nosec G204 -- Executable path is escaped as a PowerShell literal; arguments are fixed.
+		cmd = exec.Command("powershell", "-NoProfile", "-NonInteractive", "-Command", windowsTerminalScript(agentmgrPath))
 	default:
-		a.platform.ShowNotification("Error", "Unsupported platform")
+		a.notify("Error", "Unsupported platform")
 		return
 	}
 
 	// Start the command (don't wait for it)
 	if err := cmd.Start(); err != nil {
-		a.platform.ShowNotification("Error", fmt.Sprintf("Failed to launch TUI: %v", err))
+		a.notify("Error", fmt.Sprintf("Failed to launch TUI: %v", err))
 		return
 	}
 
 	// Release the process so it runs independently
 	if cmd.Process != nil {
-		cmd.Process.Release()
+		a.reportError("release terminal process", cmd.Process.Release())
 	}
 }
 
@@ -1205,7 +1222,7 @@ func (a *App) showManageAgentsWindow() {
 		// Get all agents from catalog for this platform
 		agentDefs, err := a.catalog.GetAgentsForPlatform(a.ctx, string(a.platform.ID()))
 		if err != nil {
-			a.platform.ShowNotification("Error", "Could not load agent catalog")
+			a.notify("Error", "Could not load agent catalog")
 			return
 		}
 
@@ -1220,7 +1237,7 @@ func (a *App) showManageAgentsWindow() {
 	}
 
 	// Fallback to notification
-	a.platform.ShowNotification("Manage Agents", "Use the TUI for full agent management")
+	a.notify("Manage Agents", "Use the TUI for full agent management")
 }
 
 // showSettings displays the settings dialog.
@@ -1240,7 +1257,7 @@ func (a *App) showSettings() {
 	case platform.Windows:
 		a.showWindowsSettings()
 	default:
-		a.platform.ShowNotification("Settings", "Settings panel not available on this platform")
+		a.notify("Settings", "Settings panel not available on this platform")
 	}
 }
 
@@ -1282,6 +1299,7 @@ return button returned of result
 		default:
 		}
 
+		// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 		cmd := exec.Command("osascript", "-e", script)
 		a.trackDialog(cmd)
 		output, err := cmd.CombinedOutput()
@@ -1305,7 +1323,7 @@ return button returned of result
 		case "Toggle Notifications":
 			a.config.Updates.Notify = !a.config.Updates.Notify
 			if a.configLoader != nil {
-				_ = a.configLoader.SetAndSave("updates.notify", a.config.Updates.Notify)
+				a.reportError("save notification setting", a.configLoader.SetAndSave("updates.notify", a.config.Updates.Notify))
 			}
 			notifyStatus = "ON"
 			if !a.config.Updates.Notify {
@@ -1348,12 +1366,12 @@ end tell
 		if newPath != "" {
 			a.config.Helper.CLIPath = newPath
 			if a.configLoader != nil {
-				_ = a.configLoader.SetAndSave("helper.cli_path", newPath)
+				a.reportError("save CLI path", a.configLoader.SetAndSave("helper.cli_path", newPath))
 			}
-			a.platform.ShowNotification("Settings", fmt.Sprintf("CLI path set to: %s", newPath))
+			a.notify("Settings", fmt.Sprintf("CLI path set to: %s", newPath))
 		}
 	default:
-		a.platform.ShowNotification("Settings", "Use the config file to change CLI path")
+		a.notify("Settings", "Use the config file to change CLI path")
 	}
 }
 
@@ -1362,7 +1380,7 @@ func (a *App) installOrUpdateCLI() bool {
 	// Find the bundled agentmgr binary (should be in same directory as helper)
 	bundledPath, err := findBundledAgentMgr()
 	if err != nil {
-		a.platform.ShowNotification("Install Failed", "Could not find bundled agentmgr binary")
+		a.notify("Install Failed", "Could not find bundled agentmgr binary")
 		return false
 	}
 
@@ -1380,7 +1398,7 @@ func (a *App) installOrUpdateCLI() bool {
 		return true // Windows version doesn't return status yet
 
 	default:
-		a.platform.ShowNotification("Install CLI", "Unsupported platform")
+		a.notify("Install CLI", "Unsupported platform")
 		return false
 	}
 }
@@ -1426,15 +1444,16 @@ func findBundledAgentMgr() (string, error) {
 
 // installCLIToPath installs the CLI binary to the target path using sudo.
 func (a *App) installCLIToPath(sourcePath, targetPath string) bool {
-	// Ensure target directory exists
-	targetDir := filepath.Dir(targetPath)
-
-	// Use osascript to run sudo with password prompt
-	script := fmt.Sprintf(`
-do shell script "mkdir -p '%s' && cp '%s' '%s' && chmod +x '%s'" with administrator privileges
-`, targetDir, sourcePath, targetPath, targetPath)
-
-	cmd := exec.Command("osascript", "-e", script)
+	var cmd *exec.Cmd
+	if a.platform.ID() == platform.Linux {
+		// #nosec G204 -- Explicit user-requested install; fixed program and mode with paths as argv, without a shell.
+		cmd = exec.Command("pkexec", "install", "-D", "-m", "0755", sourcePath, targetPath)
+	} else {
+		command := installShellCommand(sourcePath, targetPath)
+		script := fmt.Sprintf(`do shell script "%s" with administrator privileges`, escapeAppleScript(command))
+		// #nosec G204 -- Paths are shell-quoted, then escaped for the enclosing AppleScript literal.
+		cmd = exec.Command("osascript", "-e", script)
+	}
 	err := cmd.Run()
 	if err != nil {
 		return false
@@ -1443,38 +1462,24 @@ do shell script "mkdir -p '%s' && cp '%s' '%s' && chmod +x '%s'" with administra
 	// Update config with the new path
 	a.config.Helper.CLIPath = targetPath
 	if a.configLoader != nil {
-		_ = a.configLoader.SetAndSave("helper.cli_path", targetPath)
+		a.reportError("save CLI path", a.configLoader.SetAndSave("helper.cli_path", targetPath))
 	}
 	return true
 }
 
 // installCLIToPathWindows installs the CLI binary on Windows.
 func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
-	// Create target directory
-	targetDir := filepath.Dir(targetPath)
-	if err := os.MkdirAll(targetDir, 0755); err != nil {
-		a.platform.ShowNotification("Install Failed", fmt.Sprintf("Could not create directory: %v", err))
+	if err := copyCLIForWindows(sourcePath, targetPath); err != nil {
+		a.notify("Install Failed", fmt.Sprintf("Could not install CLI: %v", err))
 		return
 	}
 
-	// Copy the file
-	sourceData, err := os.ReadFile(sourcePath)
-	if err != nil {
-		a.platform.ShowNotification("Install Failed", fmt.Sprintf("Could not read source: %v", err))
-		return
-	}
-
-	if err := os.WriteFile(targetPath, sourceData, 0755); err != nil {
-		a.platform.ShowNotification("Install Failed", fmt.Sprintf("Could not write target: %v", err))
-		return
-	}
-
-	a.platform.ShowNotification("Install Complete", fmt.Sprintf("agentmgr installed to %s\n\nAdd this to your PATH to use from command line.", targetPath))
+	a.notify("Install Complete", fmt.Sprintf("agentmgr installed to %s\n\nAdd this to your PATH to use from command line.", targetPath))
 
 	// Update config
 	a.config.Helper.CLIPath = targetPath
 	if a.configLoader != nil {
-		_ = a.configLoader.SetAndSave("helper.cli_path", targetPath)
+		a.reportError("save CLI path", a.configLoader.SetAndSave("helper.cli_path", targetPath))
 	}
 }
 
@@ -1493,15 +1498,14 @@ func (a *App) showLinuxSettings() {
 
 		details := fmt.Sprintf("CLI Path: %s\nNotifications: %s\n\nEdit config file to change settings:\n%s",
 			currentPath, boolToOnOff(a.config.Updates.Notify), config.GetConfigPath())
-
-		//nolint:gosec // G204: uses fixed zenity command with app-controlled content
+		// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 		cmd := exec.Command("zenity", "--info", "--title=AgentManager Settings", "--text="+details)
 		_ = cmd.Run()
 		return
 	}
 
 	// Fallback to notification
-	a.platform.ShowNotification("Settings", fmt.Sprintf("Edit config file: %s", config.GetConfigPath()))
+	a.notify("Settings", fmt.Sprintf("Edit config file: %s", config.GetConfigPath()))
 }
 
 // showWindowsSettings shows the settings dialog on Windows.
@@ -1520,18 +1524,12 @@ func (a *App) showWindowsSettings() {
 
 	script := fmt.Sprintf(`
 Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.MessageBox]::Show('%s', 'AgentManager Settings', 'OK', 'Information')
-`, strings.ReplaceAll(details, "'", "''"))
+[System.Windows.Forms.MessageBox]::Show(%s, 'AgentManager Settings', 'OK', 'Information')
+`, powerShellQuote(details))
 
+	// #nosec G204 -- Fixed desktop command; text and paths are passed as arguments or explicitly quoted script literals.
 	cmd := exec.Command("powershell", "-Command", script)
 	_ = cmd.Run()
-}
-
-// escapeAppleScript escapes a string for use in AppleScript.
-func escapeAppleScript(s string) string {
-	s = strings.ReplaceAll(s, "\\", "\\\\")
-	s = strings.ReplaceAll(s, "\"", "\\\"")
-	return s
 }
 
 // boolToOnOff converts a bool to "On" or "Off".

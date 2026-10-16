@@ -13,6 +13,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -45,8 +46,17 @@ func NewSQLiteStore(dataDir string) (*SQLiteStore, error) {
 func (s *SQLiteStore) Initialize(ctx context.Context) error {
 	// Ensure the data directory exists
 	dir := filepath.Dir(s.dbPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+	// SQLite's default creation mode is too permissive for per-user state.
+	// #nosec G304 -- The database path is the fixed agentmgr.db name in the configured data directory.
+	f, err := os.OpenFile(s.dbPath, os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		return fmt.Errorf("prepare database file: %w", err)
+	}
+	if err := errors.Join(f.Chmod(0600), f.Close()); err != nil {
+		return fmt.Errorf("secure database file: %w", err)
 	}
 
 	// DSN tuning:

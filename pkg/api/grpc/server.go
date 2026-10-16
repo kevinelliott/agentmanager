@@ -319,7 +319,9 @@ func (s *Server) InstallAgent(ctx context.Context, req *InstallAgentRequest) (*I
 
 	// Refresh agents after a successful mutation.
 	_ = s.store.ClearDetectionCache(ctx)
-	s.refreshAgents(ctx)
+	if err := s.refreshAgents(ctx); err != nil {
+		slog.Warn("refresh agents after mutation", "error", err)
+	}
 
 	// Find the new installation
 	var inst *Installation
@@ -397,7 +399,9 @@ func (s *Server) UpdateAgent(ctx context.Context, req *UpdateAgentRequest) (*Upd
 
 	// Refresh agents after a successful mutation.
 	_ = s.store.ClearDetectionCache(ctx)
-	s.refreshAgents(ctx)
+	if err := s.refreshAgents(ctx); err != nil {
+		slog.Warn("refresh agents after mutation", "error", err)
+	}
 
 	// Find the updated installation
 	var updated *Installation
@@ -474,7 +478,9 @@ func (s *Server) UninstallAgent(ctx context.Context, req *UninstallAgentRequest)
 
 	// Refresh agents after a successful mutation.
 	_ = s.store.ClearDetectionCache(ctx)
-	s.refreshAgents(ctx)
+	if err := s.refreshAgents(ctx); err != nil {
+		slog.Warn("refresh agents after mutation", "error", err)
+	}
 
 	return &UninstallAgentResponse{
 		Success: true,

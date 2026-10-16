@@ -609,6 +609,14 @@ func TestRespondJSON(t *testing.T) {
 	}
 }
 
+func TestRespondJSONEncodingFailureReturnsServerError(t *testing.T) {
+	w := httptest.NewRecorder()
+	setupTestServer().respondJSON(w, http.StatusOK, make(chan int))
+	if w.Code != http.StatusInternalServerError {
+		t.Fatalf("encoding failure status = %d, want 500", w.Code)
+	}
+}
+
 func TestRespondError(t *testing.T) {
 	server := setupTestServer()
 

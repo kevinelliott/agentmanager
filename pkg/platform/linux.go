@@ -4,6 +4,7 @@ package platform
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -85,12 +86,12 @@ func (l *linuxPlatform) EnableAutoStart(ctx context.Context) error {
 }
 
 func (l *linuxPlatform) DisableAutoStart(ctx context.Context) error {
-	// Try both methods - errors are intentionally ignored as we want to attempt both
-	//nolint:errcheck
-	l.disableSystemdAutoStart(ctx)
-	//nolint:errcheck
-	l.disableXDGAutoStart()
-	return nil
+	// Attempt both backends, preserving any failures for the caller.
+	var systemdErr error
+	if l.hasSystemd() {
+		systemdErr = l.disableSystemdAutoStart(ctx)
+	}
+	return errors.Join(systemdErr, l.disableXDGAutoStart())
 }
 
 func (l *linuxPlatform) IsAutoStartEnabled(ctx context.Context) (bool, error) {
@@ -112,7 +113,7 @@ func (l *linuxPlatform) hasSystemd() bool {
 
 func (l *linuxPlatform) enableSystemdAutoStart(ctx context.Context) error {
 	serviceDir := l.getSystemdUserDir()
-	if err := os.MkdirAll(serviceDir, 0755); err != nil {
+	if err := os.MkdirAll(serviceDir, 0700); err != nil {
 		return err
 	}
 
@@ -131,12 +132,14 @@ RestartSec=5
 WantedBy=default.target
 `
 
-	if err := os.WriteFile(servicePath, []byte(serviceContent), 0644); err != nil {
+	if err := os.WriteFile(servicePath, []byte(serviceContent), 0600); err != nil {
 		return err
 	}
 
 	// Reload and enable
-	exec.CommandContext(ctx, "systemctl", "--user", "daemon-reload").Run()
+	if err := exec.CommandContext(ctx, "systemctl", "--user", "daemon-reload").Run(); err != nil {
+		return fmt.Errorf("reload user services: %w", err)
+	}
 	if err := exec.CommandContext(ctx, "systemctl", "--user", "enable", "agentmgr-helper.service").Run(); err != nil {
 		return err
 	}
@@ -144,12 +147,18 @@ WantedBy=default.target
 }
 
 func (l *linuxPlatform) disableSystemdAutoStart(ctx context.Context) error {
-	exec.CommandContext(ctx, "systemctl", "--user", "stop", "agentmgr-helper.service").Run()
-	exec.CommandContext(ctx, "systemctl", "--user", "disable", "agentmgr-helper.service").Run()
-
 	servicePath := filepath.Join(l.getSystemdUserDir(), "agentmgr-helper.service")
-	os.Remove(servicePath)
-	return nil
+	if _, err := os.Stat(servicePath); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	stopErr := exec.CommandContext(ctx, "systemctl", "--user", "stop", "agentmgr-helper.service").Run()
+	disableErr := exec.CommandContext(ctx, "systemctl", "--user", "disable", "agentmgr-helper.service").Run()
+	removeErr := os.Remove(servicePath)
+	reloadErr := exec.CommandContext(ctx, "systemctl", "--user", "daemon-reload").Run()
+	return errors.Join(stopErr, disableErr, removeErr, reloadErr)
 }
 
 func (l *linuxPlatform) isSystemdEnabled(ctx context.Context) (bool, error) {
@@ -171,7 +180,7 @@ func (l *linuxPlatform) getSystemdUserDir() string {
 
 func (l *linuxPlatform) enableXDGAutoStart() error {
 	autostartDir := l.getXDGAutostartDir()
-	if err := os.MkdirAll(autostartDir, 0755); err != nil {
+	if err := os.MkdirAll(autostartDir, 0700); err != nil {
 		return err
 	}
 
@@ -185,7 +194,7 @@ X-GNOME-Autostart-enabled=true
 `
 
 	desktopPath := filepath.Join(autostartDir, "agentmgr-helper.desktop")
-	return os.WriteFile(desktopPath, []byte(desktopEntry), 0644)
+	return os.WriteFile(desktopPath, []byte(desktopEntry), 0600)
 }
 
 func (l *linuxPlatform) disableXDGAutoStart() error {
@@ -267,11 +276,13 @@ func (l *linuxPlatform) GetShellArg() string {
 func (l *linuxPlatform) ShowNotification(title, message string) error {
 	// Try notify-send first (most common)
 	if _, err := exec.LookPath("notify-send"); err == nil {
-		return exec.Command("notify-send", title, message).Run()
+		// #nosec G204 -- Fixed desktop command receives notification/dialog text as separate arguments, without a shell.
+		return exec.Command("notify-send", "--", title, message).Run()
 	}
 	// Try zenity
 	if _, err := exec.LookPath("zenity"); err == nil {
-		return exec.Command("zenity", "--notification", "--text="+title+"\n"+message).Run() //nolint:gosec // User-provided notification text is intentional
+		// #nosec G204 -- Fixed desktop command receives notification/dialog text as separate arguments, without a shell.
+		return exec.Command("zenity", "--notification", "--text="+title+"\n"+message).Run()
 	}
 	return fmt.Errorf("no notification system available")
 }
@@ -291,7 +302,8 @@ func (l *linuxPlatform) ShowChangelogDialog(agentName, fromVer, toVer, changelog
 func (l *linuxPlatform) showZenityDialog(agentName, fromVer, toVer, changelog string) DialogResult {
 	text := fmt.Sprintf("%s\n\n%s → %s\n\n%s", agentName, fromVer, toVer, changelog)
 
-	cmd := exec.Command("zenity", "--question", //nolint:gosec // User-provided dialog text is intentional
+	// #nosec G204 -- Fixed desktop command receives notification/dialog text as separate arguments, without a shell.
+	cmd := exec.Command("zenity", "--question",
 		"--title=Update Available",
 		"--text="+text,
 		"--ok-label=Update Now",
@@ -315,6 +327,7 @@ func (l *linuxPlatform) showZenityDialog(agentName, fromVer, toVer, changelog st
 func (l *linuxPlatform) showKDialogDialog(agentName, fromVer, toVer, changelog string) DialogResult {
 	text := fmt.Sprintf("%s\n\n%s → %s\n\n%s", agentName, fromVer, toVer, changelog)
 
+	// #nosec G204 -- Fixed desktop command receives notification/dialog text as separate arguments, without a shell.
 	cmd := exec.Command("kdialog",
 		"--yesnocancel", text,
 		"--title", "Update Available",

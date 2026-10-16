@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -85,7 +86,7 @@ func (l *Loader) Load(customPath string) (*Config, error) {
 func (l *Loader) Save(cfg *Config) error {
 	// Ensure directory exists
 	dir := filepath.Dir(l.filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -99,7 +100,7 @@ func (l *Loader) Save(cfg *Config) error {
 	l.v.Set("agents", cfg.Agents)
 
 	// Write to file
-	if err := l.v.WriteConfigAs(l.filePath); err != nil {
+	if err := l.writeConfig(); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
 
@@ -122,16 +123,29 @@ func (l *Loader) SetAndSave(key string, value interface{}) error {
 
 	// Ensure directory exists
 	dir := filepath.Dir(l.filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
 	// Write to file
-	if err := l.v.WriteConfigAs(l.filePath); err != nil {
+	if err := l.writeConfig(); err != nil {
 		return fmt.Errorf("failed to write config: %w", err)
 	}
 
 	return nil
+}
+
+func (l *Loader) writeConfig() error {
+	// Match WriteConfigAs: the destination extension selects the output format.
+	format := filepath.Ext(l.filePath)
+	if format != "" {
+		l.v.SetConfigType(format[1:])
+	}
+	var data bytes.Buffer
+	if err := l.v.WriteConfigTo(&data); err != nil {
+		return err
+	}
+	return WritePrivateFile(l.filePath, data.Bytes())
 }
 
 // Get gets a configuration value by key path.
@@ -205,7 +219,7 @@ func InitConfig() error {
 	configDir := p.GetConfigDir()
 
 	// Create config directory
-	if err := os.MkdirAll(configDir, 0755); err != nil {
+	if err := os.MkdirAll(configDir, 0700); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 

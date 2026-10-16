@@ -154,28 +154,12 @@ linters:
           - staticcheck
         text: SA9003
       - linters:
-          - gosec
-        text: G306
-      - linters:
           - unused
         path: cmd/
         text: version|commit|date
       - linters:
           - goconst
         path: pkg/detector/strategies/
-      - linters:
-          - gosec
-        path: pkg/detector/strategies/
-        text: G204
-      # G703 ("Path traversal via taint analysis") fires on any os.ReadFile /
-      # os.Remove whose path was constructed from a variable. Every flagged
-      # site on this codebase builds the path from platform.GetConfigDir /
-      # platform.GetDataDir / catalog-driven package names, never from
-      # untrusted user input. Suppress globally rather than smear //nolint
-      # comments across every call site.
-      - linters:
-          - gosec
-        text: G703
       # noctx fires on os/exec.Command, net.Listen, httptest.NewRequest
       # and friends — all of which have ctx-aware alternatives but where
       # adopting them adds ceremony without correctness value in this

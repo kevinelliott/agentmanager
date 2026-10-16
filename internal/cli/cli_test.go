@@ -300,9 +300,9 @@ func TestNewVersionCommand(t *testing.T) {
 	// Verify json flag exists
 	assertFlagExists(t, cmd, "json")
 
-	// Verify command has a Run function (not RunE)
-	if cmd.Run == nil {
-		t.Error("expected Run function to be set")
+	// The version command reports output errors to Cobra.
+	if cmd.RunE == nil {
+		t.Error("expected RunE function to be set")
 	}
 }
 

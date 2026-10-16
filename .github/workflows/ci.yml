@@ -236,15 +236,33 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Install Gosec Security Scanner
+        run: go install github.com/securego/gosec/v2/cmd/gosec@v2.29.0
+
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: '-no-fail -fmt sarif -out results.sarif ./...'
+        run: gosec -fmt sarif -out results.sarif ./...
+
+      - name: Preserve existing code scanning tool identity
+        if: ${{ !cancelled() && hashFiles('results.sarif') != '' }}
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('results.sarif')
+          report = json.loads(path.read_text())
+          for run in report['runs']:
+              driver = run['tool']['driver']
+              assert driver['guid'] == '8b518d5f-906d-39f9-894b-d327b1a421c5'
+              driver['name'] = 'Golang security checks by gosec'
+          path.write_text(json.dumps(report))
+          PY
 
       - name: Upload SARIF file
+        if: ${{ !cancelled() && hashFiles('results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+          category: '.github/workflows/ci.yml:security'
 
   performance:
     name: Performance benchmarks

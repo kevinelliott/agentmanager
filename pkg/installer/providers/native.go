@@ -143,6 +143,7 @@ func (p *NativeProvider) executeCommand(ctx context.Context, command string) (st
 
 	var stdout, stderr bytes.Buffer
 	progress := ProgressWriter(ctx)
+	// #nosec G204 -- Native installers and version commands intentionally execute the selected catalog definition.
 	cmd := exec.CommandContext(ctx, shell, shellArg, command)
 	cmd.Stdout = io.MultiWriter(&stdout, progress)
 	cmd.Stderr = io.MultiWriter(&stderr, progress)
@@ -163,6 +164,7 @@ func (p *NativeProvider) getInstalledVersion(ctx context.Context, agentDef catal
 	shell := p.platform.GetShell()
 	shellArg := p.platform.GetShellArg()
 
+	// #nosec G204 -- Native installers and version commands intentionally execute the selected catalog definition.
 	cmd := exec.CommandContext(ctx, shell, shellArg, agentDef.Detection.VersionCmd)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

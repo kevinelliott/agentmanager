@@ -4,8 +4,10 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -243,54 +245,75 @@ func downloadFile(ctx context.Context, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer tmpFile.Close()
-
-	if _, err := io.Copy(tmpFile, resp.Body); err != nil {
-		os.Remove(tmpFile.Name())
-		return "", err
+	_, copyErr := io.Copy(tmpFile, resp.Body)
+	if err := errors.Join(copyErr, tmpFile.Close()); err != nil {
+		return "", errors.Join(err, os.Remove(tmpFile.Name()))
 	}
 
 	return tmpFile.Name(), nil
 }
 
-func replaceExecutable(src, dst string) error {
-	// Read the new binary
-	data, err := os.ReadFile(src)
+func replaceExecutable(src, dst string) (err error) {
+	// #nosec G304 -- Reads the private download temporary file produced by the upgrade flow.
+	source, err := os.Open(src)
 	if err != nil {
 		return fmt.Errorf("failed to read new binary: %w", err)
 	}
+	defer func() { err = errors.Join(err, source.Close()) }()
 
 	// Get permissions of old binary
-	info, err := os.Stat(dst)
+	info, err := os.Lstat(dst)
 	if err != nil {
 		return fmt.Errorf("failed to stat old binary: %w", err)
 	}
-	mode := info.Mode()
+	if !info.Mode().IsRegular() {
+		return fmt.Errorf("refusing to replace non-regular executable %s", dst)
+	}
 
-	// On Unix, we can't directly overwrite a running executable,
-	// so we use the rename trick: write to temp, then rename
-	tmpDst := dst + ".new"
-	if err := os.WriteFile(tmpDst, data, mode); err != nil {
-		return fmt.Errorf("failed to write new binary: %w", err)
+	// Keep staging and rollback files in a private, unpredictable directory on
+	// the same filesystem. A pre-existing .new symlink must never be followed.
+	stagingDir, err := os.MkdirTemp(filepath.Dir(dst), ".agentmgr-upgrade-*")
+	if err != nil {
+		return fmt.Errorf("create upgrade staging directory: %w", err)
+	}
+	keepBackup := false
+	defer func() {
+		if !keepBackup {
+			if cleanupErr := os.RemoveAll(stagingDir); cleanupErr != nil {
+				if err == nil && runtime.GOOS == "windows" {
+					// A running Windows executable can be renamed but remain
+					// locked against deletion until this process exits.
+					slog.Warn("update installed; previous executable retained", "directory", stagingDir, "error", cleanupErr)
+				} else {
+					err = errors.Join(err, cleanupErr)
+				}
+			}
+		}
+	}()
+	tmpDst := filepath.Join(stagingDir, "new")
+	// #nosec G304 -- Fixed filename inside a newly created owner-only temporary directory.
+	target, err := os.OpenFile(tmpDst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return fmt.Errorf("create staged executable: %w", err)
+	}
+	_, copyErr := io.Copy(target, source)
+	if err := errors.Join(copyErr, target.Chmod(info.Mode().Perm()), target.Sync(), target.Close()); err != nil {
+		return fmt.Errorf("write staged executable: %w", err)
 	}
 
 	// Backup old binary
-	backupPath := dst + ".old"
+	backupPath := filepath.Join(stagingDir, "previous")
 	if err := os.Rename(dst, backupPath); err != nil {
-		os.Remove(tmpDst)
 		return fmt.Errorf("failed to backup old binary: %w", err)
 	}
 
 	// Move new binary into place
 	if err := os.Rename(tmpDst, dst); err != nil {
-		// Try to restore backup - best effort, ignore error since we're already handling a failure
-		//nolint:errcheck // best effort restore on failure
-		os.Rename(backupPath, dst)
+		if restoreErr := os.Rename(backupPath, dst); restoreErr != nil {
+			keepBackup = true
+			return fmt.Errorf("install failed: %w; restore failed: %w; old executable retained at %s", err, restoreErr, backupPath)
+		}
 		return fmt.Errorf("failed to install new binary: %w", err)
 	}
-
-	// Remove backup - best effort, ignore error
-	_ = os.Remove(backupPath)
-
 	return nil
 }

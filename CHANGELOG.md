@@ -39,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Harden upgrade staging, config/plugin/database permissions, desktop command
+  quoting, and error handling identified by the 113-alert gosec review (ENGIN-1).
+  Intentional local command/file operations have per-call review annotations;
+  security CI now uses a pinned scanner and fails on findings while uploading SARIF.
 - YYLO catalog entry now lists only npm on macOS and Linux, declares its Bash
   requirement, and removes the unsupported `npx` method and Windows platform.
 - Homebrew cask version detection no longer reports `0.0.0` or leaks the cask
