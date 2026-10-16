@@ -366,6 +366,10 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
 YYLO currently supports macOS and Linux and requires Bash.
 
+For agent-browser, npm and Homebrew installs also download Chrome. On Linux, if
+Chrome reports missing system libraries, run `agent-browser install --with-deps`
+in an interactive terminal with the required privileges.
+
 > Don't see your agent? [Contributions are welcome](CONTRIBUTING.md#adding-new-agents-to-the-catalog) — adding one is a single entry in `catalog.json`.
 
 ## Architecture

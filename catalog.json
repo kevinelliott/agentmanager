@@ -6098,7 +6098,7 @@
       "install_methods": {
         "native": {
           "method": "native",
-          "command": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\nif [ -e \"$HOME/.local/bin/zcode\" ] || [ -L \"$HOME/.local/bin/zcode\" ]; then\n  printf \"%s\\n\" \"zcode already exists in ~/.local/bin; use its existing installation to update\" >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_zcode_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_zcode_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_zcode_source\" remote get-url origin)\" = \"https://github.com/zai-org/ZCode.git\"\n  git -C \"$agentmgr_zcode_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/zai-org/ZCode.git \"$agentmgr_zcode_source\"\nfi\ncd \"$agentmgr_zcode_source\"\npnpm bootstrap\npnpm --filter @zcode/cli... build\nchmod u+x \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\"\nln -s \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" \"$HOME/.local/bin/zcode\"\n\"$HOME/.local/bin/zcode\" --version",
+          "command": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\nif [ -e \"$HOME/.local/bin/zcode\" ] || [ -L \"$HOME/.local/bin/zcode\" ]; then\n  printf \"%s\\n\" \"zcode already exists in ~/.local/bin; use its existing installation to update\" >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_zcode_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_zcode_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_zcode_source\" remote get-url origin)\" = \"https://github.com/zai-org/ZCode.git\"\n  git -C \"$agentmgr_zcode_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/zai-org/ZCode.git \"$agentmgr_zcode_source\"\nfi\ncd \"$agentmgr_zcode_source\"\npnpm bootstrap\npnpm --filter @zcode/cli... build\nchmod u+x \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\"\nnode \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" --version\nln -s \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" \"$HOME/.local/bin/zcode\"",
           "platforms": [
             "darwin",
             "linux"
@@ -6108,7 +6108,7 @@
             "node>=24.14.0",
             "pnpm>=10.33.2"
           ],
-          "update_cmd": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\ncd \"$agentmgr_zcode_source\"\ngit pull --ff-only\npnpm bootstrap\npnpm --filter @zcode/cli... build\nchmod u+x \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\"\n\"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" --version",
+          "update_cmd": "set -eu\nagentmgr_zcode_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode\"\ncd \"$agentmgr_zcode_source\"\ngit pull --ff-only\npnpm bootstrap\npnpm --filter @zcode/cli... build\nchmod u+x \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\"\nnode \"$agentmgr_zcode_source/apps/zcode-cli/packages/cli/dist/zcode.cjs\" --version",
           "metadata": {
             "installer_type": "source_build",
             "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/zcode"
@@ -6300,8 +6300,7 @@
             "node>=24"
           ],
           "metadata": {
-            "post_install_cmd": "agent-browser install",
-            "post_install_cmd_linux": "agent-browser install --with-deps"
+            "post_install_cmd": "agent-browser install"
           }
         },
         "brew": {
@@ -6315,8 +6314,7 @@
             "linux"
           ],
           "metadata": {
-            "post_install_cmd": "agent-browser install",
-            "post_install_cmd_linux": "agent-browser install --with-deps"
+            "post_install_cmd": "agent-browser install"
           }
         }
       },
@@ -6337,7 +6335,7 @@
         "github_stars_checked_at": "2026-10-16T06:48:07.801513+00:00",
         "license": "Apache-2.0",
         "vendor": "Vercel Labs",
-        "post_install": "Run agent-browser install to download Chrome when no compatible browser is installed; on Linux use agent-browser install --with-deps for system libraries."
+        "post_install": "Chrome setup runs automatically after npm and Homebrew installs and updates. If Linux reports missing system libraries, run agent-browser install --with-deps directly in an interactive terminal with the required privileges."
       }
     },
     "engram": {

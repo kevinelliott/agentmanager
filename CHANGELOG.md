@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   October 16, 2026, with the count and verification time recorded in metadata.
   Install methods include explicit preview channels and a ZCode source build.
 - Required agent-browser runtime setup runs after npm and Homebrew installs and
-  updates, with platform-specific setup commands and setup failures reported.
+  updates, with setup failures reported. Linux system libraries are an explicit
+  user step to keep package operations free of hidden sudo prompts.
 
 ### Performance
 
