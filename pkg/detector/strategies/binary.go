@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -146,6 +147,8 @@ func (s *BinaryStrategy) getVersion(ctx context.Context, agentDef catalog.AgentD
 	parts[0] = path
 
 	cmd := exec.CommandContext(ctx, parts[0], parts[1:]...)
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return agent.Version{}

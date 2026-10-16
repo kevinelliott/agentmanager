@@ -240,6 +240,7 @@ func (p *NPMProvider) fetchLatestVersionUncached(ctx context.Context, packageNam
 
 	// Use npm view to get the latest version
 	cmd := exec.CommandContext(ctx, "npm", "view", packageName, "version")
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		if ctx.Err() != nil {

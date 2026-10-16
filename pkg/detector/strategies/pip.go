@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -160,6 +161,8 @@ func (s *PipStrategy) getPipPackages(ctx context.Context) map[string]pipPackage 
 	}
 
 	cmd := exec.CommandContext(ctx, pipCmd, "list", "--format=json")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return packages
@@ -186,6 +189,8 @@ func (s *PipStrategy) getPipxPackages(ctx context.Context) map[string]pipxPackag
 	}
 
 	cmd := exec.CommandContext(ctx, "pipx", "list", "--json")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return packages
@@ -215,6 +220,7 @@ func (s *PipStrategy) getUVPackages(ctx context.Context) map[string]pipPackage {
 
 	// uv tool list uses text output. Avoid a failing --format=json probe.
 	cmd := exec.CommandContext(ctx, "uv", "tool", "list")
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return packages

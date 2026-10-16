@@ -348,6 +348,7 @@ func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName
 	case "uv":
 		// Use uv pip index versions
 		cmd := exec.CommandContext(ctx, "uv", "pip", "index", "versions", packageName)
+		cmd.WaitDelay = time.Second
 		output, err := cmd.Output()
 		if err != nil {
 			// Fallback to PyPI
@@ -374,6 +375,7 @@ func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName
 			manager = "pip"
 		}
 		cmd := exec.CommandContext(ctx, manager, "index", "versions", packageName)
+		cmd.WaitDelay = time.Second
 		output, err := cmd.Output()
 		if err != nil {
 			// Fallback to PyPI API

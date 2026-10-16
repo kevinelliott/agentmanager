@@ -44,7 +44,9 @@ type npmRegistry struct {
 
 func newNPMRegistry() *npmRegistry {
 	return &npmRegistry{client: npmRegistryHTTPClient, config: func(ctx context.Context) ([]byte, error) {
-		return exec.CommandContext(ctx, "npm", "config", "list", "--json").Output()
+		cmd := exec.CommandContext(ctx, "npm", "config", "list", "--json")
+		cmd.WaitDelay = time.Second
+		return cmd.Output()
 	}}
 }
 
