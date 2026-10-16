@@ -187,3 +187,7 @@ func resetLookPathCache() {
 		return true
 	})
 }
+
+// InvalidateExecutableCache makes newly installed or removed executables visible
+// without requiring a process restart or a change to PATH.
+func InvalidateExecutableCache() { resetLookPathCache() }

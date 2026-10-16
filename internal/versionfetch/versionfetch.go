@@ -5,6 +5,8 @@ package versionfetch
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -77,7 +79,11 @@ func CheckLatestVersions(
 				return nil //nolint:nilerr // cancellation is recorded per-index, never aborts the group
 			}
 
-			latestVer, err := fetcher.GetLatestVersion(gctx, method)
+			lookupCtx, cancel := context.WithTimeout(gctx, 15*time.Second)
+			defer cancel()
+			started := time.Now()
+			latestVer, err := fetcher.GetLatestVersion(lookupCtx, method)
+			slog.DebugContext(lookupCtx, "registry lookup completed", "provider", methodStr, "package", method.Package, "duration", time.Since(started), "error", err)
 			if err != nil {
 				errs[i] = fmt.Errorf("%s (%s): %w", inst.AgentName, methodStr, err)
 				// Do not propagate so a single failure does not cancel sibling workers.

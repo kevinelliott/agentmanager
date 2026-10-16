@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 
+	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -316,7 +317,8 @@ func (s *Server) InstallAgent(ctx context.Context, req *InstallAgentRequest) (*I
 		}, nil
 	}
 
-	// Refresh agents
+	// Refresh agents after a successful mutation.
+	_ = s.store.ClearDetectionCache(ctx)
 	s.refreshAgents(ctx)
 
 	// Find the new installation
@@ -393,7 +395,8 @@ func (s *Server) UpdateAgent(ctx context.Context, req *UpdateAgentRequest) (*Upd
 		}, nil
 	}
 
-	// Refresh agents
+	// Refresh agents after a successful mutation.
+	_ = s.store.ClearDetectionCache(ctx)
 	s.refreshAgents(ctx)
 
 	// Find the updated installation
@@ -469,7 +472,8 @@ func (s *Server) UninstallAgent(ctx context.Context, req *UninstallAgentRequest)
 		}, nil
 	}
 
-	// Refresh agents
+	// Refresh agents after a successful mutation.
+	_ = s.store.ClearDetectionCache(ctx)
 	s.refreshAgents(ctx)
 
 	return &UninstallAgentResponse{
@@ -586,7 +590,7 @@ func (s *Server) SearchCatalog(ctx context.Context, req *SearchCatalogRequest) (
 
 // CheckUpdates checks for available updates.
 func (s *Server) CheckUpdates(ctx context.Context) (*CheckUpdatesResponse, error) {
-	if err := s.refreshAgents(ctx); err != nil {
+	if err := s.refreshAgentsWithVersions(ctx, true); err != nil {
 		return nil, err
 	}
 
@@ -698,23 +702,27 @@ func (s *Server) publishEvent(event *AgentEvent) {
 
 // refreshAgents refreshes the agent list.
 func (s *Server) refreshAgents(ctx context.Context) error {
-	// Get agent definitions from catalog
-	agentDefs, err := s.catalog.GetAgentsForPlatform(ctx, string(s.platform.ID()))
-	if err != nil {
-		agentDefs = nil
-	}
+	return s.refreshAgentsWithVersions(ctx, false)
+}
 
-	// Detect agents
-	agents, err := s.detector.DetectAll(ctx, agentDefs)
+func (s *Server) refreshAgentsWithVersions(ctx context.Context, versions bool) error {
+	cfg := config.Default()
+	if s.config != nil {
+		cp := *s.config
+		cfg = &cp
+	}
+	if cfg.Detection.CacheDuration <= 0 {
+		cfg.Detection.CacheDuration = time.Hour
+	}
+	pipeline := orchestrator.NewFromManagers(cfg, s.platform, s.store, s.catalog, s.detector, s.installer)
+	result, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{SkipVersionCheck: !versions, TolerateCatalogError: true})
 	if err != nil {
 		return err
 	}
-
 	s.agentsMu.Lock()
-	s.agents = agents
+	s.agents = result.Installations
 	s.lastRefresh = time.Now()
 	s.agentsMu.Unlock()
-
 	return nil
 }
 

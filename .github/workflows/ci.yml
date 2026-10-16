@@ -245,3 +245,25 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+
+  performance:
+    name: Performance benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: Run representative benchmarks
+        shell: bash
+        run: |
+          set -o pipefail
+          go test -run '^$' -bench 'Benchmark(DetectorInventory|PipelineCachePaths|CatalogView)' -benchmem -benchtime=100ms -count=3 ./pkg/detector ./internal/orchestrator ./internal/tui | tee benchmarks.txt
+      - name: Save benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: performance-benchmarks
+          path: benchmarks.txt

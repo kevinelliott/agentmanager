@@ -3,6 +3,7 @@ package platform
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"testing"
 )
@@ -84,4 +85,30 @@ func TestCachedLookPath_ConcurrentSafe(t *testing.T) {
 		}()
 	}
 	wg.Wait()
+}
+
+func TestInvalidateExecutableCacheAfterPackageMutation(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("PATH", dir)
+	InvalidateExecutableCache()
+	t.Cleanup(InvalidateExecutableCache)
+	const name = "agentmgr-cache-test-tool"
+	if _, err := cachedLookPath(name); err == nil {
+		t.Fatal("unexpected installed executable")
+	}
+	path := filepath.Join(dir, name+ExecutableExtension())
+	if err := os.WriteFile(path, []byte("test"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	InvalidateExecutableCache()
+	if got, err := cachedLookPath(name); err != nil || got != path {
+		t.Fatalf("installed executable invisible: %q %v", got, err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	InvalidateExecutableCache()
+	if _, err := cachedLookPath(name); err == nil {
+		t.Fatal("removed executable still cached")
+	}
 }

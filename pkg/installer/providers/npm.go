@@ -21,6 +21,7 @@ import (
 // NPMProvider handles npm-based installations.
 type NPMProvider struct {
 	platform platform.Platform
+	registry *npmRegistry
 }
 
 var (
@@ -30,7 +31,7 @@ var (
 
 // NewNPMProvider creates a new NPM provider.
 func NewNPMProvider(p platform.Platform) *NPMProvider {
-	return &NPMProvider{platform: p}
+	return &NPMProvider{platform: p, registry: newNPMRegistry()}
 }
 
 // Name returns the provider name.
@@ -202,7 +203,7 @@ func (p *NPMProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 		return agent.Version{}, fmt.Errorf("could not determine npm package name")
 	}
 
-	key := strings.ToLower(packageName)
+	key := NPMConfigFingerprint() + ":" + strings.ToLower(packageName)
 	if entry, ok := loadLatestVersionEntry(&npmLatestVersionCache, key); ok {
 		return entry.version, entry.err
 	}
@@ -228,10 +229,22 @@ func (p *NPMProvider) GetLatestVersion(ctx context.Context, method catalog.Insta
 }
 
 func (p *NPMProvider) fetchLatestVersionUncached(ctx context.Context, packageName string) (agent.Version, error) {
+	if p.registry != nil {
+		if version, ok := p.registry.latest(ctx, packageName); ok {
+			return version, nil
+		}
+		if err := ctx.Err(); err != nil {
+			return agent.Version{}, err
+		}
+	}
+
 	// Use npm view to get the latest version
 	cmd := exec.CommandContext(ctx, "npm", "view", packageName, "version")
 	output, err := cmd.Output()
 	if err != nil {
+		if ctx.Err() != nil {
+			return agent.Version{}, ctx.Err()
+		}
 		return agent.Version{}, fmt.Errorf("npm view failed: %w", err)
 	}
 

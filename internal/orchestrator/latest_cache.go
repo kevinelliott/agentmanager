@@ -28,9 +28,29 @@ func (f *cachedLatestVersionFetcher) GetLatestVersion(ctx context.Context, metho
 	}
 
 	key := latestVersionCacheKey(method)
+	if namespaced, ok := f.next.(interface {
+		VersionCacheNamespace(catalog.InstallMethodDef) string
+	}); ok && key != "" {
+		if namespace := namespaced.VersionCacheNamespace(method); namespace != "" {
+			key += ":" + namespace
+		}
+	}
 	if key != "" {
 		if version, ok := f.get(ctx, key); ok {
 			return version, nil
+		}
+	}
+
+	if key != "" {
+		if locker, ok := f.store.(storage.RefreshLocker); ok {
+			release, err := locker.AcquireRefreshLock(ctx, key)
+			if err != nil {
+				return agent.Version{}, err
+			}
+			defer release()
+			if version, fresh := f.get(ctx, key); fresh {
+				return version, nil
+			}
 		}
 	}
 

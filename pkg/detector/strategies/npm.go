@@ -48,6 +48,9 @@ type npmListOutput struct {
 
 // Detect scans for npm-installed agents.
 func (s *NPMStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
+	if !hasInstallMethod(agents, "npm") {
+		return nil, nil
+	}
 	// Get list of globally installed packages
 	globalPackages, err := s.getGlobalPackages(ctx)
 	if err != nil {

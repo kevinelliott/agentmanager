@@ -15,7 +15,6 @@ import (
 	"github.com/getlantern/systray"
 
 	"github.com/kevinelliott/agentmanager/internal/orchestrator"
-	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	grpcapi "github.com/kevinelliott/agentmanager/pkg/api/grpc"
 	"github.com/kevinelliott/agentmanager/pkg/api/rest"
@@ -602,40 +601,22 @@ func (a *App) checkUpdates(ctx context.Context) error {
 		}
 		a.agentsMu.RUnlock()
 
-		// Build the agent-def lookup required by the version fetcher.
-		agentDefs, err := a.catalog.GetAgentsForPlatform(ctx, string(a.platform.ID()))
+		pipeline := orchestrator.NewFromManagers(a.config, a.platform, a.store, a.catalog, a.detector, a.installer)
+		result, err := pipeline.CheckVersions(ctx, snapshot)
 		if err == nil {
-			agentDefMap := make(map[string]catalog.AgentDef, len(agentDefs))
-			for _, def := range agentDefs {
-				agentDefMap[def.ID] = def
+			latest := make(map[string]*agent.Version, len(result.Installations))
+			for _, inst := range result.Installations {
+				latest[inst.Key()] = inst.LatestVersion
 			}
-
-			_ = versionfetch.CheckLatestVersions(ctx, a.installer, snapshot, agentDefMap, versionfetch.DefaultConcurrency)
-
-			// Write the refreshed LatestVersion fields back into the shared
-			// state under the write lock, matching snapshot ordering.
 			a.agentsMu.Lock()
-			for i := range snapshot {
-				if i >= len(a.agents) {
-					break
+			for i := range a.agents {
+				if version, ok := latest[a.agents[i].Key()]; ok {
+					a.agents[i].LatestVersion = version
 				}
-				a.agents[i].LatestVersion = snapshot[i].LatestVersion
 			}
-			// Persist the refreshed snapshot so subsequent reads see the new
-			// versions on next restart.
-			if a.config.Detection.CacheEnabled {
-				toCache := make([]*agent.Installation, len(a.agents))
-				for i := range a.agents {
-					agCopy := a.agents[i]
-					toCache[i] = &agCopy
-				}
-				a.agentsMu.Unlock()
-				_ = a.store.SaveDetectionCache(ctx, toCache)
-				_ = a.store.SetLastUpdateCheckTime(ctx, time.Now())
-			} else {
-				a.agentsMu.Unlock()
-			}
+			a.agentsMu.Unlock()
 		}
+
 	}
 
 	// Only update the counts, not the full menu (to avoid menu jumping)
@@ -1026,6 +1007,7 @@ func (a *App) updateSingleAgent(inst agent.Installation) {
 	)
 
 	// Refresh agent list
+	_ = a.store.ClearDetectionCache(ctx)
 	a.refreshAgents(ctx)
 }
 
@@ -1094,6 +1076,7 @@ func (a *App) updateAllAgents(ctx context.Context) {
 	}
 
 	// Refresh agent list
+	_ = a.store.ClearDetectionCache(ctx)
 	a.refreshAgents(ctx)
 }
 

@@ -57,6 +57,9 @@ type brewCask struct {
 
 // Detect scans for brew-installed agents.
 func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
+	if !hasInstallMethod(agents, "brew") {
+		return nil, nil
+	}
 	var installations []*agent.Installation
 
 	var (

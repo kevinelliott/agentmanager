@@ -263,3 +263,25 @@ func TestCheckLatestVersions_ContextCancelled(t *testing.T) {
 		t.Errorf("expected at least one cancellation error, got none: %v", errs)
 	}
 }
+
+type deadlineFetcher struct{ t *testing.T }
+
+func (f deadlineFetcher) GetLatestVersion(ctx context.Context, _ catalog.InstallMethodDef) (agent.Version, error) {
+	deadline, ok := ctx.Deadline()
+	if !ok || time.Until(deadline) > 15*time.Second {
+		f.t.Error("lookup has no bounded deadline")
+	}
+	<-ctx.Done()
+	return agent.Version{}, ctx.Err()
+}
+
+func TestLookupDeadlineHonorsCallerCancellation(t *testing.T) {
+	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Millisecond)
+	defer cancel()
+	installations := []*agent.Installation{{AgentID: "a", Method: agent.MethodNPM}}
+	defs := map[string]catalog.AgentDef{"a": {ID: "a", InstallMethods: map[string]catalog.InstallMethodDef{"npm": {Method: "npm", Package: "a"}}}}
+	errs := CheckLatestVersions(ctx, deadlineFetcher{t: t}, installations, defs, 1)
+	if len(errs) != 1 || !errors.Is(errs[0], context.DeadlineExceeded) {
+		t.Fatalf("expected cancellation, got %v", errs)
+	}
+}

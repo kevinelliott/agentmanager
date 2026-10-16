@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"sort"
@@ -25,6 +26,15 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/platform"
 	"github.com/kevinelliott/agentmanager/pkg/storage"
 )
+
+// invalidateDetectionCache also covers partial package-manager mutations.
+func invalidateDetectionCache(store storage.Store) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	if err := store.ClearDetectionCache(ctx); err != nil {
+		slog.DebugContext(ctx, "could not invalidate inventory cache", "error", err)
+	}
+}
 
 // verboseInstallOutput returns true when the user has asked for verbose output
 // at the root level. The root PersistentPreRunE flips Logging.Level to "debug"
@@ -76,6 +86,7 @@ func newAgentListCommand(cfg *config.Config) *cobra.Command {
 		updatesOnly bool
 		refresh     bool
 		verify      bool
+		localOnly   bool
 	)
 
 	cmd := &cobra.Command{
@@ -135,7 +146,8 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 			}
 
 			pipelineRes, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{
-				ForceRefresh: refresh,
+				ForceRefresh:     refresh,
+				SkipVersionCheck: localOnly,
 			})
 			if err != nil {
 				spinner.Error("Agent detection failed")
@@ -218,6 +230,7 @@ Results are cached for 1 hour by default. Use --refresh to force re-detection.`,
 	cmd.Flags().BoolVarP(&updatesOnly, "updates", "u", false, "show only agents with updates")
 	cmd.Flags().BoolVarP(&refresh, "refresh", "r", false, "force re-detection (ignore cache)")
 	cmd.Flags().BoolVar(&verify, "verify", false, "verify agents can execute (health check)")
+	cmd.Flags().BoolVar(&localOnly, "local", false, "list local installations without checking remote versions")
 
 	return cmd
 }
@@ -278,6 +291,7 @@ failed.`,
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
+			defer invalidateDetectionCache(store)
 			catMgr := catalog.NewManager(cfg, store)
 			cat, err := catMgr.Get(ctx)
 			if err != nil {
@@ -498,6 +512,10 @@ per (agent, method) updated, plus a summary). Useful for scripting.`,
 				cmd.SilenceUsage = true
 			}
 
+			if !all && len(args) == 0 {
+				return fmt.Errorf("agent name required (or use --all)")
+			}
+
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
@@ -528,6 +546,9 @@ per (agent, method) updated, plus a summary). Useful for scripting.`,
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
+			if !dryRun {
+				defer invalidateDetectionCache(store)
+			}
 			catMgr := catalog.NewManager(cfg, store)
 			det := detector.New(plat)
 			inst := installer.NewManager(plat)
@@ -537,7 +558,11 @@ per (agent, method) updated, plus a summary). Useful for scripting.`,
 			// latest installed versions before choosing what to update. Preserve
 			// that by forcing the pipeline to bypass the detection cache.
 			spinner.UpdateMessage("Detecting agents...")
-			pipelineRes, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: true})
+			opts := orchestrator.Options{ForceRefresh: true}
+			if !all {
+				opts.AgentIDs = args
+			}
+			pipelineRes, err := pipeline.DetectAndCheckVersions(ctx, opts)
 			if err != nil {
 				spinner.Error("Detection failed")
 				return err
@@ -1124,6 +1149,7 @@ prompts can't be answered from a script).`,
 				return fmt.Errorf("failed to initialize storage: %w", err)
 			}
 
+			defer invalidateDetectionCache(store)
 			catMgr := catalog.NewManager(cfg, store)
 			agentDefs, err := catMgr.GetAgentsForPlatform(ctx, string(plat.ID()))
 			if err != nil {

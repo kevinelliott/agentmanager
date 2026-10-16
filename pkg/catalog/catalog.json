@@ -1,7 +1,7 @@
 {
-  "version": "1.0.78",
+  "version": "1.0.79",
   "schema_version": 1,
-  "last_updated": "2026-09-13T00:00:00Z",
+  "last_updated": "2026-10-16T04:36:19Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -5710,27 +5710,13 @@
           "uninstall_cmd": "npm uninstall -g @yylo/cli",
           "platforms": [
             "darwin",
-            "linux",
-            "windows"
+            "linux"
           ],
           "global_flag": "-g",
           "prereqs": [
             "node>=20.10",
-            "git"
-          ]
-        },
-        "npx": {
-          "method": "npx",
-          "package": "@yylo/cli",
-          "command": "npx @yylo/cli",
-          "platforms": [
-            "darwin",
-            "linux",
-            "windows"
-          ],
-          "prereqs": [
-            "node>=20.10",
-            "git"
+            "git",
+            "bash"
           ]
         }
       },
