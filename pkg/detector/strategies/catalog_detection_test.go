@@ -73,6 +73,31 @@ func TestCatalogLeviathanCargoDetection(t *testing.T) {
 	}
 }
 
+func TestCatalogHomebrewFormulaDetection(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("POSIX Homebrew fixture")
+	}
+	dir := t.TempDir()
+	// Homebrew v2 serializes installed kegs as objects, not version strings.
+	fixture := `#!/bin/sh
+case "$*" in
+  *--cask*) printf '%s\n' '{"casks":[]}' ;;
+  *) printf '%s\n' '{"formulae":[{"name":"docker-agent","full_name":"docker-agent","installed":[{"version":"1.150.0","used_options":[]}],"versions":{"stable":"1.150.0"}}]}' ;;
+esac
+`
+	if err := os.WriteFile(filepath.Join(dir, "brew"), []byte(fixture), 0700); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	got, err := NewBrewStrategy(newMockPlatform()).Detect(context.Background(), []catalog.AgentDef{embeddedAgent(t, "docker-agent")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0].Method != agent.MethodBrew || got[0].InstalledVersion.String() != "1.150.0" {
+		t.Fatalf("installed Homebrew formula must retain its version and update method: %+v", got)
+	}
+}
+
 func TestCargoPathRequiresDeclaredCargoMethod(t *testing.T) {
 	def := catalog.AgentDef{
 		ID: "native-only", InstallMethods: map[string]catalog.InstallMethodDef{"native": {Method: "native"}},

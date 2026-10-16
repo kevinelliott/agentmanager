@@ -40,10 +40,12 @@ func (s *BrewStrategy) IsApplicable(p platform.Platform) bool {
 
 // brewFormula represents a Homebrew formula from list output.
 type brewFormula struct {
-	Name              string   `json:"name"`
-	FullName          string   `json:"full_name"`
-	InstalledVersions []string `json:"installed"`
-	Versions          struct {
+	Name              string `json:"name"`
+	FullName          string `json:"full_name"`
+	InstalledVersions []struct {
+		Version string `json:"version"`
+	} `json:"installed"`
+	Versions struct {
 		Stable string `json:"stable"`
 	} `json:"versions"`
 }
@@ -96,7 +98,7 @@ func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([
 		if formula, found := formulae[strings.ToLower(packageName)]; found {
 			var versionStr string
 			if len(formula.InstalledVersions) > 0 {
-				versionStr = formula.InstalledVersions[0]
+				versionStr = formula.InstalledVersions[0].Version
 			}
 			version, _ := agent.ParseVersion(versionStr)
 

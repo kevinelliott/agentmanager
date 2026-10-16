@@ -46,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Keep Cargo-installed catalog tools discoverable and preserve their Cargo
   update/removal commands. Match Homebrew casks by token when their catalog
-  entries use fully qualified tap names.
+  entries use fully qualified tap names, and read Homebrew formula versions
+  from the installed keg objects returned by its v2 JSON inventory.
 - Harden upgrade staging, config/plugin/database permissions, desktop command
   quoting, and error handling identified by the 113-alert gosec review (ENGIN-1).
   Intentional local command/file operations have per-call review annotations;
