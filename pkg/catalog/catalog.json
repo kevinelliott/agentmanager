@@ -1,7 +1,7 @@
 {
-  "version": "1.0.80",
+  "version": "1.0.81",
   "schema_version": 1,
-  "last_updated": "2026-10-16T06:54:31Z",
+  "last_updated": "2026-10-16T13:40:28Z",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -6605,6 +6605,1296 @@
         "github_stars_checked_at": "2026-10-16T06:48:08.448413+00:00",
         "license": "MIT",
         "vendor": "Gas Town"
+      }
+    },
+    "browser-use": {
+      "id": "browser-use",
+      "name": "Browser Use",
+      "description": "Browser automation CLI for AI agents with persistent browser sessions",
+      "category": "productivity",
+      "tags": [
+        "browser",
+        "automation",
+        "cli"
+      ],
+      "homepage": "https://github.com/browser-use/browser-use",
+      "repository": "https://github.com/browser-use/browser-use",
+      "documentation": "https://github.com/browser-use/browser-use#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "browser-use",
+          "command": "uv tool install browser-use",
+          "update_cmd": "uv tool upgrade browser-use",
+          "uninstall_cmd": "uv tool uninstall browser-use",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "browser-use"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/browser-use/browser-use/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDONIn9tw",
+        "github_stars": "118176",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/browser-use/browser-use/releases/tag/0.13.13",
+        "vendor": "browser-use",
+        "install_note": "Requires Python 3.11+. The CLI delegates to Browser Harness; inventory reads the Python package version. Configure browser/runtime access separately."
+      }
+    },
+    "nanobot": {
+      "id": "nanobot",
+      "name": "Nanobot",
+      "description": "Lightweight personal AI agent with a native terminal interface, tools and memory",
+      "category": "productivity",
+      "tags": [
+        "personal-agent",
+        "tui",
+        "memory"
+      ],
+      "homepage": "https://github.com/HKUDS/nanobot",
+      "repository": "https://github.com/HKUDS/nanobot",
+      "documentation": "https://github.com/HKUDS/nanobot#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "nanobot-ai",
+          "command": "uv tool install nanobot-ai",
+          "update_cmd": "uv tool upgrade nanobot-ai",
+          "uninstall_cmd": "uv tool uninstall nanobot-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "nanobot"
+        ],
+        "version_cmd": "nanobot --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/HKUDS/nanobot/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDORF9GhA",
+        "github_stars": "49086",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-15",
+        "recent_activity_url": "https://github.com/HKUDS/nanobot/releases/tag/v0.3.5",
+        "vendor": "HKUDS",
+        "install_note": "Requires Python 3.11+. Configure a model provider before running the agent."
+      }
+    },
+    "zeroclaw": {
+      "id": "zeroclaw",
+      "name": "ZeroClaw",
+      "description": "Rust personal-agent runtime with tools, channels and local gateway support",
+      "category": "productivity",
+      "tags": [
+        "runtime",
+        "cli"
+      ],
+      "homepage": "https://github.com/zeroclaw-labs/zeroclaw",
+      "repository": "https://github.com/zeroclaw-labs/zeroclaw",
+      "documentation": "https://github.com/zeroclaw-labs/zeroclaw#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | sh -s -- --prebuilt --skip-quickstart",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "zeroclaw"
+        ],
+        "version_cmd": "zeroclaw --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/zeroclaw-labs/zeroclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDORPXC2g",
+        "github_stars": "32983",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-05",
+        "recent_activity_url": "https://github.com/zeroclaw-labs/zeroclaw/releases/tag/v0.8.5",
+        "vendor": "zeroclaw-labs",
+        "install_note": "Installs the prebuilt Unix runtime; run zeroclaw quickstart separately to configure providers and channels."
+      }
+    },
+    "ironclaw": {
+      "id": "ironclaw",
+      "name": "IronClaw",
+      "description": "Privacy-oriented personal AI agent with sandboxed tools and extensible capabilities",
+      "category": "productivity",
+      "tags": [
+        "runtime",
+        "sandbox",
+        "cli"
+      ],
+      "homepage": "https://github.com/nearai/ironclaw",
+      "repository": "https://github.com/nearai/ironclaw",
+      "documentation": "https://github.com/nearai/ironclaw#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://github.com/nearai/ironclaw/releases/latest/download/ironclaw-installer.sh)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | sh -s --",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "ironclaw"
+        ],
+        "version_cmd": "ironclaw --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/nearai/ironclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDORHZ7Zw",
+        "github_stars": "12658",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-29",
+        "recent_activity_url": "https://github.com/nearai/ironclaw/releases/tag/ironclaw-v1.4.1",
+        "vendor": "nearai",
+        "install_note": "Uses the upstream release installer. Initial provider and service setup is separate."
+      }
+    },
+    "docker-agent": {
+      "id": "docker-agent",
+      "name": "Docker Agent",
+      "description": "Declarative YAML agent teams with tools, MCP and a terminal interface",
+      "category": "coding",
+      "tags": [
+        "docker",
+        "orchestration",
+        "tui"
+      ],
+      "homepage": "https://github.com/docker/docker-agent",
+      "repository": "https://github.com/docker/docker-agent",
+      "documentation": "https://github.com/docker/docker-agent#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "docker-agent",
+          "command": "brew install docker-agent",
+          "update_cmd": "brew upgrade docker-agent",
+          "uninstall_cmd": "brew uninstall docker-agent",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "docker-agent"
+        ],
+        "version_cmd": "docker-agent version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/docker/docker-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOPn2YWg",
+        "github_stars": "4544",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-09",
+        "recent_activity_url": "https://github.com/docker/docker-agent/releases/tag/v1.150.0",
+        "vendor": "docker",
+        "install_note": "Homebrew installs the standalone CLI. Docker Desktop 4.63+ also includes the docker agent plugin; plugin-only installations are not detected by this entry."
+      }
+    },
+    "kimchi": {
+      "id": "kimchi",
+      "name": "Kimchi",
+      "description": "Terminal coding agent with multi-model orchestration and extensible tools",
+      "category": "coding",
+      "tags": [
+        "coding-agent",
+        "tui"
+      ],
+      "homepage": "https://github.com/getkimchi/kimchi",
+      "repository": "https://github.com/getkimchi/kimchi",
+      "documentation": "https://github.com/getkimchi/kimchi#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "getkimchi/tap/kimchi",
+          "command": "brew install getkimchi/tap/kimchi",
+          "update_cmd": "brew upgrade getkimchi/tap/kimchi",
+          "uninstall_cmd": "brew uninstall getkimchi/tap/kimchi",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | bash -s --",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "kimchi"
+        ],
+        "version_cmd": "kimchi --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/getkimchi/kimchi/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOR8R3Jw",
+        "github_stars": "2271",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/getkimchi/kimchi/releases/tag/v1.15.2",
+        "vendor": "getkimchi"
+      }
+    },
+    "unreal-agent": {
+      "id": "unreal-agent",
+      "name": "Unreal Agent",
+      "description": "Async-first coding harness with a packaged terminal client",
+      "category": "coding",
+      "tags": [
+        "coding-agent",
+        "tui"
+      ],
+      "homepage": "https://github.com/unreallabsai/unreal-agent",
+      "repository": "https://github.com/unreallabsai/unreal-agent",
+      "documentation": "https://github.com/unreallabsai/unreal-agent#readme",
+      "install_methods": {
+        "brew-cask": {
+          "method": "brew-cask",
+          "package": "unreallabsai/tap/unreal-agent",
+          "command": "brew install --cask unreallabsai/tap/unreal-agent",
+          "update_cmd": "brew upgrade --cask unreallabsai/tap/unreal-agent",
+          "uninstall_cmd": "brew uninstall --cask unreallabsai/tap/unreal-agent",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_unreal_agent_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/unreal-agent\"\nif [ -e \"$HOME/.local/bin/unreal-agent-tui\" ] || [ -L \"$HOME/.local/bin/unreal-agent-tui\" ]; then\n  printf '%s\\n' 'unreal-agent-tui already exists in ~/.local/bin; use its existing installation to update' >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_unreal_agent_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_unreal_agent_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_unreal_agent_source\" remote get-url origin)\" = \"https://github.com/unreallabsai/unreal-agent.git\"\n  git -C \"$agentmgr_unreal_agent_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/unreallabsai/unreal-agent.git \"$agentmgr_unreal_agent_source\"\nfi\ncd \"$agentmgr_unreal_agent_source\"\nGOBIN=\"$PWD/.agentmanager-bin\" go -C cmd/unreal-agent-tui install .\ntest -x \"$agentmgr_unreal_agent_source/.agentmanager-bin/unreal-agent-tui\"\nln -s \"$agentmgr_unreal_agent_source/.agentmanager-bin/unreal-agent-tui\" \"$HOME/.local/bin/unreal-agent-tui\"\n",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "git",
+            "go>=1.27"
+          ],
+          "update_cmd": "set -eu\nagentmgr_unreal_agent_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/unreal-agent\"\ntest \"$(git -C \"$agentmgr_unreal_agent_source\" remote get-url origin)\" = \"https://github.com/unreallabsai/unreal-agent.git\"\ncd \"$agentmgr_unreal_agent_source\"\ngit pull --ff-only\nGOBIN=\"$PWD/.agentmanager-bin\" go -C cmd/unreal-agent-tui install .",
+          "metadata": {
+            "installer_type": "source_build",
+            "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/unreal-agent"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "unreal-agent-tui",
+          "unreal-agent"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/unreallabsai/unreal-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOUkrR9Q",
+        "github_stars": "2202",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-06",
+        "recent_activity_url": "https://github.com/unreallabsai/unreal-agent/releases/tag/v0.3.1",
+        "vendor": "unreallabsai",
+        "install_note": "Homebrew distributes a cask (macOS). The Unix source build requires Go 1.27+ and links unreal-agent-tui into ~/.local/bin. Upstream exposes no documented version flag."
+      }
+    },
+    "dirac": {
+      "id": "dirac",
+      "name": "Dirac",
+      "description": "Coding agent CLI with hash-anchored editing, context management and ACP support",
+      "category": "coding",
+      "tags": [
+        "coding-agent",
+        "cli",
+        "acp"
+      ],
+      "homepage": "https://github.com/dirac-run/dirac",
+      "repository": "https://github.com/dirac-run/dirac",
+      "documentation": "https://github.com/dirac-run/dirac#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "dirac-cli",
+          "command": "npm install -g dirac-cli",
+          "update_cmd": "npm update -g dirac-cli",
+          "uninstall_cmd": "npm uninstall -g dirac-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "dirac"
+        ],
+        "version_cmd": "dirac --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/dirac-run/dirac/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOR6l_uA",
+        "github_stars": "1530",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/dirac-run/dirac/releases/tag/v0.5.21",
+        "vendor": "dirac-run",
+        "install_note": "The CLI package is dirac-cli. Requires Node >=22.13 and <25."
+      }
+    },
+    "vtcode": {
+      "id": "vtcode",
+      "name": "VT Code",
+      "description": "Rust terminal coding agent supporting hosted and local models",
+      "category": "coding",
+      "tags": [
+        "coding-agent",
+        "tui"
+      ],
+      "homepage": "https://github.com/vinhnx/VTCode",
+      "repository": "https://github.com/vinhnx/VTCode",
+      "documentation": "https://github.com/vinhnx/VTCode#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "vinhnx/tap/vtcode",
+          "command": "brew install vinhnx/tap/vtcode",
+          "update_cmd": "brew upgrade vinhnx/tap/vtcode",
+          "uninstall_cmd": "brew uninstall vinhnx/tap/vtcode",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://raw.githubusercontent.com/vinhnx/VTCode/main/scripts/install.sh)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | bash -s --",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "bash"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "vtcode"
+        ],
+        "version_cmd": "vtcode --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/vinhnx/VTCode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOPmULpg",
+        "github_stars": "880",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/vinhnx/VTCode/releases/tag/0.178.0",
+        "vendor": "vinhnx",
+        "install_note": "The upstream native installer may also install optional search tools. Homebrew installs the CLI through the verified tap."
+      }
+    },
+    "icode": {
+      "id": "icode",
+      "name": "iCode",
+      "description": "Python terminal interface for agent coding and workflow development",
+      "category": "coding",
+      "tags": [
+        "coding-agent",
+        "tui",
+        "experimental"
+      ],
+      "homepage": "https://github.com/openJiuwen-ai/iCode",
+      "repository": "https://github.com/openJiuwen-ai/iCode",
+      "documentation": "https://github.com/openJiuwen-ai/iCode#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "icode-tui",
+          "command": "uv tool install icode-tui",
+          "update_cmd": "uv tool upgrade icode-tui",
+          "uninstall_cmd": "uv tool uninstall icode-tui",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "icode"
+        ],
+        "version_cmd": "icode --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openJiuwen-ai/iCode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOUvPrtQ",
+        "github_stars": "355",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/openJiuwen-ai/iCode/releases/tag/v0.30.0",
+        "vendor": "openJiuwen-ai",
+        "install_note": "Requires Python 3.14+. Upstream describes the project as work in progress."
+      }
+    },
+    "happy": {
+      "id": "happy",
+      "name": "Happy",
+      "description": "Terminal wrapper for continuing Claude Code and Codex sessions from your phone",
+      "category": "productivity",
+      "tags": [
+        "remote",
+        "companion",
+        "cli"
+      ],
+      "homepage": "https://github.com/slopus/happy",
+      "repository": "https://github.com/slopus/happy",
+      "documentation": "https://github.com/slopus/happy#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "happy",
+          "command": "npm install -g happy",
+          "update_cmd": "npm update -g happy",
+          "uninstall_cmd": "npm uninstall -g happy",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "happy"
+        ],
+        "version_cmd": "happy --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/slopus/happy/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOPOjixQ",
+        "github_stars": "24175",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-22",
+        "recent_activity_url": "https://github.com/slopus/happy/releases/tag/cli-1.2.5",
+        "vendor": "slopus",
+        "install_note": "The original Happy CLI is published as happy; happy-coder is the former package name. Requires an existing supported coding agent."
+      }
+    },
+    "sno-station": {
+      "id": "sno-station",
+      "name": "Sno Station",
+      "description": "Shared memory and handoffs across coding agents through the Sno CLI",
+      "category": "productivity",
+      "tags": [
+        "memory",
+        "handoff",
+        "cli"
+      ],
+      "homepage": "https://github.com/sno-ai/sno-station",
+      "repository": "https://github.com/sno-ai/sno-station",
+      "documentation": "https://github.com/sno-ai/sno-station#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://sno.ai/install)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | sh -s --",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "sno"
+        ],
+        "version_cmd": "sno --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sno-ai/sno-station/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOUhDkBA",
+        "github_stars": "758",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/sno-ai/sno-station/releases/tag/v1.3.9",
+        "vendor": "sno-ai",
+        "install_note": "The upstream installer initializes Sno and may add its bin directory to the shell profile. Run sno setup separately to configure Station and agent integrations."
+      }
+    },
+    "agent-memory": {
+      "id": "agent-memory",
+      "name": "agent-memory",
+      "description": "Markdown-based long-term memory with CLI, MCP and lifecycle integrations",
+      "category": "productivity",
+      "tags": [
+        "memory",
+        "cli",
+        "mcp"
+      ],
+      "homepage": "https://github.com/tigerless-labs/agent-memory",
+      "repository": "https://github.com/tigerless-labs/agent-memory",
+      "documentation": "https://github.com/tigerless-labs/agent-memory#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_agent_memory_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/agent-memory\"\nif [ -e \"$HOME/.local/bin/mem\" ] || [ -L \"$HOME/.local/bin/mem\" ]; then\n  printf '%s\\n' 'mem already exists in ~/.local/bin; use its existing installation to update' >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_agent_memory_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_agent_memory_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_agent_memory_source\" remote get-url origin)\" = \"https://github.com/tigerless-labs/agent-memory.git\"\n  git -C \"$agentmgr_agent_memory_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/tigerless-labs/agent-memory.git \"$agentmgr_agent_memory_source\"\nfi\ncd \"$agentmgr_agent_memory_source\"\nuv sync --all-packages\ntest -x \"$agentmgr_agent_memory_source/.venv/bin/mem\"\nln -s \"$agentmgr_agent_memory_source/.venv/bin/mem\" \"$HOME/.local/bin/mem\"\n",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "git",
+            "uv",
+            "python>=3.12"
+          ],
+          "update_cmd": "set -eu\nagentmgr_agent_memory_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/agent-memory\"\ntest \"$(git -C \"$agentmgr_agent_memory_source\" remote get-url origin)\" = \"https://github.com/tigerless-labs/agent-memory.git\"\ncd \"$agentmgr_agent_memory_source\"\ngit pull --ff-only\nuv sync --all-packages",
+          "metadata": {
+            "installer_type": "source_build",
+            "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/agent-memory"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "mem"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/tigerless-labs/agent-memory/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOULVN7Q",
+        "github_stars": "3904",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-01",
+        "recent_activity_url": "https://github.com/tigerless-labs/agent-memory",
+        "vendor": "tigerless-labs",
+        "install_note": "Not published to PyPI. Builds from the upstream workspace into the AgentManager data directory and links mem into ~/.local/bin; requires Python 3.12+. The CLI has no version flag. Hook and MCP configuration is a separate explicit setup step."
+      }
+    },
+    "macos-harness": {
+      "id": "macos-harness",
+      "name": "macOS Harness",
+      "description": "CLI for coding agents to inspect and automate native macOS applications",
+      "category": "productivity",
+      "tags": [
+        "computer-use",
+        "macos",
+        "cli"
+      ],
+      "homepage": "https://github.com/browser-use/macos-harness",
+      "repository": "https://github.com/browser-use/macos-harness",
+      "documentation": "https://github.com/browser-use/macos-harness#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "macos-harness",
+          "command": "uv tool install macos-harness",
+          "update_cmd": "uv tool upgrade macos-harness",
+          "uninstall_cmd": "uv tool uninstall macos-harness",
+          "platforms": [
+            "darwin"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "macos-harness"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/browser-use/macos-harness/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOT6kwBw",
+        "github_stars": "954",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/browser-use/macos-harness/releases/tag/v0.2.1",
+        "vendor": "browser-use",
+        "install_note": "macOS only; upstream recommends Python 3.12. Run macos-harness install --agent NAME and macos-harness doctor separately, then grant the macOS permissions reported by doctor."
+      }
+    },
+    "fauxnix": {
+      "id": "fauxnix",
+      "name": "fauxnix",
+      "description": "Unix-style command adapter for coding agents running on native Windows",
+      "category": "terminal",
+      "tags": [
+        "windows",
+        "companion",
+        "cli"
+      ],
+      "homepage": "https://github.com/20000419/fauxnix",
+      "repository": "https://github.com/20000419/fauxnix",
+      "documentation": "https://github.com/20000419/fauxnix#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "fauxnix-cli",
+          "command": "npm install -g fauxnix-cli",
+          "update_cmd": "npm update -g fauxnix-cli",
+          "uninstall_cmd": "npm uninstall -g fauxnix-cli",
+          "platforms": [
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "fauxnix"
+        ],
+        "version_cmd": "fauxnix --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/20000419/fauxnix/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOT5r5iA",
+        "github_stars": "994",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-12",
+        "recent_activity_url": "https://github.com/20000419/fauxnix/releases/tag/v2.1.0",
+        "vendor": "20000419",
+        "install_note": "Windows with PowerShell 5.1+ and Node 22.20+. The package is fauxnix-cli, not the unrelated fauxnix npm package. Agent integration is configured separately."
+      }
+    },
+    "only-cli": {
+      "id": "only-cli",
+      "name": "Only CLI / oc",
+      "description": "Compact website CLI that exposes browser actions and structured output for agents",
+      "category": "productivity",
+      "tags": [
+        "browser",
+        "cli"
+      ],
+      "homepage": "https://github.com/only-cli/oc",
+      "repository": "https://github.com/only-cli/oc",
+      "documentation": "https://github.com/only-cli/oc#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@only-cli/oc",
+          "command": "npm install -g @only-cli/oc",
+          "update_cmd": "npm update -g @only-cli/oc",
+          "uninstall_cmd": "npm uninstall -g @only-cli/oc",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "oc"
+        ],
+        "version_cmd": "oc --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/only-cli/oc/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOT8aCMA",
+        "github_stars": "542",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-25",
+        "recent_activity_url": "https://github.com/only-cli/oc/releases/tag/v0.5.8",
+        "vendor": "only-cli",
+        "install_note": "Requires Node 20+. The oc command conflicts with Red Hat OpenShift. If OpenShift is installed, use npx @only-cli/oc instead of a global installation. Detection uses the npm package identity."
+      }
+    },
+    "foremerge": {
+      "id": "foremerge",
+      "name": "Foremerge",
+      "description": "Coordinate agent change intentions and detect collisions across Git worktrees",
+      "category": "coding",
+      "tags": [
+        "coordination",
+        "git",
+        "cli"
+      ],
+      "homepage": "https://github.com/naw103/foremerge",
+      "repository": "https://github.com/naw103/foremerge",
+      "documentation": "https://github.com/naw103/foremerge#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "foremerge",
+          "command": "npm install -g foremerge",
+          "update_cmd": "npm update -g foremerge",
+          "uninstall_cmd": "npm uninstall -g foremerge",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "foremerge",
+          "fmg"
+        ],
+        "version_cmd": "foremerge --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/naw103/foremerge/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOT_6UKw",
+        "github_stars": "540",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-03",
+        "recent_activity_url": "https://github.com/naw103/foremerge/releases/tag/v0.5.1",
+        "vendor": "naw103",
+        "install_note": "The npm package bundles release binaries for macOS and glibc Linux; no Windows npm package is published. Run foremerge setup separately to configure integrations."
+      }
+    },
+    "leviathan": {
+      "id": "leviathan",
+      "name": "Leviathan",
+      "description": "Local retrieval and long-term memory over structured datasets with CLI and MCP",
+      "category": "research",
+      "tags": [
+        "retrieval",
+        "memory",
+        "mcp",
+        "cli"
+      ],
+      "homepage": "https://github.com/elstongun/leviathan",
+      "repository": "https://github.com/elstongun/leviathan",
+      "documentation": "https://github.com/elstongun/leviathan#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "cargo install --locked leviathan-index",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "package": "leviathan-index",
+          "prereqs": [
+            "cargo"
+          ],
+          "update_cmd": "cargo install --locked --force leviathan-index",
+          "uninstall_cmd": "cargo uninstall leviathan-index",
+          "metadata": {
+            "installer_type": "source_build"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "leviathan"
+        ],
+        "version_cmd": "leviathan --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/elstongun/leviathan/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOU8WIWA",
+        "github_stars": "825",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-09",
+        "recent_activity_url": "https://github.com/elstongun/leviathan/releases/tag/v0.2.0",
+        "vendor": "elstongun",
+        "install_note": "The Rust package is leviathan-index; its executable is leviathan."
+      }
+    },
+    "openqodex": {
+      "id": "openqodex",
+      "name": "OpenQodex",
+      "description": "Agent-assisted code review with scanners, change reports and optional push gates",
+      "category": "coding",
+      "tags": [
+        "review",
+        "cli"
+      ],
+      "homepage": "https://github.com/openqodex/openqodex",
+      "repository": "https://github.com/openqodex/openqodex",
+      "documentation": "https://github.com/openqodex/openqodex#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "openqodex",
+          "command": "npm install -g openqodex",
+          "update_cmd": "npm update -g openqodex",
+          "uninstall_cmd": "npm uninstall -g openqodex",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "openqodex"
+        ],
+        "version_cmd": "openqodex --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openqodex/openqodex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOU4Tqpg",
+        "github_stars": "721",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/openqodex/openqodex/releases/tag/openqodex%400.13.0",
+        "vendor": "openqodex",
+        "install_note": "Requires Node 22+ on macOS or Linux. Global npm installation adds the CLI only; run openqodex init separately to review and authorize project/agent setup. Full review requires an authenticated Claude Code or Codex installation."
+      }
+    },
+    "tsk": {
+      "id": "tsk",
+      "name": "tsk",
+      "description": "Shared terminal task board for people and coding agents",
+      "category": "productivity",
+      "tags": [
+        "tasks",
+        "tui"
+      ],
+      "homepage": "https://github.com/smarzban/tsk",
+      "repository": "https://github.com/smarzban/tsk",
+      "documentation": "https://github.com/smarzban/tsk#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "smarzban/tap/tsk",
+          "command": "brew install smarzban/tap/tsk",
+          "update_cmd": "brew upgrade smarzban/tap/tsk",
+          "uninstall_cmd": "brew uninstall smarzban/tap/tsk",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        },
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://gettsk.sh/install.sh)\nprintf \"%s\\n\" \"$agentmgr_installer_body\" | sh -s --",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ],
+          "metadata": {
+            "installer_type": "shell_script"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "tsk"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/smarzban/tsk/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOT91MpQ",
+        "github_stars": "212",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-22",
+        "recent_activity_url": "https://github.com/smarzban/tsk/releases/tag/v0.11.6",
+        "vendor": "smarzban",
+        "install_note": "Agent and Herdr integrations are separate setup steps. Version probing is disabled because upstream documents --help rather than a stable version flag."
+      }
+    },
+    "plannotator-tui": {
+      "id": "plannotator-tui",
+      "name": "Plannotator TUI",
+      "description": "Annotate Markdown plans in the terminal and return feedback to coding agents",
+      "category": "productivity",
+      "tags": [
+        "plans",
+        "review",
+        "tui"
+      ],
+      "homepage": "https://github.com/plannotator/plannotator-tui",
+      "repository": "https://github.com/plannotator/plannotator-tui",
+      "documentation": "https://github.com/plannotator/plannotator-tui#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "plannotator/tap/plannotator-tui",
+          "command": "brew install plannotator/tap/plannotator-tui",
+          "update_cmd": "brew upgrade plannotator/tap/plannotator-tui",
+          "uninstall_cmd": "brew uninstall plannotator/tap/plannotator-tui",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "plannotator-tui"
+        ],
+        "version_cmd": "plannotator-tui --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/plannotator/plannotator-tui/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOUHTBLw",
+        "github_stars": "180",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-25",
+        "recent_activity_url": "https://github.com/plannotator/plannotator-tui/releases/tag/v0.9.4",
+        "vendor": "plannotator",
+        "install_note": "Homebrew 6 may require trusting plannotator/tap first. The optional Herdr add-on is installed separately."
+      }
+    },
+    "moltis": {
+      "id": "moltis",
+      "name": "Moltis",
+      "description": "Persistent Rust personal-agent gateway with a CLI and browser interface",
+      "category": "productivity",
+      "tags": [
+        "runtime",
+        "cli",
+        "gateway"
+      ],
+      "homepage": "https://github.com/moltis-org/moltis",
+      "repository": "https://github.com/moltis-org/moltis",
+      "documentation": "https://github.com/moltis-org/moltis#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "moltis-org/tap/moltis",
+          "command": "brew install moltis-org/tap/moltis",
+          "update_cmd": "brew upgrade moltis-org/tap/moltis",
+          "uninstall_cmd": "brew uninstall moltis-org/tap/moltis",
+          "platforms": [
+            "darwin",
+            "linux"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "moltis"
+        ],
+        "version_cmd": "moltis --version",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/moltis-org/moltis/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOREW6tQ",
+        "github_stars": "2890",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-14",
+        "recent_activity_url": "https://github.com/moltis-org/moltis/releases/tag/20260913.02",
+        "vendor": "moltis-org",
+        "install_note": "Primary interactive surface is the browser UI; this entry manages the gateway CLI."
+      }
+    },
+    "symphony": {
+      "id": "symphony",
+      "name": "Symphony",
+      "description": "Experimental issue-driven orchestration runtime for isolated coding-agent work",
+      "category": "coding",
+      "tags": [
+        "orchestration",
+        "cli",
+        "experimental"
+      ],
+      "homepage": "https://github.com/openai/symphony",
+      "repository": "https://github.com/openai/symphony",
+      "documentation": "https://github.com/openai/symphony#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\ncase \"$(uname -s):$(uname -m)\" in\n  Darwin:arm64|Darwin:aarch64) agentmgr_symphony_target=macos_arm64 ;;\n  Darwin:x86_64) agentmgr_symphony_target=macos_x86_64 ;;\n  Linux:aarch64|Linux:arm64) agentmgr_symphony_target=linux_arm64 ;;\n  Linux:x86_64) agentmgr_symphony_target=linux_x86_64 ;;\n  *) printf '%s\\n' 'Unsupported Symphony release platform' >&2; exit 1 ;;\nesac\nagentmgr_symphony_tag=$(curl -fsSL https://api.github.com/repos/openai/symphony/releases/latest | jq -er '.tag_name')\nagentmgr_symphony_asset=\"symphony-$agentmgr_symphony_tag-$agentmgr_symphony_target\"\nagentmgr_symphony_tmp=$(mktemp -d)\ntrap 'rm -rf \"$agentmgr_symphony_tmp\"' EXIT HUP INT TERM\ncd \"$agentmgr_symphony_tmp\"\ncurl -fsSLo \"$agentmgr_symphony_asset\" \"https://github.com/openai/symphony/releases/download/$agentmgr_symphony_tag/$agentmgr_symphony_asset\"\ncurl -fsSLo \"$agentmgr_symphony_asset.sha256\" \"https://github.com/openai/symphony/releases/download/$agentmgr_symphony_tag/$agentmgr_symphony_asset.sha256\"\nif command -v sha256sum >/dev/null 2>&1; then\n  sha256sum -c \"$agentmgr_symphony_asset.sha256\"\nelse\n  shasum -a 256 -c \"$agentmgr_symphony_asset.sha256\"\nfi\nmkdir -p \"$HOME/.local/bin\"\ntest ! -L \"$HOME/.local/bin/symphony\"\ninstall -m 0755 \"$agentmgr_symphony_asset\" \"$HOME/.local/bin/symphony\"",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "jq",
+            "codex",
+            "git"
+          ],
+          "metadata": {
+            "installer_type": "github_release"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "symphony"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openai/symphony/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDORZ29ew",
+        "github_stars": "27709",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-09-15",
+        "recent_activity_url": "https://github.com/openai/symphony/releases/tag/nightly",
+        "vendor": "openai",
+        "install_note": "Engineering preview. Installs a stable self-contained Unix release with checksum verification. Supply a configured WORKFLOW.md and tracker credentials separately; no version probe is run."
+      }
+    },
+    "open-scion": {
+      "id": "open-scion",
+      "name": "open_scion",
+      "description": "Experimental community source-control system for coding agents with the Graft CLI",
+      "category": "coding",
+      "tags": [
+        "git",
+        "cli",
+        "experimental"
+      ],
+      "homepage": "https://github.com/feder-cr/git-ai",
+      "repository": "https://github.com/feder-cr/git-ai",
+      "documentation": "https://github.com/feder-cr/git-ai#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\nif [ -e \"$HOME/.local/bin/graft\" ] || [ -L \"$HOME/.local/bin/graft\" ]; then\n  printf '%s\\n' 'graft already exists in ~/.local/bin; use its existing installation to update' >&2\n  exit 1\nfi\nmkdir -p \"$(dirname \"$agentmgr_open_scion_source\")\" \"$HOME/.local/bin\"\nif [ -d \"$agentmgr_open_scion_source/.git\" ]; then\n  test \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/open_scion.git\"\n  git -C \"$agentmgr_open_scion_source\" pull --ff-only\nelse\n  git clone --depth 1 https://github.com/feder-cr/open_scion.git \"$agentmgr_open_scion_source\"\nfi\ncd \"$agentmgr_open_scion_source\"\nmake build\ntest -x \"$agentmgr_open_scion_source/_build/bin/graft\"\nln -s \"$agentmgr_open_scion_source/_build/bin/graft\" \"$HOME/.local/bin/graft\"\n",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "git",
+            "go>=1.26",
+            "make",
+            "cc",
+            "meson",
+            "ninja"
+          ],
+          "update_cmd": "set -eu\nagentmgr_open_scion_source=\"${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion\"\ntest \"$(git -C \"$agentmgr_open_scion_source\" remote get-url origin)\" = \"https://github.com/feder-cr/open_scion.git\"\ncd \"$agentmgr_open_scion_source\"\ngit pull --ff-only\nmake build",
+          "metadata": {
+            "installer_type": "source_build",
+            "source_path": "${XDG_DATA_HOME:-$HOME/.local/share}/agentmgr/open-scion"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "graft"
+        ],
+        "version_cmd": "",
+        "version_regex": "([0-9]+\\.[0-9]+(?:\\.[0-9]+)?(?:-[0-9A-Za-z.-]+)?)"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/feder-cr/git-ai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_repository_id": "R_kgDOVK7wyg",
+        "github_stars": "1031",
+        "github_stars_checked_at": "2026-10-16T13:28:29.691405+00:00",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/feder-cr/open_scion/releases/tag/v0.1.0",
+        "vendor": "feder-cr",
+        "install_note": "Early v0.1.0 source build; not Anthropic Scion. Builds bundled Git and links graft into ~/.local/bin. Requires Go 1.26, a C toolchain, Meson and Ninja. Configure and run a Graft server separately; no version probe is run."
       }
     }
   }

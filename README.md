@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-125-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-149-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 125 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 149 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -67,7 +67,7 @@ make install
 
 ```bash
 agentmgr doctor          # Check system health and configuration
-agentmgr catalog list    # Confirm the embedded catalog loads (125 agents)
+agentmgr catalog list    # Confirm the embedded catalog loads (149 agents)
 ```
 
 > **Offline-first:** the catalog is embedded into the binary, so `agentmgr catalog list`
@@ -117,7 +117,7 @@ reasonix          DeepSeek-Reasonix   homebrew +1 DeepSeek-native AI coding agen
 smallcode         SmallCode           native +3   Terminal-native coding agent built to…
 …
 
-125 agents available
+149 agents available
 ```
 
 ```console
@@ -232,7 +232,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **125 agents**, embedded in the binary and refreshable from the
+The catalog ships with **149 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -243,6 +243,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Agent Deck | `agent-deck` | brew, go, native |
 | Agent of Empires | `agent-of-empires` | brew, native |
 | agent-browser | `agent-browser` | brew, npm |
+| agent-memory | `agent-memory` | native |
 | Agents CLI | `agents-cli` | pip, pipx, uv |
 | AIChat | `aichat` | binary, brew, cargo, scoop |
 | Aider | `aider` | pip, pipx, uv |
@@ -256,6 +257,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Beads | `beads` | brew, native, npm |
 | Bernstein | `bernstein` | native, pip, pipx, uv |
 | Blackbox CLI | `blackbox-cli` | native, npm, powershell |
+| Browser Use | `browser-use` | uv |
 | ByteRover CLI | `byterover-cli` | native, npm |
 | Caveman Code | `caveman-code` | npm |
 | ccusage | `ccusage` | brew, npm, npx |
@@ -284,13 +286,17 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | DeepSeek Harness | `deepseek-harness` | npm |
 | DeepSeek-Reasonix | `reasonix` | homebrew, npm |
 | Dexter | `dexter` | git |
+| Dirac | `dirac` | npm |
+| Docker Agent | `docker-agent` | brew |
 | Droid | `droid` | brew, native, powershell |
 | DSCODE | `dscode` | native |
 | ElevenLabs CLI | `elevenlabs-cli` | npm |
 | Engram | `engram` | brew |
 | fast-agent | `fast-agent` | pip, pipx, uv |
+| fauxnix | `fauxnix` | npm |
 | fence | `fence` | brew, go, native |
 | FetchCoder | `fetchcoder` | npm |
+| Foremerge | `foremerge` | npm |
 | Forge CLI | `forge-cli` | npm |
 | ForgeCode | `forgecode` | native, npm |
 | FrontierAgent | `frontier-agent` | native |
@@ -300,14 +306,18 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | gptme | `gptme` | brew, pip, pipx, uv |
 | Grok Build | `grok-build` | native |
 | Grok CLI | `grok-cli` | bun, npm |
+| Happy | `happy` | npm |
 | Herdr | `herdr` | binary, brew, native, nix |
 | Hermes Agent | `hermes-agent` | native, source |
 | Hunk | `hunk` | brew, native, npm |
+| iCode | `icode` | uv |
+| IronClaw | `ironclaw` | native |
 | jcode | `jcode` | binary, brew, native |
 | jevgrep | `jevgrep` | npm |
 | Junie CLI | `junie-cli` | brew, native, npm |
 | Juno Code | `juno-code` | npm |
 | Kilocode CLI | `kilocode-cli` | npm |
+| Kimchi | `kimchi` | brew, native |
 | Kimi Code | `kimi-code` | binary, native, pip, pipx, uv |
 | Kiro CLI | `kiro-cli` | brew, native |
 | KlaatCode | `klaatcode` | brew, native, npm, npx |
@@ -315,28 +325,36 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | kubectl-ai | `kubectl-ai` | krew, native, nix |
 | late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
+| Leviathan | `leviathan` | native |
 | little-coder | `little-coder` | native, npm |
+| macOS Harness | `macos-harness` | uv |
 | Mastra Code | `mastracode` | npm |
 | mcp2cli | `mcp2cli` | pip, uv |
 | Meta Muse Code | `muse-code` | native |
 | MiniMax Code | `minimax-code` | native, powershell |
 | Mistral Vibe | `mistral-vibe` | brew, native, pip, uv |
+| Moltis | `moltis` | brew |
+| Nanobot | `nanobot` | uv |
 | Nanocoder | `nanocoder` | brew, npm |
 | nono | `nono` | brew, cargo |
 | oh-my-pi | `oh-my-pi` | bun, native, npm, powershell |
 | Omnigent | `omnigent` | brew, native, pipx, uv |
 | Ona | `ona` | binary, brew |
+| Only CLI / oc | `only-cli` | npm |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
+| open_scion | `open-scion` | native |
 | openclaude | `openclaude` | npm, npx |
 | OpenClaw | `openclaw` | brew, native, npm |
 | OpenCode | `opencode` | brew, chocolatey, curl, npm, scoop |
 | OpenHands CLI | `openhands` | native, pip, pipx, uv |
+| OpenQodex | `openqodex` | npm |
 | Ouroboros | `ouroboros` | native, pip, pipx, uv |
 | Paperclip | `paperclip` | npm, npx |
 | Penguin Harness | `penguin-harness` | native, npm, npx |
 | Pi Agent Rust | `pi-agent-rust` | binary, native |
 | Pi Coding Agent | `pi-coding-agent` | binary, npm |
 | Plandex | `plandex` | native |
+| Plannotator TUI | `plannotator-tui` | brew |
 | Qoder CLI | `qoder-cli` | binary |
 | Qwen Code | `qwen-code` | brew, npm |
 | RA.Aid | `ra-aid` | brew, pip, pipx, uv |
@@ -348,19 +366,25 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Ruflo | `ruflo` | native, npm, npx |
 | skills | `skills` | npm, npx |
 | SmallCode | `smallcode` | native, npm, npx, powershell |
+| Sno Station | `sno-station` | native |
+| Symphony | `symphony` | native |
 | Tabnine CLI | `tabnine-cli` | native |
 | Tenere | `tenere` | brew, cargo, nix |
 | TokenTracker | `tokentracker` | npm, npx |
 | Tokscale | `tokscale` | bun, npm |
 | Trae Agent | `trae-agent` | source |
+| tsk | `tsk` | brew, native |
 | TUIOS | `tuios` | brew, native |
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
+| Unreal Agent | `unreal-agent` | brew-cask, native |
 | Valyu CLI | `valyu-cli` | npm |
 | VibeMux | `vibemux` | binary, native |
+| VT Code | `vtcode` | brew, native |
 | WhipCode | `whipcode` | native |
 | YYLO | `yylo` | npm |
 | ZCode | `zcode` | native |
 | zero | `zero` | native, npm |
+| ZeroClaw | `zeroclaw` | native |
 | Zeroshot | `zeroshot` | npm |
 | zerostack | `zerostack` | cargo, native |
 
