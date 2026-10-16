@@ -33,6 +33,8 @@ func NewManager(p platform.Platform) *Manager {
 
 // Install installs an agent using the specified method.
 func (m *Manager) Install(ctx context.Context, agentDef catalog.AgentDef, method catalog.InstallMethodDef, force bool) (*providers.Result, error) {
+	platform.InvalidateExecutableCache()
+	defer platform.InvalidateExecutableCache()
 	switch method.Method {
 	case "npm":
 		if !m.npm.IsAvailable() {
@@ -62,6 +64,8 @@ func (m *Manager) Install(ctx context.Context, agentDef catalog.AgentDef, method
 
 // Update updates an installed agent.
 func (m *Manager) Update(ctx context.Context, inst *agent.Installation, agentDef catalog.AgentDef, method catalog.InstallMethodDef) (*providers.Result, error) {
+	platform.InvalidateExecutableCache()
+	defer platform.InvalidateExecutableCache()
 	switch method.Method {
 	case "npm", "bun", "bunx":
 		if method.Method == "npm" && !m.npm.IsAvailable() {
@@ -99,6 +103,8 @@ func (m *Manager) Update(ctx context.Context, inst *agent.Installation, agentDef
 
 // Uninstall removes an installed agent.
 func (m *Manager) Uninstall(ctx context.Context, inst *agent.Installation, method catalog.InstallMethodDef) error {
+	platform.InvalidateExecutableCache()
+	defer platform.InvalidateExecutableCache()
 	switch method.Method {
 	case "npm":
 		if !m.npm.IsAvailable() {
@@ -209,4 +215,12 @@ func (m *Manager) GetLatestVersion(ctx context.Context, method catalog.InstallMe
 	default:
 		return agent.Version{}, fmt.Errorf("unsupported install method: %s", method.Method)
 	}
+}
+
+// VersionCacheNamespace separates registry results when npm configuration changes.
+func (m *Manager) VersionCacheNamespace(method catalog.InstallMethodDef) string {
+	if method.Method == "npm" {
+		return providers.NPMConfigFingerprint()
+	}
+	return ""
 }

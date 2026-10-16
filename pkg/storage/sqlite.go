@@ -568,17 +568,9 @@ func (s *SQLiteStore) SaveDetectionCache(ctx context.Context, installations []*a
 
 // GetDetectionCache retrieves the cached detected agents.
 func (s *SQLiteStore) GetDetectionCache(ctx context.Context) ([]*agent.Installation, time.Time, error) {
-	query := "SELECT data, cached_at FROM detection_cache WHERE id = 1"
-
-	var data []byte
-	var cachedAt time.Time
-
-	err := s.db.QueryRowContext(ctx, query).Scan(&data, &cachedAt)
-	if err == sql.ErrNoRows {
-		return nil, time.Time{}, nil
-	}
-	if err != nil {
-		return nil, time.Time{}, fmt.Errorf("failed to get detection cache: %w", err)
+	data, cachedAt, err := s.readDetectionSnapshot(ctx)
+	if err != nil || data == nil {
+		return nil, cachedAt, err
 	}
 
 	var records []*InstallationRecord
@@ -634,4 +626,21 @@ func (s *SQLiteStore) GetLastUpdateCheckTime(ctx context.Context) (time.Time, er
 		return time.Time{}, nil
 	}
 	return time.Parse(time.RFC3339, val)
+}
+
+func (s *SQLiteStore) readDetectionSnapshot(ctx context.Context) ([]byte, time.Time, error) {
+	query := "SELECT data, cached_at FROM detection_cache WHERE id = 1"
+
+	var data []byte
+	var cachedAt time.Time
+
+	err := s.db.QueryRowContext(ctx, query).Scan(&data, &cachedAt)
+	if err == sql.ErrNoRows {
+		return nil, time.Time{}, nil
+	}
+	if err != nil {
+		return nil, time.Time{}, fmt.Errorf("failed to get detection cache: %w", err)
+	}
+
+	return data, cachedAt, nil
 }

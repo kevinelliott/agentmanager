@@ -150,6 +150,7 @@ tokscale      Tokscale            npm     1.0.22               1.0.22   ●
 ```bash
 agentmgr agent list              # List all detected agents (uses cache)
 agentmgr agent list --refresh    # Force re-detection, ignore cache
+agentmgr agent list --local      # List installations without remote version checks
 agentmgr agent refresh           # Force re-detection and update cache
 agentmgr agent install <name>    # Install an agent
 agentmgr agent update <name>     # Update specific agent
@@ -343,10 +344,12 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
 | Valyu CLI | `valyu-cli` | npm |
 | VibeMux | `vibemux` | binary, native |
-| YYLO | `yylo` | npm, npx |
+| YYLO | `yylo` | npm |
 | zero | `zero` | native, npm |
 | Zeroshot | `zeroshot` | npm |
 | zerostack | `zerostack` | cargo, native |
+
+YYLO currently supports macOS and Linux and requires Bash.
 
 > Don't see your agent? [Contributions are welcome](CONTRIBUTING.md#adding-new-agents-to-the-catalog) — adding one is a single entry in `catalog.json`.
 
@@ -439,6 +442,20 @@ make check
 # Run tests with coverage
 make test-coverage
 ```
+
+### Performance checks
+
+```bash
+make benchmark-performance
+agentmgr -v agent list --refresh   # Log time spent in each detection and version-check phase
+```
+
+The benchmarks cover local inventory subprocesses, cold and warm SQLite caches,
+expired version metadata, and catalog rendering. CI saves benchmark results as
+an artifact. Compare results on the same machine and Go version.
+
+The TUI displays installations before remote version checks finish. Its catalog
+shows a page of agents; use the up and down arrows to scroll.
 
 ### Project Structure
 

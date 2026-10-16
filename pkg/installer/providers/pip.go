@@ -347,7 +347,8 @@ func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName
 
 	case "uv":
 		// Use uv pip index versions
-		cmd := exec.CommandContext(ctx, "uv", "pip", "index", "versions", packageName)
+		cmd := exec.CommandContext(ctx, "uv", "pip", "index", "versions", packageName) // #nosec G204 -- Package metadata comes from the trusted catalog and is passed as separate arguments, without a shell.
+		cmd.WaitDelay = time.Second
 		output, err := cmd.Output()
 		if err != nil {
 			// Fallback to PyPI
@@ -373,7 +374,8 @@ func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName
 		if !p.platform.IsExecutableInPath("pip3") {
 			manager = "pip"
 		}
-		cmd := exec.CommandContext(ctx, manager, "index", "versions", packageName)
+		cmd := exec.CommandContext(ctx, manager, "index", "versions", packageName) // #nosec G204 -- Package metadata comes from the trusted catalog and is passed as separate arguments, without a shell.
+		cmd.WaitDelay = time.Second
 		output, err := cmd.Output()
 		if err != nil {
 			// Fallback to PyPI API
@@ -400,6 +402,7 @@ func (p *PipProvider) fetchLatestVersionUncached(ctx context.Context, methodName
 // Previously this shelled out to `curl`, which forked a subprocess on every
 // call and silently lost context (timeouts / cancellation). The shared
 // http.Client reuses connections and honors ctx.
+
 func (p *PipProvider) getLatestFromPyPI(ctx context.Context, packageName string) (agent.Version, error) {
 	url := fmt.Sprintf("https://pypi.org/pypi/%s/json", packageName)
 

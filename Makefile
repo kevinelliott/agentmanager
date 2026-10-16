@@ -1,6 +1,6 @@
 # AgentManager Makefile
 
-.PHONY: all build build-cli build-helper build-macos-app clean test test-verbose test-pkg test-unit test-coverage test-coverage-summary test-short test-integration benchmark lint install fmt vet deps sync-catalog check-catalog-sync
+.PHONY: all build build-cli build-helper build-macos-app clean test test-verbose test-pkg test-unit test-coverage test-coverage-summary test-short test-integration benchmark benchmark-performance lint install fmt vet deps sync-catalog check-catalog-sync
 
 # Build variables
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -112,6 +112,10 @@ test-integration:
 # Benchmark tests
 benchmark:
 	go test -bench=. -benchmem ./...
+
+# Reproducible performance checks; process fixtures use local dummy inventories.
+benchmark-performance:
+	go test -run '^$$' -bench 'Benchmark(DetectorInventory|PipelineCachePaths|CatalogView)' -benchmem ./pkg/detector ./internal/orchestrator ./internal/tui
 
 # Run linter
 # Pins to the same golangci-lint version CI uses; reinstalls if the local

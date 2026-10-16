@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -66,19 +67,20 @@ func (s *PipStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]
 		wg           sync.WaitGroup
 	)
 
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		pipPackages = s.getPipPackages(ctx)
-	}()
-	go func() {
-		defer wg.Done()
-		pipxPackages = s.getPipxPackages(ctx)
-	}()
-	go func() {
-		defer wg.Done()
-		uvPackages = s.getUVPackages(ctx)
-	}()
+	for _, probe := range []struct {
+		method string
+		run    func()
+	}{
+		{"pip", func() { pipPackages = s.getPipPackages(ctx) }},
+		{"pipx", func() { pipxPackages = s.getPipxPackages(ctx) }},
+		{"uv", func() { uvPackages = s.getUVPackages(ctx) }},
+	} {
+		if !hasInstallMethod(agents, probe.method) {
+			continue
+		}
+		wg.Add(1)
+		go func(run func()) { defer wg.Done(); run() }(probe.run)
+	}
 	wg.Wait()
 
 	for _, agentDef := range agents {
@@ -159,6 +161,8 @@ func (s *PipStrategy) getPipPackages(ctx context.Context) map[string]pipPackage 
 	}
 
 	cmd := exec.CommandContext(ctx, pipCmd, "list", "--format=json")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return packages
@@ -185,6 +189,8 @@ func (s *PipStrategy) getPipxPackages(ctx context.Context) map[string]pipxPackag
 	}
 
 	cmd := exec.CommandContext(ctx, "pipx", "list", "--json")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return packages
@@ -212,36 +218,14 @@ func (s *PipStrategy) getUVPackages(ctx context.Context) map[string]pipPackage {
 		return packages
 	}
 
-	// uv tool list shows installed tools
-	cmd := exec.CommandContext(ctx, "uv", "tool", "list", "--format=json")
+	// uv tool list uses text output. Avoid a failing --format=json probe.
+	cmd := exec.CommandContext(ctx, "uv", "tool", "list")
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
-		// Try alternative format
-		cmd = exec.CommandContext(ctx, "uv", "tool", "list")
-		output, err = cmd.Output()
-		if err != nil {
-			return packages
-		}
-		// Parse text output
-		return s.parseUVTextOutput(string(output))
-	}
-
-	var tools []struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
-	}
-	if err := json.Unmarshal(output, &tools); err != nil {
 		return packages
 	}
-
-	for _, tool := range tools {
-		packages[strings.ToLower(tool.Name)] = pipPackage{
-			Name:    tool.Name,
-			Version: tool.Version,
-		}
-	}
-
-	return packages
+	return s.parseUVTextOutput(string(output))
 }
 
 // parseUVTextOutput parses the text output of uv tool list.

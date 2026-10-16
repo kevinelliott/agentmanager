@@ -319,8 +319,13 @@ func (p *BrewProvider) fetchLatestVersionUncached(ctx context.Context, packageNa
 	args = append(args, packageName)
 
 	cmd := exec.CommandContext(ctx, "brew", args...)
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
+		if ctx.Err() != nil {
+			return agent.Version{}, ctx.Err()
+		}
 		return agent.Version{}, fmt.Errorf("brew info failed: %w", err)
 	}
 

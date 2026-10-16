@@ -16,6 +16,7 @@ import (
 
 	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/internal/tui/styles"
+	"github.com/kevinelliott/agentmanager/internal/versionfetch"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -48,6 +49,8 @@ type Model struct {
 	// migrations per `r` keypress).
 	store  storage.Store
 	catMgr *catalog.Manager
+	ctx    context.Context
+	cancel context.CancelFunc
 
 	// Data
 	agents      []*agent.Installation
@@ -55,13 +58,17 @@ type Model struct {
 	selectedIdx int
 
 	// UI state
-	currentView    View
-	width          int
-	height         int
-	loading        bool
-	err            error
-	catalogLoading bool
-	catalogErr     error
+	currentView     View
+	width           int
+	height          int
+	loading         bool
+	err             error
+	catalogLoading  bool
+	catalogErr      error
+	versionsLoading bool
+	versionsErr     error
+	catalogRows     []string
+	catalogOffset   int
 
 	// Components
 	list    list.Model
@@ -168,7 +175,9 @@ func New(cfg *config.Config, plat platform.Platform, store storage.Store) Model 
 	l.SetFilteringEnabled(true)
 	l.Styles.Title = styles.Title
 
+	ctx, cancel := context.WithCancel(context.Background())
 	return Model{
+		ctx: ctx, cancel: cancel,
 		config:      cfg,
 		platform:    plat,
 		store:       store,
@@ -200,35 +209,54 @@ func (m Model) loadData() tea.Msg {
 // Run() and reused across every refresh. Detector + installer.Manager
 // are cheap to construct, so we still build those per-refresh.
 func (m Model) loadDataWithRefresh(forceRefresh bool) tea.Msg {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(m.ctx, 60*time.Second)
 	defer cancel()
 
-	// Run the shared detect+version-check pipeline. Version-check errors are
-	// intentionally dropped here; the TUI surfaces them indirectly via
-	// HasUpdate() being false for unchecked installations, matching the
-	// previous behavior.
+	// Show the local snapshot before the separate registry metadata phase.
 	det := detector.New(m.platform)
 	instMgr := installer.NewManager(m.platform)
 	pipeline := orchestrator.NewFromManagers(m.config, m.platform, m.store, m.catMgr, det, instMgr)
-	res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: forceRefresh})
+	res, err := pipeline.DetectAndCheckVersions(ctx, orchestrator.Options{ForceRefresh: forceRefresh, SkipVersionCheck: true})
 	if err != nil {
 		return dataLoadedMsg{err: err}
 	}
 
 	return dataLoadedMsg{
-		agents: res.Installations,
+		agents:        res.Installations,
+		checkVersions: res.NeedsVersionCheck,
 	}
 }
 
-// dataLoadedMsg is sent when data has been loaded.
+// loadVersions refreshes metadata after the local snapshot is visible.
+func (m Model) loadVersions() tea.Msg {
+	ctx, cancel := context.WithTimeout(m.ctx, 60*time.Second)
+	defer cancel()
+	pipeline := orchestrator.NewFromManagers(m.config, m.platform, m.store, m.catMgr, detector.New(m.platform), installer.NewManager(m.platform))
+	res, err := pipeline.CheckVersions(ctx, m.agents)
+	if err != nil {
+		return versionsLoadedMsg{err: err}
+	}
+	if errs := versionfetch.NonNilErrors(res.VersionCheckErrors); len(errs) > 0 {
+		err = fmt.Errorf("%d update check(s) failed: %w", len(errs), errs[0])
+	}
+	return versionsLoadedMsg{agents: res.Installations, err: err}
+}
+
+type versionsLoadedMsg struct {
+	agents []*agent.Installation
+	err    error
+}
+
 type dataLoadedMsg struct {
+	checkVersions bool
+
 	agents  []*agent.Installation
 	catalog *catalog.Catalog
 	err     error
 }
 
 func (m Model) loadCatalog(forceRefresh bool) tea.Msg {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(m.ctx, 60*time.Second)
 	defer cancel()
 
 	if forceRefresh {
@@ -256,59 +284,42 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.Quit):
-			return m, tea.Quit
-
-		case key.Matches(msg, m.keys.Tab):
-			m.currentView = (m.currentView + 1) % 5
-			if m.currentView == ViewCatalog && m.catalog == nil && !m.catalogLoading {
-				m.catalogLoading = true
-				m.catalogErr = nil
-				cmds = append(cmds, func() tea.Msg {
-					return m.loadCatalog(false)
-				})
-			}
-
-		case key.Matches(msg, m.keys.Back):
-			if m.currentView != ViewDashboard {
-				m.currentView = ViewDashboard
-			}
-
-		case key.Matches(msg, m.keys.Refresh):
-			if m.currentView == ViewCatalog {
-				m.catalogLoading = true
-				m.catalogErr = nil
-				return m, func() tea.Msg {
-					return m.loadCatalog(true)
-				}
-			}
-			m.loading = true
-			return m, func() tea.Msg {
-				return m.loadDataWithRefresh(true) // Force refresh, bypass cache
-			}
-
-		case key.Matches(msg, m.keys.Enter):
-			if m.currentView == ViewAgentList && len(m.agents) > 0 {
-				m.currentView = ViewAgentDetail
-			}
-		}
+		var cmd tea.Cmd
+		m, cmd = m.handleKey(msg)
+		cmds = append(cmds, cmd)
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		m.list.SetSize(msg.Width-4, msg.Height-8)
+		m.catalogOffset = min(m.catalogOffset, max(0, len(m.catalogRows)-m.catalogPageSize()))
 
 	case dataLoadedMsg:
 		m.loading = false
 		if msg.err != nil {
 			m.err = msg.err
 		} else {
+			m.err = nil
+			m.versionsErr = nil
 			m.agents = msg.agents
 			if msg.catalog != nil {
 				m.catalog = msg.catalog
 			}
 			m.updateList()
+			m.rebuildCatalogRows()
+			if msg.checkVersions {
+				m.versionsLoading = true
+				cmds = append(cmds, m.loadVersions)
+			}
+		}
+
+	case versionsLoadedMsg:
+		m.versionsLoading = false
+		m.versionsErr = msg.err
+		if msg.agents != nil {
+			m.agents = msg.agents
+			m.updateList()
+			m.rebuildCatalogRows()
 		}
 
 	case catalogLoadedMsg:
@@ -318,9 +329,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			m.catalogErr = nil
 			m.catalog = msg.catalog
+			m.catalogOffset = 0
+			m.rebuildCatalogRows()
 		}
 
 	case spinner.TickMsg:
+		if !m.loading && !m.catalogLoading && !m.versionsLoading {
+			return m, nil
+		}
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		cmds = append(cmds, cmd)
@@ -331,6 +347,55 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.list, cmd = m.list.Update(msg)
 		cmds = append(cmds, cmd)
+	}
+
+	return m, tea.Batch(cmds...)
+}
+
+func (m Model) handleKey(msg tea.KeyMsg) (Model, tea.Cmd) {
+	var cmds []tea.Cmd
+	switch {
+	case key.Matches(msg, m.keys.Quit):
+		if m.cancel != nil {
+			m.cancel()
+		}
+		return m, tea.Quit
+
+	case key.Matches(msg, m.keys.Tab):
+		m.currentView = (m.currentView + 1) % 5
+		if m.currentView == ViewCatalog && m.catalog == nil && !m.catalogLoading {
+			m.catalogLoading = true
+			m.catalogErr = nil
+			cmds = append(cmds, m.spinner.Tick, func() tea.Msg {
+				return m.loadCatalog(false)
+			})
+		}
+
+	case key.Matches(msg, m.keys.Back):
+		if m.currentView != ViewDashboard {
+			m.currentView = ViewDashboard
+		}
+
+	case key.Matches(msg, m.keys.Refresh):
+		if m.loading || m.catalogLoading || m.versionsLoading {
+			return m, nil
+		}
+		if m.currentView == ViewCatalog {
+			m.catalogLoading = true
+			m.catalogErr = nil
+			return m, tea.Batch(m.spinner.Tick, func() tea.Msg { return m.loadCatalog(true) })
+		}
+		m.loading = true
+		return m, tea.Batch(m.spinner.Tick, func() tea.Msg { return m.loadDataWithRefresh(true) })
+
+	case m.currentView == ViewCatalog && key.Matches(msg, m.keys.Down):
+		m.catalogOffset = min(m.catalogOffset+1, max(0, len(m.catalogRows)-m.catalogPageSize()))
+	case m.currentView == ViewCatalog && key.Matches(msg, m.keys.Up):
+		m.catalogOffset = max(0, m.catalogOffset-1)
+	case key.Matches(msg, m.keys.Enter):
+		if m.currentView == ViewAgentList && len(m.agents) > 0 {
+			m.currentView = ViewAgentDetail
+		}
 	}
 
 	return m, tea.Batch(cmds...)
@@ -417,7 +482,13 @@ func (m Model) footerView() string {
 		)
 	}
 
+	if m.versionsLoading {
+		helpKeys = append(helpKeys, styles.Help.Render(m.spinner.View()+" Checking updates…"))
+	} else if m.versionsErr != nil {
+		helpKeys = append(helpKeys, styles.ErrorMessage.Render("Update check failed: "+m.versionsErr.Error()))
+	}
 	help := strings.Join(helpKeys, "  ")
+
 	return styles.StatusBar.Width(m.width).Render(help)
 }
 
@@ -452,8 +523,14 @@ func (m Model) dashboardView() string {
 		styles.Subtitle.Render("Agent Statistics"),
 		styles.Version.Render(fmt.Sprintf("%d", installed)),
 		func() string {
+			if m.versionsLoading {
+				return styles.InfoMessage.Render("Checking updates…")
+			}
 			if updatesAvailable > 0 {
 				return styles.StatusUpdateAvailable.Render(fmt.Sprintf("%d available", updatesAvailable))
+			}
+			if m.versionsErr != nil {
+				return styles.ErrorMessage.Render("Check incomplete")
 			}
 			return styles.StatusInstalled.Render("All up to date")
 		}(),
@@ -566,57 +643,55 @@ func (m Model) catalogView() string {
 	b.WriteString("\n")
 	b.WriteString(styles.Title.Render("  Available Agents"))
 	b.WriteString("\n\n")
-
-	// Get agents for current platform
-	agents := m.catalog.GetAgentsByPlatform(string(m.platform.ID()))
-
-	if len(agents) == 0 {
-		b.WriteString(styles.InfoMessage.Render("  No agents available for this platform.\n"))
-		return b.String()
+	if len(m.catalogRows) == 0 {
+		return b.String() + styles.InfoMessage.Render("  No agents available for this platform.\n")
 	}
+	start := min(m.catalogOffset, max(0, len(m.catalogRows)-m.catalogPageSize()))
+	end := min(len(m.catalogRows), start+m.catalogPageSize())
+	for _, row := range m.catalogRows[start:end] {
+		b.WriteString(row)
+	}
+	fmt.Fprintf(&b, "\n  %d agents available · showing %d–%d · ↑/↓ scroll\n", len(m.catalogRows), start+1, end)
+	return b.String()
+}
 
-	// Sort agents alphabetically by name (case-insensitive)
-	sort.Slice(agents, func(i, j int) bool {
-		return strings.ToLower(agents[i].Name) < strings.ToLower(agents[j].Name)
-	})
+func (m Model) catalogPageSize() int {
+	size := max(1, m.height-12)
+	if m.config != nil && m.config.UI.PageSize > 0 {
+		size = min(size, m.config.UI.PageSize)
+	}
+	return size
+}
 
-	// Build a simple table of agents
-	for _, agentDef := range agents {
-		// Check if installed
-		installed := false
-		for _, inst := range m.agents {
-			if inst.AgentID == agentDef.ID {
-				installed = true
-				break
-			}
-		}
-
+// rebuildCatalogRows derives immutable display rows only when source data changes.
+func (m *Model) rebuildCatalogRows() {
+	if m.catalog == nil {
+		return
+	}
+	agents := m.catalog.GetAgentsByPlatform(string(m.platform.ID()))
+	sort.Slice(agents, func(i, j int) bool { return strings.ToLower(agents[i].Name) < strings.ToLower(agents[j].Name) })
+	installed := make(map[string]bool, len(m.agents))
+	for _, inst := range m.agents {
+		installed[inst.AgentID] = true
+	}
+	rows := make([]string, 0, len(agents))
+	for _, def := range agents {
 		status := styles.StatusNotInstalled.Render("Not installed")
-		if installed {
+		if installed[def.ID] {
 			status = styles.StatusInstalled.Render("Installed")
 		}
-
-		methods := agentDef.GetSupportedMethods(string(m.platform.ID()))
-		methodStr := ""
+		methods := def.GetSupportedMethods(string(m.platform.ID()))
+		method := ""
 		if len(methods) > 0 {
-			methodStr = methods[0].Method
-			if len(methods) > 1 {
-				methodStr += fmt.Sprintf(" +%d", len(methods)-1)
-			}
+			method = methods[0].Method
 		}
-
-		line := fmt.Sprintf("  %s  %s  %s  %s\n",
-			styles.Badge.Render(fmt.Sprintf("%-12s", agentDef.ID)),
-			styles.Version.Render(fmt.Sprintf("%-20s", agentDef.Name)),
-			styles.Help.Render(fmt.Sprintf("%-10s", methodStr)),
-			status,
-		)
-		b.WriteString(line)
+		if len(methods) > 1 {
+			method += fmt.Sprintf(" +%d", len(methods)-1)
+		}
+		rows = append(rows, fmt.Sprintf("  %s  %s  %s  %s\n", styles.Badge.Render(fmt.Sprintf("%-12s", def.ID)), styles.Version.Render(fmt.Sprintf("%-20s", def.Name)), styles.Help.Render(fmt.Sprintf("%-10s", method)), status))
 	}
-
-	fmt.Fprintf(&b, "\n  %d agents available\n", len(agents))
-
-	return b.String()
+	m.catalogRows = rows
+	m.catalogOffset = min(m.catalogOffset, max(0, len(rows)-m.catalogPageSize()))
 }
 
 // settingsView renders settings.
@@ -675,8 +750,10 @@ func Run(cfg *config.Config, plat platform.Platform) error {
 	}
 	cancel()
 
+	m := New(cfg, plat, store)
+	defer m.cancel()
 	p := tea.NewProgram(
-		New(cfg, plat, store),
+		m,
 		tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	)

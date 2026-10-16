@@ -19,6 +19,7 @@ package orchestrator
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/kevinelliott/agentmanager/internal/versionfetch"
@@ -103,6 +104,10 @@ func NewFromManagers(
 // The zero value performs a normal cache-aware detection with default
 // version-check concurrency.
 type Options struct {
+	// AgentIDs limits a targeted command to the requested agents. Scoped scans
+	// never replace the complete installation snapshot or its freshness clock.
+	AgentIDs []string
+
 	// ForceRefresh bypasses the detection cache. The cache is also cleared
 	// so the next cold start does not see stale data.
 	ForceRefresh bool
@@ -125,6 +130,10 @@ type Options struct {
 
 // Result is the output of DetectAndCheckVersions.
 type Result struct {
+	// NeedsVersionCheck allows local-first consumers to schedule metadata work
+	// only when the version-check TTL has expired or a new scan completed.
+	NeedsVersionCheck bool
+
 	// Installations is the merged set of detected agents. LatestVersion is
 	// populated where the registry lookup succeeded.
 	Installations []*agent.Installation
@@ -152,120 +161,198 @@ type Result struct {
 	VersionCheckErrors []error
 }
 
-// DetectAndCheckVersions runs the shared detect-and-version-check pipeline.
-//
-// Semantics (preserved from the original call sites):
-//
-//   - If the detection cache is enabled, not stale, and ForceRefresh is false,
-//     the cached installations are used and the version check only runs when
-//     the update-check TTL has expired.
-//   - Otherwise the detector runs fresh. When ForceRefresh is true the cache
-//     is also cleared so a follow-up cold start does not see a stale entry.
-//   - After a version check the refreshed installations (with LatestVersion
-//     filled) are written back to the cache and the last-update-check
-//     timestamp is advanced. Cache-write errors are intentionally swallowed
-//     because they are non-fatal and match existing behavior.
-//   - A catalog fetch error is fatal by default. Callers that need to
-//     continue with no definitions (e.g. the systray on a flaky network)
-//     can set Options.TolerateCatalogError. Version-check errors are
-//     captured per index and returned to the caller, never aborting the
-//     pipeline.
+// DetectAndCheckVersions uses independent clocks for inventory and registry data.
+// Inventory snapshots are saved before optional version checks so local-only
+// callers and concurrent processes can immediately reuse a completed scan.
 func (p *Pipeline) DetectAndCheckVersions(ctx context.Context, opts Options) (*Result, error) {
-	var (
-		installations      []*agent.Installation
-		usedDetectionCache bool
-		needUpdateCheck    bool
-	)
-
-	// Try the detection cache before loading the catalog. On the fully warm
-	// path (fresh detection cache and fresh update-check TTL), agent list /
-	// systray refresh callers do not need catalog definitions at all.
+	started := time.Now()
+	result := &Result{}
+	scoped := len(opts.AgentIDs) > 0
 	if p.cfg.Detection.CacheEnabled && !opts.ForceRefresh {
-		cached, cachedAt, cacheErr := p.store.GetDetectionCache(ctx)
-		if cacheErr == nil && cached != nil && time.Since(cachedAt) < p.cfg.Detection.CacheDuration {
-			installations = cached
-			usedDetectionCache = true
+		if cached, ok := p.cachedInstallations(ctx, time.Time{}); ok {
+			result.Installations = filterInstallations(cached, opts.AgentIDs)
+			result.UsedDetectionCache = true
+		}
+	}
+	needVersions := !result.UsedDetectionCache || scoped || p.versionsExpired(ctx)
+	result.NeedsVersionCheck = needVersions
+	if result.UsedDetectionCache && (opts.SkipVersionCheck || !needVersions) {
+		return result, nil
+	}
 
-			// Still refresh latest-version metadata if the update-check TTL
-			// has elapsed since the last check.
-			lastCheck, lastErr := p.store.GetLastUpdateCheckTime(ctx)
-			if lastErr != nil || lastCheck.IsZero() || time.Since(lastCheck) >= p.cfg.Detection.UpdateCheckCacheDuration {
-				needUpdateCheck = true
+	catalogStart := time.Now()
+	defs, err := p.catalog.GetAgentsForPlatform(ctx, string(p.plat.ID()))
+	if err != nil && !opts.TolerateCatalogError {
+		return nil, fmt.Errorf("failed to load catalog: %w", err)
+	}
+	if err != nil {
+		defs = nil
+	}
+	result.AgentDefs = filterDefinitions(defs, opts.AgentIDs)
+	result.AgentDefMap = make(map[string]catalog.AgentDef, len(result.AgentDefs))
+	for _, def := range result.AgentDefs {
+		result.AgentDefMap[def.ID] = def
+	}
+	slog.DebugContext(ctx, "catalog loaded", "duration", time.Since(catalogStart), "agents", len(result.AgentDefs))
+
+	if !result.UsedDetectionCache {
+		detectStart := time.Now()
+		if err := p.detect(ctx, opts, started, result); err != nil {
+			return nil, err
+		}
+		slog.DebugContext(ctx, "detection completed", "duration", time.Since(detectStart), "cache_hit", result.UsedDetectionCache, "installations", len(result.Installations))
+		needVersions = scoped || !result.UsedDetectionCache || p.versionsExpired(ctx)
+		result.NeedsVersionCheck = needVersions
+	}
+	if opts.SkipVersionCheck || !needVersions {
+		return result, nil
+	}
+
+	return p.checkVersions(ctx, opts, result, started)
+}
+
+// CheckVersions checks an already detected complete snapshot without scanning
+// again. The input is copied so a visible UI snapshot is never mutated in place.
+func (p *Pipeline) CheckVersions(ctx context.Context, installations []*agent.Installation) (*Result, error) {
+	defs, err := p.catalog.GetAgentsForPlatform(ctx, string(p.plat.ID()))
+	if err != nil {
+		return nil, err
+	}
+	result := &Result{Installations: make([]*agent.Installation, len(installations)), AgentDefs: defs, AgentDefMap: make(map[string]catalog.AgentDef, len(defs))}
+	for i, inst := range installations {
+		cp := *inst
+		result.Installations[i] = &cp
+	}
+	for _, def := range defs {
+		result.AgentDefMap[def.ID] = def
+	}
+	return p.checkVersions(ctx, Options{}, result, time.Now())
+}
+
+func (p *Pipeline) checkVersions(ctx context.Context, opts Options, result *Result, started time.Time) (*Result, error) {
+	scoped := len(opts.AgentIDs) > 0
+	fetcher := p.installer
+	if p.cfg.Detection.UpdateCheckCacheDuration > 0 {
+		fetcher = &cachedLatestVersionFetcher{next: p.installer, store: p.store, ttl: p.cfg.Detection.UpdateCheckCacheDuration}
+	}
+	versionStart := time.Now()
+	result.VersionCheckErrors = versionfetch.CheckLatestVersions(ctx, fetcher, result.Installations, result.AgentDefMap, opts.VersionCheckConcurrency)
+	result.RanVersionCheck = true
+	result.NeedsVersionCheck = ctx.Err() != nil
+	if ctx.Err() == nil && !scoped {
+		_ = p.store.SetLastUpdateCheckTime(ctx, time.Now()) //nolint:errcheck // best-effort metadata; TTL also bounds retries for unsupported providers
+	}
+	if p.cfg.Detection.CacheEnabled {
+		if updater, ok := p.store.(storage.DetectionCacheUpdater); ok {
+			_ = updater.UpdateDetectionVersions(ctx, result.Installations) //nolint:errcheck // preserve scan timestamp; cache is best-effort
+		} else if !scoped {
+			// Preserve version persistence for existing third-party Store implementations.
+			// The optional updater is needed only to preserve their scan timestamps too.
+			_ = p.store.SaveDetectionCache(ctx, result.Installations) //nolint:errcheck // best-effort legacy cache persistence
+		}
+	}
+	slog.DebugContext(ctx, "version checks completed", "duration", time.Since(versionStart), "total_duration", time.Since(started), "installations", len(result.Installations))
+	return result, nil
+}
+
+func (p *Pipeline) versionsExpired(ctx context.Context) bool {
+	last, err := p.store.GetLastUpdateCheckTime(ctx)
+	return err != nil || last.IsZero() || time.Since(last) >= p.cfg.Detection.UpdateCheckCacheDuration
+}
+
+func (p *Pipeline) cachedInstallations(ctx context.Context, newerThan time.Time) ([]*agent.Installation, bool) {
+	cached, at, err := p.store.GetDetectionCache(ctx)
+	if err != nil || cached == nil || at.IsZero() || time.Since(at) >= p.cfg.Detection.CacheDuration || (!newerThan.IsZero() && at.Before(newerThan)) {
+		return nil, false
+	}
+	// The caller owns the snapshot, including fields mutated during version checks.
+	out := make([]*agent.Installation, len(cached))
+	for i, inst := range cached {
+		cp := *inst
+		out[i] = &cp
+	}
+	return out, true
+}
+
+func (p *Pipeline) detect(ctx context.Context, opts Options, started time.Time, result *Result) error {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		// Bound callers without a deadline while preserving explicit scan budgets.
+		deadline = time.Now().Add(30 * time.Second)
+	}
+	detectCtx, cancel := context.WithDeadline(ctx, deadline)
+	defer cancel()
+	scoped := len(opts.AgentIDs) > 0
+	if p.cfg.Detection.CacheEnabled && !scoped {
+		if locker, ok := p.store.(storage.RefreshLocker); ok {
+			release, err := locker.AcquireRefreshLock(detectCtx, "detection:"+string(p.plat.ID()))
+			if err != nil && detectCtx.Err() != nil {
+				return fmt.Errorf("waiting for detection: %w", err)
+			}
+			if err != nil {
+				slog.DebugContext(ctx, "inventory coordination unavailable", "error", err)
+			} else {
+				defer release()
+				// A scan completed while this request waited. Forced refreshes may share
+				// only a scan newer than their own start, never an older cached snapshot.
+				newerThan := time.Time{}
+				if opts.ForceRefresh {
+					newerThan = started
+				}
+				if cached, fresh := p.cachedInstallations(detectCtx, newerThan); fresh {
+					result.Installations = cached
+					result.UsedDetectionCache = true
+					return nil
+				}
 			}
 		}
 	}
-
-	result := &Result{
-		Installations:      installations,
-		UsedDetectionCache: usedDetectionCache,
-	}
-
-	if usedDetectionCache && (opts.SkipVersionCheck || !needUpdateCheck) {
-		return result, nil
-	}
-
-	agentDefs, err := p.catalog.GetAgentsForPlatform(ctx, string(p.plat.ID()))
+	installations, err := p.detector.DetectAll(detectCtx, result.AgentDefs)
 	if err != nil {
-		if !opts.TolerateCatalogError {
-			return nil, fmt.Errorf("failed to load catalog: %w", err)
-		}
-		// Fall through with a nil slice; downstream handles that safely.
-		agentDefs = nil
+		return fmt.Errorf("detection failed: %w", err)
 	}
-
-	agentDefMap := make(map[string]catalog.AgentDef, len(agentDefs))
-	for _, def := range agentDefs {
-		agentDefMap[def.ID] = def
+	if err := detectCtx.Err(); err != nil {
+		return fmt.Errorf("detection interrupted: %w", err)
 	}
-	result.AgentDefs = agentDefs
-	result.AgentDefMap = agentDefMap
-
-	// Cold detect path (cache disabled, empty, expired, or forced).
-	if !usedDetectionCache {
-		if opts.ForceRefresh {
-			//nolint:errcheck // best-effort cache clear; stale entries will be overwritten below
-			_ = p.store.ClearDetectionCache(ctx)
-		}
-
-		installations, err = p.detector.DetectAll(ctx, agentDefs)
-		if err != nil {
-			return nil, fmt.Errorf("detection failed: %w", err)
-		}
-		// A fresh detection always warrants a version check.
-		needUpdateCheck = true
-		result.Installations = installations
+	result.Installations = installations
+	if p.cfg.Detection.CacheEnabled && !scoped {
+		_ = p.store.SaveDetectionCache(ctx, installations) //nolint:errcheck // best-effort inventory snapshot
+		// The new snapshot has not had a complete registry check yet.
+		_ = p.store.SetLastUpdateCheckTime(ctx, time.Time{}) //nolint:errcheck // best-effort metadata
 	}
+	return nil
+}
 
-	if opts.SkipVersionCheck || !needUpdateCheck {
-		return result, nil
+func filterDefinitions(defs []catalog.AgentDef, ids []string) []catalog.AgentDef {
+	if len(ids) == 0 {
+		return defs
 	}
-
-	concurrency := opts.VersionCheckConcurrency
-	if concurrency <= 0 {
-		concurrency = versionfetch.DefaultConcurrency
+	wanted := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		wanted[id] = true
 	}
-
-	fetcher := p.installer
-	if p.cfg != nil && p.store != nil && p.cfg.Detection.UpdateCheckCacheDuration > 0 {
-		fetcher = &cachedLatestVersionFetcher{
-			next:  p.installer,
-			store: p.store,
-			ttl:   p.cfg.Detection.UpdateCheckCacheDuration,
+	out := make([]catalog.AgentDef, 0, len(ids))
+	for _, def := range defs {
+		if wanted[def.ID] {
+			out = append(out, def)
 		}
 	}
+	return out
+}
 
-	errs := versionfetch.CheckLatestVersions(ctx, fetcher, installations, agentDefMap, concurrency)
-	result.RanVersionCheck = true
-	result.VersionCheckErrors = errs
-
-	// Persist the refreshed snapshot. Both writes are best-effort to preserve
-	// the silent-failure semantics the previous hand-rolled pipelines relied on.
-	//nolint:errcheck // best-effort timestamp; cached data is still usable without it
-	_ = p.store.SetLastUpdateCheckTime(ctx, time.Now())
-	if p.cfg.Detection.CacheEnabled {
-		//nolint:errcheck // best-effort cache; agents will be redetected on the next run
-		_ = p.store.SaveDetectionCache(ctx, installations)
+func filterInstallations(installations []*agent.Installation, ids []string) []*agent.Installation {
+	if len(ids) == 0 {
+		return installations
 	}
-
-	return result, nil
+	wanted := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		wanted[id] = true
+	}
+	out := make([]*agent.Installation, 0, len(ids))
+	for _, inst := range installations {
+		if wanted[inst.AgentID] {
+			out = append(out, inst)
+		}
+	}
+	return out
 }

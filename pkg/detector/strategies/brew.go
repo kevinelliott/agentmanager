@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -57,6 +58,9 @@ type brewCask struct {
 
 // Detect scans for brew-installed agents.
 func (s *BrewStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
+	if !hasInstallMethod(agents, "brew") {
+		return nil, nil
+	}
 	var installations []*agent.Installation
 
 	var (
@@ -138,6 +142,8 @@ func (s *BrewStrategy) getInstalledFormulae(ctx context.Context) map[string]brew
 	formulae := make(map[string]brewFormula)
 
 	cmd := exec.CommandContext(ctx, "brew", "info", "--installed", "--json=v2")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return formulae
@@ -165,6 +171,8 @@ func (s *BrewStrategy) getInstalledCasks(ctx context.Context) map[string]brewCas
 	casks := make(map[string]brewCask)
 
 	cmd := exec.CommandContext(ctx, "brew", "info", "--cask", "--installed", "--json=v2")
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		return casks

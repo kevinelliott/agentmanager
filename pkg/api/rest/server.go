@@ -12,6 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
+	"github.com/kevinelliott/agentmanager/internal/orchestrator"
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -265,41 +266,43 @@ func (s *Server) handleGetStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+const queryTrue = "true"
+
 // getAgentsWithCache returns detected agents, preferring the on-disk
 // detection cache when it is fresher than cfg.Detection.CacheDuration.
 // Pass ?refresh=true on the inbound request to force a re-detection.
 func (s *Server) getAgentsWithCache(r *http.Request, defs []catalog.AgentDef) ([]*agent.Installation, error) {
-	ctx := r.Context()
-
-	refresh := r.URL.Query().Get("refresh") == "true"
-	cacheEnabled := s.config != nil && s.config.Detection.CacheEnabled
-	cacheDuration := time.Hour
-	if s.config != nil && s.config.Detection.CacheDuration > 0 {
-		cacheDuration = s.config.Detection.CacheDuration
-	}
-
-	if !refresh && cacheEnabled && s.store != nil {
-		cached, cachedAt, err := s.store.GetDetectionCache(ctx)
-		if err == nil && cached != nil && !cachedAt.IsZero() && time.Since(cachedAt) < cacheDuration {
-			return cached, nil
-		}
-	}
-
 	if s.detector == nil {
+		// A fresh stored snapshot is sufficient even when no detector was provided.
+		if s.config != nil && s.config.Detection.CacheEnabled && s.store != nil {
+			cached, at, err := s.store.GetDetectionCache(r.Context())
+			ttl := s.config.Detection.CacheDuration
+			if ttl <= 0 {
+				ttl = time.Hour
+			}
+			if err == nil && cached != nil && r.URL.Query().Get("refresh") != queryTrue && !at.IsZero() && time.Since(at) < ttl {
+				return cached, nil
+			}
+		}
 		return nil, fmt.Errorf("detector not available")
 	}
-
-	agents, err := s.detector.DetectAll(ctx, defs)
+	if s.store == nil {
+		return s.detector.DetectAll(r.Context(), defs)
+	}
+	cfg := config.Default()
+	if s.config != nil {
+		cp := *s.config
+		cfg = &cp
+	}
+	if cfg.Detection.CacheDuration <= 0 {
+		cfg.Detection.CacheDuration = time.Hour
+	}
+	pipeline := orchestrator.NewFromManagers(cfg, s.platform, s.store, s.catalog, s.detector, s.installer)
+	result, err := pipeline.DetectAndCheckVersions(r.Context(), orchestrator.Options{SkipVersionCheck: true, TolerateCatalogError: true, ForceRefresh: r.URL.Query().Get("refresh") == queryTrue})
 	if err != nil {
 		return nil, err
 	}
-
-	// Best-effort save-back; failures here shouldn't block the response.
-	if cacheEnabled && s.store != nil {
-		_ = s.store.SaveDetectionCache(ctx, agents)
-	}
-
-	return agents, nil
+	return result.Installations, nil
 }
 
 func (s *Server) handleListAgents(w http.ResponseWriter, r *http.Request) {
@@ -407,6 +410,7 @@ func (s *Server) handleInstallAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_ = s.store.ClearDetectionCache(ctx)
 	s.respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": fmt.Sprintf("Installed version %s", result.Version),
@@ -469,6 +473,7 @@ func (s *Server) handleUpdateAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_ = s.store.ClearDetectionCache(ctx)
 	s.respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success":      true,
 		"message":      fmt.Sprintf("Updated from %s to %s", fromVersion, result.Version),
@@ -529,6 +534,7 @@ func (s *Server) handleUninstallAgent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_ = s.store.ClearDetectionCache(ctx)
 	s.respondJSON(w, http.StatusOK, map[string]interface{}{
 		"success": true,
 		"message": "Agent uninstalled successfully",
@@ -661,6 +667,17 @@ func (s *Server) handleCheckUpdates(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.respondError(w, http.StatusInternalServerError, "Failed to detect agents", err)
 		return
+	}
+
+	if s.installer != nil {
+		cfg := s.config
+		if cfg == nil {
+			cfg = config.Default()
+		}
+		pipeline := orchestrator.NewFromManagers(cfg, s.platform, s.store, s.catalog, s.detector, s.installer)
+		if result, checkErr := pipeline.CheckVersions(ctx, agents); checkErr == nil {
+			agents = result.Installations
+		}
 	}
 
 	var updates []map[string]interface{}

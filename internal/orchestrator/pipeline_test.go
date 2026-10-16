@@ -117,6 +117,7 @@ type fakeStore struct {
 	detectionAt      time.Time
 	detectionErr     error
 	saveCount        int
+	versionSaveCount int
 	saveCache        []*agent.Installation
 	clearCount       int
 	lastUpdateCheck  time.Time
@@ -161,6 +162,22 @@ func (s *fakeStore) SaveDetectionCache(_ context.Context, insts []*agent.Install
 	s.saveCache = cp
 	s.detection = cp
 	s.detectionAt = time.Now()
+	return nil
+}
+
+func (s *fakeStore) UpdateDetectionVersions(_ context.Context, insts []*agent.Installation) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.versionSaveCount++
+	versions := make(map[string]*agent.Version, len(insts))
+	for _, inst := range insts {
+		versions[inst.Key()] = inst.LatestVersion
+	}
+	for _, inst := range s.detection {
+		if version, ok := versions[inst.Key()]; ok {
+			inst.LatestVersion = version
+		}
+	}
 	return nil
 }
 
@@ -299,8 +316,8 @@ func TestPipeline_ColdDetectFillsVersionsAndSavesCache(t *testing.T) {
 	if store.saveCount != 1 {
 		t.Errorf("store.SaveDetectionCache called %d times, want 1", store.saveCount)
 	}
-	if store.setLastUpdateCnt != 1 {
-		t.Errorf("store.SetLastUpdateCheckTime called %d times, want 1", store.setLastUpdateCnt)
+	if store.setLastUpdateCnt != 2 {
+		t.Errorf("store.SetLastUpdateCheckTime called %d times, want 2 (invalidate then complete)", store.setLastUpdateCnt)
 	}
 	if filtered := versionfetch.NonNilErrors(res.VersionCheckErrors); len(filtered) != 0 {
 		t.Errorf("NonNilErrors len = %d, want 0", len(filtered))
@@ -377,8 +394,8 @@ func TestPipeline_CacheHitWithStaleUpdateCheckRunsVersionCheckOnly(t *testing.T)
 	if det.calls != 0 {
 		t.Errorf("detector.DetectAll called %d times, want 0 (cache hit)", det.calls)
 	}
-	if store.saveCount != 1 {
-		t.Errorf("store.SaveDetectionCache called %d times, want 1", store.saveCount)
+	if store.saveCount != 0 {
+		t.Errorf("store.SaveDetectionCache called %d times, want 0 (metadata-only update)", store.saveCount)
 	}
 	if store.setLastUpdateCnt != 1 {
 		t.Errorf("store.SetLastUpdateCheckTime called %d times, want 1", store.setLastUpdateCnt)
@@ -422,7 +439,7 @@ func TestPipeline_PersistentLatestVersionCacheSkipsFetcher(t *testing.T) {
 	}
 }
 
-func TestPipeline_ForceRefreshBypassesCacheAndClearsIt(t *testing.T) {
+func TestPipeline_ForceRefreshReplacesCacheAfterSuccessfulDetection(t *testing.T) {
 	cfg := defaultConfig()
 	cat := &fakeCatalog{agents: []catalog.AgentDef{makeAgentDef("a")}}
 	det := &fakeDetector{installations: []*agent.Installation{makeInstallation("a")}}
@@ -446,15 +463,15 @@ func TestPipeline_ForceRefreshBypassesCacheAndClearsIt(t *testing.T) {
 	if !res.RanVersionCheck {
 		t.Errorf("RanVersionCheck = false, want true (cold detect)")
 	}
-	if store.clearCount != 1 {
-		t.Errorf("store.ClearDetectionCache called %d times, want 1", store.clearCount)
+	if store.clearCount != 0 {
+		t.Errorf("store.ClearDetectionCache called %d times, want 0 (preserve prior snapshot until success)", store.clearCount)
 	}
 	if det.calls != 1 {
 		t.Errorf("detector.DetectAll called %d times, want 1", det.calls)
 	}
 }
 
-func TestPipeline_SkipVersionCheckSkipsFetchAndCacheWrite(t *testing.T) {
+func TestPipeline_SkipVersionCheckPersistsDetectionWithoutFetching(t *testing.T) {
 	cfg := defaultConfig()
 	cat := &fakeCatalog{agents: []catalog.AgentDef{makeAgentDef("a")}}
 	det := &fakeDetector{installations: []*agent.Installation{makeInstallation("a")}}
@@ -471,11 +488,11 @@ func TestPipeline_SkipVersionCheckSkipsFetchAndCacheWrite(t *testing.T) {
 	if res.RanVersionCheck {
 		t.Errorf("RanVersionCheck = true, want false (SkipVersionCheck)")
 	}
-	if store.saveCount != 0 {
-		t.Errorf("store.SaveDetectionCache called %d times, want 0 (skipped)", store.saveCount)
+	if store.saveCount != 1 {
+		t.Errorf("store.SaveDetectionCache called %d times, want 1 (inventory-only snapshot)", store.saveCount)
 	}
-	if store.setLastUpdateCnt != 0 {
-		t.Errorf("store.SetLastUpdateCheckTime called %d times, want 0 (skipped)", store.setLastUpdateCnt)
+	if store.setLastUpdateCnt != 1 {
+		t.Errorf("store.SetLastUpdateCheckTime called %d times, want 1 (invalidate old version timestamp)", store.setLastUpdateCnt)
 	}
 	if len(fetcher.calls) != 0 {
 		t.Errorf("fetcher called when SkipVersionCheck was true: %+v", fetcher.calls)

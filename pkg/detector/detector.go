@@ -4,6 +4,7 @@ package detector
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -111,7 +112,9 @@ func (d *Detector) DetectAll(ctx context.Context, agents []catalog.AgentDef) ([]
 		go func(strategy Strategy) {
 			defer wg.Done()
 
+			started := time.Now()
 			installations, err := strategy.Detect(ctx, agents)
+			slog.DebugContext(ctx, "detection strategy completed", "strategy", strategy.Name(), "duration", time.Since(started), "installations", len(installations), "error", err)
 			if err != nil {
 				errorsChan <- fmt.Errorf("%s detection failed: %w", strategy.Name(), err)
 				return
@@ -137,6 +140,10 @@ func (d *Detector) DetectAll(ctx context.Context, agents []catalog.AgentDef) ([]
 	// Drain error channel (errors are logged by strategies, not surfaced)
 	for range errorsChan {
 		// Errors from individual strategies are logged but don't fail detection
+	}
+
+	if err := ctx.Err(); err != nil {
+		return nil, err
 	}
 
 	// Deduplicate installations by key

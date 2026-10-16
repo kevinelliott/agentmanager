@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -145,7 +146,9 @@ func (s *BinaryStrategy) getVersion(ctx context.Context, agentDef catalog.AgentD
 	// Replace the executable name with the full path
 	parts[0] = path
 
-	cmd := exec.CommandContext(ctx, parts[0], parts[1:]...)
+	cmd := exec.CommandContext(ctx, parts[0], parts[1:]...) // #nosec G204 -- Probes an installed executable resolved from PATH with version arguments from the trusted catalog.
+
+	cmd.WaitDelay = time.Second
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return agent.Version{}

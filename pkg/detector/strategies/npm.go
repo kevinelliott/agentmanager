@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
@@ -48,6 +49,9 @@ type npmListOutput struct {
 
 // Detect scans for npm-installed agents.
 func (s *NPMStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]*agent.Installation, error) {
+	if !hasInstallMethod(agents, "npm") {
+		return nil, nil
+	}
 	// Get list of globally installed packages
 	globalPackages, err := s.getGlobalPackages(ctx)
 	if err != nil {
@@ -106,6 +110,7 @@ func (s *NPMStrategy) Detect(ctx context.Context, agents []catalog.AgentDef) ([]
 // getGlobalPackages retrieves globally installed npm packages.
 func (s *NPMStrategy) getGlobalPackages(ctx context.Context) (map[string]npmPackage, error) {
 	cmd := exec.CommandContext(ctx, "npm", "list", "-g", "--depth=0", "--json")
+	cmd.WaitDelay = time.Second
 	output, err := cmd.Output()
 	if err != nil {
 		// npm list returns exit code 1 if there are peer dependency issues

@@ -15,8 +15,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Router, skills, and ccusage.
 - YYLO agent in the catalog (now 110 total).
 
+### Performance
+
+- Targeted detection and update commands skip unrelated package managers and agents.
+- Public npm version lookups reuse HTTP connections after one configuration lookup;
+  custom registry, authentication, TLS, proxy, offline, and tag settings retain npm.
+- Inventory and registry refreshes share cancellable locks across processes, and
+  version-only cache writes preserve the original inventory timestamp.
+- REST and gRPC inventory requests reuse the shared cache-aware pipeline.
+- The TUI displays local results before checking versions, stops idle spinner ticks,
+  and renders cached catalog rows within a scrollable viewport.
+- Add `agent list --local`, lookup deadlines, debug phase timings, and representative
+  inventory, SQLite cache, and rendering benchmarks with CI artifacts.
+
 ### Fixed
 
+- YYLO catalog entry now lists only npm on macOS and Linux, declares its Bash
+  requirement, and removes the unsupported `npx` method and Windows platform.
 - Homebrew cask version detection no longer reports `0.0.0` or leaks the cask
   `,<build-id>` suffix; cask versions are normalized to the clean value (for
   example `1.0.16`) at every install and detection site.
