@@ -275,7 +275,12 @@ func (p *Pipeline) cachedInstallations(ctx context.Context, newerThan time.Time)
 }
 
 func (p *Pipeline) detect(ctx context.Context, opts Options, started time.Time, result *Result) error {
-	detectCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		// Bound callers without a deadline while preserving explicit scan budgets.
+		deadline = time.Now().Add(30 * time.Second)
+	}
+	detectCtx, cancel := context.WithDeadline(ctx, deadline)
 	defer cancel()
 	scoped := len(opts.AgentIDs) > 0
 	if p.cfg.Detection.CacheEnabled && !scoped {
