@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -45,8 +46,8 @@ func TestReplaceExecutablePreservesModeAndAdjacentFiles(t *testing.T) {
 func TestReplaceExecutableDoesNotFollowStagingSymlink(t *testing.T) {
 	dir := t.TempDir()
 	src, dst, victim := filepath.Join(dir, "download"), filepath.Join(dir, "agentmgr"), filepath.Join(dir, "victim")
-	for _, path := range []string{src, dst, victim} {
-		if err := os.WriteFile(path, []byte("keep"), 0600); err != nil {
+	for path, content := range map[string]string{src: "new executable", dst: "old executable", victim: "keep"} {
+		if err := os.WriteFile(path, []byte(content), 0600); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -107,9 +108,33 @@ func TestVersionJSONReturnsOutputError(t *testing.T) {
 func TestSetPluginEnabledRejectsPathTraversal(t *testing.T) {
 	for _, name := range []string{"../outside", "a/../../outside", `a\..\outside`, "/tmp/plugin", ".", ""} {
 		t.Run(name, func(t *testing.T) {
-			if err := setPluginEnabled(name, true); err == nil {
-				t.Fatalf("accepted unsafe plugin name %q on %s", name, runtime.GOOS)
+			if err := setPluginEnabled(name, true); err == nil || !strings.Contains(err.Error(), "plugin name") {
+				t.Fatalf("unsafe plugin name %q was not rejected by validation on %s: %v", name, runtime.GOOS, err)
 			}
 		})
+	}
+}
+
+func TestSetPluginEnabledDoesNotModifyFileOutsidePluginDirectory(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("uses the Linux XDG config-directory fixture")
+	}
+	dir := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", dir)
+	configDir := filepath.Join(dir, "agentmgr")
+	if err := os.MkdirAll(filepath.Join(configDir, "plugins"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(configDir, "outside.plugin.json")
+	content := `{"name":"outside","method":"custom","detect_script":"echo []","enabled":false}`
+	if err := os.WriteFile(outside, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := setPluginEnabled("../outside", true); err == nil {
+		t.Fatal("expected traversal to be rejected")
+	}
+	data, err := os.ReadFile(outside)
+	if err != nil || string(data) != content {
+		t.Fatalf("file outside plugins was modified: %q %v", data, err)
 	}
 }
