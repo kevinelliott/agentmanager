@@ -87,11 +87,7 @@ func (l *linuxPlatform) EnableAutoStart(ctx context.Context) error {
 
 func (l *linuxPlatform) DisableAutoStart(ctx context.Context) error {
 	// Attempt both backends, preserving any failures for the caller.
-	var systemdErr error
-	if l.hasSystemd() {
-		systemdErr = l.disableSystemdAutoStart(ctx)
-	}
-	return errors.Join(systemdErr, l.disableXDGAutoStart())
+	return errors.Join(l.disableSystemdAutoStart(ctx), l.disableXDGAutoStart())
 }
 
 func (l *linuxPlatform) IsAutoStartEnabled(ctx context.Context) (bool, error) {
@@ -148,16 +144,26 @@ WantedBy=default.target
 
 func (l *linuxPlatform) disableSystemdAutoStart(ctx context.Context) error {
 	servicePath := filepath.Join(l.getSystemdUserDir(), "agentmgr-helper.service")
-	if _, err := os.Stat(servicePath); err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
+	_, statErr := os.Stat(servicePath)
+	if statErr != nil && !os.IsNotExist(statErr) {
+		return statErr
 	}
-	stopErr := exec.CommandContext(ctx, "systemctl", "--user", "stop", "agentmgr-helper.service").Run()
-	disableErr := exec.CommandContext(ctx, "systemctl", "--user", "disable", "agentmgr-helper.service").Run()
-	removeErr := os.Remove(servicePath)
-	reloadErr := exec.CommandContext(ctx, "systemctl", "--user", "daemon-reload").Run()
+	useSystemctl := statErr == nil && l.hasSystemd()
+	var stopErr, disableErr, reloadErr error
+	if useSystemctl {
+		stopErr = exec.CommandContext(ctx, "systemctl", "--user", "stop", "agentmgr-helper.service").Run()
+		disableErr = exec.CommandContext(ctx, "systemctl", "--user", "disable", "agentmgr-helper.service").Run()
+	}
+	// Remove our unit and enablement even when systemctl is absent or fails.
+	var removeErr error
+	for _, path := range []string{servicePath, filepath.Join(l.getSystemdUserDir(), "default.target.wants", "agentmgr-helper.service")} {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			removeErr = errors.Join(removeErr, err)
+		}
+	}
+	if useSystemctl {
+		reloadErr = exec.CommandContext(ctx, "systemctl", "--user", "daemon-reload").Run()
+	}
 	return errors.Join(stopErr, disableErr, removeErr, reloadErr)
 }
 

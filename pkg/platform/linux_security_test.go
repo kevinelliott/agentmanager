@@ -85,3 +85,37 @@ func TestNotificationPassesLiteralArguments(t *testing.T) {
 		t.Fatalf("notification arguments = %q %v, want %q", data, err, want)
 	}
 }
+
+func TestDisableAutoStartRemovesUnitWithoutSystemctl(t *testing.T) {
+	p, _ := linuxSystemctlFixture(t, "exit 0\n")
+	t.Setenv("PATH", t.TempDir())
+	servicePath := filepath.Join(p.getSystemdUserDir(), "agentmgr-helper.service")
+	enablement := filepath.Join(p.getSystemdUserDir(), "default.target.wants", "agentmgr-helper.service")
+	if err := os.MkdirAll(filepath.Dir(enablement), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(servicePath, []byte("fixture"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(servicePath, enablement); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.DisableAutoStart(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	for _, path := range []string{servicePath, enablement} {
+		if _, err := os.Lstat(path); !os.IsNotExist(err) {
+			t.Fatalf("autostart remains without systemctl: %s %v", path, err)
+		}
+	}
+	// A dangling enablement left by older versions must also be removed.
+	if err := os.Symlink(servicePath, enablement); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.DisableAutoStart(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Lstat(enablement); !os.IsNotExist(err) {
+		t.Fatalf("dangling enablement was not removed: %v", err)
+	}
+}
