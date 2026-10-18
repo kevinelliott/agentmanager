@@ -1,7 +1,7 @@
 {
-  "version": "1.0.86",
+  "version": "1.0.87",
   "schema_version": 1,
-  "last_updated": "2026-10-18T10:09:30.810405+00:00",
+  "last_updated": "2026-10-18T10:41:17.264180+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -13037,6 +13037,1036 @@
         "recent_activity_url": "https://github.com/n8n-io/n8n/commit/d2dc2f9ce50294df5c08799af437c56e3e04ab13",
         "vendor": "n8n-io",
         "notes": "Requires Node 24+. The npm n8n package includes the self-hosted workflow CLI/server, not a desktop app. Configure storage, encryption/authentication, credentials and workflow activation separately. Starting or executing workflows can call external services; installation does not start the service or activate workflows."
+      }
+    },
+    "chrome-devtools-mcp": {
+      "id": "chrome-devtools-mcp",
+      "name": "Chrome DevTools MCP",
+      "description": "Gives coding agents Chrome inspection, debugging and browser automation tools",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "repository": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+      "documentation": "https://github.com/ChromeDevTools/chrome-devtools-mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "chrome-devtools-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g chrome-devtools-mcp",
+          "update_cmd": "npm update -g chrome-devtools-mcp",
+          "uninstall_cmd": "npm uninstall -g chrome-devtools-mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "chrome-devtools-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ChromeDevTools/chrome-devtools-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "53766",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOPt7f_g",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/ChromeDevTools/chrome-devtools-mcp/commit/ff5204aaf572725557b4bb2f3f542fa3ead5f6a5",
+        "vendor": "ChromeDevTools",
+        "notes": "Requires Node 20.19+ on 20.x, 22.12+ on 22.x, or 23+. Install a supported Chrome/Chrome for Testing browser and configure the MCP client separately. Upstream usage statistics are enabled by default; use --no-usage-statistics when starting the server to opt out. Installation does not start a browser or register the server.",
+        "license": "Apache-2.0"
+      }
+    },
+    "tavily-mcp": {
+      "id": "tavily-mcp",
+      "name": "Tavily MCP",
+      "description": "Provides web search, extraction, crawling and research tools to agent MCP clients",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/tavily-ai/tavily-mcp",
+      "repository": "https://github.com/tavily-ai/tavily-mcp",
+      "documentation": "https://github.com/tavily-ai/tavily-mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "tavily-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g tavily-mcp",
+          "update_cmd": "npm update -g tavily-mcp",
+          "uninstall_cmd": "npm uninstall -g tavily-mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "tavily-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/tavily-ai/tavily-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2437",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONwWHkQ",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/tavily-ai/tavily-mcp/commit/688b0f78d518d507cb31b94d9cc0e44c6eadd7c0",
+        "vendor": "tavily-ai",
+        "notes": "Upstream recommends Node 20+; use a current Node LTS runtime. Configure a Tavily API key, tool selection and MCP client separately. Search, crawl and research requests can consume account credits; installation does not start the server or send requests.",
+        "license": "MIT"
+      }
+    },
+    "exa-mcp": {
+      "id": "exa-mcp",
+      "name": "Exa MCP Server",
+      "description": "Provides web and code search plus research tools for agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/exa-labs/exa-mcp-server",
+      "repository": "https://github.com/exa-labs/exa-mcp-server",
+      "documentation": "https://github.com/exa-labs/exa-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "exa-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g exa-mcp-server",
+          "update_cmd": "npm update -g exa-mcp-server",
+          "uninstall_cmd": "npm uninstall -g exa-mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "exa-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/exa-labs/exa-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5136",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONV0Q1A",
+        "recent_activity_date": "2026-10-07",
+        "recent_activity_url": "https://github.com/exa-labs/exa-mcp-server/commit/e9c3b0126a3373eb1aeaca162e84d0791ff4c7f7",
+        "vendor": "exa-labs",
+        "notes": "Requires Node 20+. Configure Exa credentials, enabled tools and the MCP client separately. Service-backed search and research requests can consume account credits; installation does not start a server or submit searches.",
+        "license": "MIT"
+      }
+    },
+    "firecrawl-mcp": {
+      "id": "firecrawl-mcp",
+      "name": "Firecrawl MCP Server",
+      "description": "Exposes website scraping, crawling and browser tools to agent MCP clients",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/firecrawl/firecrawl-mcp-server",
+      "repository": "https://github.com/firecrawl/firecrawl-mcp-server",
+      "documentation": "https://github.com/firecrawl/firecrawl-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "firecrawl-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g firecrawl-mcp",
+          "update_cmd": "npm update -g firecrawl-mcp",
+          "uninstall_cmd": "npm uninstall -g firecrawl-mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "firecrawl-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/firecrawl/firecrawl-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7629",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONZvgOw",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/firecrawl/firecrawl-mcp-server/commit/26a23f28ec22241cb16e2115f27a6370ce2a00e0",
+        "vendor": "firecrawl",
+        "notes": "Requires Node 22+. This firecrawl-mcp package is separate from firecrawl-cli. Configure a Firecrawl API key or supported self-hosted endpoint and the MCP client separately. Crawls and browser operations can consume service resources; installation does not start the server or a crawl.",
+        "license": "MIT"
+      }
+    },
+    "brave-search-mcp": {
+      "id": "brave-search-mcp",
+      "name": "Brave Search MCP",
+      "description": "Provides Brave web, image, news and local search tools for agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/brave/brave-search-mcp-server",
+      "repository": "https://github.com/brave/brave-search-mcp-server",
+      "documentation": "https://github.com/brave/brave-search-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@brave/brave-search-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @brave/brave-search-mcp-server",
+          "update_cmd": "npm update -g @brave/brave-search-mcp-server",
+          "uninstall_cmd": "npm uninstall -g @brave/brave-search-mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "brave-search-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/brave/brave-search-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1508",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOO6qv7A",
+        "recent_activity_date": "2026-10-05",
+        "recent_activity_url": "https://github.com/brave/brave-search-mcp-server/commit/e4866a959a635038f8f889804aba6061ed214bf4",
+        "vendor": "brave",
+        "notes": "Use a current Node LTS runtime; the published commander dependency requires Node 20+. Configure a Brave Search API key, account access and MCP client separately. Installation does not start the server or perform searches.",
+        "license": "MIT"
+      }
+    },
+    "perplexity-mcp": {
+      "id": "perplexity-mcp",
+      "name": "Perplexity MCP",
+      "description": "Connects agents to Perplexity search, reasoning and research tools",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/perplexityai/modelcontextprotocol",
+      "repository": "https://github.com/perplexityai/modelcontextprotocol",
+      "documentation": "https://github.com/perplexityai/modelcontextprotocol#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@perplexity-ai/mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @perplexity-ai/mcp-server",
+          "update_cmd": "npm update -g @perplexity-ai/mcp-server",
+          "uninstall_cmd": "npm uninstall -g @perplexity-ai/mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "perplexity-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/perplexityai/modelcontextprotocol/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2577",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOGYXDg",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/perplexityai/modelcontextprotocol/commit/6ba09f856ab8da91c171e5d60f0db9803c1753f5",
+        "vendor": "perplexityai",
+        "notes": "Requires Node 18+; use a current Node LTS runtime. Configure a Perplexity API key, enabled tools and MCP client separately. Model and research requests can consume account credits; installation does not start a server or send prompts.",
+        "license": "MIT"
+      }
+    },
+    "playwright-test": {
+      "id": "playwright-test",
+      "name": "Playwright Test CLI",
+      "description": "Runs browser tests and captures traces for coding-agent verification",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/playwright",
+      "repository": "https://github.com/microsoft/playwright",
+      "documentation": "https://github.com/microsoft/playwright#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@playwright/test",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @playwright/test",
+          "update_cmd": "npm update -g @playwright/test",
+          "uninstall_cmd": "npm uninstall -g @playwright/test",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "playwright"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/playwright/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "97971",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkyMjE5ODE4OTE=",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/microsoft/playwright/commit/b335271cdc2b57cac2be8ad37c5dd283ac6b8938",
+        "vendor": "microsoft",
+        "notes": "Requires Node 20+. The @playwright/test distribution supplies playwright and is distinct from playwright-cli and playwright-mcp. Browser downloads, Linux system dependencies and project test configuration are explicit setup steps. Installation does not run tests or install browsers.",
+        "license": "Apache-2.0"
+      }
+    },
+    "huggingface-cli": {
+      "id": "huggingface-cli",
+      "name": "Hugging Face CLI",
+      "description": "Manages model and dataset artifacts used by agent applications",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/huggingface/huggingface_hub",
+      "repository": "https://github.com/huggingface/huggingface_hub",
+      "documentation": "https://github.com/huggingface/huggingface_hub#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "huggingface-hub",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install huggingface-hub",
+          "update_cmd": "uv tool upgrade huggingface-hub",
+          "uninstall_cmd": "uv tool uninstall huggingface-hub",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "hf"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/huggingface/huggingface_hub/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3989",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkzMjM1OTE4MzA=",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/huggingface/huggingface_hub/commit/bb2ef7579c3d2dc2eb49b16ccf15a070fe5b7023",
+        "vendor": "huggingface",
+        "notes": "Requires Python 3.10+. The huggingface-hub distribution supplies hf and also publishes the tiny-agents executable. Configure login and access to gated repositories separately. Model/dataset downloads, uploads and agent/model-provider setup are explicit operations; installation does not download models.",
+        "license": "Apache-2.0"
+      }
+    },
+    "github-mcp": {
+      "id": "github-mcp",
+      "name": "GitHub MCP Server",
+      "description": "Connects agents to scoped GitHub repository, issue and pull-request tools",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/github/github-mcp-server",
+      "repository": "https://github.com/github/github-mcp-server",
+      "documentation": "https://github.com/github/github-mcp-server#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "github-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install github-mcp-server",
+          "update_cmd": "brew upgrade github-mcp-server",
+          "uninstall_cmd": "brew uninstall github-mcp-server",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "github-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/github/github-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "33714",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOODGMVA",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/github/github-mcp-server/commit/e3809fe91c7546633241006bf0b91f23b2595e28",
+        "vendor": "github",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula, separate from the hosted remote MCP endpoint. Configure GitHub authentication, token permissions, toolsets, read-only settings and the MCP client explicitly. Enabled tools can modify GitHub resources; installation does not connect or write to repositories.",
+        "license": "MIT"
+      }
+    },
+    "aws-documentation-mcp": {
+      "id": "aws-documentation-mcp",
+      "name": "AWS Documentation MCP",
+      "description": "Retrieves and searches AWS documentation for agent infrastructure workflows",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/awslabs/mcp",
+      "repository": "https://github.com/awslabs/mcp",
+      "documentation": "https://github.com/awslabs/mcp#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "awslabs-aws-documentation-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install awslabs-aws-documentation-mcp-server",
+          "update_cmd": "uv tool upgrade awslabs-aws-documentation-mcp-server",
+          "uninstall_cmd": "uv tool uninstall awslabs-aws-documentation-mcp-server",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "awslabs.aws-documentation-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/awslabs/mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "9789",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOMICbA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/awslabs/mcp/commit/d534d0fa3c06838336ac1ed64e7114db0ba85e6f",
+        "vendor": "awslabs",
+        "notes": "Requires Python 3.10+. The official distribution and executable use awslabs.aws-documentation-mcp-server; the catalog package uses its normalized hyphenated name so uv inventory, upgrades and removal match. Choose the documentation region/partition and MCP client configuration separately. This entry is the documentation server, not the other AWS MCP servers.",
+        "license": "Apache-2.0"
+      }
+    },
+    "redis-mcp": {
+      "id": "redis-mcp",
+      "name": "Redis MCP Server",
+      "description": "Provides Redis data and command tools to configured agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/redis/mcp-redis",
+      "repository": "https://github.com/redis/mcp-redis",
+      "documentation": "https://github.com/redis/mcp-redis#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "redis-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install redis-mcp-server",
+          "update_cmd": "uv tool upgrade redis-mcp-server",
+          "uninstall_cmd": "uv tool uninstall redis-mcp-server",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "redis-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/redis/mcp-redis/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "636",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOSp5bg",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/redis/mcp-redis/commit/f6182f5c7273a7654103dde66b2234097074f79c",
+        "vendor": "redis",
+        "notes": "The published distribution requires Python 3.10+; follow upstream runtime guidance. Configure the Redis endpoint, authentication, ACLs, enabled commands and MCP client separately. Enabled tools can read or mutate Redis data; installation does not start Redis or connect to a database.",
+        "license": "MIT"
+      }
+    },
+    "qdrant-mcp": {
+      "id": "qdrant-mcp",
+      "name": "Qdrant MCP Server",
+      "description": "Stores and retrieves semantic context for agents using Qdrant collections",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/qdrant/mcp-server-qdrant",
+      "repository": "https://github.com/qdrant/mcp-server-qdrant",
+      "documentation": "https://github.com/qdrant/mcp-server-qdrant#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-server-qdrant",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-server-qdrant",
+          "update_cmd": "uv tool upgrade mcp-server-qdrant",
+          "uninstall_cmd": "uv tool uninstall mcp-server-qdrant",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-server-qdrant"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/qdrant/mcp-server-qdrant/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1551",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONXvVzg",
+        "recent_activity_date": "2026-09-04",
+        "recent_activity_url": "https://api.github.com/repos/qdrant/mcp-server-qdrant",
+        "vendor": "qdrant",
+        "notes": "Requires Python 3.10+ and a supported native embedding runtime. Configure a Qdrant endpoint or local storage, collection, embedding model and MCP client explicitly. First embedding use can download a model; data ingestion and server startup are separate steps. Native dependency support varies by OS and architecture.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mongodb-mcp": {
+      "id": "mongodb-mcp",
+      "name": "MongoDB MCP Server",
+      "description": "Provides database inspection, query and Atlas tools to agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/mongodb-js/mongodb-mcp-server",
+      "repository": "https://github.com/mongodb-js/mongodb-mcp-server",
+      "documentation": "https://github.com/mongodb-js/mongodb-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mongodb-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g mongodb-mcp-server",
+          "update_cmd": "npm update -g mongodb-mcp-server",
+          "uninstall_cmd": "npm uninstall -g mongodb-mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mongodb-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mongodb-js/mongodb-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1143",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOT_S5w",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/mongodb-js/mongodb-mcp-server/commit/324ee0f30b5bf6090f80c959804b3fc1463ef3da",
+        "vendor": "mongodb-js",
+        "notes": "Requires Node 20.19+ on 20.x, 22.13+ on 22.x, or 24+. Configure a MongoDB connection or Atlas account, permissions, read-only/tool settings and MCP client separately. Optional native authentication or local Atlas features may need platform dependencies. Installation does not connect or modify databases.",
+        "license": "Apache-2.0"
+      }
+    },
+    "dbhub": {
+      "id": "dbhub",
+      "name": "DBHub",
+      "description": "Provides configured multi-database SQL and schema tools to agents",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/bytebase/dbhub",
+      "repository": "https://github.com/bytebase/dbhub",
+      "documentation": "https://github.com/bytebase/dbhub#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@bytebase/dbhub",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @bytebase/dbhub",
+          "update_cmd": "npm update -g @bytebase/dbhub",
+          "uninstall_cmd": "npm uninstall -g @bytebase/dbhub",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "dbhub"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bytebase/dbhub/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3669",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOFulYQ",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/bytebase/dbhub/commit/2dbf01af53e34784eafc00d777394ec844b98eca",
+        "vendor": "bytebase",
+        "notes": "Requires Node 22.5+. Use @bytebase/dbhub, not the unrelated unscoped dbhub package. Configure database drivers, connections, permissions, read-only settings and MCP client explicitly; optional native drivers/SSH can need build tools. Installation does not connect to databases or run SQL.",
+        "license": "MIT"
+      }
+    },
+    "supabase-mcp": {
+      "id": "supabase-mcp",
+      "name": "Supabase MCP Server",
+      "description": "Connects agents to scoped Supabase project and database tools",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/supabase/mcp",
+      "repository": "https://github.com/supabase/mcp",
+      "documentation": "https://github.com/supabase/mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@supabase/mcp-server-supabase",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @supabase/mcp-server-supabase",
+          "update_cmd": "npm update -g @supabase/mcp-server-supabase",
+          "uninstall_cmd": "npm uninstall -g @supabase/mcp-server-supabase",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-server-supabase"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/supabase/mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2959",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONgdK1A",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/supabase/mcp/commit/bd2d33f1b401adbbf913b3f40eb460fd67e1f9ea",
+        "vendor": "supabase",
+        "notes": "Use a current Node LTS runtime; the published MCP Node dependency requires Node 20+. The canonical upstream repository is supabase/mcp. Configure authentication, project scope, read-only mode, toolsets and MCP client separately. Enabled tools can modify project resources; installation does not create or access projects.",
+        "license": "Apache-2.0"
+      }
+    },
+    "kubernetes-mcp": {
+      "id": "kubernetes-mcp",
+      "name": "Kubernetes MCP Server",
+      "description": "Provides Kubernetes and OpenShift cluster tools for agent workflows",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/containers/kubernetes-mcp-server",
+      "repository": "https://github.com/containers/kubernetes-mcp-server",
+      "documentation": "https://github.com/containers/kubernetes-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "kubernetes-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g kubernetes-mcp-server",
+          "update_cmd": "npm update -g kubernetes-mcp-server",
+          "uninstall_cmd": "npm uninstall -g kubernetes-mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "kubernetes-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/containers/kubernetes-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2164",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDON3kF8g",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/containers/kubernetes-mcp-server/commit/970df6a7169c943fc0c82641fde6eed38f1e153c",
+        "vendor": "containers",
+        "notes": "Uses a Node wrapper with native optional packages for macOS/Linux/Windows x64 and arm64. Use a current Node LTS runtime and retain npm optional dependencies. Configure kubeconfig, context, permissions, read-only/tool settings and MCP client explicitly. Enabled tools can modify clusters; installation does not start or connect to a cluster.",
+        "license": "Apache-2.0"
+      }
+    },
+    "terraform-mcp": {
+      "id": "terraform-mcp",
+      "name": "Terraform MCP Server",
+      "description": "Provides Terraform Registry and HCP Terraform context and tools to agents",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/hashicorp/terraform-mcp-server",
+      "repository": "https://github.com/hashicorp/terraform-mcp-server",
+      "documentation": "https://github.com/hashicorp/terraform-mcp-server#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "terraform-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install terraform-mcp-server",
+          "update_cmd": "brew upgrade terraform-mcp-server",
+          "uninstall_cmd": "brew uninstall terraform-mcp-server",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "terraform-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/hashicorp/terraform-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1550",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOcYUNw",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/hashicorp/terraform-mcp-server/commit/4bbe30cc0cf6bb590defb566bdd842e6f952ade2",
+        "vendor": "hashicorp",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula. Configure the MCP client, enabled toolsets and any HCP Terraform credentials/permissions separately. Service-backed operations use the selected account scope; installation does not start the server or perform Terraform/HCP operations.",
+        "license": "MPL-2.0"
+      }
+    },
+    "azure-mcp": {
+      "id": "azure-mcp",
+      "name": "Azure MCP Server",
+      "description": "Connects agent MCP clients to configured Azure service tools",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/microsoft/mcp",
+      "repository": "https://github.com/microsoft/mcp",
+      "documentation": "https://github.com/microsoft/mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@azure/mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @azure/mcp",
+          "update_cmd": "npm update -g @azure/mcp",
+          "uninstall_cmd": "npm uninstall -g @azure/mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "azmcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3780",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDOOWbNxA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/microsoft/mcp/commit/bc89c9e5e2f774db19d9bc391b16f2920384ddfd",
+        "vendor": "microsoft",
+        "notes": "Requires Node 22+. The npm wrapper loads native optional packages for macOS/Linux/Windows x64 and arm64; retain optional dependencies and meet upstream OS library requirements. Configure Azure authentication, subscriptions, permissions, toolsets and read-only settings explicitly. Installation does not sign in, provision resources or start the server.",
+        "license": "MIT"
+      }
+    },
+    "neon-mcp": {
+      "id": "neon-mcp",
+      "name": "Neon MCP Server",
+      "description": "Provides Neon database, branch and project tools for agent workflows",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/neondatabase/mcp-server-neon",
+      "repository": "https://github.com/neondatabase/mcp-server-neon",
+      "documentation": "https://github.com/neondatabase/mcp-server-neon#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@neondatabase/mcp-server-neon",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @neondatabase/mcp-server-neon",
+          "update_cmd": "npm update -g @neondatabase/mcp-server-neon",
+          "uninstall_cmd": "npm uninstall -g @neondatabase/mcp-server-neon",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-server-neon"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/neondatabase/mcp-server-neon/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "654",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONWr6iA",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/neondatabase/mcp-server-neon/commit/1f341ee896f7838690e35fb47cba5d306f2e29ea",
+        "vendor": "neondatabase",
+        "notes": "Requires Node 22+. Configure Neon credentials, project scope, permissions, read-only/tool selection and MCP client separately. Enabled tools can create branches, execute queries or modify resources; installation does not access or provision databases.",
+        "license": "MIT"
+      }
+    },
+    "grafana-mcp": {
+      "id": "grafana-mcp",
+      "name": "Grafana MCP Server",
+      "description": "Gives agents configured Grafana observability and dashboard tools",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/grafana/mcp-grafana",
+      "repository": "https://github.com/grafana/mcp-grafana",
+      "documentation": "https://github.com/grafana/mcp-grafana#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "mcp-grafana",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install mcp-grafana",
+          "update_cmd": "brew upgrade mcp-grafana",
+          "uninstall_cmd": "brew uninstall mcp-grafana",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-grafana"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/grafana/mcp-grafana/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3571",
+        "github_stars_checked_at": "2026-10-18T10:41:17.264180+00:00",
+        "github_repository_id": "R_kgDONhz-pg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/grafana/mcp-grafana/commit/29bafef770443584ffcf698fd640c005586c1184",
+        "vendor": "grafana",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula. Configure the Grafana URL, service-account token, permissions, datasource/tool selection and MCP client explicitly. Enabled tools can query telemetry or modify dashboards/resources; installation does not connect or start the server.",
+        "license": "Apache-2.0"
       }
     }
   }

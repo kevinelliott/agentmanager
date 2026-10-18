@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty more relevant tools (269 total), including Chrome DevTools MCP,
+  Playwright Test, Hugging Face CLI, Tavily, Exa, Brave Search, Perplexity,
+  GitHub, AWS Documentation, Redis, Qdrant, MongoDB, DBHub, Supabase,
+  Kubernetes, Terraform, Azure, Neon, Grafana and Firecrawl MCP (ENGIN-8).
+  Catalog 1.0.87 preserves all previous definitions. Both catalog copies,
+  README listings and catalog documentation are synchronized; package names,
+  executables, runtime/setup requirements and research evidence appear in
+  `docs/catalog/research-2026-10-18-engin-8.csv`. Notes distinguish MCP servers
+  from existing CLIs and record native launchers, AWS uv name normalization,
+  browser setup and Chrome DevTools usage-statistics configuration.
+
 - Twenty more agent tools (249 total), including Code2Prompt, grepai, llmfit,
   Fabric AI, Browserbase Browse, OpenAgents Control, Cisco MCP Scanner,
   Pydantic AI CLI, Hayhooks, MLX LM, Phoenix, Langflow and workflow utilities
