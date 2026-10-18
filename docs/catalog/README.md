@@ -1,6 +1,6 @@
 # Catalog research and update records
 
-AgentManager ships with 289 catalog entries in catalog version 1.0.88. The
+AgentManager ships with 309 catalog entries in catalog version 1.0.89. The
 [root catalog](../../catalog.json) and [embedded catalog](../../pkg/catalog/catalog.json)
 contain the same definitions. The [supported agents table](../../README.md#supported-agents)
 lists each entry's ID and installation methods.
@@ -14,7 +14,7 @@ platforms and setup notes before installing it.
 Each research record captures the canonical GitHub repository and repository ID,
 star count and verification time, recent activity evidence, upstream installation
 source, distribution version, executable names, supported platforms and relevance.
-The eight batches below required at least 100 stars and activity within the two
+The nine batches below required at least 100 stars and activity within the two
 months before verification. Star counts and distribution versions are snapshots.
 
 | Issue | Added | Catalog version | Evidence |
@@ -27,6 +27,7 @@ months before verification. Star counts and distribution versions are snapshots.
 | ENGIN-7 | 20 | 1.0.86 | [October 18 expanded research](research-2026-10-18-engin-7.csv) |
 | ENGIN-8 | 20 | 1.0.87 | [October 18 MCP and CLI research](research-2026-10-18-engin-8.csv) |
 | ENGIN-9 | 20 | 1.0.88 | [October 18 evaluation and MCP research](research-2026-10-18-engin-9.csv) |
+| ENGIN-10 | 20 | 1.0.89 | [October 18 runtime and workflow research](research-2026-10-18-engin-10.csv) |
 
 Recent activity is identified as a default-branch commit or a repository push in
 the CSV. A push record does not imply that the default branch changed recently.
@@ -60,7 +61,7 @@ Keep `package` set to the main distribution. uv retains the executable setting
 for subsequent `tool upgrade` operations; inventory and removal also use the
 main distribution name. See the [uv tool documentation](https://docs.astral.sh/uv/concepts/tools/#installing-executables-from-additional-packages).
 This support was introduced with ENGIN-4. Older AgentManager binaries must be
-upgraded or rebuilt before installing FastMCP or Langflow through these methods;
+upgraded or rebuilt before installing FastMCP, Langflow or PromptFlow through these methods;
 refreshing the catalog alone does not update the application. Until a binary
 release includes it, use the [source build instructions](../../README.md#from-source)
 with the latest main branch.
@@ -225,6 +226,55 @@ The ENGIN-9 batch adds evaluation, observability, notebooks and service tools:
   development requires 3.11+. Optional integrations, worker startup, flow runs,
   evaluations, artifact uploads and service deployment remain explicit steps.
 
+The ENGIN-10 batch adds agent runtimes, compute, memory and workflow tools:
+
+- PromptFlow installs the `promptflow` metapackage with
+  `with_executables_from=promptflow-devkit`, exposing `pf` while preserving
+  inventory, upgrades and removal. An isolated Python 3.12 uv installation
+  verified this mapping. Older binaries need the ENGIN-4 metadata support
+  described above. Flow tools, provider connections and Azure integrations are
+  separate. Docling's published metapackage already exposes its own CLI and
+  installs `docling-slim` with standard conversion features; it needs no override.
+- Docling, Docling Serve and Docling MCP install distinct conversion, API-service
+  and MCP CLIs. The latter uses `docling-mcp-server`. Choose compatible native
+  dependencies, OCR/model backends and local/remote conversion before use.
+  First conversion can download model weights; MCP registration, service
+  authentication and document processing are explicit steps.
+- Agent Stack uses `agentstack-cli` from `i-am-bee/agentstack`, distinct from the
+  unrelated `agentstack` distribution. It requires Python 3.14, selectable with
+  `UV_PYTHON=3.14`. Run `agentstack self install` separately to install its
+  Lima VM/Kubernetes platform; Linux needs QEMU. On Windows the CLI runs
+  natively in PowerShell with WSL2 available, rather than from inside WSL.
+- GPUStack's Python method requires Python 3.10–3.12 and targets Linux; select
+  `UV_PYTHON=3.12`. Current workers need Linux (WSL2 on Windows); macOS workers
+  are unsupported upstream. Configure Docker, GPU/container drivers, workers,
+  authentication and model backends separately. RamaLama and dstack use
+  Homebrew-managed runtimes; current bottles cover Apple silicon macOS and
+  x64/arm64 Linux, with source builds on other supported Homebrew hosts.
+- Modal uses Python `modal`; Vast.ai uses `vastai` from `vast-ai/vast-cli`.
+  RunPod uses `runpod/runpodctl/runpodctl` with universal macOS and x64/arm64
+  Linux binaries. Configure account scope, credentials, workload images and
+  storage before remote execution. `RUNPOD_NO_UPDATE_CHECK=1` disables the
+  upstream CLI's own update check. OpenSandbox uses `opensandbox-cli` and `osb`,
+  also publishing `opensandbox`; configure its separately deployed server.
+- AWS AgentCore uses npm `@aws/agentcore` and Node 20+. Its postinstall detects
+  older Python toolkit installations and may warn. Apify MCP Client uses
+  `@apify/mcpc`, requires Node 22.12+ and publishes `mcpc`/`mcpc-bridge`.
+  BMad uses the stable 6.12 npm installer, distinct from the v7 preview source;
+  setup/scripts also need Python and uv. Installing its wrapper does not write
+  project skills until its project install command is invoked.
+- Trigger.dev uses npm `trigger.dev` and the `trigger` executable. Its wrapper
+  declares Node 18.20+, while its PostHog dependency requires Node
+  20.20+ on 20.x or 22.22+; use a current Node LTS runtime. Set
+  `TRIGGER_TELEMETRY_DISABLED` to disable upstream telemetry. Configure projects,
+  secrets, development workers and deployment explicitly.
+- DeepCode uses `deepcode-hku` with Python 3.12+; starting a client can launch
+  a persistent local service. Codeflash optimization can edit code, run tests
+  and submit selected code to its service. Cognee uses `cognee-cli`; select
+  datasets, storage and embedding/model providers before ingestion. ZenML
+  integrations and stacks also require explicit configuration. Package
+  installation does not run agent tasks, pull models or provision compute.
+
 ## Inclusion announcements
 
 The catalog update pull request records upstream announcements with links and
@@ -241,7 +291,8 @@ covers its 64 recent additions. The [ENGIN-5 record](https://github.com/kevinell
 covers 84 additions. The [ENGIN-6 record](https://github.com/kevinelliott/agentmanager/pull/71#issuecomment-6248466338)
 covers 104 additions. The [ENGIN-7 record](https://github.com/kevinelliott/agentmanager/pull/72#issuecomment-6248707616)
 covers 124 additions. The [ENGIN-8 record](https://github.com/kevinelliott/agentmanager/pull/73#issuecomment-6248942295)
-covers 144 additions. The ENGIN-9 update expands the audit to 164 additions
-across ENGIN-2 through ENGIN-9, preserving existing notices without duplicates.
+covers 144 additions. The [ENGIN-9 record](https://github.com/kevinelliott/agentmanager/pull/74#issuecomment-6249319742)
+covers 164 additions. The ENGIN-10 update expands the audit to 184 additions
+across ENGIN-2 through ENGIN-10, preserving existing notices without duplicates.
 The update PR records new announcements, unsuitable venues and any denied
 posting permissions.
