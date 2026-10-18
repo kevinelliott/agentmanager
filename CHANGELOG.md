@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty additional tools (289 total), including Harbor, SWE-ReX, BrowserTools
+  MCP, MCP for Blender, MCP Toolbox, Neo4j, ClickHouse, MotherDuck, MCP Atlassian,
+  Airtable, Resend, Jupyter MCP, ContextForge, LitServe, Open WebUI, Logfire,
+  Opik, MLflow, Prefect and Weights and Biases (ENGIN-9). Catalog 1.0.88
+  preserves all previous definitions. Both catalogs, README listings and catalog
+  documentation are synchronized; verified distributions/executables, source
+  identities, platform/runtime limits and setup notes are recorded in
+  `docs/catalog/research-2026-10-18-engin-9.csv`, including Blender's rename,
+  telemetry preferences, browser/notebook extensions and explicit service setup.
+
 - Twenty more relevant tools (269 total), including Chrome DevTools MCP,
   Playwright Test, Hugging Face CLI, Tavily, Exa, Brave Search, Perplexity,
   GitHub, AWS Documentation, Redis, Qdrant, MongoDB, DBHub, Supabase,

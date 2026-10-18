@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-269-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-289-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 269 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 289 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -234,7 +234,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **269 agents**, embedded in the binary and refreshable from the
+The catalog ships with **289 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -254,6 +254,7 @@ verification sources and installation/setup limits.
 | Agents CLI | `agents-cli` | pip, pipx, uv |
 | AIChat | `aichat` | binary, brew, cargo, scoop |
 | Aider | `aider` | pip, pipx, uv |
+| Airtable MCP Server | `airtable-mcp` | npm |
 | Amazon Q Developer CLI | `amazon-q` | brew, dmg, native |
 | Amp | `amp` | brew, chocolatey, native, npm |
 | Amplifier | `amplifier` | native |
@@ -276,6 +277,7 @@ verification sources and installation/setup limits.
 | Brave Search MCP | `brave-search-mcp` | npm |
 | Browser Use | `browser-use` | uv |
 | Browserbase Browse | `browserbase-browse` | npm |
+| BrowserTools MCP | `browser-tools-mcp` | npm |
 | ByteRover CLI | `byterover-cli` | native, npm |
 | CASS | `cass` | brew |
 | Caveman Code | `caveman-code` | npm |
@@ -297,6 +299,7 @@ verification sources and installation/setup limits.
 | Claw Orchestrator | `claw-orchestrator` | native, npm |
 | ClawCodex | `clawcodex` | native |
 | ClawHub | `clawhub` | npm |
+| ClickHouse MCP Server | `clickhouse-mcp` | uv |
 | Cline CLI | `cline-cli` | npm |
 | Cloudflare cf | `cloudflare-cf` | npm |
 | cmux | `cmux` | binary, brew |
@@ -361,11 +364,13 @@ verification sources and installation/setup limits.
 | Grok Build | `grok-build` | native |
 | Grok CLI | `grok-cli` | bun, npm |
 | Happy | `happy` | npm |
+| Harbor Agent Evaluation CLI | `harbor` | uv |
 | Hayhooks | `hayhooks` | uv |
 | Herdr | `herdr` | binary, brew, native, nix |
 | Hermes Agent | `hermes-agent` | native, source |
 | Hugging Face CLI | `huggingface-cli` | uv |
 | Hunk | `hunk` | brew, native, npm |
+| IBM ContextForge Gateway | `contextforge` | uv |
 | iCode | `icode` | uv |
 | Inspect AI | `inspect-ai` | uv |
 | IronClaw | `ironclaw` | native |
@@ -373,6 +378,7 @@ verification sources and installation/setup limits.
 | jevgrep | `jevgrep` | npm |
 | Junie CLI | `junie-cli` | brew, native, npm |
 | Juno Code | `juno-code` | npm |
+| Jupyter MCP Server | `jupyter-mcp` | uv |
 | Kilocode CLI | `kilocode-cli` | npm |
 | Kimchi | `kimchi` | brew, native |
 | Kimi Code | `kimi-code` | binary, native, pip, pipx, uv |
@@ -386,6 +392,7 @@ verification sources and installation/setup limits.
 | late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
 | Leviathan | `leviathan` | cargo |
+| LitServe CLI | `litserve` | uv |
 | little-coder | `little-coder` | native, npm |
 | llama-swap | `llama-swap` | brew |
 | llama.cpp CLI | `llama-cpp` | brew |
@@ -397,11 +404,14 @@ verification sources and installation/setup limits.
 | Marvin CLI | `marvin` | uv |
 | Mastra Code | `mastracode` | npm |
 | MCO | `mco` | npm |
+| MCP Atlassian | `mcp-atlassian` | uv |
 | MCP Filesystem Server | `mcp-filesystem` | npm |
+| MCP for Blender | `mcp-for-blender` | uv |
 | MCP Inspector | `mcp-inspector` | npm |
 | MCP Proxy | `mcp-proxy` | uv |
 | MCP Publisher | `mcp-publisher` | brew |
 | MCP Remote | `mcp-remote` | npm |
+| MCP Toolbox for Databases | `mcp-toolbox` | brew |
 | mcp-use CLI | `mcp-use` | npm |
 | mcp2cli | `mcp2cli` | pip, uv |
 | MCPJam Inspector | `mcpjam-inspector` | npm |
@@ -411,12 +421,15 @@ verification sources and installation/setup limits.
 | Mini SWE Agent | `mini-swe-agent` | uv |
 | MiniMax Code | `minimax-code` | native, powershell |
 | Mistral Vibe | `mistral-vibe` | brew, native, pip, uv |
+| MLflow CLI | `mlflow` | uv |
 | MLX LM | `mlx-lm` | uv |
 | Moltis | `moltis` | brew |
 | MongoDB MCP Server | `mongodb-mcp` | npm |
+| MotherDuck and DuckDB MCP | `motherduck-mcp` | uv |
 | n8n CLI | `n8n` | npm |
 | Nanobot | `nanobot` | uv |
 | Nanocoder | `nanocoder` | brew, npm |
+| Neo4j MCP Server | `neo4j-mcp` | brew |
 | Neon MCP Server | `neon-mcp` | npm |
 | nono | `nono` | brew, cargo |
 | NTM | `ntm` | brew |
@@ -430,6 +443,7 @@ verification sources and installation/setup limits.
 | Ona | `ona` | binary, brew |
 | Only CLI / oc | `only-cli` | npm |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
+| Open WebUI CLI | `open-webui` | uv |
 | open_scion | `open-scion` | native |
 | OpenAgents Control | `openagents-control` | npm |
 | OpenAgents Launcher | `openagents-launcher` | npm |
@@ -440,6 +454,7 @@ verification sources and installation/setup limits.
 | OpenQodex | `openqodex` | npm |
 | OpenSpec | `openspec` | brew, npm |
 | OpenViking | `openviking` | uv |
+| Opik CLI | `opik` | uv |
 | OptiLLM | `optillm` | uv |
 | Oracle | `oracle` | npm |
 | Ouroboros | `ouroboros` | native, pip, pipx, uv |
@@ -456,8 +471,10 @@ verification sources and installation/setup limits.
 | Playwright MCP | `playwright-mcp` | npm |
 | Playwright Test CLI | `playwright-test` | npm |
 | Pochi | `pochi` | npm |
+| Prefect CLI | `prefect` | uv |
 | Promptfoo | `promptfoo` | npm |
 | Pydantic AI CLI | `pydantic-clai` | uv |
+| Pydantic Logfire CLI | `logfire` | uv |
 | Qdrant MCP Server | `qdrant-mcp` | uv |
 | QMD | `qmd` | npm |
 | Qoder CLI | `qoder-cli` | binary |
@@ -468,6 +485,7 @@ verification sources and installation/setup limits.
 | Ralphex | `ralphex` | brew |
 | Redis MCP Server | `redis-mcp` | uv |
 | Repomix | `repomix` | npm |
+| Resend MCP Server | `resend-mcp` | npm |
 | rmux | `rmux` | brew, cargo |
 | Roo Code CLI | `roo-code-cli` | native |
 | rtk | `rtk` | binary, brew, cargo, native |
@@ -484,6 +502,7 @@ verification sources and installation/setup limits.
 | Summarize | `summarize` | npm |
 | Supabase MCP Server | `supabase-mcp` | npm |
 | Supergateway | `supergateway` | npm |
+| SWE-ReX Remote Runtime | `swe-rex` | uv |
 | Symphony | `symphony` | native |
 | Tabnine CLI | `tabnine-cli` | native |
 | Tavily MCP | `tavily-mcp` | npm |
@@ -503,6 +522,7 @@ verification sources and installation/setup limits.
 | VibeMux | `vibemux` | binary, native |
 | VT Code | `vtcode` | brew, native |
 | wcgw | `wcgw` | uv |
+| Weights and Biases CLI | `wandb` | uv |
 | WhipCode | `whipcode` | native |
 | Workmux | `workmux` | brew |
 | Worktrunk | `worktrunk` | brew |
