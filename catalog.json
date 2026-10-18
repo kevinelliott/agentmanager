@@ -9956,7 +9956,7 @@
         "executables": [
           "fastmcp"
         ],
-        "version_cmd": ""
+        "version_cmd": "fastmcp --version"
       },
       "changelog": {
         "type": "github_releases",
@@ -9970,7 +9970,7 @@
         "recent_activity_date": "2026-10-17",
         "recent_activity_url": "https://github.com/PrefectHQ/fastmcp/commit/7f3c53eadf6bb1b7194e00c42551e4db380b3f67",
         "vendor": "PrefectHQ",
-        "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; the native adapter explicitly exposes the fastmcp-slim dependency executable with uv --with-executables-from. Configure or launch MCP servers separately. Version probing is disabled; the CLI is detected by its executable.",
+        "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; the native adapter explicitly exposes the fastmcp-slim dependency executable with uv --with-executables-from. Configure or launch MCP servers separately. The published CLI provides a safe --version flag for detection.",
         "license": "Apache-2.0"
       }
     }
