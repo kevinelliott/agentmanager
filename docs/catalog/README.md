@@ -120,7 +120,8 @@ The ENGIN-7 batch adds code context, browser/MCP tools and agent workflows:
 - Fabric uses Homebrew `fabric-ai`, including the executable name `fabric-ai`.
   It is distinct from the Python Fabric SSH tool. Browserbase Browse uses npm
   `browse` from the Stagehand repository, distinct from the SDK and legacy
-  `bb` CLI. Configure a local browser or cloud credentials separately.
+  `bb` CLI. Its pinned Stagehand dependency requires Node 22.18+. Configure
+  a local browser or cloud credentials separately.
 - Pydantic AI CLI uses `clai` (Python 3.11+) on the upstream POSIX terminal
   platforms. Cisco MCP Scanner uses `cisco-ai-mcp-scanner`; upstream selects
   Python 3.13, which can be chosen with `UV_PYTHON=3.13`. Live-server scanning
@@ -144,6 +145,8 @@ The ENGIN-7 batch adds code context, browser/MCP tools and agent workflows:
 - n8n requires Node 24+. OpenAgents Control needs Bash, Git and OpenCode
   (Git Bash or WSL on Windows); the npm wrapper does not install its agent
   patterns until invoked. Apify also publishes `actor` and `apify-cli` aliases.
+  Its `which` 7 dependency requires Node 22.22.2+ on 22.x, 24.15+ on 24.x,
+  or 26+, despite the CLI's broader declared Node 20+ requirement.
   Select workflow activation, project setup, cloud deployment and model or
   browser downloads explicitly; installation does not run these operations.
 

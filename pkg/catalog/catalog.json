@@ -12271,7 +12271,7 @@
         "recent_activity_date": "2026-10-15",
         "recent_activity_url": "https://github.com/browserbase/stagehand/commit/10418f98831285b3cddca5328c8013a94f22672a",
         "vendor": "browserbase",
-        "notes": "Requires Node 20.19+ on the 20.x line or Node 22.12+. The official CLI is npm browse from browserbase/stagehand, not the Stagehand SDK or legacy bb CLI. Configure local Chrome/Chromium or Browserbase credentials separately. Browser commands can start a daemon/session; cloud calls can consume credits. Installation does not start a browser.",
+        "notes": "The CLI declares Node 20.19+ or 22.12+, but its pinned Stagehand dependency requires Node 22.18+; use a compatible current runtime. The official CLI is npm browse from browserbase/stagehand, not the Stagehand SDK or legacy bb CLI. Configure local Chrome/Chromium or Browserbase credentials separately. Browser commands can start a daemon/session; cloud calls can consume credits. Installation does not start a browser.",
         "license": "MIT"
       }
     },
@@ -12731,7 +12731,7 @@
         "recent_activity_date": "2026-10-09",
         "recent_activity_url": "https://github.com/apify/apify-cli/commit/59dc6b0bb86d9bb4587ef2b29bb667ae9d4aabd0",
         "vendor": "apify",
-        "notes": "The published CLI requires Node 20+; current upstream development targets Node 22+. Uses apify-cli rather than an Apify SDK; it also installs actor and apify-cli aliases. Create projects and authenticate explicitly. Local runs need their project/browser dependencies; cloud Actor runs or deployments can consume account resources.",
+        "notes": "The CLI declares Node 20+, but its which 7 dependency requires Node 22.22.2+ on 22.x, 24.15+ on 24.x, or 26+. Use a compatible current runtime. Uses apify-cli rather than an Apify SDK; it also installs actor and apify-cli aliases. Create projects and authenticate explicitly. Local runs need their project/browser dependencies; cloud Actor runs or deployments can consume account resources.",
         "license": "Apache-2.0"
       }
     },
