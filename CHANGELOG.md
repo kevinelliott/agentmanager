@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- uv tool installs can expose dependency executables while retaining the main
+  package identity for inventory, update checks, upgrades and removal. FastMCP
+  uses this to expose its `fastmcp-slim` CLI.
 - Keep Cargo-installed catalog tools discoverable and preserve their Cargo
   update/removal commands. Match Homebrew casks by token when their catalog
   entries use fully qualified tap names, and read Homebrew formula versions

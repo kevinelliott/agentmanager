@@ -9059,7 +9059,7 @@
         "recent_activity_date": "2026-09-19",
         "recent_activity_url": "https://github.com/microsoft/amplifier/commit/33b75749920472257d1d85d20a5699ecf9d1ece7",
         "vendor": "microsoft",
-        "notes": "Requires uv, git and Python 3.11+. Installs the upstream Git distribution through uv; native Windows is excluded in favor of upstream-supported WSL. Configure providers and bundles separately.",
+        "notes": "Requires uv, git and Python 3.11+. Installs the upstream Git distribution through uv; native Windows is excluded in favor of upstream-supported WSL. Configure providers and bundles separately. Source installations do not support automatic release checks; use agentmgr agent update amplifier --force to pull upstream changes.",
         "license": "MIT"
       }
     },
@@ -9938,18 +9938,23 @@
       "repository": "https://github.com/PrefectHQ/fastmcp",
       "documentation": "https://github.com/PrefectHQ/fastmcp#readme",
       "install_methods": {
-        "native": {
-          "method": "native",
-          "platforms": [
-            "darwin",
-            "linux"
-          ],
+        "uv": {
+          "method": "uv",
+          "package": "fastmcp",
           "command": "uv tool install --with-executables-from fastmcp-slim fastmcp",
           "update_cmd": "uv tool upgrade fastmcp",
           "uninstall_cmd": "uv tool uninstall fastmcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
           "prereqs": [
             "uv"
-          ]
+          ],
+          "metadata": {
+            "with_executables_from": "fastmcp-slim"
+          }
         }
       },
       "detection": {
@@ -9970,7 +9975,7 @@
         "recent_activity_date": "2026-10-17",
         "recent_activity_url": "https://github.com/PrefectHQ/fastmcp/commit/7f3c53eadf6bb1b7194e00c42551e4db380b3f67",
         "vendor": "PrefectHQ",
-        "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; the native adapter explicitly exposes the fastmcp-slim dependency executable with uv --with-executables-from. Configure or launch MCP servers separately. The published CLI provides a safe --version flag for detection.",
+        "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; uv exposes the fastmcp-slim dependency executable with --with-executables-from while retaining fastmcp as the package for inventory and updates. Configure or launch MCP servers separately. Older AgentManager binaries need to be rebuilt or upgraded to support uv dependency executables (introduced with ENGIN-4).",
         "license": "Apache-2.0"
       }
     }

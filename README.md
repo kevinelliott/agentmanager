@@ -309,7 +309,7 @@ verification sources and installation/setup limits.
 | ElevenLabs CLI | `elevenlabs-cli` | npm |
 | Engram | `engram` | brew |
 | fast-agent | `fast-agent` | pip, pipx, uv |
-| FastMCP CLI | `fastmcp` | native |
+| FastMCP CLI | `fastmcp` | uv |
 | fauxnix | `fauxnix` | npm |
 | fence | `fence` | brew, go, native |
 | FetchCoder | `fetchcoder` | npm |

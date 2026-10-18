@@ -42,10 +42,23 @@ CodexBar here is the CLI formula; Playwright CLI and Playwright MCP are separate
 tools; Beads Rust supplies `br` and is separate from Beads.
 
 Amplifier uses the upstream Git distribution through a native uv adapter on
-macOS/Linux. FastMCP 4 uses a native uv adapter that explicitly exposes the
-`fastmcp-slim` dependency's executable. Their update and removal commands retain
-uv tool management. Commands that might start an application are omitted from
+macOS/Linux. Its source installation has no automatic release checks; use
+`agentmgr agent update amplifier --force` to pull upstream changes. FastMCP 4
+uses uv with `with_executables_from` installation metadata to expose the
+`fastmcp-slim` dependency's CLI while retaining normal package inventory, update
+checks and removal. Commands that might start an application are omitted from
 automatic version probing.
+
+For uv catalog methods, `metadata.with_executables_from` accepts uv's
+comma-separated package list and is passed as a single installation argument.
+Keep `package` set to the main distribution. uv retains the executable setting
+for subsequent `tool upgrade` operations; inventory and removal also use the
+main distribution name. See the [uv tool documentation](https://docs.astral.sh/uv/concepts/tools/#installing-executables-from-additional-packages).
+This support was introduced with ENGIN-4. Older AgentManager binaries must be
+upgraded or rebuilt before installing FastMCP through this catalog method;
+refreshing the catalog alone does not update the application. Until a binary
+release includes it, use the [source build instructions](../../README.md#from-source)
+with the latest main branch.
 
 ## Inclusion announcements
 
