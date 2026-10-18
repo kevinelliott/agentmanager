@@ -1,6 +1,6 @@
 # Catalog research and update records
 
-AgentManager ships with 209 catalog entries in catalog version 1.0.84. The
+AgentManager ships with 229 catalog entries in catalog version 1.0.85. The
 [root catalog](../../catalog.json) and [embedded catalog](../../pkg/catalog/catalog.json)
 contain the same definitions. The [supported agents table](../../README.md#supported-agents)
 lists each entry's ID and installation methods.
@@ -14,7 +14,7 @@ platforms and setup notes before installing it.
 Each research record captures the canonical GitHub repository and repository ID,
 star count and verification time, recent activity evidence, upstream installation
 source, distribution version, executable names, supported platforms and relevance.
-The four batches below required at least 100 stars and activity within the two
+The five batches below required at least 100 stars and activity within the two
 months before verification. Star counts and distribution versions are snapshots.
 
 | Issue | Added | Catalog version | Evidence |
@@ -23,6 +23,7 @@ months before verification. Star counts and distribution versions are snapshots.
 | ENGIN-3 | 20 | 1.0.82 | [October 18 research](research-2026-10-18.csv) |
 | ENGIN-4 | 20 | 1.0.83 | [October 18 follow-up research](research-2026-10-18-engin-4.csv) |
 | ENGIN-5 | 20 | 1.0.84 | [October 18 additional research](research-2026-10-18-engin-5.csv) |
+| ENGIN-6 | 20 | 1.0.85 | [October 18 latest research](research-2026-10-18-engin-6.csv) |
 
 Recent activity is identified as a default-branch commit or a repository push in
 the CSV. A push record does not imply that the default branch changed recently.
@@ -80,6 +81,36 @@ The ENGIN-5 batch uses published npm/uv packages and Homebrew formulas:
   startup and optional services remain explicit steps, as do Crawl4AI browser
   setup, sandbox provisioning and evaluation runs.
 
+The ENGIN-6 batch adds MCP management, evaluation, context and session tools:
+
+- TOON CLI uses `@toon-format/cli` and requires Node 24+. MCPJam Inspector
+  uses `@mcpjam/inspector` and runs as `inspector`; it is distinct from the
+  official `mcp-inspector`. Use a current Node runtime for SDK dependencies.
+- MCO uses `@tt-a1i/mco`, whose wrapper needs `python3` (Python 3.10+) on
+  PATH. Its bundled Python sources are separate from the unrelated `mco`
+  PyPI distribution. This catalog method supports macOS/Linux.
+- Skillshare uses the Homebrew CLI formula. amux uses the upstream
+  `andyrewlee/amux/amux` formula, builds with Go, and requires Git and
+  tmux 3.2+. Synchronizing skills, creating workspaces and starting agents
+  are separate operations.
+- RuVector needs a working native backend for persistent vector storage.
+  Its core binaries cover macOS x64/arm64, glibc Linux x64/arm64 and Windows
+  x64. Check `ruvector info`; semantic commands download an embedding model
+  on first use. Cisco Skill Scanner wheels require CPython 3.11–3.14 and
+  support glibc Linux x64/arm64, macOS 14+ x64/arm64 and Windows x64; source
+  builds on other platforms need Go 1.27.1+.
+- Context Mode's upstream npm postinstall can repair existing Claude plugin
+  registries/settings and normalize hooks during installation or updates.
+  Agent adapter and MCP registration still need separate configuration.
+- Snyk Agent Scan uses the `snyk-agent-scan` Python package and needs an
+  account/token. Scans can start configured MCP commands, contact servers
+  and submit component metadata for analysis; follow upstream consent and
+  data-handling guidance. Model-backed evaluations, Firecrawl requests and
+  Sentry AI features also require explicit configuration and service access.
+- Sentry CLI here is npm `sentry` from `getsentry/toolkit`, distinct from
+  `@sentry/cli` and its `sentry-cli` executable. Claude Code Log and Claude
+  Replay generate artifacts containing session content; review before sharing.
+
 ## Inclusion announcements
 
 The catalog update pull request records upstream announcements with links and
@@ -92,6 +123,8 @@ recorded as skipped; unrelated bug reports are not used for announcements.
 The initial ENGIN-2 outreach record is on
 [PR #67](https://github.com/kevinelliott/agentmanager/pull/67#issuecomment-6216845583).
 The [ENGIN-4 completion record](https://github.com/kevinelliott/agentmanager/pull/69#issuecomment-6247777800)
-covers its 64 recent additions. The ENGIN-5 update expands that audit to 84
-additions across ENGIN-2 through ENGIN-5, preserving existing notices without
-duplicates.
+covers its 64 recent additions. The [ENGIN-5 record](https://github.com/kevinelliott/agentmanager/pull/70#issuecomment-6248132465)
+covers 84 additions. The ENGIN-6 update expands that audit to 104 additions
+across ENGIN-2 through ENGIN-6, preserving existing notices without duplicates.
+The update PR records new announcements, unsuitable venues and any denied
+posting permissions.

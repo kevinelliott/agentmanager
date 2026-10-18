@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty more relevant agent tools (229 total), including MCPM, MCPJam
+  Inspector, Skillshare CLI, wcgw, Supergateway, TOON CLI, RuVector CLI, amux,
+  Firecrawl CLI, Agent Eval, DeepEval and agent scanning/session utilities
+  (ENGIN-6). Catalog 1.0.85 preserves all prior definitions and records verified
+  distributions, executables and setup requirements in
+  `docs/catalog/research-2026-10-18-engin-6.csv`. README listings and catalog
+  documentation are synchronized, including runtime limits, native backends
+  and upstream installer effects on existing plugin settings.
 - Twenty additional agent tools (209 total), including Autohand, Serena,
   OpenViking, Context7 CLI, Repomix, GitIngest, CrewAI CLI, LangGraph CLI,
   Promptfoo, Inspect AI and MCP/runtime utilities (ENGIN-5). Catalog 1.0.84
