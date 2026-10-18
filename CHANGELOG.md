@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty-four approved agentic CLI/TUI catalog additions (now 149 total), with
+  verified GitHub star counts, recent activity and upstream install sources
+  recorded for each entry (ENGIN-2). Includes platform restrictions, explicit
+  source builds where needed, and separate setup instructions for optional agent
+  integrations. Both catalog copies are updated to version 1.0.81.
 - Sixteen new agents in the catalog (now 109 total): openclaude, dao-code,
   Omnigent, zero, Claude-Codex Bridge, ClawCodex, Meta Muse Code, Ouroboros,
   rmux, Atomic Agent, Penguin Harness, KlaatCode, BBARIT Agent, Claude Code
@@ -39,6 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Keep Cargo-installed catalog tools discoverable and preserve their Cargo
+  update/removal commands. Match Homebrew casks by token when their catalog
+  entries use fully qualified tap names, and read Homebrew formula versions
+  from the installed keg objects returned by its v2 JSON inventory. Keep formula
+  and cask identities separate and preserve explicit cask installation flags.
 - Harden upgrade staging, config/plugin/database permissions, desktop command
   quoting, and error handling identified by the 113-alert gosec review (ENGIN-1).
   Intentional local command/file operations have per-call review annotations;
