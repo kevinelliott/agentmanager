@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty more agent tools (189 total), including Pochi, Amplifier, Playwright
+  CLI/MCP, MCP Inspector, FastMCP CLI, QMD, CASS, NTM, Oracle and Google ADK
+  (ENGIN-4). Catalog 1.0.83 records verified upstream repositories, executable
+  names, package distributions and platform/setup limits. README listings and
+  the catalog research index are synchronized; evidence is recorded in
+  `docs/catalog/research-2026-10-18-engin-4.csv`.
 - Twenty more coding agents and related terminal tools (169 total), including
   Mini SWE Agent, OmO, Gajae Code, Gas Town, Workmux, Worktrunk, OpenSpec,
   Spec Kit, MCPorter and agent session/review utilities (ENGIN-3). Catalog
@@ -50,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- uv tool installs can expose dependency executables while retaining the main
+  package identity for inventory, update checks, upgrades and removal. FastMCP
+  uses this to expose its `fastmcp-slim` CLI.
 - Keep Cargo-installed catalog tools discoverable and preserve their Cargo
   update/removal commands. Match Homebrew casks by token when their catalog
   entries use fully qualified tap names, and read Homebrew formula versions

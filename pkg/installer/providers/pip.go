@@ -184,6 +184,11 @@ func (p *PipProvider) buildInstallCommand(method catalog.InstallMethodDef, force
 		if force {
 			args = append(args, "--force")
 		}
+		// Metapackages can expose a dependency's CLI while retaining their
+		// own package identity for uv inventory, version checks and upgrades.
+		if packages := strings.TrimSpace(method.Metadata["with_executables_from"]); packages != "" {
+			args = append(args, "--with-executables-from", packages)
+		}
 		args = append(args, packageName)
 		return "uv", args, packageName, nil
 

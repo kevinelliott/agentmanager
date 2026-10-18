@@ -1,7 +1,7 @@
 {
-  "version": "1.0.82",
+  "version": "1.0.83",
   "schema_version": 1,
-  "last_updated": "2026-10-18T07:18:54.864666+00:00",
+  "last_updated": "2026-10-18T08:21:15.960180+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -8959,6 +8959,1024 @@
         "vendor": "github",
         "notes": "The official PyPI package is specify-cli and its executable is specify. Requires Python 3.11+. Run specify init separately to choose an integration and add project files. Optional extensions and presets are separate choices.",
         "license": "MIT"
+      }
+    },
+    "pochi": {
+      "id": "pochi",
+      "name": "Pochi",
+      "description": "Terminal coding agent for planning, implementation and developer workflows",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/TabbyML/pochi",
+      "repository": "https://github.com/TabbyML/pochi",
+      "documentation": "https://github.com/TabbyML/pochi#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@getpochi/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @getpochi/cli",
+          "update_cmd": "npm update -g @getpochi/cli",
+          "uninstall_cmd": "npm uninstall -g @getpochi/cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "pochi"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/TabbyML/pochi/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "129",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOPg3Q8g",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/TabbyML/pochi/commit/c8fa907291d68b96cda4f2cedefd02e93c97713a",
+        "vendor": "TabbyML",
+        "notes": "Research preview. The published CLI uses Node.js; configure authentication and provider settings separately.",
+        "license": "Apache-2.0"
+      }
+    },
+    "amplifier": {
+      "id": "amplifier",
+      "name": "Amplifier",
+      "description": "Modular terminal agent with composable tools, providers and workflow bundles",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/amplifier",
+      "repository": "https://github.com/microsoft/amplifier",
+      "documentation": "https://github.com/microsoft/amplifier#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install git+https://github.com/microsoft/amplifier",
+          "update_cmd": "uv tool install git+https://github.com/microsoft/amplifier --force",
+          "uninstall_cmd": "uv tool uninstall amplifier",
+          "prereqs": [
+            "uv",
+            "git"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "amplifier"
+        ],
+        "version_cmd": "amplifier --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/amplifier/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3127",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOPs8RUw",
+        "recent_activity_date": "2026-09-19",
+        "recent_activity_url": "https://github.com/microsoft/amplifier/commit/33b75749920472257d1d85d20a5699ecf9d1ece7",
+        "vendor": "microsoft",
+        "notes": "Requires uv, git and Python 3.11+. Installs the upstream Git distribution through uv; native Windows is excluded in favor of upstream-supported WSL. Configure providers and bundles separately. Source installations do not support automatic release checks; use agentmgr agent update amplifier --force to pull upstream changes.",
+        "license": "MIT"
+      }
+    },
+    "oracle": {
+      "id": "oracle",
+      "name": "Oracle",
+      "description": "Multi-model second opinions with selected repository files and prompts",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/steipete/oracle",
+      "repository": "https://github.com/steipete/oracle",
+      "documentation": "https://github.com/steipete/oracle#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@steipete/oracle",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @steipete/oracle",
+          "update_cmd": "npm update -g @steipete/oracle",
+          "uninstall_cmd": "npm uninstall -g @steipete/oracle",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "oracle"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/steipete/oracle/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4058",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQVzqjA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/steipete/oracle/commit/42a162f53971780c12f11926ed12d6581588a66b",
+        "vendor": "steipete",
+        "notes": "Requires Node 24+. Configure model credentials or a browser session separately before submitting prompts and files.",
+        "license": "MIT"
+      }
+    },
+    "summarize": {
+      "id": "summarize",
+      "name": "Summarize",
+      "description": "Extracts and summarizes URLs, documents and media for agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/steipete/summarize",
+      "repository": "https://github.com/steipete/summarize",
+      "documentation": "https://github.com/steipete/summarize#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@steipete/summarize",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @steipete/summarize",
+          "update_cmd": "npm update -g @steipete/summarize",
+          "uninstall_cmd": "npm uninstall -g @steipete/summarize",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "summarize"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/steipete/summarize/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "6719",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQqaE2w",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/steipete/summarize/commit/5ec9c755688eb5aaf8eb75b1710f979c16242bc1",
+        "vendor": "steipete",
+        "notes": "Requires Node 24+. Provider credentials and optional media extraction/transcription dependencies are configured separately.",
+        "license": "MIT"
+      }
+    },
+    "peekaboo": {
+      "id": "peekaboo",
+      "name": "Peekaboo",
+      "description": "macOS screen capture and UI automation CLI for AI agents",
+      "category": "productivity",
+      "tags": [
+        "agents",
+        "productivity"
+      ],
+      "homepage": "https://github.com/openclaw/Peekaboo",
+      "repository": "https://github.com/openclaw/Peekaboo",
+      "documentation": "https://github.com/openclaw/Peekaboo#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "openclaw/tap/peekaboo",
+          "platforms": [
+            "darwin"
+          ],
+          "command": "brew install openclaw/tap/peekaboo",
+          "update_cmd": "brew upgrade openclaw/tap/peekaboo",
+          "uninstall_cmd": "brew uninstall openclaw/tap/peekaboo",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "peekaboo"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openclaw/Peekaboo/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5335",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOOuskXg",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/openclaw/Peekaboo/commit/93e64709dd74a0ff0e6ce6ec9221ddc19e3892a7",
+        "vendor": "openclaw",
+        "notes": "macOS 15+ only. The canonical repository and Homebrew tap are under openclaw. Screen Recording and Accessibility permissions must be configured separately.",
+        "license": "MIT"
+      }
+    },
+    "codexbar": {
+      "id": "codexbar",
+      "name": "CodexBar CLI",
+      "description": "Terminal usage and quota reporting for coding agent providers",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/steipete/CodexBar",
+      "repository": "https://github.com/steipete/CodexBar",
+      "documentation": "https://github.com/steipete/CodexBar#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "steipete/tap/codexbar",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install steipete/tap/codexbar",
+          "update_cmd": "brew upgrade steipete/tap/codexbar",
+          "uninstall_cmd": "brew uninstall steipete/tap/codexbar",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "codexbar"
+        ],
+        "version_cmd": "codexbar --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/steipete/CodexBar/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "22608",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQW2AGg",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/steipete/CodexBar/commit/6480977b47f6e4ffd5dcaae1cb0c7fdf34ee449e",
+        "vendor": "steipete",
+        "notes": "This entry installs the CLI formula, including Linux support, rather than the macOS desktop application. Supports macOS/Linux x64 and arm64. Configure provider access separately.",
+        "license": "MIT"
+      }
+    },
+    "cc-switch-cli": {
+      "id": "cc-switch-cli",
+      "name": "CC Switch CLI",
+      "description": "Switches coding agent providers and manages local agent configurations",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/SaladDay/cc-switch-cli",
+      "repository": "https://github.com/SaladDay/cc-switch-cli",
+      "documentation": "https://github.com/SaladDay/cc-switch-cli#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "cc-switch-cli",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install cc-switch-cli",
+          "update_cmd": "brew upgrade cc-switch-cli",
+          "uninstall_cmd": "brew uninstall cc-switch-cli",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "cc-switch"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/SaladDay/cc-switch-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5332",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQbUM0Q",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/SaladDay/cc-switch-cli/commit/b03e725823e8d6d8569db710dada64a728559ea8",
+        "vendor": "SaladDay",
+        "notes": "Installs the cc-switch CLI from Homebrew core on macOS/Linux. Choose providers and configuration changes explicitly. Use brew upgrade rather than the built-in updater for this installation.",
+        "license": "MIT"
+      }
+    },
+    "google-adk": {
+      "id": "google-adk",
+      "name": "Google ADK CLI",
+      "description": "Creates, runs and evaluates tool-using agents from the terminal",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/google/adk-python",
+      "repository": "https://github.com/google/adk-python",
+      "documentation": "https://github.com/google/adk-python#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "google-adk",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install google-adk",
+          "update_cmd": "uv tool upgrade google-adk",
+          "uninstall_cmd": "uv tool uninstall google-adk",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "adk"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/google/adk-python/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "21898",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOOSaYQw",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/google/adk-python/commit/e2dbc0f55027372f3a701d41004ee006ee8f9f14",
+        "vendor": "google",
+        "notes": "Requires Python 3.11+. The google-adk distribution supplies the adk CLI. Configure model credentials and initialize agent projects separately.",
+        "license": "Apache-2.0"
+      }
+    },
+    "llm": {
+      "id": "llm",
+      "name": "LLM",
+      "description": "Terminal language model client with tools, model plugins and reusable prompts",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/simonw/llm",
+      "repository": "https://github.com/simonw/llm",
+      "documentation": "https://github.com/simonw/llm#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "llm",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install llm",
+          "update_cmd": "uv tool upgrade llm",
+          "uninstall_cmd": "uv tool uninstall llm",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "llm"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/simonw/llm/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "12636",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOJRhX7A",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/simonw/llm/commit/2465dfcae2f6a81f0e45d52d03310a0520cf1873",
+        "vendor": "simonw",
+        "notes": "Requires Python 3.10+. Configure model credentials, optional plugins and tool permissions separately.",
+        "license": "Apache-2.0"
+      }
+    },
+    "qmd": {
+      "id": "qmd",
+      "name": "QMD",
+      "description": "Local hybrid document search and MCP retrieval for agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/tobi/qmd",
+      "repository": "https://github.com/tobi/qmd",
+      "documentation": "https://github.com/tobi/qmd#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@tobilu/qmd",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @tobilu/qmd",
+          "update_cmd": "npm update -g @tobilu/qmd",
+          "uninstall_cmd": "npm uninstall -g @tobilu/qmd",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "qmd"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/tobi/qmd/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "30468",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQk1Y9Q",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/tobi/qmd/commit/86d2365d17fc682e491c2c53d1e4a884aee8682a",
+        "vendor": "tobi",
+        "notes": "Requires Node 22+. macOS requires Homebrew SQLite for extension support. Choose collections and initialize indexes/model downloads separately; native dependencies have platform-specific requirements.",
+        "license": "MIT"
+      }
+    },
+    "gws": {
+      "id": "gws",
+      "name": "Google Workspace CLI",
+      "description": "Agent-friendly CLI for Google Workspace APIs with structured output",
+      "category": "productivity",
+      "tags": [
+        "agents",
+        "productivity"
+      ],
+      "homepage": "https://github.com/googleworkspace/cli",
+      "repository": "https://github.com/googleworkspace/cli",
+      "documentation": "https://github.com/googleworkspace/cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@googleworkspace/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @googleworkspace/cli",
+          "update_cmd": "npm update -g @googleworkspace/cli",
+          "uninstall_cmd": "npm uninstall -g @googleworkspace/cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "gws"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/googleworkspace/cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "31632",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDORcxyRg",
+        "recent_activity_date": "2026-10-06",
+        "recent_activity_url": "https://api.github.com/repos/googleworkspace/cli",
+        "vendor": "googleworkspace",
+        "notes": "Requires Node 18+. npm downloads the upstream native platform executable. Google API activation, OAuth consent and account authentication are separate setup steps.",
+        "license": "Apache-2.0"
+      }
+    },
+    "clawhub": {
+      "id": "clawhub",
+      "name": "ClawHub",
+      "description": "Searches and manages reusable agent skills from the ClawHub registry",
+      "category": "productivity",
+      "tags": [
+        "agents",
+        "productivity"
+      ],
+      "homepage": "https://github.com/openclaw/clawhub",
+      "repository": "https://github.com/openclaw/clawhub",
+      "documentation": "https://github.com/openclaw/clawhub#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "clawhub",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g clawhub",
+          "update_cmd": "npm update -g clawhub",
+          "uninstall_cmd": "npm uninstall -g clawhub",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "clawhub"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openclaw/clawhub/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "9516",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQzBxXQ",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/openclaw/clawhub/commit/c3dd39f527710b39e6aec6de0f05ab59ba25a41c",
+        "vendor": "openclaw",
+        "notes": "Requires Node 22+. This installs the registry CLI only. Choose and review individual skills and authentication separately.",
+        "license": "MIT"
+      }
+    },
+    "mcp-inspector": {
+      "id": "mcp-inspector",
+      "name": "MCP Inspector",
+      "description": "Inspects and debugs MCP servers and their tool interfaces",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/inspector",
+      "repository": "https://github.com/modelcontextprotocol/inspector",
+      "documentation": "https://github.com/modelcontextprotocol/inspector#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@modelcontextprotocol/inspector",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @modelcontextprotocol/inspector",
+          "update_cmd": "npm update -g @modelcontextprotocol/inspector",
+          "uninstall_cmd": "npm uninstall -g @modelcontextprotocol/inspector",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-inspector"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/modelcontextprotocol/inspector/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "11095",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOM7KEng",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/modelcontextprotocol/inspector/commit/074b8108f340590268f2900741403755e923a11c",
+        "vendor": "modelcontextprotocol",
+        "notes": "Requires Node 22.19+. Version probing is disabled to avoid launching the inspector during detection; npm inventory supplies its version. Connect and authenticate individual MCP servers separately."
+      }
+    },
+    "cass": {
+      "id": "cass",
+      "name": "CASS",
+      "description": "Indexes and searches coding agent conversation histories across tools",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/Dicklesworthstone/coding_agent_session_search",
+      "repository": "https://github.com/Dicklesworthstone/coding_agent_session_search",
+      "documentation": "https://github.com/Dicklesworthstone/coding_agent_session_search#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "dicklesworthstone/tap/cass",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install dicklesworthstone/tap/cass",
+          "update_cmd": "brew upgrade dicklesworthstone/tap/cass",
+          "uninstall_cmd": "brew uninstall dicklesworthstone/tap/cass",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "cass"
+        ],
+        "version_cmd": "cass --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/coding_agent_session_search/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1181",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQZ8ZBA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/Dicklesworthstone/coding_agent_session_search/commit/b4854449808ba4ef2ad6009f9c9b1ca1451fe2ea",
+        "vendor": "Dicklesworthstone",
+        "notes": "The current Homebrew formula supports Apple Silicon macOS and x64/arm64 Linux; Intel macOS is excluded by upstream. Choose session sources and build an index explicitly. Use --robot or --json for agent-facing searches."
+      }
+    },
+    "dcg": {
+      "id": "dcg",
+      "name": "Destructive Command Guard",
+      "description": "Checks shell commands against configurable destructive-operation rules",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/Dicklesworthstone/destructive_command_guard",
+      "repository": "https://github.com/Dicklesworthstone/destructive_command_guard",
+      "documentation": "https://github.com/Dicklesworthstone/destructive_command_guard#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "dicklesworthstone/tap/dcg",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install dicklesworthstone/tap/dcg",
+          "update_cmd": "brew upgrade dicklesworthstone/tap/dcg",
+          "uninstall_cmd": "brew uninstall dicklesworthstone/tap/dcg",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "dcg"
+        ],
+        "version_cmd": "dcg --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/destructive_command_guard/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "6181",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQ1qBfA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/Dicklesworthstone/destructive_command_guard/commit/16b42252663be68e240784c6f8268251124dc31e",
+        "vendor": "Dicklesworthstone",
+        "notes": "Homebrew installs the CLI only. Run dcg install separately to choose and enable coding-agent hooks. Supports macOS/Linux x64 and arm64. Upstream uses a custom license rider; review its license before use."
+      }
+    },
+    "ntm": {
+      "id": "ntm",
+      "name": "NTM",
+      "description": "Tmux session manager for coordinating multiple coding agents",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/Dicklesworthstone/ntm",
+      "repository": "https://github.com/Dicklesworthstone/ntm",
+      "documentation": "https://github.com/Dicklesworthstone/ntm#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "dicklesworthstone/tap/ntm",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install dicklesworthstone/tap/ntm",
+          "update_cmd": "brew upgrade dicklesworthstone/tap/ntm",
+          "uninstall_cmd": "brew uninstall dicklesworthstone/tap/ntm",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ntm"
+        ],
+        "version_cmd": "ntm --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/ntm/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "459",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQl_XGA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/Dicklesworthstone/ntm/commit/cb3ed0a45a85e0550ab291fa598302ff8acd7109",
+        "vendor": "Dicklesworthstone",
+        "notes": "Supports macOS/Linux x64 and arm64. Homebrew installs tmux as a dependency. Install and authenticate the coding agents you want to coordinate separately."
+      }
+    },
+    "beads-rust": {
+      "id": "beads-rust",
+      "name": "Beads Rust",
+      "description": "Rust issue tracker CLI for durable coding agent task context",
+      "category": "productivity",
+      "tags": [
+        "agents",
+        "productivity"
+      ],
+      "homepage": "https://github.com/Dicklesworthstone/beads_rust",
+      "repository": "https://github.com/Dicklesworthstone/beads_rust",
+      "documentation": "https://github.com/Dicklesworthstone/beads_rust#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "dicklesworthstone/tap/br",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install dicklesworthstone/tap/br",
+          "update_cmd": "brew upgrade dicklesworthstone/tap/br",
+          "uninstall_cmd": "brew uninstall dicklesworthstone/tap/br",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "br"
+        ],
+        "version_cmd": "br --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Dicklesworthstone/beads_rust/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1130",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOQ8WWnQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/Dicklesworthstone/beads_rust/commit/53f7a3d30aca8cab3c3e4abdefeade459e8a3089",
+        "vendor": "Dicklesworthstone",
+        "notes": "Installs the br executable, a separate project from the existing Beads catalog entry. Initialize project tracking explicitly. Supports macOS/Linux x64 and arm64. Upstream uses a custom license rider."
+      }
+    },
+    "playwright-cli": {
+      "id": "playwright-cli",
+      "name": "Playwright CLI",
+      "description": "Browser automation CLI and reusable browser workflows for coding agents",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/playwright-cli",
+      "repository": "https://github.com/microsoft/playwright-cli",
+      "documentation": "https://github.com/microsoft/playwright-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@playwright/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @playwright/cli",
+          "update_cmd": "npm update -g @playwright/cli",
+          "uninstall_cmd": "npm uninstall -g @playwright/cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "playwright-cli"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/playwright-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "14319",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkyNzM1NjIzNzk=",
+        "recent_activity_date": "2026-09-28",
+        "recent_activity_url": "https://github.com/microsoft/playwright-cli/commit/b85c7a736bb473bf55b584e54a09ffa698d6d871",
+        "vendor": "microsoft",
+        "notes": "Requires Node 18+. Browser downloads and optional coding-agent skills are separate setup steps. This direct CLI is distinct from the Playwright MCP server.",
+        "license": "Apache-2.0"
+      }
+    },
+    "playwright-mcp": {
+      "id": "playwright-mcp",
+      "name": "Playwright MCP",
+      "description": "MCP server exposing Playwright browser automation to AI agents",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/playwright-mcp",
+      "repository": "https://github.com/microsoft/playwright-mcp",
+      "documentation": "https://github.com/microsoft/playwright-mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@playwright/mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @playwright/mcp",
+          "update_cmd": "npm update -g @playwright/mcp",
+          "uninstall_cmd": "npm uninstall -g @playwright/mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "playwright-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/playwright-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "38310",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDOOMjd8A",
+        "recent_activity_date": "2026-10-08",
+        "recent_activity_url": "https://github.com/microsoft/playwright-mcp/commit/b8b4183e099f136cbec0388a6088d4aa2f6b9685",
+        "vendor": "microsoft",
+        "notes": "Requires Node 18+. Configure an MCP client and install browser dependencies separately. Installation does not start the server or connect a browser.",
+        "license": "Apache-2.0"
+      }
+    },
+    "fastmcp": {
+      "id": "fastmcp",
+      "name": "FastMCP CLI",
+      "description": "Runs, inspects and integrates Python MCP servers from the terminal",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/PrefectHQ/fastmcp",
+      "repository": "https://github.com/PrefectHQ/fastmcp",
+      "documentation": "https://github.com/PrefectHQ/fastmcp#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "fastmcp",
+          "command": "uv tool install --with-executables-from fastmcp-slim fastmcp",
+          "update_cmd": "uv tool upgrade fastmcp",
+          "uninstall_cmd": "uv tool uninstall fastmcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ],
+          "metadata": {
+            "with_executables_from": "fastmcp-slim"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "fastmcp"
+        ],
+        "version_cmd": "fastmcp --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/PrefectHQ/fastmcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "28119",
+        "github_stars_checked_at": "2026-10-18T08:21:15.960180+00:00",
+        "github_repository_id": "R_kgDONWxneQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/PrefectHQ/fastmcp/commit/7f3c53eadf6bb1b7194e00c42551e4db380b3f67",
+        "vendor": "PrefectHQ",
+        "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; uv exposes the fastmcp-slim dependency executable with --with-executables-from while retaining fastmcp as the package for inventory and updates. Configure or launch MCP servers separately. Older AgentManager binaries need to be rebuilt or upgraded to support uv dependency executables (introduced with ENGIN-4).",
+        "license": "Apache-2.0"
       }
     }
   }
