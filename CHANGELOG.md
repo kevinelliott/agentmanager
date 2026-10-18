@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty more coding agents and related terminal tools (169 total), including
+  Mini SWE Agent, OmO, Gajae Code, Gas Town, Workmux, Worktrunk, OpenSpec,
+  Spec Kit, MCPorter and agent session/review utilities (ENGIN-3). Catalog
+  1.0.82 records verified upstream identities, installation methods, platform
+  limits and research evidence in `docs/catalog/research-2026-10-18.csv`.
+  Optional project, hook, provider and agent setup remains an explicit user step.
 - Twenty-four approved agentic CLI/TUI catalog additions (now 149 total), with
   verified GitHub star counts, recent activity and upstream install sources
   recorded for each entry (ENGIN-2). Includes platform restrictions, explicit

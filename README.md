@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-149-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-169-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 149 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 169 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -243,6 +243,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | abtop | `abtop` | cargo, native, powershell |
 | Agent CLI | `agent-cli` | pip, pipx, uv |
 | Agent Deck | `agent-deck` | brew, go, native |
+| Agent Manager | `agent-manager` | brew |
 | Agent of Empires | `agent-of-empires` | brew, native |
 | agent-browser | `agent-browser` | brew, npm |
 | agent-memory | `agent-memory` | native |
@@ -262,9 +263,12 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Browser Use | `browser-use` | uv |
 | ByteRover CLI | `byterover-cli` | native, npm |
 | Caveman Code | `caveman-code` | npm |
+| CCManager | `ccmanager` | npm |
+| ccstatusline | `ccstatusline` | npm |
 | ccusage | `ccusage` | brew, npm, npx |
 | Claude Code | `claude-code` | native, npm |
 | Claude Code Router | `claude-code-router` | brew, npm, npx |
+| Claude Code Templates | `claude-code-templates` | npm |
 | Claude Squad | `claude-squad` | brew, native |
 | Claude-Codex Bridge | `claude-codex-bridge` | npm, npx |
 | Claw Orchestrator | `claw-orchestrator` | native, npm |
@@ -302,6 +306,8 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Forge CLI | `forge-cli` | npm |
 | ForgeCode | `forgecode` | native, npm |
 | FrontierAgent | `frontier-agent` | native |
+| Gajae Code | `gajae-code` | native |
+| Gas Town | `gastown` | brew |
 | Gemini CLI | `gemini-cli` | npm |
 | GitHub Copilot CLI | `copilot-cli` | brew, npm, winget |
 | Goose | `goose` | brew, brew-cask, native, powershell |
@@ -332,15 +338,21 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | macOS Harness | `macos-harness` | uv |
 | Mastra Code | `mastracode` | npm |
 | mcp2cli | `mcp2cli` | pip, uv |
+| MCPorter | `mcporter` | npm |
 | Meta Muse Code | `muse-code` | native |
+| Mini SWE Agent | `mini-swe-agent` | uv |
 | MiniMax Code | `minimax-code` | native, powershell |
 | Mistral Vibe | `mistral-vibe` | brew, native, pip, uv |
 | Moltis | `moltis` | brew |
 | Nanobot | `nanobot` | uv |
 | Nanocoder | `nanocoder` | brew, npm |
 | nono | `nono` | brew, cargo |
+| NullClaw | `nullclaw` | brew |
+| Oh My ClaudeCode | `oh-my-claudecode` | npm |
+| Oh My Codex | `oh-my-codex` | npm |
 | oh-my-pi | `oh-my-pi` | bun, native, npm, powershell |
 | Omnigent | `omnigent` | brew, native, pipx, uv |
+| OmO | `omo` | npm |
 | Ona | `ona` | binary, brew |
 | Only CLI / oc | `only-cli` | npm |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
@@ -350,11 +362,13 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | OpenCode | `opencode` | brew, chocolatey, curl, npm, scoop |
 | OpenHands CLI | `openhands` | native, pip, pipx, uv |
 | OpenQodex | `openqodex` | npm |
+| OpenSpec | `openspec` | brew, npm |
 | Ouroboros | `ouroboros` | native, pip, pipx, uv |
 | Paperclip | `paperclip` | npm, npx |
 | Penguin Harness | `penguin-harness` | native, npm, npx |
 | Pi Agent Rust | `pi-agent-rust` | binary, native |
 | Pi Coding Agent | `pi-coding-agent` | binary, npm |
+| PicoClaw | `picoclaw` | brew |
 | Plandex | `plandex` | native |
 | Plannotator TUI | `plannotator-tui` | brew |
 | Qoder CLI | `qoder-cli` | binary |
@@ -362,6 +376,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | RA.Aid | `ra-aid` | brew, pip, pipx, uv |
 | Rallies CLI | `rallies-cli` | pip, pipx |
 | Ralph TUI | `ralph-tui` | bun, bunx |
+| Ralphex | `ralphex` | brew |
 | rmux | `rmux` | brew, cargo |
 | Roo Code CLI | `roo-code-cli` | native |
 | rtk | `rtk` | binary, brew, cargo, native |
@@ -369,6 +384,7 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | skills | `skills` | npm, npx |
 | SmallCode | `smallcode` | native, npm, npx, powershell |
 | Sno Station | `sno-station` | native |
+| Spec Kit | `spec-kit` | uv |
 | Symphony | `symphony` | native |
 | Tabnine CLI | `tabnine-cli` | native |
 | Tenere | `tenere` | brew, cargo, nix |
@@ -376,13 +392,17 @@ e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 | Tokscale | `tokscale` | bun, npm |
 | Trae Agent | `trae-agent` | source |
 | tsk | `tsk` | brew, native |
+| tuicr | `tuicr` | brew |
 | TUIOS | `tuios` | brew, native |
 | TunaCode CLI | `tunacode-cli` | pip, pipx, uv |
 | Unreal Agent | `unreal-agent` | brew, native |
 | Valyu CLI | `valyu-cli` | npm |
+| Vibe Kanban | `vibe-kanban` | npm |
 | VibeMux | `vibemux` | binary, native |
 | VT Code | `vtcode` | brew, native |
 | WhipCode | `whipcode` | native |
+| Workmux | `workmux` | brew |
+| Worktrunk | `worktrunk` | brew |
 | YYLO | `yylo` | npm |
 | ZCode | `zcode` | native |
 | zero | `zero` | native, npm |
