@@ -1,6 +1,6 @@
 # Catalog research and update records
 
-AgentManager ships with 229 catalog entries in catalog version 1.0.85. The
+AgentManager ships with 249 catalog entries in catalog version 1.0.86. The
 [root catalog](../../catalog.json) and [embedded catalog](../../pkg/catalog/catalog.json)
 contain the same definitions. The [supported agents table](../../README.md#supported-agents)
 lists each entry's ID and installation methods.
@@ -14,7 +14,7 @@ platforms and setup notes before installing it.
 Each research record captures the canonical GitHub repository and repository ID,
 star count and verification time, recent activity evidence, upstream installation
 source, distribution version, executable names, supported platforms and relevance.
-The five batches below required at least 100 stars and activity within the two
+The six batches below required at least 100 stars and activity within the two
 months before verification. Star counts and distribution versions are snapshots.
 
 | Issue | Added | Catalog version | Evidence |
@@ -24,6 +24,7 @@ months before verification. Star counts and distribution versions are snapshots.
 | ENGIN-4 | 20 | 1.0.83 | [October 18 follow-up research](research-2026-10-18-engin-4.csv) |
 | ENGIN-5 | 20 | 1.0.84 | [October 18 additional research](research-2026-10-18-engin-5.csv) |
 | ENGIN-6 | 20 | 1.0.85 | [October 18 latest research](research-2026-10-18-engin-6.csv) |
+| ENGIN-7 | 20 | 1.0.86 | [October 18 expanded research](research-2026-10-18-engin-7.csv) |
 
 Recent activity is identified as a default-branch commit or a repository push in
 the CSV. A push record does not imply that the default branch changed recently.
@@ -57,7 +58,7 @@ Keep `package` set to the main distribution. uv retains the executable setting
 for subsequent `tool upgrade` operations; inventory and removal also use the
 main distribution name. See the [uv tool documentation](https://docs.astral.sh/uv/concepts/tools/#installing-executables-from-additional-packages).
 This support was introduced with ENGIN-4. Older AgentManager binaries must be
-upgraded or rebuilt before installing FastMCP through this catalog method;
+upgraded or rebuilt before installing FastMCP or Langflow through these methods;
 refreshing the catalog alone does not update the application. Until a binary
 release includes it, use the [source build instructions](../../README.md#from-source)
 with the latest main branch.
@@ -111,6 +112,41 @@ The ENGIN-6 batch adds MCP management, evaluation, context and session tools:
   `@sentry/cli` and its `sentry-cli` executable. Claude Code Log and Claude
   Replay generate artifacts containing session content; review before sharing.
 
+The ENGIN-7 batch adds code context, browser/MCP tools and agent workflows:
+
+- Code2Prompt and grepai prepare and retrieve repository context. grepai uses
+  `yoanbernabeu/tap/grepai` with x64/arm64 macOS/Linux binaries and needs an
+  embedding provider. Configure it and index selected repositories explicitly.
+- Fabric uses Homebrew `fabric-ai`, including the executable name `fabric-ai`.
+  It is distinct from the Python Fabric SSH tool. Browserbase Browse uses npm
+  `browse` from the Stagehand repository, distinct from the SDK and legacy
+  `bb` CLI. Configure a local browser or cloud credentials separately.
+- Pydantic AI CLI uses `clai` (Python 3.11+) on the upstream POSIX terminal
+  platforms. Cisco MCP Scanner uses `cisco-ai-mcp-scanner`; upstream selects
+  Python 3.13, which can be chosen with `UV_PYTHON=3.13`. Live-server scanning
+  can start configured commands or contact servers; select targets and engines
+  explicitly. The official MCP Filesystem Server also needs explicit allowed
+  directories and client configuration before use.
+- Langflow requires Python 3.10–3.14. Its `langflow` metapackage exposes the
+  `langflow-base` dependency's CLI with `with_executables_from`, preserving
+  package inventory, upgrades and removal. Older binaries need the source
+  build or a release containing the ENGIN-4 uv metadata support described above.
+- MLX LM's base method targets Apple silicon macOS 14+ and Python 3.11+.
+  Linux CPU/CUDA extras are separate. Magentic UI's current MagenticLite release
+  tests macOS arm64 and Windows x64 in WSL2; native Linux x64 is expected but
+  untested upstream. Run its Linux method inside WSL on Windows, and configure
+  the Quicksand VM, Linux KVM access and model credentials separately.
+- Chroma's `chromadb` package supplies `chroma`; native wheels cover macOS
+  x64/arm64, glibc Linux x64/arm64 and Windows x64. Dependencies can impose
+  stricter OS/runtime requirements. Phoenix uses `arize-phoenix` and Python
+  3.11–3.14; Hayhooks uses Python 3.10–3.14. Storage, data ingestion, tracing
+  instrumentation, pipeline dependencies and server startup are explicit steps.
+- n8n requires Node 24+. OpenAgents Control needs Bash, Git and OpenCode
+  (Git Bash or WSL on Windows); the npm wrapper does not install its agent
+  patterns until invoked. Apify also publishes `actor` and `apify-cli` aliases.
+  Select workflow activation, project setup, cloud deployment and model or
+  browser downloads explicitly; installation does not run these operations.
+
 ## Inclusion announcements
 
 The catalog update pull request records upstream announcements with links and
@@ -124,7 +160,8 @@ The initial ENGIN-2 outreach record is on
 [PR #67](https://github.com/kevinelliott/agentmanager/pull/67#issuecomment-6216845583).
 The [ENGIN-4 completion record](https://github.com/kevinelliott/agentmanager/pull/69#issuecomment-6247777800)
 covers its 64 recent additions. The [ENGIN-5 record](https://github.com/kevinelliott/agentmanager/pull/70#issuecomment-6248132465)
-covers 84 additions. The ENGIN-6 update expands that audit to 104 additions
-across ENGIN-2 through ENGIN-6, preserving existing notices without duplicates.
+covers 84 additions. The [ENGIN-6 record](https://github.com/kevinelliott/agentmanager/pull/71#issuecomment-6248466338)
+covers 104 additions. The ENGIN-7 update expands that audit to 124 additions
+across ENGIN-2 through ENGIN-7, preserving existing notices without duplicates.
 The update PR records new announcements, unsuitable venues and any denied
 posting permissions.

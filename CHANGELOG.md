@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty more agent tools (249 total), including Code2Prompt, grepai, llmfit,
+  Fabric AI, Browserbase Browse, OpenAgents Control, Cisco MCP Scanner,
+  Pydantic AI CLI, Hayhooks, MLX LM, Phoenix, Langflow and workflow utilities
+  (ENGIN-7). Catalog 1.0.86 preserves prior definitions and synchronizes both
+  catalogs, README listings and catalog documentation. The research record
+  `docs/catalog/research-2026-10-18-engin-7.csv` verifies distributions,
+  executables and platform/setup limits, including Langflow's dependency CLI,
+  Fabric's Homebrew executable name and Apple silicon requirements for MLX LM.
 - Twenty more relevant agent tools (229 total), including MCPM, MCPJam
   Inspector, Skillshare CLI, wcgw, Supergateway, TOON CLI, RuVector CLI, amux,
   Firecrawl CLI, Agent Eval, DeepEval and agent scanning/session utilities

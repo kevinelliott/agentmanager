@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-229-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-249-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 229 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 249 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -234,7 +234,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **229 agents**, embedded in the binary and refreshable from the
+The catalog ships with **249 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -260,15 +260,19 @@ verification sources and installation/setup limits.
 | amux | `amux` | brew |
 | Antigravity CLI | `antigravity-cli` | brew, native, powershell |
 | apfel | `apfel` | brew |
+| Apify CLI | `apify-cli` | npm |
+| Arize Phoenix CLI | `phoenix` | uv |
 | Atomic Agent | `atomic-agent` | native, powershell |
 | Auggie | `auggie` | npm |
 | Autohand | `autohand` | npm |
 | BBARIT Agent | `bbarit-agent` | native, powershell |
 | Beads | `beads` | brew, native, npm |
 | Beads Rust | `beads-rust` | brew |
+| BentoML CLI | `bentoml` | uv |
 | Bernstein | `bernstein` | native, pip, pipx, uv |
 | Blackbox CLI | `blackbox-cli` | native, npm, powershell |
 | Browser Use | `browser-use` | uv |
+| Browserbase Browse | `browserbase-browse` | npm |
 | ByteRover CLI | `byterover-cli` | native, npm |
 | CASS | `cass` | brew |
 | Caveman Code | `caveman-code` | npm |
@@ -276,6 +280,8 @@ verification sources and installation/setup limits.
 | CCManager | `ccmanager` | npm |
 | ccstatusline | `ccstatusline` | npm |
 | ccusage | `ccusage` | brew, npm, npx |
+| Chroma CLI | `chroma` | uv |
+| Cisco MCP Scanner | `mcp-scanner` | uv |
 | Cisco Skill Scanner | `skill-scanner` | uv |
 | Claude Code | `claude-code` | native, npm |
 | Claude Code Log | `claude-code-log` | uv |
@@ -291,6 +297,7 @@ verification sources and installation/setup limits.
 | Cloudflare cf | `cloudflare-cf` | npm |
 | cmux | `cmux` | binary, brew |
 | CocoIndex Code | `cocoindex-code` | pip, pipx, uv |
+| Code2Prompt | `code2prompt` | brew |
 | Codebuff | `codebuff` | binary, npm |
 | CodeWhale | `codewhale` | cargo, npm |
 | Codex | `codex` | binary, brew, npm |
@@ -320,6 +327,7 @@ verification sources and installation/setup limits.
 | E2B CLI | `e2b-cli` | npm |
 | ElevenLabs CLI | `elevenlabs-cli` | npm |
 | Engram | `engram` | brew |
+| Fabric AI | `fabric` | brew |
 | fast-agent | `fast-agent` | pip, pipx, uv |
 | FastMCP CLI | `fastmcp` | uv |
 | fauxnix | `fauxnix` | npm |
@@ -340,9 +348,11 @@ verification sources and installation/setup limits.
 | Google Workspace CLI | `gws` | npm |
 | Goose | `goose` | brew, brew-cask, native, powershell |
 | gptme | `gptme` | brew, pip, pipx, uv |
+| grepai | `grepai` | brew |
 | Grok Build | `grok-build` | native |
 | Grok CLI | `grok-cli` | bun, npm |
 | Happy | `happy` | npm |
+| Hayhooks | `hayhooks` | uv |
 | Herdr | `herdr` | binary, brew, native, nix |
 | Hermes Agent | `hermes-agent` | native, source |
 | Hunk | `hunk` | brew, native, npm |
@@ -360,17 +370,23 @@ verification sources and installation/setup limits.
 | KlaatCode | `klaatcode` | brew, native, npm, npx |
 | Kode CLI | `kode-cli` | npm |
 | kubectl-ai | `kubectl-ai` | krew, native, nix |
+| Langflow CLI | `langflow` | uv |
 | LangGraph CLI | `langgraph-cli` | uv |
 | late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
 | Leviathan | `leviathan` | cargo |
 | little-coder | `little-coder` | native, npm |
+| llama-swap | `llama-swap` | brew |
 | llama.cpp CLI | `llama-cpp` | brew |
 | LLM | `llm` | uv |
+| llmfit | `llmfit` | brew |
 | macOS Harness | `macos-harness` | uv |
+| Magentic UI CLI | `magentic-ui` | uv |
 | MarkItDown | `markitdown` | uv |
+| Marvin CLI | `marvin` | uv |
 | Mastra Code | `mastracode` | npm |
 | MCO | `mco` | npm |
+| MCP Filesystem Server | `mcp-filesystem` | npm |
 | MCP Inspector | `mcp-inspector` | npm |
 | MCP Proxy | `mcp-proxy` | uv |
 | MCP Publisher | `mcp-publisher` | brew |
@@ -384,7 +400,9 @@ verification sources and installation/setup limits.
 | Mini SWE Agent | `mini-swe-agent` | uv |
 | MiniMax Code | `minimax-code` | native, powershell |
 | Mistral Vibe | `mistral-vibe` | brew, native, pip, uv |
+| MLX LM | `mlx-lm` | uv |
 | Moltis | `moltis` | brew |
+| n8n CLI | `n8n` | npm |
 | Nanobot | `nanobot` | uv |
 | Nanocoder | `nanocoder` | brew, npm |
 | nono | `nono` | brew, cargo |
@@ -400,6 +418,7 @@ verification sources and installation/setup limits.
 | Only CLI / oc | `only-cli` | npm |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
 | open_scion | `open-scion` | native |
+| OpenAgents Control | `openagents-control` | npm |
 | OpenAgents Launcher | `openagents-launcher` | npm |
 | openclaude | `openclaude` | npm, npx |
 | OpenClaw | `openclaw` | brew, native, npm |
@@ -423,6 +442,7 @@ verification sources and installation/setup limits.
 | Playwright MCP | `playwright-mcp` | npm |
 | Pochi | `pochi` | npm |
 | Promptfoo | `promptfoo` | npm |
+| Pydantic AI CLI | `pydantic-clai` | uv |
 | QMD | `qmd` | npm |
 | Qoder CLI | `qoder-cli` | binary |
 | Qwen Code | `qwen-code` | brew, npm |
