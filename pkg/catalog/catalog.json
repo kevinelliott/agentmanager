@@ -1,7 +1,7 @@
 {
-  "version": "1.0.85",
+  "version": "1.0.86",
   "schema_version": 1,
-  "last_updated": "2026-10-18T09:41:41.270287+00:00",
+  "last_updated": "2026-10-18T10:09:30.810405+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -12021,6 +12021,1022 @@
         "recent_activity_url": "https://github.com/getsentry/toolkit/commit/d7aa182b7d3fbbf93230b1d5b3e40fef04943ac7",
         "vendor": "getsentry",
         "notes": "Requires Node 20+. Uses the sentry npm package from getsentry/toolkit, distinct from @sentry/cli and its sentry-cli executable. Authenticate and select projects explicitly. AI explanation/fix-plan features require service access; installing the CLI does not configure the separate Sentry MCP server."
+      }
+    },
+    "code2prompt": {
+      "id": "code2prompt",
+      "name": "Code2Prompt",
+      "description": "Builds repository context and token-counted prompts for coding agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/mufeedvh/code2prompt",
+      "repository": "https://github.com/mufeedvh/code2prompt",
+      "documentation": "https://github.com/mufeedvh/code2prompt#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "code2prompt",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install code2prompt",
+          "update_cmd": "brew upgrade code2prompt",
+          "uninstall_cmd": "brew uninstall code2prompt",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "code2prompt"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mufeedvh/code2prompt/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7722",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOLd6edQ",
+        "recent_activity_date": "2026-09-07",
+        "recent_activity_url": "https://github.com/mufeedvh/code2prompt/commit/66585136062c04275ddd5a01c5518a4d78c4aa76",
+        "vendor": "mufeedvh",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula. Select repositories, filters and output options explicitly. Skills and MCP configuration are separate steps; generated context can contain source code and should be reviewed before sharing.",
+        "license": "MIT"
+      }
+    },
+    "grepai": {
+      "id": "grepai",
+      "name": "grepai",
+      "description": "Searches code semantically and traces callers for coding-agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/yoanbernabeu/grepai",
+      "repository": "https://github.com/yoanbernabeu/grepai",
+      "documentation": "https://github.com/yoanbernabeu/grepai#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "yoanbernabeu/tap/grepai",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install yoanbernabeu/tap/grepai",
+          "update_cmd": "brew upgrade yoanbernabeu/tap/grepai",
+          "uninstall_cmd": "brew uninstall yoanbernabeu/tap/grepai",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "grepai"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/yoanbernabeu/grepai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1912",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOQ2r-Cw",
+        "recent_activity_date": "2026-09-10",
+        "recent_activity_url": "https://github.com/yoanbernabeu/grepai/commit/eb941fe8072b7a9af87e2604896456ae16a5127d",
+        "vendor": "yoanbernabeu",
+        "notes": "Uses the upstream Homebrew tap with x64/arm64 macOS/Linux binaries. Requires an embedding provider such as local Ollama/LM Studio or a configured hosted provider. Initialize and index chosen repositories explicitly; model downloads, indexing, watch mode and MCP setup are separate steps.",
+        "license": "MIT"
+      }
+    },
+    "llmfit": {
+      "id": "llmfit",
+      "name": "llmfit",
+      "description": "Matches local language models and inference runtimes to available agent hardware",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/AlexsJones/llmfit",
+      "repository": "https://github.com/AlexsJones/llmfit",
+      "documentation": "https://github.com/AlexsJones/llmfit#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "llmfit",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install llmfit",
+          "update_cmd": "brew upgrade llmfit",
+          "uninstall_cmd": "brew uninstall llmfit",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "llmfit"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/AlexsJones/llmfit/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "38053",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDORQ6nQA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/AlexsJones/llmfit/commit/e915091dd58f7fefaa9814d2d34ee61bd754fdc0",
+        "vendor": "AlexsJones",
+        "notes": "Uses the macOS/Linux Homebrew formula. Hardware fit estimates depend on the selected model/backend. Install model runtimes and explicitly download, benchmark or serve models separately; installation does not start inference or submit benchmark results.",
+        "license": "MIT"
+      }
+    },
+    "fabric": {
+      "id": "fabric",
+      "name": "Fabric AI",
+      "description": "Runs reusable language-model patterns and pipelines for agent-assisted workflows",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/danielmiessler/Fabric",
+      "repository": "https://github.com/danielmiessler/Fabric",
+      "documentation": "https://github.com/danielmiessler/Fabric#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "fabric-ai",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install fabric-ai",
+          "update_cmd": "brew upgrade fabric-ai",
+          "uninstall_cmd": "brew uninstall fabric-ai",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "fabric-ai"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/danielmiessler/Fabric/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "44329",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOLAgryw",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/danielmiessler/Fabric/commit/cef213cd9c2e4b90658a33b24693bb8ffc34c742",
+        "vendor": "danielmiessler",
+        "notes": "Uses the macOS/Linux fabric-ai Homebrew formula, whose executable is fabric-ai rather than fabric. It is distinct from the unrelated Python Fabric SSH tool. Run setup and select providers, patterns and inputs explicitly; pattern refreshes and model requests are separate steps.",
+        "license": "MIT"
+      }
+    },
+    "browserbase-browse": {
+      "id": "browserbase-browse",
+      "name": "Browserbase Browse",
+      "description": "Gives agents browser control, web telemetry and Browserbase platform commands",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/browserbase/stagehand",
+      "repository": "https://github.com/browserbase/stagehand",
+      "documentation": "https://github.com/browserbase/stagehand#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "browse",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g browse",
+          "update_cmd": "npm update -g browse",
+          "uninstall_cmd": "npm uninstall -g browse",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "browse"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/browserbase/stagehand/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "25723",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOLk6wNA",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/browserbase/stagehand/commit/10418f98831285b3cddca5328c8013a94f22672a",
+        "vendor": "browserbase",
+        "notes": "The CLI declares Node 20.19+ or 22.12+, but its pinned Stagehand dependency requires Node 22.18+; use a compatible current runtime. The official CLI is npm browse from browserbase/stagehand, not the Stagehand SDK or legacy bb CLI. Configure local Chrome/Chromium or Browserbase credentials separately. Browser commands can start a daemon/session; cloud calls can consume credits. Installation does not start a browser.",
+        "license": "MIT"
+      }
+    },
+    "openagents-control": {
+      "id": "openagents-control",
+      "name": "OpenAgents Control",
+      "description": "Installs and manages coding-agent patterns, context and OpenCode workflows",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/darrenhinde/OpenAgentsControl",
+      "repository": "https://github.com/darrenhinde/OpenAgentsControl",
+      "documentation": "https://github.com/darrenhinde/OpenAgentsControl#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@nextsystems/oac",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @nextsystems/oac",
+          "update_cmd": "npm update -g @nextsystems/oac",
+          "uninstall_cmd": "npm uninstall -g @nextsystems/oac",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "oac"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/darrenhinde/OpenAgentsControl/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4916",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOPeJ1TQ",
+        "recent_activity_date": "2026-09-13",
+        "recent_activity_url": "https://api.github.com/repos/darrenhinde/OpenAgentsControl",
+        "vendor": "darrenhinde",
+        "notes": "The npm package declares Node 14+, while current upstream development uses Node 18+; use a current Node runtime. Requires Bash 3.2+, Git and OpenCode for agent workflows; Windows needs Git Bash or WSL. Installing the wrapper does not install agent patterns or configure a project; run OAC setup/install explicitly.",
+        "license": "MIT"
+      }
+    },
+    "mcp-scanner": {
+      "id": "mcp-scanner",
+      "name": "Cisco MCP Scanner",
+      "description": "Analyzes MCP tool definitions and server code with configurable security scanners",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/cisco-ai-defense/mcp-scanner",
+      "repository": "https://github.com/cisco-ai-defense/mcp-scanner",
+      "documentation": "https://github.com/cisco-ai-defense/mcp-scanner#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "cisco-ai-mcp-scanner",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install cisco-ai-mcp-scanner",
+          "update_cmd": "uv tool upgrade cisco-ai-mcp-scanner",
+          "uninstall_cmd": "uv tool uninstall cisco-ai-mcp-scanner",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-scanner"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/cisco-ai-defense/mcp-scanner/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1094",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOP1tfFg",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/cisco-ai-defense/mcp-scanner/commit/07cb5b085597d46c1e5fb829991d3c9d44787497",
+        "vendor": "cisco-ai-defense",
+        "notes": "Requires Python 3.11.4+; upstream selects Python 3.13. Set UV_PYTHON=3.13 when installing to select that interpreter. YARA and other native dependencies may need platform build tools. Choose scan targets/engines explicitly; live-server scans can execute server commands or contact services. Hosted/LLM analysis and VirusTotal need separate credentials.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcp-filesystem": {
+      "id": "mcp-filesystem",
+      "name": "MCP Filesystem Server",
+      "description": "Provides configured local filesystem tools to agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/servers",
+      "repository": "https://github.com/modelcontextprotocol/servers",
+      "documentation": "https://github.com/modelcontextprotocol/servers#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@modelcontextprotocol/server-filesystem",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @modelcontextprotocol/server-filesystem",
+          "update_cmd": "npm update -g @modelcontextprotocol/server-filesystem",
+          "uninstall_cmd": "npm uninstall -g @modelcontextprotocol/server-filesystem",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-server-filesystem"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/modelcontextprotocol/servers/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "91343",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDONRaG_w",
+        "recent_activity_date": "2026-10-11",
+        "recent_activity_url": "https://github.com/modelcontextprotocol/servers/commit/bbb701e7ac1e57f3edd1c2836b94c5457eaf7b9c",
+        "vendor": "modelcontextprotocol",
+        "notes": "Uses the official @modelcontextprotocol/server-filesystem package and mcp-server-filesystem executable. Use a current Node runtime for SDK dependencies. Configure MCP clients and explicitly choose allowed directories before starting the server; filesystem access is limited by that configuration. Installation does not register or start an MCP server."
+      }
+    },
+    "pydantic-clai": {
+      "id": "pydantic-clai",
+      "name": "Pydantic AI CLI",
+      "description": "Runs Pydantic AI agents and terminal conversations through the clai client",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/pydantic/pydantic-ai",
+      "repository": "https://github.com/pydantic/pydantic-ai",
+      "documentation": "https://github.com/pydantic/pydantic-ai#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "clai",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install clai",
+          "update_cmd": "uv tool upgrade clai",
+          "uninstall_cmd": "uv tool uninstall clai",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "clai"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/pydantic/pydantic-ai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "20698",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOMMa-Pg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/pydantic/pydantic-ai/commit/0be309f8a0d92f5868e1779c39f93f4e5f30f1ff",
+        "vendor": "pydantic",
+        "notes": "Requires Python 3.11+. Installs the official clai distribution, which includes the pydantic-ai dependency, rather than relying on the pai compatibility alias. This catalog method targets macOS/Linux terminal platforms. Configure model providers and choose custom agents or tools explicitly.",
+        "license": "MIT"
+      }
+    },
+    "hayhooks": {
+      "id": "hayhooks",
+      "name": "Hayhooks",
+      "description": "Deploys Haystack agent and retrieval pipelines as HTTP and MCP endpoints",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/deepset-ai/hayhooks",
+      "repository": "https://github.com/deepset-ai/hayhooks",
+      "documentation": "https://github.com/deepset-ai/hayhooks#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "hayhooks",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install hayhooks",
+          "update_cmd": "uv tool upgrade hayhooks",
+          "uninstall_cmd": "uv tool uninstall hayhooks",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "hayhooks"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/deepset-ai/hayhooks/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "154",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOK87WGQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/deepset-ai/hayhooks/commit/a1f7840ac7e6664bd2484d0add9534a3a4934f62",
+        "vendor": "deepset-ai",
+        "notes": "Requires Python 3.10 through 3.14. The hayhooks distribution supplies its CLI. Define pipeline wrappers and install pipeline-specific dependencies in the chosen environment separately. Deployment, server startup, MCP exposure and provider credentials are explicit setup steps.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mlx-lm": {
+      "id": "mlx-lm",
+      "name": "MLX LM",
+      "description": "Runs local language models and OpenAI-compatible inference for Apple silicon agents",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/ml-explore/mlx-lm",
+      "repository": "https://github.com/ml-explore/mlx-lm",
+      "documentation": "https://github.com/ml-explore/mlx-lm#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mlx-lm",
+          "platforms": [
+            "darwin"
+          ],
+          "command": "uv tool install mlx-lm",
+          "update_cmd": "uv tool upgrade mlx-lm",
+          "uninstall_cmd": "uv tool uninstall mlx-lm",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mlx_lm"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ml-explore/mlx-lm/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7389",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOOG6IBg",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/ml-explore/mlx-lm/commit/93e6d4a6447b3080861985947f0820e76fcb957d",
+        "vendor": "ml-explore",
+        "notes": "Requires Python 3.11+ and Apple silicon macOS 14+ with a compatible MLX/Metal backend. This entry uses the base macOS distribution; Linux CPU/CUDA extras are not installed. Select models and explicitly download, chat, fine-tune or start mlx_lm.server separately; memory requirements depend on the model.",
+        "license": "MIT"
+      }
+    },
+    "phoenix": {
+      "id": "phoenix",
+      "name": "Arize Phoenix CLI",
+      "description": "Serves tracing, inspection and evaluation tools for agent applications",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/Arize-ai/phoenix",
+      "repository": "https://github.com/Arize-ai/phoenix",
+      "documentation": "https://github.com/Arize-ai/phoenix#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "arize-phoenix",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install arize-phoenix",
+          "update_cmd": "uv tool upgrade arize-phoenix",
+          "uninstall_cmd": "uv tool uninstall arize-phoenix",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "phoenix"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Arize-ai/phoenix/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "11892",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOIZ8Rag",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/Arize-ai/phoenix/commit/c9a3087027fedff23c32b083534d0a16bcce1a25",
+        "vendor": "Arize-ai",
+        "notes": "Requires Python 3.11 through 3.14. The arize-phoenix package supplies phoenix and arize-phoenix. Start the local service explicitly; configure storage, tracing exporters, instrumentation, authentication and evaluation providers separately. Application instrumentation can send trace content to the configured endpoint."
+      }
+    },
+    "langflow": {
+      "id": "langflow",
+      "name": "Langflow CLI",
+      "description": "Builds, runs and serves visual agent workflows and MCP-enabled flows",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/langflow-ai/langflow",
+      "repository": "https://github.com/langflow-ai/langflow",
+      "documentation": "https://github.com/langflow-ai/langflow#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "langflow",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install --with-executables-from langflow-base langflow",
+          "update_cmd": "uv tool upgrade langflow",
+          "uninstall_cmd": "uv tool uninstall langflow",
+          "prereqs": [
+            "uv"
+          ],
+          "metadata": {
+            "with_executables_from": "langflow-base"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "langflow"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/langflow-ai/langflow/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "155787",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOI7jmAw",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/langflow-ai/langflow/commit/972d56c47d3830d17060ee85cfaad152df823041",
+        "vendor": "langflow-ai",
+        "notes": "Requires Python 3.10 through 3.14. Langflow is a metapackage; expose the langflow-base dependency executable with uv --with-executables-from langflow-base while retaining langflow for inventory, upgrades and removal. Older AgentManager binaries must be upgraded/rebuilt for this metadata support. Start the service and configure flow dependencies, providers, storage and authentication explicitly.",
+        "license": "MIT"
+      }
+    },
+    "apify-cli": {
+      "id": "apify-cli",
+      "name": "Apify CLI",
+      "description": "Develops and runs web-extraction Actors that provide data and tools to agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/apify/apify-cli",
+      "repository": "https://github.com/apify/apify-cli",
+      "documentation": "https://github.com/apify/apify-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "apify-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g apify-cli",
+          "update_cmd": "npm update -g apify-cli",
+          "uninstall_cmd": "npm uninstall -g apify-cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "apify"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/apify/apify-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "260",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxMTc4NTE5MTM=",
+        "recent_activity_date": "2026-10-09",
+        "recent_activity_url": "https://github.com/apify/apify-cli/commit/59dc6b0bb86d9bb4587ef2b29bb667ae9d4aabd0",
+        "vendor": "apify",
+        "notes": "The CLI declares Node 20+, but its which 7 dependency requires Node 22.22.2+ on 22.x, 24.15+ on 24.x, or 26+. Use a compatible current runtime. Uses apify-cli rather than an Apify SDK; it also installs actor and apify-cli aliases. Create projects and authenticate explicitly. Local runs need their project/browser dependencies; cloud Actor runs or deployments can consume account resources.",
+        "license": "Apache-2.0"
+      }
+    },
+    "magentic-ui": {
+      "id": "magentic-ui",
+      "name": "Magentic UI CLI",
+      "description": "Launches a human-supervised computer-use agent interface and backend",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/magentic-ui",
+      "repository": "https://github.com/microsoft/magentic-ui",
+      "documentation": "https://github.com/microsoft/magentic-ui#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "magentic-ui",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install magentic-ui",
+          "update_cmd": "uv tool upgrade magentic-ui",
+          "uninstall_cmd": "uv tool uninstall magentic-ui",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "magentic-ui"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/magentic-ui/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "10098",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOOlAmNA",
+        "recent_activity_date": "2026-09-23",
+        "recent_activity_url": "https://api.github.com/repos/microsoft/magentic-ui",
+        "vendor": "microsoft",
+        "notes": "Requires Python 3.12+. The current upstream MagenticLite release tests macOS arm64 and Windows x64 through WSL2; native Linux x64 is expected but untested upstream. This catalog method supports macOS/Linux, with Windows users running inside WSL. Quicksand VM setup, Linux KVM access, model credentials and service startup are separate requirements.",
+        "license": "MIT"
+      }
+    },
+    "marvin": {
+      "id": "marvin",
+      "name": "Marvin CLI",
+      "description": "Extracts and transforms structured data through agentic language-model workflows",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/PrefectHQ/marvin",
+      "repository": "https://github.com/PrefectHQ/marvin",
+      "documentation": "https://github.com/PrefectHQ/marvin#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "marvin",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install marvin",
+          "update_cmd": "uv tool upgrade marvin",
+          "uninstall_cmd": "uv tool uninstall marvin",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "marvin"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/PrefectHQ/marvin/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "6206",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOJH-5uw",
+        "recent_activity_date": "2026-09-23",
+        "recent_activity_url": "https://github.com/PrefectHQ/marvin/commit/db665c58fa503e6328f83c81cac20dedd037a274",
+        "vendor": "PrefectHQ",
+        "notes": "Requires Python 3.10+. The marvin package supplies the CLI, including stdin extraction via marvin x and configuration/database commands. Configure model providers and storage explicitly. Model-backed operations can send selected input to the configured provider; installation does not execute a workflow.",
+        "license": "Apache-2.0"
+      }
+    },
+    "llama-swap": {
+      "id": "llama-swap",
+      "name": "llama-swap",
+      "description": "Routes agent model requests and swaps local inference-server processes",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/mostlygeek/llama-swap",
+      "repository": "https://github.com/mostlygeek/llama-swap",
+      "documentation": "https://github.com/mostlygeek/llama-swap#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "mostlygeek/llama-swap/llama-swap",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install mostlygeek/llama-swap/llama-swap",
+          "update_cmd": "brew upgrade mostlygeek/llama-swap/llama-swap",
+          "uninstall_cmd": "brew uninstall mostlygeek/llama-swap/llama-swap",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "llama-swap"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mostlygeek/llama-swap/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5998",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOM7P8-A",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/mostlygeek/llama-swap/commit/a2796fb0306215c6883454a8707dfb22d25c3068",
+        "vendor": "mostlygeek",
+        "notes": "Uses the upstream Homebrew tap with x64/arm64 macOS/Linux binaries. Install inference backends, choose models and prepare a configuration separately. Starting the proxy can launch configured model-server commands; installation does not start it or download models.",
+        "license": "MIT"
+      }
+    },
+    "bentoml": {
+      "id": "bentoml",
+      "name": "BentoML CLI",
+      "description": "Packages and serves model inference APIs used by agent applications",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/bentoml/BentoML",
+      "repository": "https://github.com/bentoml/BentoML",
+      "documentation": "https://github.com/bentoml/BentoML#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "bentoml",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install bentoml",
+          "update_cmd": "uv tool upgrade bentoml",
+          "uninstall_cmd": "uv tool uninstall bentoml",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "bentoml"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bentoml/BentoML/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "8906",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxNzg5NzY1Mjk=",
+        "recent_activity_date": "2026-09-07",
+        "recent_activity_url": "https://github.com/bentoml/BentoML/commit/517b343b81aeb0b01bbd908e58e53ad9c12ef7eb",
+        "vendor": "bentoml",
+        "notes": "Requires Python 3.9+. The bentoml distribution supplies its CLI; model/framework dependencies belong in the selected service environment. Define services and configure models explicitly. Container builds need Docker, and cloud deployment needs separate account/authentication setup; installation does not deploy a service.",
+        "license": "Apache-2.0"
+      }
+    },
+    "chroma": {
+      "id": "chroma",
+      "name": "Chroma CLI",
+      "description": "Runs and manages vector retrieval storage for agent memory and RAG workflows",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/chroma-core/chroma",
+      "repository": "https://github.com/chroma-core/chroma",
+      "documentation": "https://github.com/chroma-core/chroma#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "chromadb",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install chromadb",
+          "update_cmd": "uv tool upgrade chromadb",
+          "uninstall_cmd": "uv tool uninstall chromadb",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "chroma"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/chroma-core/chroma/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "29521",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "R_kgDOII5zmA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/chroma-core/chroma/commit/ddc17cd7c508f15f237c965e74e536ff64396ddb",
+        "vendor": "chroma-core",
+        "notes": "Requires Python 3.9+. The chromadb distribution supplies chroma. Published native wheels cover macOS x64 10.12+/arm64 11+, glibc 2.17+ Linux x64/arm64 and Windows x64; dependency requirements can be stricter. Choose storage and explicitly start a server or connect to cloud resources. Collection creation, embedding downloads and data ingestion are separate steps.",
+        "license": "Apache-2.0"
+      }
+    },
+    "n8n": {
+      "id": "n8n",
+      "name": "n8n CLI",
+      "description": "Runs automation workflows that integrate agents, model calls and external tools",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/n8n-io/n8n",
+      "repository": "https://github.com/n8n-io/n8n",
+      "documentation": "https://github.com/n8n-io/n8n#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "n8n",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g n8n",
+          "update_cmd": "npm update -g n8n",
+          "uninstall_cmd": "npm uninstall -g n8n",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "n8n"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/n8n-io/n8n/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "207867",
+        "github_stars_checked_at": "2026-10-18T10:09:30.810405+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxOTMyMTU1NTQ=",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/n8n-io/n8n/commit/d2dc2f9ce50294df5c08799af437c56e3e04ab13",
+        "vendor": "n8n-io",
+        "notes": "Requires Node 24+. The npm n8n package includes the self-hosted workflow CLI/server, not a desktop app. Configure storage, encryption/authentication, credentials and workflow activation separately. Starting or executing workflows can call external services; installation does not start the service or activate workflows."
       }
     }
   }
