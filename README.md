@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-209-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-229-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 209 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 229 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -234,7 +234,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **209 agents**, embedded in the binary and refreshable from the
+The catalog ships with **229 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -246,6 +246,7 @@ verification sources and installation/setup limits.
 | abtop | `abtop` | cargo, native, powershell |
 | Agent CLI | `agent-cli` | pip, pipx, uv |
 | Agent Deck | `agent-deck` | brew, go, native |
+| Agent Eval | `agent-eval` | npm |
 | Agent Manager | `agent-manager` | brew |
 | Agent of Empires | `agent-of-empires` | brew, native |
 | agent-browser | `agent-browser` | brew, npm |
@@ -256,6 +257,7 @@ verification sources and installation/setup limits.
 | Amazon Q Developer CLI | `amazon-q` | brew, dmg, native |
 | Amp | `amp` | brew, chocolatey, native, npm |
 | Amplifier | `amplifier` | native |
+| amux | `amux` | brew |
 | Antigravity CLI | `antigravity-cli` | brew, native, powershell |
 | apfel | `apfel` | brew |
 | Atomic Agent | `atomic-agent` | native, powershell |
@@ -274,9 +276,12 @@ verification sources and installation/setup limits.
 | CCManager | `ccmanager` | npm |
 | ccstatusline | `ccstatusline` | npm |
 | ccusage | `ccusage` | brew, npm, npx |
+| Cisco Skill Scanner | `skill-scanner` | uv |
 | Claude Code | `claude-code` | native, npm |
+| Claude Code Log | `claude-code-log` | uv |
 | Claude Code Router | `claude-code-router` | brew, npm, npx |
 | Claude Code Templates | `claude-code-templates` | npm |
+| Claude Replay | `claude-replay` | npm |
 | Claude Squad | `claude-squad` | brew, native |
 | Claude-Codex Bridge | `claude-codex-bridge` | npm, npx |
 | Claw Orchestrator | `claw-orchestrator` | native, npm |
@@ -291,6 +296,7 @@ verification sources and installation/setup limits.
 | Codex | `codex` | binary, brew, npm |
 | CodexBar CLI | `codexbar` | brew |
 | Command Code | `command-code` | npm |
+| Context Mode | `context-mode` | npm |
 | Context7 CLI | `context7` | npm |
 | Continue CLI | `continue-cli` | npm |
 | CoreCoder | `corecoder` | pip, pipx, uv |
@@ -301,6 +307,7 @@ verification sources and installation/setup limits.
 | Cursor CLI | `cursor-cli` | native |
 | dao-code | `dao-code` | native, npm, npx |
 | Deep Agents CLI | `deepagents-cli` | native, pip, uv |
+| DeepEval | `deepeval` | uv |
 | DeepSeek CLI | `deepseek-cli` | npm |
 | DeepSeek Harness | `deepseek-harness` | npm |
 | DeepSeek-Reasonix | `reasonix` | homebrew, npm |
@@ -318,11 +325,13 @@ verification sources and installation/setup limits.
 | fauxnix | `fauxnix` | npm |
 | fence | `fence` | brew, go, native |
 | FetchCoder | `fetchcoder` | npm |
+| Firecrawl CLI | `firecrawl-cli` | npm |
 | Foremerge | `foremerge` | npm |
 | Forge CLI | `forge-cli` | npm |
 | ForgeCode | `forgecode` | native, npm |
 | FrontierAgent | `frontier-agent` | native |
 | Gajae Code | `gajae-code` | native |
+| garak | `garak` | uv |
 | Gas Town | `gastown` | brew |
 | Gemini CLI | `gemini-cli` | npm |
 | GitHub Copilot CLI | `copilot-cli` | brew, npm, winget |
@@ -361,12 +370,15 @@ verification sources and installation/setup limits.
 | macOS Harness | `macos-harness` | uv |
 | MarkItDown | `markitdown` | uv |
 | Mastra Code | `mastracode` | npm |
+| MCO | `mco` | npm |
 | MCP Inspector | `mcp-inspector` | npm |
 | MCP Proxy | `mcp-proxy` | uv |
 | MCP Publisher | `mcp-publisher` | brew |
 | MCP Remote | `mcp-remote` | npm |
 | mcp-use CLI | `mcp-use` | npm |
 | mcp2cli | `mcp2cli` | pip, uv |
+| MCPJam Inspector | `mcpjam-inspector` | npm |
+| MCPM | `mcpm` | uv |
 | MCPorter | `mcporter` | npm |
 | Meta Muse Code | `muse-code` | native |
 | Mini SWE Agent | `mini-swe-agent` | uv |
@@ -396,6 +408,7 @@ verification sources and installation/setup limits.
 | OpenQodex | `openqodex` | npm |
 | OpenSpec | `openspec` | brew, npm |
 | OpenViking | `openviking` | uv |
+| OptiLLM | `optillm` | uv |
 | Oracle | `oracle` | npm |
 | Ouroboros | `ouroboros` | native, pip, pipx, uv |
 | Paperclip | `paperclip` | npm, npx |
@@ -422,17 +435,23 @@ verification sources and installation/setup limits.
 | Roo Code CLI | `roo-code-cli` | native |
 | rtk | `rtk` | binary, brew, cargo, native |
 | Ruflo | `ruflo` | native, npm, npx |
+| RuVector CLI | `ruvector` | npm |
+| Sentry CLI | `sentry-cli` | npm |
 | Serena | `serena` | uv |
 | skills | `skills` | npm, npx |
+| Skillshare CLI | `skillshare` | brew |
 | SmallCode | `smallcode` | native, npm, npx, powershell |
 | Sno Station | `sno-station` | native |
+| Snyk Agent Scan | `snyk-agent-scan` | uv |
 | Spec Kit | `spec-kit` | uv |
 | Summarize | `summarize` | npm |
+| Supergateway | `supergateway` | npm |
 | Symphony | `symphony` | native |
 | Tabnine CLI | `tabnine-cli` | native |
 | Tenere | `tenere` | brew, cargo, nix |
 | TokenTracker | `tokentracker` | npm, npx |
 | Tokscale | `tokscale` | bun, npm |
+| TOON CLI | `toon-cli` | npm |
 | Trae Agent | `trae-agent` | source |
 | tsk | `tsk` | brew, native |
 | tuicr | `tuicr` | brew |
@@ -443,6 +462,7 @@ verification sources and installation/setup limits.
 | Vibe Kanban | `vibe-kanban` | npm |
 | VibeMux | `vibemux` | binary, native |
 | VT Code | `vtcode` | brew, native |
+| wcgw | `wcgw` | uv |
 | WhipCode | `whipcode` | native |
 | Workmux | `workmux` | brew |
 | Worktrunk | `worktrunk` | brew |

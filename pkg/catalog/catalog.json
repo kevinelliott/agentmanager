@@ -1,7 +1,7 @@
 {
-  "version": "1.0.84",
+  "version": "1.0.85",
   "schema_version": 1,
-  "last_updated": "2026-10-18T09:03:13.354574+00:00",
+  "last_updated": "2026-10-18T09:41:41.270287+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -11000,6 +11000,1027 @@
         "vendor": "unclecode",
         "notes": "Requires Python 3.10+. The crawl4ai package supplies crwl. Browser downloads, system libraries and crawl4ai-setup are separate explicit steps; review upstream prerequisites for each platform before crawling.",
         "license": "Apache-2.0"
+      }
+    },
+    "mcpm": {
+      "id": "mcpm",
+      "name": "MCPM",
+      "description": "Discovers, configures and manages MCP servers and client profiles",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/pathintegral-institute/mcpm.sh",
+      "repository": "https://github.com/pathintegral-institute/mcpm.sh",
+      "documentation": "https://github.com/pathintegral-institute/mcpm.sh#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcpm",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcpm",
+          "update_cmd": "uv tool upgrade mcpm",
+          "uninstall_cmd": "uv tool uninstall mcpm",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcpm"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/pathintegral-institute/mcpm.sh/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1015",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOOMVwYQ",
+        "recent_activity_date": "2026-10-08",
+        "recent_activity_url": "https://github.com/pathintegral-institute/mcpm.sh/commit/0119b7f8e7453a3941f290b31fa1d64dc0322ca5",
+        "vendor": "pathintegral-institute",
+        "notes": "Requires Python 3.11+. Select servers and explicitly configure profiles, client integrations, router processes and sharing. Installing the manager does not install or start individual MCP servers.",
+        "license": "MIT"
+      }
+    },
+    "mcpjam-inspector": {
+      "id": "mcpjam-inspector",
+      "name": "MCPJam Inspector",
+      "description": "Tests and debugs MCP tools, apps, authentication and agent interactions",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/MCPJam/inspector",
+      "repository": "https://github.com/MCPJam/inspector",
+      "documentation": "https://github.com/MCPJam/inspector#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@mcpjam/inspector",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @mcpjam/inspector",
+          "update_cmd": "npm update -g @mcpjam/inspector",
+          "uninstall_cmd": "npm uninstall -g @mcpjam/inspector",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "inspector"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/MCPJam/inspector/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2269",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOOvT9vA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/MCPJam/inspector/commit/773b197b84ede68d433d48e3c730300f8393c957",
+        "vendor": "MCPJam",
+        "notes": "The published terminal package requires Node 22+; use a current Node 24 runtime for its dependencies. Its executables are inspector and inspector-vite, distinct from the official mcp-inspector CLI. Start the local inspector, connect servers and configure model/authentication providers explicitly."
+      }
+    },
+    "skillshare": {
+      "id": "skillshare",
+      "name": "Skillshare CLI",
+      "description": "Synchronizes agent skills, configurations and integrations across coding tools",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/runkids/skillshare",
+      "repository": "https://github.com/runkids/skillshare",
+      "documentation": "https://github.com/runkids/skillshare#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "skillshare",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install skillshare",
+          "update_cmd": "brew upgrade skillshare",
+          "uninstall_cmd": "brew uninstall skillshare",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "skillshare"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/runkids/skillshare/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2802",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOQ5mtHQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/runkids/skillshare/commit/8f55e5899927e136fa4ec19ec5548f11ffdbe096",
+        "vendor": "runkids",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula, distinct from Skillshare App. Initialize sources and choose targets before running sync; synchronization can write agent configuration files. Windows users can follow the separate upstream installer.",
+        "license": "MIT"
+      }
+    },
+    "wcgw": {
+      "id": "wcgw",
+      "name": "wcgw",
+      "description": "Provides interactive shell and code-editing tools to MCP coding clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/rusiaaman/wcgw",
+      "repository": "https://github.com/rusiaaman/wcgw",
+      "documentation": "https://github.com/rusiaaman/wcgw#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "wcgw",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install wcgw",
+          "update_cmd": "uv tool upgrade wcgw",
+          "uninstall_cmd": "uv tool uninstall wcgw",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "wcgw"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/rusiaaman/wcgw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "678",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOM0nWHQ",
+        "recent_activity_date": "2026-09-12",
+        "recent_activity_url": "https://github.com/rusiaaman/wcgw/commit/339201affd179795139590351e0eb25f910d6306",
+        "vendor": "rusiaaman",
+        "notes": "Requires Python 3.11+; the upstream quick start selects Python 3.12. Supports macOS/Linux; Windows guidance uses WSL. Configure the MCP client separately. Starting the server exposes shell and file operations to the connected client; installation does not start it.",
+        "license": "Apache-2.0"
+      }
+    },
+    "supergateway": {
+      "id": "supergateway",
+      "name": "Supergateway",
+      "description": "Bridges stdio and HTTP/SSE/WebSocket transports for agent MCP servers",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/supercorp-ai/supergateway",
+      "repository": "https://github.com/supercorp-ai/supergateway",
+      "documentation": "https://github.com/supercorp-ai/supergateway#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "supergateway",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g supergateway",
+          "update_cmd": "npm update -g supergateway",
+          "uninstall_cmd": "npm uninstall -g supergateway",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "supergateway"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/supercorp-ai/supergateway/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2907",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDONgnyLA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/supercorp-ai/supergateway/commit/181961cd1382cd583bab548c2ddb0096045eaece",
+        "vendor": "supercorp-ai",
+        "notes": "The npm package declares Node 20+; use a current Node runtime for SDK dependencies. Choose commands, URLs, authentication, transport and listener settings explicitly. Installation does not start a gateway.",
+        "license": "MIT"
+      }
+    },
+    "toon-cli": {
+      "id": "toon-cli",
+      "name": "TOON CLI",
+      "description": "Converts JSON to token-oriented notation and analyzes agent context size",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/toon-format/toon",
+      "repository": "https://github.com/toon-format/toon",
+      "documentation": "https://github.com/toon-format/toon#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@toon-format/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @toon-format/cli",
+          "update_cmd": "npm update -g @toon-format/cli",
+          "uninstall_cmd": "npm uninstall -g @toon-format/cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "toon"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/toon-format/toon/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "25508",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOQHTSxQ",
+        "recent_activity_date": "2026-10-09",
+        "recent_activity_url": "https://github.com/toon-format/toon/commit/e247c423e0a38bca3477b17fecdf6ef4feeb5584",
+        "vendor": "toon-format",
+        "notes": "Requires Node 24+. The CLI is @toon-format/cli and runs as toon, distinct from the @toon-format/toon library. Choose inputs and conversion/output options explicitly; token statistics depend on the data and tokenizer.",
+        "license": "MIT"
+      }
+    },
+    "ruvector": {
+      "id": "ruvector",
+      "name": "RuVector CLI",
+      "description": "Manages persistent vector memory, semantic retrieval and MCP tools for agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/ruvnet/RuVector",
+      "repository": "https://github.com/ruvnet/RuVector",
+      "documentation": "https://github.com/ruvnet/RuVector#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "ruvector",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g ruvector",
+          "update_cmd": "npm update -g ruvector",
+          "uninstall_cmd": "npm uninstall -g ruvector",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ruvector"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ruvnet/RuVector/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4585",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOQYnEmw",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/ruvnet/RuVector/commit/46d816ddc4c2a8a06cd3613534a79b1d557d858b",
+        "vendor": "ruvnet",
+        "notes": "Requires Node 20+ and a working native backend. Published core binaries cover macOS x64/arm64, glibc Linux x64/arm64 and Windows x64; verify ruvector info before relying on persistent storage. Semantic commands download an embedding model on first use. Memory indexing, hooks and MCP startup are separate steps.",
+        "license": "MIT"
+      }
+    },
+    "amux": {
+      "id": "amux",
+      "name": "amux",
+      "description": "Runs parallel coding-agent sessions in a terminal workspace and worktree UI",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/andyrewlee/amux",
+      "repository": "https://github.com/andyrewlee/amux",
+      "documentation": "https://github.com/andyrewlee/amux#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "andyrewlee/amux/amux",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install andyrewlee/amux/amux",
+          "update_cmd": "brew upgrade andyrewlee/amux/amux",
+          "uninstall_cmd": "brew uninstall andyrewlee/amux/amux",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "amux"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/andyrewlee/amux/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "163",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOQxcUBQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/andyrewlee/amux/commit/ae994c3ab2fcfbf4b067e99b035f787e35de15e9",
+        "vendor": "andyrewlee",
+        "notes": "Uses the upstream Homebrew tap on macOS/Linux; its formula builds from source with Go and depends on tmux. Requires tmux 3.2+ and Git. Install and authenticate agent CLIs separately; workspace creation and agent startup are explicit operations.",
+        "license": "MIT"
+      }
+    },
+    "firecrawl-cli": {
+      "id": "firecrawl-cli",
+      "name": "Firecrawl CLI",
+      "description": "Scrapes, searches and crawls web content for coding-agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/firecrawl/cli",
+      "repository": "https://github.com/firecrawl/cli",
+      "documentation": "https://github.com/firecrawl/cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "firecrawl-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g firecrawl-cli",
+          "update_cmd": "npm update -g firecrawl-cli",
+          "uninstall_cmd": "npm uninstall -g firecrawl-cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "firecrawl"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/firecrawl/cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "655",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOQ1p1JA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/firecrawl/cli/commit/6516c126d1b2818eb40bfdc2b7a9396107cbf6bd",
+        "vendor": "firecrawl",
+        "notes": "Requires Node 22+. The published CLI is firecrawl-cli, distinct from the firecrawl SDK. Authenticate with a service account/API key and select requests explicitly; service calls can consume account credits. Installation does not run crawls or provision services."
+      }
+    },
+    "optillm": {
+      "id": "optillm",
+      "name": "OptiLLM",
+      "description": "Serves an OpenAI-compatible inference proxy with agent tools and reasoning methods",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/algorithmicsuperintelligence/optillm",
+      "repository": "https://github.com/algorithmicsuperintelligence/optillm",
+      "documentation": "https://github.com/algorithmicsuperintelligence/optillm#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "optillm",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install optillm",
+          "update_cmd": "uv tool upgrade optillm",
+          "uninstall_cmd": "uv tool uninstall optillm",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "optillm"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/algorithmicsuperintelligence/optillm/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4319",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOMnCOOA",
+        "recent_activity_date": "2026-10-11",
+        "recent_activity_url": "https://github.com/algorithmicsuperintelligence/optillm/commit/c0dc4f011ad644ce44aea884c43fbb0de6beb0e3",
+        "vendor": "algorithmicsuperintelligence",
+        "notes": "Requires Python 3.10+ and model/backend dependencies; some methods need additional packages or model downloads. The canonical repository is algorithmicsuperintelligence/optillm. Configure providers, inference approaches and listener settings before explicitly starting the proxy.",
+        "license": "Apache-2.0"
+      }
+    },
+    "agent-eval": {
+      "id": "agent-eval",
+      "name": "Agent Eval",
+      "description": "Evaluates coding-agent tasks in repeatable Docker or Vercel sandbox experiments",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/vercel-labs/agent-eval",
+      "repository": "https://github.com/vercel-labs/agent-eval",
+      "documentation": "https://github.com/vercel-labs/agent-eval#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@vercel/agent-eval",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @vercel/agent-eval",
+          "update_cmd": "npm update -g @vercel/agent-eval",
+          "uninstall_cmd": "npm uninstall -g @vercel/agent-eval",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agent-eval"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/vercel-labs/agent-eval/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "270",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDORDq6rQ",
+        "recent_activity_date": "2026-10-08",
+        "recent_activity_url": "https://github.com/vercel-labs/agent-eval/commit/28e71cff296dfaa24bd584d53d3eb7077901c95d",
+        "vendor": "vercel-labs",
+        "notes": "The package declares Node 18+, but dependencies require newer runtimes; use Node 22.19+ or current Node 24. Choose an agent/provider, evaluation project and Docker or Vercel sandbox backend separately. Runs can make model and cloud calls; --dry previews experiments without executing them."
+      }
+    },
+    "garak": {
+      "id": "garak",
+      "name": "garak",
+      "description": "Runs configurable vulnerability and behavior probes against language-model targets",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/NVIDIA/garak",
+      "repository": "https://github.com/NVIDIA/garak",
+      "documentation": "https://github.com/NVIDIA/garak#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "garak",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install garak",
+          "update_cmd": "uv tool upgrade garak",
+          "uninstall_cmd": "uv tool uninstall garak",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "garak"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/NVIDIA/garak/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "9608",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOJhfZ-g",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/NVIDIA/garak/commit/cc1215c5c301a69f115b0b2b7ef8e4172ae2e7fc",
+        "vendor": "NVIDIA",
+        "notes": "Requires Python 3.11+. Select target generators, probe suites and credentials explicitly. Optional probes/detectors may require further packages, model downloads or hardware. Installation does not run probes.",
+        "license": "Apache-2.0"
+      }
+    },
+    "deepeval": {
+      "id": "deepeval",
+      "name": "DeepEval",
+      "description": "Runs agent and language-model evaluations with configurable quality metrics",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/confident-ai/deepeval",
+      "repository": "https://github.com/confident-ai/deepeval",
+      "documentation": "https://github.com/confident-ai/deepeval#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "deepeval",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install deepeval",
+          "update_cmd": "uv tool upgrade deepeval",
+          "uninstall_cmd": "uv tool uninstall deepeval",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "deepeval"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/confident-ai/deepeval/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "18931",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOKFeYBA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/confident-ai/deepeval/commit/ec979c1c67df600e06096d1f17052b0536a04468",
+        "vendor": "confident-ai",
+        "notes": "Requires Python 3.9 through 3.x. The deepeval distribution supplies the deepeval CLI. Create evaluation tests and configure providers separately; model-backed metrics can make paid API calls. Hosted account integration is optional and explicit.",
+        "license": "Apache-2.0"
+      }
+    },
+    "snyk-agent-scan": {
+      "id": "snyk-agent-scan",
+      "name": "Snyk Agent Scan",
+      "description": "Discovers and scans agent skills, MCP servers and configurations for risks",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/snyk/agent-scan",
+      "repository": "https://github.com/snyk/agent-scan",
+      "documentation": "https://github.com/snyk/agent-scan#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "snyk-agent-scan",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install snyk-agent-scan",
+          "update_cmd": "uv tool upgrade snyk-agent-scan",
+          "uninstall_cmd": "uv tool uninstall snyk-agent-scan",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "snyk-agent-scan"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/snyk/agent-scan/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3147",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOOVdVTw",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/snyk/agent-scan/commit/3550263f64f5e0b3717486c11a246b601a88bc21",
+        "vendor": "snyk",
+        "notes": "Requires Python 3.10+ and Snyk account/token setup. Formerly MCP Scan; use the official snyk-agent-scan Python distribution, not an npm lookalike. Starting a scan can execute configured MCP commands, contact servers and submit component metadata for analysis; review upstream consent and data-handling guidance. Windows discovery coverage varies by agent.",
+        "license": "Apache-2.0"
+      }
+    },
+    "skill-scanner": {
+      "id": "skill-scanner",
+      "name": "Cisco Skill Scanner",
+      "description": "Analyzes agent skills with static, behavioral and optional model-based checks",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/cisco-ai-defense/skill-scanner",
+      "repository": "https://github.com/cisco-ai-defense/skill-scanner",
+      "documentation": "https://github.com/cisco-ai-defense/skill-scanner#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "cisco-ai-skill-scanner",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install cisco-ai-skill-scanner",
+          "update_cmd": "uv tool upgrade cisco-ai-skill-scanner",
+          "uninstall_cmd": "uv tool uninstall cisco-ai-skill-scanner",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "skill-scanner"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/cisco-ai-defense/skill-scanner/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2608",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDORDsnaQ",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/cisco-ai-defense/skill-scanner/commit/8554b119bd118583f1a235e4e7aad8f2005ef904",
+        "vendor": "cisco-ai-defense",
+        "notes": "Requires CPython 3.11 through 3.14. Published wheels include the CEL helper for glibc Linux x64/arm64, macOS 14+ x64/arm64 and Windows x64. Other source builds require Go 1.27.1+. Select skill paths and analyzers explicitly; optional model/hosted analyzers require separate credentials."
+      }
+    },
+    "mco": {
+      "id": "mco",
+      "name": "MCO",
+      "description": "Orchestrates selected coding-agent CLIs for task execution and comparative review",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/mco-org/mco",
+      "repository": "https://github.com/mco-org/mco",
+      "documentation": "https://github.com/mco-org/mco#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@tt-a1i/mco",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "npm install -g @tt-a1i/mco",
+          "update_cmd": "npm update -g @tt-a1i/mco",
+          "uninstall_cmd": "npm uninstall -g @tt-a1i/mco",
+          "global_flag": "-g",
+          "prereqs": [
+            "node",
+            "python3"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mco"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mco-org/mco/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "536",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDORZQpsA",
+        "recent_activity_date": "2026-10-07",
+        "recent_activity_url": "https://github.com/mco-org/mco/commit/3cfce130362dbcc2aedda6170d1a31e39cf67d3e",
+        "vendor": "mco-org",
+        "notes": "Requires Node 18+ and python3 (Python 3.10+) on PATH. Uses the official @tt-a1i/mco npm wrapper with its bundled Python sources, not the unrelated mco PyPI package. This entry supports macOS/Linux. Install provider CLIs and authenticate them separately; run mco install explicitly for optional skill setup and select providers for each task.",
+        "license": "MIT"
+      }
+    },
+    "claude-code-log": {
+      "id": "claude-code-log",
+      "name": "Claude Code Log",
+      "description": "Converts coding-agent session transcripts into browsable HTML and Markdown",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/daaain/claude-code-log",
+      "repository": "https://github.com/daaain/claude-code-log",
+      "documentation": "https://github.com/daaain/claude-code-log#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "claude-code-log",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install claude-code-log",
+          "update_cmd": "uv tool upgrade claude-code-log",
+          "uninstall_cmd": "uv tool uninstall claude-code-log",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "claude-code-log"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/daaain/claude-code-log/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1243",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOO7hCLw",
+        "recent_activity_date": "2026-10-09",
+        "recent_activity_url": "https://github.com/daaain/claude-code-log/commit/9834d25c88dc4dbe8f8ade40ae4b74602ae7669d",
+        "vendor": "daaain",
+        "notes": "Requires Python 3.10+. Select transcript files, output paths and optional serving/TUI modes explicitly. Generated artifacts can contain conversation and tool content; review them before sharing.",
+        "license": "MIT"
+      }
+    },
+    "context-mode": {
+      "id": "context-mode",
+      "name": "Context Mode",
+      "description": "Provides sandboxed execution and indexed retrieval to reduce agent context volume",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/mksglu/context-mode",
+      "repository": "https://github.com/mksglu/context-mode",
+      "documentation": "https://github.com/mksglu/context-mode#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "context-mode",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g context-mode",
+          "update_cmd": "npm update -g context-mode",
+          "uninstall_cmd": "npm uninstall -g context-mode",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "context-mode"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mksglu/context-mode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "30584",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDORWiFDA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/mksglu/context-mode/commit/dad48de75686389612bba9ef842e459ee38134cd",
+        "vendor": "mksglu",
+        "notes": "Requires Node 22.5+ and a supported better-sqlite3 native build. The upstream npm postinstall can repair existing Claude plugin registry/settings and normalize hooks, including during updates. Configure agent adapters/MCP registration separately; installation does not launch the server. Follow upstream runtime and platform guidance."
+      }
+    },
+    "claude-replay": {
+      "id": "claude-replay",
+      "name": "Claude Replay",
+      "description": "Turns coding-agent JSONL sessions into interactive replay artifacts",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/es617/claude-replay",
+      "repository": "https://github.com/es617/claude-replay",
+      "documentation": "https://github.com/es617/claude-replay#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "claude-replay",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g claude-replay",
+          "update_cmd": "npm update -g claude-replay",
+          "uninstall_cmd": "npm uninstall -g claude-replay",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "claude-replay"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/es617/claude-replay/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "846",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDORcNfXA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/es617/claude-replay/commit/0f2cf93f36b494671233e51d07d35be30bd977be",
+        "vendor": "es617",
+        "notes": "Requires Node 18+. Choose session files and generate output explicitly. Review generated replay content before sharing; transcripts can contain prompts, code and tool output.",
+        "license": "MIT"
+      }
+    },
+    "sentry-cli": {
+      "id": "sentry-cli",
+      "name": "Sentry CLI",
+      "description": "Retrieves debugging context and AI root-cause analysis for coding agents",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/getsentry/toolkit",
+      "repository": "https://github.com/getsentry/toolkit",
+      "documentation": "https://github.com/getsentry/toolkit#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "sentry",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g sentry",
+          "update_cmd": "npm update -g sentry",
+          "uninstall_cmd": "npm uninstall -g sentry",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "sentry"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/getsentry/toolkit/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "932",
+        "github_stars_checked_at": "2026-10-18T09:41:41.270287+00:00",
+        "github_repository_id": "R_kgDOOQ5oBw",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/getsentry/toolkit/commit/d7aa182b7d3fbbf93230b1d5b3e40fef04943ac7",
+        "vendor": "getsentry",
+        "notes": "Requires Node 20+. Uses the sentry npm package from getsentry/toolkit, distinct from @sentry/cli and its sentry-cli executable. Authenticate and select projects explicitly. AI explanation/fix-plan features require service access; installing the CLI does not configure the separate Sentry MCP server."
       }
     }
   }
