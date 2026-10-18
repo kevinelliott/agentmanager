@@ -1,6 +1,6 @@
 # Catalog research and update records
 
-AgentManager ships with 249 catalog entries in catalog version 1.0.86. The
+AgentManager ships with 269 catalog entries in catalog version 1.0.87. The
 [root catalog](../../catalog.json) and [embedded catalog](../../pkg/catalog/catalog.json)
 contain the same definitions. The [supported agents table](../../README.md#supported-agents)
 lists each entry's ID and installation methods.
@@ -14,7 +14,7 @@ platforms and setup notes before installing it.
 Each research record captures the canonical GitHub repository and repository ID,
 star count and verification time, recent activity evidence, upstream installation
 source, distribution version, executable names, supported platforms and relevance.
-The six batches below required at least 100 stars and activity within the two
+The seven batches below required at least 100 stars and activity within the two
 months before verification. Star counts and distribution versions are snapshots.
 
 | Issue | Added | Catalog version | Evidence |
@@ -25,6 +25,7 @@ months before verification. Star counts and distribution versions are snapshots.
 | ENGIN-5 | 20 | 1.0.84 | [October 18 additional research](research-2026-10-18-engin-5.csv) |
 | ENGIN-6 | 20 | 1.0.85 | [October 18 latest research](research-2026-10-18-engin-6.csv) |
 | ENGIN-7 | 20 | 1.0.86 | [October 18 expanded research](research-2026-10-18-engin-7.csv) |
+| ENGIN-8 | 20 | 1.0.87 | [October 18 MCP and CLI research](research-2026-10-18-engin-8.csv) |
 
 Recent activity is identified as a default-branch commit or a repository push in
 the CSV. A push record does not imply that the default branch changed recently.
@@ -41,7 +42,7 @@ Homebrew formula supports Apple Silicon macOS and x64/arm64 Linux.
 Installing a CLI does not complete its account authentication, project
 initialization, session indexing, browser downloads, MCP client configuration or
 optional agent hooks. Follow the linked upstream documentation for these steps.
-CodexBar here is the CLI formula; Playwright CLI and Playwright MCP are separate
+CodexBar here is the CLI formula; Playwright CLI, Playwright MCP and Playwright Test are separate
 tools; Beads Rust supplies `br` and is separate from Beads.
 
 Amplifier uses the upstream Git distribution through a native uv adapter on
@@ -150,6 +151,35 @@ The ENGIN-7 batch adds code context, browser/MCP tools and agent workflows:
   Select workflow activation, project setup, cloud deployment and model or
   browser downloads explicitly; installation does not run these operations.
 
+The ENGIN-8 batch adds browser verification, research and service MCP tools:
+
+- Playwright Test uses `@playwright/test` and supplies `playwright`; browser
+  downloads, Linux libraries and project tests require separate setup. Chrome
+  DevTools MCP requires a supported Chrome browser. Its usage statistics are
+  enabled upstream by default; start it with `--no-usage-statistics` to opt out.
+- Tavily, Exa, Brave Search, Perplexity and Firecrawl MCP need their provider
+  credentials and MCP client configuration. Service requests can consume credits.
+  Firecrawl MCP is separate from Firecrawl CLI. Use a current Node LTS runtime;
+  Firecrawl and Neon require Node 22+, Azure requires Node 22+, and DBHub
+  requires Node 22.5+. MongoDB supports Node 20.19+, 22.13+, or 24+.
+- DBHub uses `@bytebase/dbhub`, not the unrelated unscoped package. Supabase's
+  canonical source is `supabase/mcp`. Azure (`azmcp`) and Kubernetes use native
+  optional npm packages for macOS/Linux/Windows x64 and arm64; retain optional
+  dependencies and satisfy upstream OS library requirements.
+- Hugging Face uses Python `huggingface-hub` and the `hf` executable. AWS
+  Documentation MCP uses the normalized uv package name
+  `awslabs-aws-documentation-mcp-server` while its executable retains dots:
+  `awslabs.aws-documentation-mcp-server`. An isolated Python 3.12 installation
+  verified this inventory mapping. Both require Python 3.10+.
+- Redis and Qdrant also publish Python 3.10+ distributions. Qdrant needs a
+  supported native embedding runtime; first use can download an embedding model.
+  Configure endpoints, collections, database permissions and model choices
+  separately. GitHub, Terraform and Grafana use macOS/Linux Homebrew formulas.
+- Set account/project/cluster scope, authentication, read-only settings and tool
+  selection before starting service MCP servers. Enabled tools may modify
+  resources. Installing a package does not register an MCP client, authenticate,
+  start services, provision resources or perform database operations.
+
 ## Inclusion announcements
 
 The catalog update pull request records upstream announcements with links and
@@ -164,7 +194,8 @@ The initial ENGIN-2 outreach record is on
 The [ENGIN-4 completion record](https://github.com/kevinelliott/agentmanager/pull/69#issuecomment-6247777800)
 covers its 64 recent additions. The [ENGIN-5 record](https://github.com/kevinelliott/agentmanager/pull/70#issuecomment-6248132465)
 covers 84 additions. The [ENGIN-6 record](https://github.com/kevinelliott/agentmanager/pull/71#issuecomment-6248466338)
-covers 104 additions. The ENGIN-7 update expands that audit to 124 additions
-across ENGIN-2 through ENGIN-7, preserving existing notices without duplicates.
+covers 104 additions. The [ENGIN-7 record](https://github.com/kevinelliott/agentmanager/pull/72#issuecomment-6248707616)
+covers 124 additions. The ENGIN-8 update expands the audit to 144 additions
+across ENGIN-2 through ENGIN-8, preserving existing notices without duplicates.
 The update PR records new announcements, unsuitable venues and any denied
 posting permissions.
