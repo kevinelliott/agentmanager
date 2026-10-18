@@ -1,6 +1,6 @@
 # Catalog research and update records
 
-AgentManager ships with 269 catalog entries in catalog version 1.0.87. The
+AgentManager ships with 289 catalog entries in catalog version 1.0.88. The
 [root catalog](../../catalog.json) and [embedded catalog](../../pkg/catalog/catalog.json)
 contain the same definitions. The [supported agents table](../../README.md#supported-agents)
 lists each entry's ID and installation methods.
@@ -14,7 +14,7 @@ platforms and setup notes before installing it.
 Each research record captures the canonical GitHub repository and repository ID,
 star count and verification time, recent activity evidence, upstream installation
 source, distribution version, executable names, supported platforms and relevance.
-The seven batches below required at least 100 stars and activity within the two
+The eight batches below required at least 100 stars and activity within the two
 months before verification. Star counts and distribution versions are snapshots.
 
 | Issue | Added | Catalog version | Evidence |
@@ -26,6 +26,7 @@ months before verification. Star counts and distribution versions are snapshots.
 | ENGIN-6 | 20 | 1.0.85 | [October 18 latest research](research-2026-10-18-engin-6.csv) |
 | ENGIN-7 | 20 | 1.0.86 | [October 18 expanded research](research-2026-10-18-engin-7.csv) |
 | ENGIN-8 | 20 | 1.0.87 | [October 18 MCP and CLI research](research-2026-10-18-engin-8.csv) |
+| ENGIN-9 | 20 | 1.0.88 | [October 18 evaluation and MCP research](research-2026-10-18-engin-9.csv) |
 
 Recent activity is identified as a default-branch commit or a repository push in
 the CSV. A push record does not imply that the default branch changed recently.
@@ -180,6 +181,50 @@ The ENGIN-8 batch adds browser verification, research and service MCP tools:
   resources. Installing a package does not register an MCP client, authenticate,
   start services, provision resources or perform database operations.
 
+The ENGIN-9 batch adds evaluation, observability, notebooks and service tools:
+
+- Harbor uses Python `harbor` from `harbor-framework/harbor`, the Terminal-Bench
+  creators' agent evaluation framework. It needs Python 3.12+ and also publishes
+  `hb` and `hr`. SWE-ReX installs `swe-rex` and exposes `swerex-remote`, a remote
+  shell runtime rather than an agent. These methods target macOS/Linux; Windows
+  users can use WSL. Select Docker/cloud environments and credentials explicitly.
+- BrowserTools MCP uses `@agentdeskai/browser-tools-mcp` and Node 22.19+.
+  Version 2 includes its connector; load the Chrome DevTools extension and
+  configure the MCP client separately. Capture begins when DevTools opens on
+  a selected session. MCP for Blender is now `mcp-for-blender` from
+  `ahujasid/mcp-for-blender`. Install and enable the Blender addon separately.
+  Setup commands can edit client/addon files. Minimal anonymous usage telemetry
+  is enabled by default; content collection requires opt-in. Set
+  `DISABLE_TELEMETRY=true` to disable all telemetry.
+- MCP Toolbox uses Homebrew `mcp-toolbox` but runs as `toolbox`; check for
+  conflicts such as KaHIP. Neo4j uses Homebrew `neo4j-mcp`; current bottles cover
+  Apple silicon macOS and x64/arm64 Linux, with source builds on other supported
+  Homebrew hosts. Configure database access, toolsets and read-only settings.
+- ClickHouse installs its base integration; embedded chDB needs the optional
+  `chdb` extra. MotherDuck MCP also supports local DuckDB and defaults to
+  read-only file connections. The community MCP Atlassian server is distinct
+  from Atlassian's hosted remote service. Airtable and Resend need scoped
+  credentials and explicit client configuration; enabled tools can modify data
+  or send email. Resend uses `resend-mcp` and Node 22+.
+- ContextForge uses `mcp-contextforge-gateway` and the `mcpgateway` command.
+  It needs Python 3.12–3.13 and this method targets macOS/Linux (WSL on Windows).
+  Generate secrets and configure authentication, storage and upstream access
+  before starting it. Jupyter MCP uses normalized `jupyter-mcp-server`, also
+  supplying `jupyter-mcp`; notebook extensions, server authentication, kernels
+  and optional sandbox provider extras require separate setup.
+- Open WebUI uses the Python `open-webui` distribution and Python 3.11–3.12;
+  select a compatible interpreter with `UV_PYTHON=3.12`. Configure storage,
+  authentication and model/tool providers before startup. First use may download
+  embedding models. LitServe installs `litserve` plus a `lightning` alias;
+  define services and install their model/framework dependencies separately.
+- Logfire's `logfire` package includes the CLI; `logfire-sdk` alone does not.
+  Opik, MLflow and Weights and Biases install their base CLIs. Configure tracing
+  destinations, projects, authentication/offline modes and instrumentation
+  explicitly. MLflow MCP/GenAI extras are separate, and `wandb` also installs
+  `wb`. Prefect's published package supports Python 3.10–3.14 while current
+  development requires 3.11+. Optional integrations, worker startup, flow runs,
+  evaluations, artifact uploads and service deployment remain explicit steps.
+
 ## Inclusion announcements
 
 The catalog update pull request records upstream announcements with links and
@@ -195,7 +240,8 @@ The [ENGIN-4 completion record](https://github.com/kevinelliott/agentmanager/pul
 covers its 64 recent additions. The [ENGIN-5 record](https://github.com/kevinelliott/agentmanager/pull/70#issuecomment-6248132465)
 covers 84 additions. The [ENGIN-6 record](https://github.com/kevinelliott/agentmanager/pull/71#issuecomment-6248466338)
 covers 104 additions. The [ENGIN-7 record](https://github.com/kevinelliott/agentmanager/pull/72#issuecomment-6248707616)
-covers 124 additions. The ENGIN-8 update expands the audit to 144 additions
-across ENGIN-2 through ENGIN-8, preserving existing notices without duplicates.
+covers 124 additions. The [ENGIN-8 record](https://github.com/kevinelliott/agentmanager/pull/73#issuecomment-6248942295)
+covers 144 additions. The ENGIN-9 update expands the audit to 164 additions
+across ENGIN-2 through ENGIN-9, preserving existing notices without duplicates.
 The update PR records new announcements, unsuitable venues and any denied
 posting permissions.

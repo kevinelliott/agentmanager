@@ -1,7 +1,7 @@
 {
-  "version": "1.0.87",
+  "version": "1.0.88",
   "schema_version": 1,
-  "last_updated": "2026-10-18T10:41:17.264180+00:00",
+  "last_updated": "2026-10-18T11:13:48.618011+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -14067,6 +14067,1022 @@
         "vendor": "grafana",
         "notes": "Uses the macOS/Linux Homebrew CLI formula. Configure the Grafana URL, service-account token, permissions, datasource/tool selection and MCP client explicitly. Enabled tools can query telemetry or modify dashboards/resources; installation does not connect or start the server.",
         "license": "Apache-2.0"
+      }
+    },
+    "mcp-toolbox": {
+      "id": "mcp-toolbox",
+      "name": "MCP Toolbox for Databases",
+      "description": "Connects agents to configured databases using reusable MCP toolsets",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/googleapis/mcp-toolbox",
+      "repository": "https://github.com/googleapis/mcp-toolbox",
+      "documentation": "https://github.com/googleapis/mcp-toolbox#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "mcp-toolbox",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install mcp-toolbox",
+          "update_cmd": "brew upgrade mcp-toolbox",
+          "uninstall_cmd": "brew uninstall mcp-toolbox",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "toolbox"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/googleapis/mcp-toolbox/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "16678",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOMGbPlg",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/googleapis/mcp-toolbox/commit/6d46c5f39df8088cd275d7efd5104149eb7c751d",
+        "vendor": "googleapis",
+        "notes": "Uses the macOS/Linux Homebrew formula and toolbox executable; it conflicts with other toolbox binaries such as KaHIP. Configure database sources, credentials, permissions, toolsets and the MCP client separately. Choose prebuilt tools or a tools configuration explicitly. Installation does not connect to databases or start the server.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcp-atlassian": {
+      "id": "mcp-atlassian",
+      "name": "MCP Atlassian",
+      "description": "Provides Jira and Confluence project context and tools to agent clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/sooperset/mcp-atlassian",
+      "repository": "https://github.com/sooperset/mcp-atlassian",
+      "documentation": "https://github.com/sooperset/mcp-atlassian#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-atlassian",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-atlassian",
+          "update_cmd": "uv tool upgrade mcp-atlassian",
+          "uninstall_cmd": "uv tool uninstall mcp-atlassian",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-atlassian"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sooperset/mcp-atlassian/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "6014",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDONYN7OA",
+        "recent_activity_date": "2026-09-19",
+        "recent_activity_url": "https://github.com/sooperset/mcp-atlassian/commit/0a5d2427144d72f5aade07d4fabd385421cec401",
+        "vendor": "sooperset",
+        "notes": "Requires Python 3.10+. This is the community sooperset server, distinct from Atlassian hosted remote MCP. Configure Jira/Confluence endpoints, authentication, permissions, read-only/tool settings and MCP client separately. Enabled tools can modify issues or pages; installation does not connect to a workspace.",
+        "license": "MIT"
+      }
+    },
+    "clickhouse-mcp": {
+      "id": "clickhouse-mcp",
+      "name": "ClickHouse MCP Server",
+      "description": "Provides ClickHouse query and analytics tools to agent MCP clients",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/ClickHouse/mcp-clickhouse",
+      "repository": "https://github.com/ClickHouse/mcp-clickhouse",
+      "documentation": "https://github.com/ClickHouse/mcp-clickhouse#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-clickhouse",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-clickhouse",
+          "update_cmd": "uv tool upgrade mcp-clickhouse",
+          "uninstall_cmd": "uv tool uninstall mcp-clickhouse",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-clickhouse"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ClickHouse/mcp-clickhouse/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "889",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDONiKCTA",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/ClickHouse/mcp-clickhouse/commit/37edacdc91957174ab11b5f9c1004bd231f926bd",
+        "vendor": "ClickHouse",
+        "notes": "Requires Python 3.10+. This method installs the base ClickHouse server integration; embedded chDB needs the separate chdb extra. Configure endpoints, credentials, database access and MCP client explicitly. Query execution and server startup are separate operations.",
+        "license": "Apache-2.0"
+      }
+    },
+    "motherduck-mcp": {
+      "id": "motherduck-mcp",
+      "name": "MotherDuck and DuckDB MCP",
+      "description": "Provides agent tools for local DuckDB data and MotherDuck analytics",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/motherduckdb/mcp-server-motherduck",
+      "repository": "https://github.com/motherduckdb/mcp-server-motherduck",
+      "documentation": "https://github.com/motherduckdb/mcp-server-motherduck#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-server-motherduck",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-server-motherduck",
+          "update_cmd": "uv tool upgrade mcp-server-motherduck",
+          "uninstall_cmd": "uv tool uninstall mcp-server-motherduck",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-server-motherduck"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/motherduckdb/mcp-server-motherduck/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "532",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDONczgWA",
+        "recent_activity_date": "2026-10-07",
+        "recent_activity_url": "https://github.com/motherduckdb/mcp-server-motherduck/commit/41acb581d9bc04e427655ba5178b2c5c01f68cd2",
+        "vendor": "motherduckdb",
+        "notes": "Requires Python 3.10+ and compatible DuckDB native wheels. Choose a local database path or MotherDuck endpoint/token and configure the MCP client separately. File connections are read-only by default; enabling writes or database switching is explicit. Installation does not create or open a database.",
+        "license": "MIT"
+      }
+    },
+    "neo4j-mcp": {
+      "id": "neo4j-mcp",
+      "name": "Neo4j MCP Server",
+      "description": "Provides graph schema discovery and Cypher tools to agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/neo4j/mcp",
+      "repository": "https://github.com/neo4j/mcp",
+      "documentation": "https://github.com/neo4j/mcp#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "neo4j-mcp",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install neo4j-mcp",
+          "update_cmd": "brew upgrade neo4j-mcp",
+          "uninstall_cmd": "brew uninstall neo4j-mcp",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "neo4j-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/neo4j/mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "300",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOPhD2ig",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/neo4j/mcp/commit/362f6b35a5677e9ec0076b57d8c6e2135d31e687",
+        "vendor": "neo4j",
+        "notes": "Uses the official macOS/Linux Homebrew CLI formula. Current bottles cover Apple silicon macOS and x64/arm64 Linux; other supported Homebrew hosts may need a Go source build. Configure the Neo4j URI, authentication, database, read-only mode, telemetry preference and MCP client separately. Installation does not start Neo4j or execute queries."
+      }
+    },
+    "airtable-mcp": {
+      "id": "airtable-mcp",
+      "name": "Airtable MCP Server",
+      "description": "Provides scoped Airtable record and schema tools to agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/domdomegg/airtable-mcp-server",
+      "repository": "https://github.com/domdomegg/airtable-mcp-server",
+      "documentation": "https://github.com/domdomegg/airtable-mcp-server#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "airtable-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g airtable-mcp-server",
+          "update_cmd": "npm update -g airtable-mcp-server",
+          "uninstall_cmd": "npm uninstall -g airtable-mcp-server",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "airtable-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/domdomegg/airtable-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "455",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDONcr9ig",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/domdomegg/airtable-mcp-server/commit/b28244860d90b28dffa3a0c9db0784e461e028b9",
+        "vendor": "domdomegg",
+        "notes": "Use a current Node LTS runtime for SDK dependencies. Configure an Airtable personal access token, allowed bases/scopes, tool permissions and MCP client separately. Enabled tools can modify records or schemas; installation does not access Airtable or start the server.",
+        "license": "MIT"
+      }
+    },
+    "mcp-for-blender": {
+      "id": "mcp-for-blender",
+      "name": "MCP for Blender",
+      "description": "Connects agents to Blender scene inspection and scripted content creation",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/ahujasid/mcp-for-blender",
+      "repository": "https://github.com/ahujasid/mcp-for-blender",
+      "documentation": "https://github.com/ahujasid/mcp-for-blender#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-for-blender",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-for-blender",
+          "update_cmd": "uv tool upgrade mcp-for-blender",
+          "uninstall_cmd": "uv tool uninstall mcp-for-blender",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-for-blender"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ahujasid/mcp-for-blender/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "31479",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOOEqgHw",
+        "recent_activity_date": "2026-10-06",
+        "recent_activity_url": "https://github.com/ahujasid/mcp-for-blender/commit/7a0373ec9199183cb460068c4f96aed9c579fb4f",
+        "vendor": "ahujasid",
+        "notes": "Requires Python 3.10+ and Blender 3.0+ with its addon installed, enabled and connected separately. The current package/repository are mcp-for-blender, renamed from blender-mcp. Setup commands can edit client configuration and addon files; run them explicitly. Minimal anonymous usage telemetry is enabled by default; content collection needs opt-in. Set DISABLE_TELEMETRY=true to disable all telemetry. Tool execution can run Python in Blender.",
+        "license": "MIT"
+      }
+    },
+    "browser-tools-mcp": {
+      "id": "browser-tools-mcp",
+      "name": "BrowserTools MCP",
+      "description": "Streams browser diagnostics and Lighthouse audits into coding-agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/AgentDeskAI/browser-tools-mcp",
+      "repository": "https://github.com/AgentDeskAI/browser-tools-mcp",
+      "documentation": "https://github.com/AgentDeskAI/browser-tools-mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@agentdeskai/browser-tools-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @agentdeskai/browser-tools-mcp",
+          "update_cmd": "npm update -g @agentdeskai/browser-tools-mcp",
+          "uninstall_cmd": "npm uninstall -g @agentdeskai/browser-tools-mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "browser-tools-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/AgentDeskAI/browser-tools-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7327",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDON3H_uQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/AgentDeskAI/browser-tools-mcp/commit/349129ed6f87abff8f3154cc11dfb13b4e869cce",
+        "vendor": "AgentDeskAI",
+        "notes": "Requires Node 22.19+ and Chrome with the upstream DevTools extension. The current 2.x server includes its connector; no separate connector server is required. Load the extension and configure the MCP client explicitly. Opening DevTools begins capture of the inspected session, which can contain application content. Installation does not install the extension or start capture.",
+        "license": "MIT"
+      }
+    },
+    "swe-rex": {
+      "id": "swe-rex",
+      "name": "SWE-ReX Remote Runtime",
+      "description": "Serves interactive shell execution environments for coding agents",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/SWE-agent/SWE-ReX",
+      "repository": "https://github.com/SWE-agent/SWE-ReX",
+      "documentation": "https://github.com/SWE-agent/SWE-ReX#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "swe-rex",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install swe-rex",
+          "update_cmd": "uv tool upgrade swe-rex",
+          "uninstall_cmd": "uv tool uninstall swe-rex",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "swerex-remote"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/SWE-agent/SWE-ReX/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "620",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDONAPrmw",
+        "recent_activity_date": "2026-10-12",
+        "recent_activity_url": "https://api.github.com/repos/SWE-agent/SWE-ReX",
+        "vendor": "SWE-agent",
+        "notes": "Requires Python 3.10+. This entry exposes the swe-rex remote runtime CLI, swerex-remote, rather than a coding agent. The catalog targets macOS/Linux POSIX shell environments; Windows users can run inside WSL. Configure runtime isolation, access and any Docker/cloud backend explicitly. Optional provider extras are separate; installation does not start a command service.",
+        "license": "MIT"
+      }
+    },
+    "opik": {
+      "id": "opik",
+      "name": "Opik CLI",
+      "description": "Configures agent tracing, evaluation and Opik service integrations",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/comet-ml/opik",
+      "repository": "https://github.com/comet-ml/opik",
+      "documentation": "https://github.com/comet-ml/opik#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "opik",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install opik",
+          "update_cmd": "uv tool upgrade opik",
+          "uninstall_cmd": "uv tool uninstall opik",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "opik"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/comet-ml/opik/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "22700",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOJhWgDg",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/comet-ml/opik/commit/535e6110129e81552677c41e93859e4d8a677e72",
+        "vendor": "comet-ml",
+        "notes": "Requires Python 3.10+. The opik distribution includes its CLI; configure a chosen self-hosted endpoint or Comet credentials/workspace separately. Instrumentation, model-backed evaluation and MCP client registration are explicit steps. Installing the CLI does not deploy the Opik backend or upload application traces.",
+        "license": "Apache-2.0"
+      }
+    },
+    "litserve": {
+      "id": "litserve",
+      "name": "LitServe CLI",
+      "description": "Builds and serves custom inference and agent pipeline APIs",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/Lightning-AI/LitServe",
+      "repository": "https://github.com/Lightning-AI/LitServe",
+      "documentation": "https://github.com/Lightning-AI/LitServe#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "litserve",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install litserve",
+          "update_cmd": "uv tool upgrade litserve",
+          "uninstall_cmd": "uv tool uninstall litserve",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "litserve"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Lightning-AI/LitServe/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3955",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOK44GuA",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/Lightning-AI/LitServe/commit/68c4943be1eeabd18561ac6704b6043459d6fa40",
+        "vendor": "Lightning-AI",
+        "notes": "Requires Python 3.10+. The litserve package supplies litserve and also a lightning executable; check alias conflicts. Define service code and install model/framework dependencies in its selected environment separately. Model downloads, GPU setup, service startup and cloud deployment are explicit operations.",
+        "license": "Apache-2.0"
+      }
+    },
+    "prefect": {
+      "id": "prefect",
+      "name": "Prefect CLI",
+      "description": "Orchestrates and observes scheduled agent workflows and task execution",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/PrefectHQ/prefect",
+      "repository": "https://github.com/PrefectHQ/prefect",
+      "documentation": "https://github.com/PrefectHQ/prefect#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "prefect",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install prefect",
+          "update_cmd": "uv tool upgrade prefect",
+          "uninstall_cmd": "uv tool uninstall prefect",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "prefect"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/PrefectHQ/prefect/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "24034",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxMzkxOTk2ODQ=",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/PrefectHQ/prefect/commit/87b5243845e733ed938b21cf7b9aeda6d6a4e194",
+        "vendor": "PrefectHQ",
+        "notes": "The published package supports Python 3.10 through 3.14; current upstream development requires Python 3.11+. Configure a self-hosted API or cloud account, storage, work pools and deployment credentials separately. Optional integration packages are separate. Starting workers, running flows and deploying infrastructure are explicit operations.",
+        "license": "Apache-2.0"
+      }
+    },
+    "open-webui": {
+      "id": "open-webui",
+      "name": "Open WebUI CLI",
+      "description": "Serves a self-hosted interface for model conversations and agent tool workflows",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/open-webui/open-webui",
+      "repository": "https://github.com/open-webui/open-webui",
+      "documentation": "https://github.com/open-webui/open-webui#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "open-webui",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install open-webui",
+          "update_cmd": "uv tool upgrade open-webui",
+          "uninstall_cmd": "uv tool uninstall open-webui",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "open-webui"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/open-webui/open-webui/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "156029",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOKdDCcw",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/open-webui/open-webui/commit/91ea4e3421d1d8069f13d4a463fcb5986d94ea60",
+        "vendor": "open-webui",
+        "notes": "Requires Python 3.11 or 3.12; set UV_PYTHON=3.12 when installing to select a compatible interpreter. The Python open-webui distribution supplies the server CLI, distinct from the source frontend npm workspace. Native dependencies can impose OS/architecture limits. Configure authentication, storage, providers and tools separately. Service startup and any first-use embedding/model downloads are explicit steps."
+      }
+    },
+    "resend-mcp": {
+      "id": "resend-mcp",
+      "name": "Resend MCP Server",
+      "description": "Provides configured email and Resend account tools to agent MCP clients",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/resend/resend-mcp",
+      "repository": "https://github.com/resend/resend-mcp",
+      "documentation": "https://github.com/resend/resend-mcp#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "resend-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g resend-mcp",
+          "update_cmd": "npm update -g resend-mcp",
+          "uninstall_cmd": "npm uninstall -g resend-mcp",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "resend-mcp"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/resend/resend-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "576",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDON-gcNQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/resend/resend-mcp/commit/d1e33d59e4b35038ef7ca6f557a6795e4c18bf4a",
+        "vendor": "resend",
+        "notes": "Requires Node 22+. Uses the current resend-mcp package from resend/resend-mcp. Configure a Resend API key, verified sender/domain, account scopes, enabled tools and MCP client separately. Enabled operations can send email or modify account resources; installation does not authenticate, send messages or start the server.",
+        "license": "MIT"
+      }
+    },
+    "contextforge": {
+      "id": "contextforge",
+      "name": "IBM ContextForge Gateway",
+      "description": "Federates agent MCP tools through a configurable gateway and administration service",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/IBM/mcp-context-forge",
+      "repository": "https://github.com/IBM/mcp-context-forge",
+      "documentation": "https://github.com/IBM/mcp-context-forge#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-contextforge-gateway",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install mcp-contextforge-gateway",
+          "update_cmd": "uv tool upgrade mcp-contextforge-gateway",
+          "uninstall_cmd": "uv tool uninstall mcp-contextforge-gateway",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcpgateway"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/IBM/mcp-context-forge/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4647",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOOmfhRw",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/IBM/mcp-context-forge/commit/86af292eeea89c155b437758b52e3b4b83fb9702",
+        "vendor": "IBM",
+        "notes": "Requires Python 3.12 or 3.13. This catalog method targets macOS/Linux; Windows users can run inside WSL. The base package supplies mcpgateway plus cforge, mcpplugins, init-secrets and mcpgateway-server aliases. Configure generated secrets, authentication, storage and upstream tool access before service startup. Optional plugins/backends need separate dependencies; installation does not start or expose a gateway.",
+        "license": "Apache-2.0"
+      }
+    },
+    "jupyter-mcp": {
+      "id": "jupyter-mcp",
+      "name": "Jupyter MCP Server",
+      "description": "Gives agents configured notebook editing and kernel execution tools",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/datalayer/jupyter-mcp-server",
+      "repository": "https://github.com/datalayer/jupyter-mcp-server",
+      "documentation": "https://github.com/datalayer/jupyter-mcp-server#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "jupyter-mcp-server",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install jupyter-mcp-server",
+          "update_cmd": "uv tool upgrade jupyter-mcp-server",
+          "uninstall_cmd": "uv tool uninstall jupyter-mcp-server",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "jupyter-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/datalayer/jupyter-mcp-server/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1305",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDON4OHLw",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/datalayer/jupyter-mcp-server/commit/ef47e8b9c9bfce1a23265831a1ad80f94d58bb85",
+        "vendor": "datalayer",
+        "notes": "Requires Python 3.10+ and compatible native dependencies. The normalized jupyter-mcp-server distribution also supplies jupyter-mcp. Configure the notebook server, authentication/token, collaborative notebook extensions and MCP client separately. Optional sandbox providers need their own extras/credentials. Enabled tools can execute notebook code; installation does not start kernels or provision a sandbox.",
+        "license": "BSD-3-Clause"
+      }
+    },
+    "logfire": {
+      "id": "logfire",
+      "name": "Pydantic Logfire CLI",
+      "description": "Configures tracing and observability for agent and language-model applications",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/pydantic/logfire",
+      "repository": "https://github.com/pydantic/logfire",
+      "documentation": "https://github.com/pydantic/logfire#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "logfire",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install logfire",
+          "update_cmd": "uv tool upgrade logfire",
+          "uninstall_cmd": "uv tool uninstall logfire",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "logfire"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/pydantic/logfire/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4518",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOLyFVuA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/pydantic/logfire/commit/ac9722e5193160b9cc1e666721053e06c7abf0dc",
+        "vendor": "pydantic",
+        "notes": "Requires Python 3.10+. Install logfire for its CLI; logfire-sdk alone does not supply this command. Authenticate and select a project/endpoint, then instrument the application explicitly. Framework-specific integrations can need optional extras. Traces may contain application/model content sent to the configured destination; installation does not add instrumentation or submit traces.",
+        "license": "MIT"
+      }
+    },
+    "mlflow": {
+      "id": "mlflow",
+      "name": "MLflow CLI",
+      "description": "Tracks, evaluates and serves models and agent applications through MLflow",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/mlflow/mlflow",
+      "repository": "https://github.com/mlflow/mlflow",
+      "documentation": "https://github.com/mlflow/mlflow#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mlflow",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mlflow",
+          "update_cmd": "uv tool upgrade mlflow",
+          "uninstall_cmd": "uv tool uninstall mlflow",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mlflow"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mlflow/mlflow/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "28434",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxMzYyMDI2OTU=",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/mlflow/mlflow/commit/cb1e3747ce6bb0024fb55a88a5b8238baec0acfe",
+        "vendor": "mlflow",
+        "notes": "Requires Python 3.10+ and compatible scientific/native dependencies. This method installs the base mlflow distribution and its CLI; MCP, GenAI gateway and provider-specific extras are separate. Configure tracking/artifact storage, authentication, model providers and serving environments explicitly. Installation does not start a server, run evaluations or deploy models.",
+        "license": "Apache-2.0"
+      }
+    },
+    "harbor": {
+      "id": "harbor",
+      "name": "Harbor Agent Evaluation CLI",
+      "description": "Runs agent benchmarks and evaluation environments for coding-agent comparison",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/harbor-framework/harbor",
+      "repository": "https://github.com/harbor-framework/harbor",
+      "documentation": "https://github.com/harbor-framework/harbor#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "harbor",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "uv tool install harbor",
+          "update_cmd": "uv tool upgrade harbor",
+          "uninstall_cmd": "uv tool uninstall harbor",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "harbor"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/harbor-framework/harbor/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "6208",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "R_kgDOPYWqYw",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/harbor-framework/harbor/commit/7331d8a3e23cb72e8277522059ff7c9ab9435d90",
+        "vendor": "harbor-framework",
+        "notes": "Requires Python 3.12+. This is harbor-framework/harbor from the Terminal-Bench creators, not the container registry project; the package also installs hb and hr aliases. The catalog targets macOS/Linux; Windows users can run inside WSL. Select datasets, agents, model credentials and Docker or a supported cloud environment explicitly. Runs can consume compute/provider credits; installation does not launch benchmarks or provision environments.",
+        "license": "Apache-2.0"
+      }
+    },
+    "wandb": {
+      "id": "wandb",
+      "name": "Weights and Biases CLI",
+      "description": "Tracks agent experiments, evaluation runs and model artifacts",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/wandb/wandb",
+      "repository": "https://github.com/wandb/wandb",
+      "documentation": "https://github.com/wandb/wandb#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "wandb",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install wandb",
+          "update_cmd": "uv tool upgrade wandb",
+          "uninstall_cmd": "uv tool uninstall wandb",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "wandb"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/wandb/wandb/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "11300",
+        "github_stars_checked_at": "2026-10-18T11:13:48.618011+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnk4NjAzMTY3NA==",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/wandb/wandb/commit/047eba94f1e461d8469ca1320161bbdb4c0035f6",
+        "vendor": "wandb",
+        "notes": "Requires Python 3.10+ and compatible platform wheels. The wandb distribution supplies wandb and the wb alias. Configure login or offline mode, project scope and artifact destinations separately. Application instrumentation, sweeps and synchronization are explicit operations; selected runs/artifacts can be uploaded to the configured service. Installation does not start experiments or upload data.",
+        "license": "MIT"
       }
     }
   }
