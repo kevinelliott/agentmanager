@@ -1,7 +1,7 @@
 {
-  "version": "1.0.81",
+  "version": "1.0.82",
   "schema_version": 1,
-  "last_updated": "2026-10-16T13:50:40Z",
+  "last_updated": "2026-10-18T07:18:54.864666+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -7895,6 +7895,1070 @@
         "recent_activity_url": "https://github.com/feder-cr/git-ai/releases/tag/v0.1.0",
         "vendor": "feder-cr",
         "install_note": "Early v0.1.0 source build; not Anthropic Scion. Builds bundled Git and links graft into ~/.local/bin. Requires Go 1.26, a C toolchain, Meson and Ninja. Configure and run a Graft server separately; no version probe is run."
+      }
+    },
+    "mini-swe-agent": {
+      "id": "mini-swe-agent",
+      "name": "Mini SWE Agent",
+      "description": "Lightweight terminal coding agent that fixes repository issues using shell tools",
+      "category": "coding",
+      "tags": [
+        "coding",
+        "autonomous",
+        "terminal"
+      ],
+      "homepage": "https://github.com/SWE-agent/mini-swe-agent",
+      "repository": "https://github.com/SWE-agent/mini-swe-agent",
+      "documentation": "https://github.com/SWE-agent/mini-swe-agent#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mini-swe-agent",
+          "command": "uv tool install mini-swe-agent",
+          "update_cmd": "uv tool upgrade mini-swe-agent",
+          "uninstall_cmd": "uv tool uninstall mini-swe-agent",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mini-swe-agent",
+          "mini"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/SWE-agent/mini-swe-agent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "8610",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOPDg-Zg",
+        "recent_activity_date": "2026-09-03",
+        "recent_activity_url": "https://github.com/SWE-agent/mini-swe-agent/commit/04d809ceab9df28f9adaed044884180159172930",
+        "vendor": "SWE-agent",
+        "notes": "Requires Python 3.10+. Configure a model provider separately. Inventory reads the mini-swe-agent package version.",
+        "license": "MIT"
+      }
+    },
+    "openspec": {
+      "id": "openspec",
+      "name": "OpenSpec",
+      "description": "Spec-driven development CLI for planning and coordinating AI coding changes",
+      "category": "coding",
+      "tags": [
+        "specifications",
+        "planning",
+        "coding"
+      ],
+      "homepage": "https://github.com/Fission-AI/OpenSpec",
+      "repository": "https://github.com/Fission-AI/OpenSpec",
+      "documentation": "https://github.com/Fission-AI/OpenSpec#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "openspec",
+          "command": "brew install openspec",
+          "update_cmd": "brew upgrade openspec",
+          "uninstall_cmd": "brew uninstall openspec",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        },
+        "npm": {
+          "method": "npm",
+          "package": "@fission-ai/openspec",
+          "command": "npm install -g @fission-ai/openspec",
+          "update_cmd": "npm update -g @fission-ai/openspec",
+          "uninstall_cmd": "npm uninstall -g @fission-ai/openspec",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=20.19.0",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "openspec"
+        ],
+        "version_cmd": "openspec --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Fission-AI/OpenSpec/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "72283",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOPYoUTA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/Fission-AI/OpenSpec/commit/c794978f4f8845ce59693373c9dd882ee776588c",
+        "vendor": "Fission-AI",
+        "notes": "Requires Node 20.19+. Run openspec init in each project separately to choose and configure coding-agent integrations.",
+        "license": "MIT"
+      }
+    },
+    "workmux": {
+      "id": "workmux",
+      "name": "Workmux",
+      "description": "Git worktree and tmux workflow manager for parallel terminal coding agents",
+      "category": "terminal",
+      "tags": [
+        "worktrees",
+        "tmux",
+        "orchestration"
+      ],
+      "homepage": "https://github.com/raine/workmux",
+      "repository": "https://github.com/raine/workmux",
+      "documentation": "https://github.com/raine/workmux#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "raine/workmux/workmux",
+          "command": "brew install raine/workmux/workmux",
+          "update_cmd": "brew upgrade raine/workmux/workmux",
+          "uninstall_cmd": "brew uninstall raine/workmux/workmux",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "workmux"
+        ],
+        "version_cmd": "workmux --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/raine/workmux/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2890",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQPV-KQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/raine/workmux/commit/16c9ecb5da576d68d93946a430dd471b7405a60d",
+        "vendor": "raine",
+        "notes": "Requires git and tmux (or a supported terminal multiplexer) for agent workflows. Run workmux setup separately to install optional hooks and skills.",
+        "license": "MIT"
+      }
+    },
+    "worktrunk": {
+      "id": "worktrunk",
+      "name": "Worktrunk",
+      "description": "Git worktree CLI designed for parallel AI coding agent workflows",
+      "category": "terminal",
+      "tags": [
+        "worktrees",
+        "git",
+        "orchestration"
+      ],
+      "homepage": "https://github.com/max-sixty/worktrunk",
+      "repository": "https://github.com/max-sixty/worktrunk",
+      "documentation": "https://github.com/max-sixty/worktrunk#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "worktrunk",
+          "command": "brew install worktrunk",
+          "update_cmd": "brew upgrade worktrunk",
+          "uninstall_cmd": "brew uninstall worktrunk",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "wt"
+        ],
+        "version_cmd": "wt --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/max-sixty/worktrunk/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "9280",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQEkLnw",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/max-sixty/worktrunk/commit/5e5c65b2bba5c97f84ef870f2e23ee9f2e81e529",
+        "vendor": "max-sixty",
+        "notes": "This entry manages the Homebrew wt CLI on macOS/Linux. Run wt config shell install separately for directory switching. Windows installation is omitted because wt conflicts with Windows Terminal; upstream offers git-wt through Winget."
+      }
+    },
+    "gastown": {
+      "id": "gastown",
+      "name": "Gas Town",
+      "description": "Multi-agent workspace manager with task dispatch and terminal agent coordination",
+      "category": "coding",
+      "tags": [
+        "orchestration",
+        "multi-agent",
+        "tmux"
+      ],
+      "homepage": "https://github.com/gastownhall/gastown",
+      "repository": "https://github.com/gastownhall/gastown",
+      "documentation": "https://github.com/gastownhall/gastown#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "gastown",
+          "command": "brew install gastown",
+          "update_cmd": "brew upgrade gastown",
+          "uninstall_cmd": "brew uninstall gastown",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "gt"
+        ],
+        "version_cmd": "gt version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/gastownhall/gastown/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "18403",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQpbhqA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://api.github.com/repos/gastownhall/gastown",
+        "vendor": "gastownhall",
+        "notes": "Manages the gt CLI only. Full workflows also require configured coding agents, tmux, Dolt and Beads. Review the upstream prerequisites and initialize a workspace separately.",
+        "license": "MIT"
+      }
+    },
+    "ccmanager": {
+      "id": "ccmanager",
+      "name": "CCManager",
+      "description": "Terminal session manager for Claude Code, Codex, Gemini and other coding agents",
+      "category": "terminal",
+      "tags": [
+        "sessions",
+        "multi-agent",
+        "worktrees"
+      ],
+      "homepage": "https://github.com/kbwo/ccmanager",
+      "repository": "https://github.com/kbwo/ccmanager",
+      "documentation": "https://github.com/kbwo/ccmanager#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "ccmanager",
+          "command": "npm install -g ccmanager",
+          "update_cmd": "npm update -g ccmanager",
+          "uninstall_cmd": "npm uninstall -g ccmanager",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ccmanager"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/kbwo/ccmanager/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1265",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOO3rA7Q",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/kbwo/ccmanager/commit/93c2d9020ddacd1e24dbea75f694918d049795d3",
+        "vendor": "kbwo",
+        "notes": "The npm package bundles native platform executables for macOS, Linux and Windows x64. Install and authenticate the coding agents you want to manage separately.",
+        "license": "MIT"
+      }
+    },
+    "agent-manager": {
+      "id": "agent-manager",
+      "name": "Agent Manager",
+      "description": "Tmux TUI for coding agent status, worktrees, prompts and diff review",
+      "category": "terminal",
+      "tags": [
+        "tmux",
+        "sessions",
+        "code-review"
+      ],
+      "homepage": "https://github.com/YoanWai/agent-manager",
+      "repository": "https://github.com/YoanWai/agent-manager",
+      "documentation": "https://github.com/YoanWai/agent-manager#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "agent-manager",
+          "command": "brew install agent-manager",
+          "update_cmd": "brew upgrade agent-manager",
+          "uninstall_cmd": "brew uninstall agent-manager",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agent-manager"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/YoanWai/agent-manager/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "602",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOTZhECQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/YoanWai/agent-manager/commit/a0bab132d5c4d0824cd49fa232ea622b35dd64cc",
+        "vendor": "YoanWai",
+        "notes": "YoanWai Agent Manager is a separate project from AgentManager (agentmgr). Homebrew installs its tmux dependency; git and authenticated agent CLIs are needed for workflows. This entry uses the macOS/Linux formula.",
+        "license": "Apache-2.0"
+      }
+    },
+    "ralphex": {
+      "id": "ralphex",
+      "name": "Ralphex",
+      "description": "Autonomous coding plan execution with fresh agent sessions and review loops",
+      "category": "coding",
+      "tags": [
+        "autonomous",
+        "planning",
+        "code-review"
+      ],
+      "homepage": "https://github.com/umputun/ralphex",
+      "repository": "https://github.com/umputun/ralphex",
+      "documentation": "https://github.com/umputun/ralphex#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "umputun/apps/ralphex",
+          "command": "brew install umputun/apps/ralphex",
+          "update_cmd": "brew upgrade umputun/apps/ralphex",
+          "uninstall_cmd": "brew uninstall umputun/apps/ralphex",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ralphex"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/umputun/ralphex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1501",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQ9H_YQ",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/umputun/ralphex/commit/53dc21452bd9310d3f5870499173ece0ff73e2d5",
+        "vendor": "umputun",
+        "notes": "Requires a supported coding executor such as Claude Code or Codex. Supply and review an implementation plan separately. The upstream Homebrew tap provides macOS/Linux binaries.",
+        "license": "MIT"
+      }
+    },
+    "oh-my-claudecode": {
+      "id": "oh-my-claudecode",
+      "name": "Oh My ClaudeCode",
+      "description": "Multi-agent orchestration and workflow CLI for Claude Code",
+      "category": "coding",
+      "tags": [
+        "claude-code",
+        "orchestration",
+        "multi-agent"
+      ],
+      "homepage": "https://github.com/Yeachan-Heo/oh-my-claudecode",
+      "repository": "https://github.com/Yeachan-Heo/oh-my-claudecode",
+      "documentation": "https://github.com/Yeachan-Heo/oh-my-claudecode#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "oh-my-claude-sisyphus",
+          "command": "npm install -g oh-my-claude-sisyphus",
+          "update_cmd": "npm update -g oh-my-claude-sisyphus",
+          "uninstall_cmd": "npm uninstall -g oh-my-claude-sisyphus",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=20",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "omc",
+          "oh-my-claudecode"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Yeachan-Heo/oh-my-claudecode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "40020",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQ2bIeQ",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/Yeachan-Heo/oh-my-claudecode/commit/6688a30e90d7285ff336af2dc5ab4b9709f1a8bc",
+        "vendor": "Yeachan-Heo",
+        "notes": "The project is branded oh-my-claudecode; its official npm package is oh-my-claude-sisyphus. Use Node 20 or 22 through 26, as declared by the package. Configure Claude Code and run omc setup separately. Native Windows team workflows require psmux; Unix team workflows use tmux.",
+        "license": "MIT"
+      }
+    },
+    "oh-my-codex": {
+      "id": "oh-my-codex",
+      "name": "Oh My Codex",
+      "description": "Agent team orchestration and workflow CLI for OpenAI Codex",
+      "category": "coding",
+      "tags": [
+        "codex",
+        "orchestration",
+        "multi-agent"
+      ],
+      "homepage": "https://github.com/Yeachan-Heo/oh-my-codex",
+      "repository": "https://github.com/Yeachan-Heo/oh-my-codex",
+      "documentation": "https://github.com/Yeachan-Heo/oh-my-codex#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "oh-my-codex",
+          "command": "npm install -g oh-my-codex",
+          "update_cmd": "npm update -g oh-my-codex",
+          "uninstall_cmd": "npm uninstall -g oh-my-codex",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=20",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "omx"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Yeachan-Heo/oh-my-codex/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "33567",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDORG3jag",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/Yeachan-Heo/oh-my-codex/commit/b4a0817e8ce2ec735ed154caeb6569c1be047419",
+        "vendor": "Yeachan-Heo",
+        "notes": "Requires an installed and authenticated Codex CLI. Run scoped omx setup separately before using workflows. This entry follows the upstream recommended macOS/Linux path; native Windows is not included.",
+        "license": "MIT"
+      }
+    },
+    "omo": {
+      "id": "omo",
+      "name": "OmO",
+      "description": "Terminal coding agent with multi-model workflows and parallel agent execution",
+      "category": "coding",
+      "tags": [
+        "coding",
+        "multi-agent",
+        "terminal"
+      ],
+      "homepage": "https://github.com/code-yeongyu/oh-my-openagent",
+      "repository": "https://github.com/code-yeongyu/oh-my-openagent",
+      "documentation": "https://github.com/code-yeongyu/oh-my-openagent#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "omo-ai",
+          "command": "npm install -g omo-ai",
+          "update_cmd": "npm update -g omo-ai",
+          "uninstall_cmd": "npm uninstall -g omo-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=24",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "omo"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/code-yeongyu/oh-my-openagent/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "70152",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQheEEQ",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/code-yeongyu/oh-my-openagent/commit/fb46adca8720130967cac60deb06b668523f17c5",
+        "vendor": "code-yeongyu",
+        "notes": "Formerly oh-my-opencode; the canonical repository is oh-my-openagent. The standalone omo command is published in the official omo-ai npm package, not the unrelated omo package. Requires Node 24+. Configure providers separately."
+      }
+    },
+    "ccstatusline": {
+      "id": "ccstatusline",
+      "name": "ccstatusline",
+      "description": "Customizable Claude Code status line with an interactive terminal configurator",
+      "category": "productivity",
+      "tags": [
+        "claude-code",
+        "monitoring",
+        "tui"
+      ],
+      "homepage": "https://github.com/sirmalloc/ccstatusline",
+      "repository": "https://github.com/sirmalloc/ccstatusline",
+      "documentation": "https://github.com/sirmalloc/ccstatusline#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "ccstatusline",
+          "command": "npm install -g ccstatusline",
+          "update_cmd": "npm update -g ccstatusline",
+          "uninstall_cmd": "npm uninstall -g ccstatusline",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=14",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ccstatusline"
+        ],
+        "version_cmd": "ccstatusline --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sirmalloc/ccstatusline/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "13320",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOPagTbA",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/sirmalloc/ccstatusline/commit/bed850187783904a9affcaba1dd80e967622e70b",
+        "vendor": "sirmalloc",
+        "notes": "Run the configuration TUI separately to choose status widgets and enable the Claude Code status line. Installing the package does not authorize changes to Claude Code settings.",
+        "license": "MIT"
+      }
+    },
+    "vibe-kanban": {
+      "id": "vibe-kanban",
+      "name": "Vibe Kanban",
+      "description": "Local coding-agent task orchestrator with isolated workspaces and a browser board",
+      "category": "coding",
+      "tags": [
+        "orchestration",
+        "worktrees",
+        "tasks"
+      ],
+      "homepage": "https://github.com/BloopAI/vibe-kanban",
+      "repository": "https://github.com/BloopAI/vibe-kanban",
+      "documentation": "https://github.com/BloopAI/vibe-kanban#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "vibe-kanban",
+          "command": "npm install -g vibe-kanban",
+          "update_cmd": "npm update -g vibe-kanban",
+          "uninstall_cmd": "npm uninstall -g vibe-kanban",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=20.19.0",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "vibe-kanban"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/BloopAI/vibe-kanban/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "28383",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOO7s21A",
+        "recent_activity_date": "2026-09-19",
+        "recent_activity_url": "https://github.com/BloopAI/vibe-kanban/commit/d5cbb5380fa0b32e98ef9b8d987f63decce4be3a",
+        "vendor": "BloopAI",
+        "notes": "The CLI launches the local server and browser interface. Authenticate supported coding agents separately. Version probing is disabled to avoid starting the application during detection; npm inventory supplies the package version.",
+        "license": "Apache-2.0"
+      }
+    },
+    "picoclaw": {
+      "id": "picoclaw",
+      "name": "PicoClaw",
+      "description": "Lightweight personal AI agent with command-line chat and tool execution",
+      "category": "productivity",
+      "tags": [
+        "assistant",
+        "automation",
+        "terminal"
+      ],
+      "homepage": "https://github.com/sipeed/picoclaw",
+      "repository": "https://github.com/sipeed/picoclaw",
+      "documentation": "https://github.com/sipeed/picoclaw#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "picoclaw",
+          "command": "brew install picoclaw",
+          "update_cmd": "brew upgrade picoclaw",
+          "uninstall_cmd": "brew uninstall picoclaw",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "picoclaw"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sipeed/picoclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "30088",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDORIcl9w",
+        "recent_activity_date": "2026-08-19",
+        "recent_activity_url": "https://github.com/sipeed/picoclaw/commit/bbf6893ca7afad27f1d00a0f5a45982a549c6ed6",
+        "vendor": "sipeed",
+        "notes": "This entry manages the Homebrew core CLI on macOS/Linux. Run onboarding and configure model providers or messaging channels separately; it does not install the launcher UI.",
+        "license": "MIT"
+      }
+    },
+    "nullclaw": {
+      "id": "nullclaw",
+      "name": "NullClaw",
+      "description": "Compact autonomous AI assistant runtime with a command-line gateway",
+      "category": "productivity",
+      "tags": [
+        "assistant",
+        "automation",
+        "gateway"
+      ],
+      "homepage": "https://github.com/nullclaw/nullclaw",
+      "repository": "https://github.com/nullclaw/nullclaw",
+      "documentation": "https://github.com/nullclaw/nullclaw#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "nullclaw",
+          "command": "brew install nullclaw",
+          "update_cmd": "brew upgrade nullclaw",
+          "uninstall_cmd": "brew uninstall nullclaw",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "nullclaw"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/nullclaw/nullclaw/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "8131",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDORR018w",
+        "recent_activity_date": "2026-10-05",
+        "recent_activity_url": "https://github.com/nullclaw/nullclaw/commit/5f1cade05c19b6ecdfb9565ae3305e892e484da9",
+        "vendor": "nullclaw",
+        "notes": "Homebrew supplies the self-contained macOS/Linux CLI. Provider configuration, onboarding and service installation are separate explicit steps.",
+        "license": "MIT"
+      }
+    },
+    "gajae-code": {
+      "id": "gajae-code",
+      "name": "Gajae Code",
+      "description": "Terminal coding agent with local tools, provider integrations and persistent sessions",
+      "category": "coding",
+      "tags": [
+        "coding",
+        "terminal",
+        "sessions"
+      ],
+      "homepage": "https://github.com/Yeachan-Heo/gajae-code",
+      "repository": "https://github.com/Yeachan-Heo/gajae-code",
+      "documentation": "https://github.com/Yeachan-Heo/gajae-code#readme",
+      "install_methods": {
+        "native": {
+          "method": "native",
+          "command": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://raw.githubusercontent.com/Yeachan-Heo/gajae-code/v0.15.3/scripts/install.sh)\nprintf '%s\\n' \"$agentmgr_installer_body\" | sh -s -- --channel stable",
+          "update_cmd": "set -eu\nagentmgr_installer_body=$(curl -fsSL https://raw.githubusercontent.com/Yeachan-Heo/gajae-code/v0.15.3/scripts/install.sh)\nprintf '%s\\n' \"$agentmgr_installer_body\" | sh -s -- --channel stable",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "curl",
+            "sh"
+          ],
+          "metadata": {
+            "installer_ref": "v0.15.3",
+            "channel": "stable"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "gjc"
+        ],
+        "version_cmd": "gjc --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/Yeachan-Heo/gajae-code/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3001",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOSoXRbQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/Yeachan-Heo/gajae-code/commit/e9179a14cb19d0f34e0da199f10f89793ddac60a",
+        "vendor": "Yeachan-Heo",
+        "notes": "Uses the upstream tagged installer to fetch the latest stable standalone binary and verify published SHA-256 checksums. Bun is not required. Supports macOS x64/arm64 and glibc Linux x64/arm64; Alpine/musl is excluded. Default location is ~/.local/bin/gjc. Provider setup is separate.",
+        "license": "MIT"
+      }
+    },
+    "mcporter": {
+      "id": "mcporter",
+      "name": "MCPorter",
+      "description": "CLI for discovering, calling and generating clients for MCP tools",
+      "category": "productivity",
+      "tags": [
+        "mcp",
+        "tools",
+        "integrations"
+      ],
+      "homepage": "https://github.com/openclaw/mcporter",
+      "repository": "https://github.com/openclaw/mcporter",
+      "documentation": "https://github.com/openclaw/mcporter#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mcporter",
+          "command": "npm install -g mcporter",
+          "update_cmd": "npm update -g mcporter",
+          "uninstall_cmd": "npm uninstall -g mcporter",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "node>=24",
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcporter"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openclaw/mcporter/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5069",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQPd19g",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/openclaw/mcporter/commit/90bb83f934cb68f5faf463461388135a20597293",
+        "vendor": "openclaw",
+        "notes": "Requires Node 24+. The canonical repository moved from steipete/mcporter to openclaw/mcporter. Review MCP server configuration and authentication separately before connecting tools.",
+        "license": "MIT"
+      }
+    },
+    "claude-code-templates": {
+      "id": "claude-code-templates",
+      "name": "Claude Code Templates",
+      "description": "CLI for managing Claude Code agents, commands, hooks and project templates",
+      "category": "productivity",
+      "tags": [
+        "claude-code",
+        "configuration",
+        "templates"
+      ],
+      "homepage": "https://github.com/davila7/claude-code-templates",
+      "repository": "https://github.com/davila7/claude-code-templates",
+      "documentation": "https://github.com/davila7/claude-code-templates#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "claude-code-templates",
+          "command": "npm install -g claude-code-templates",
+          "update_cmd": "npm update -g claude-code-templates",
+          "uninstall_cmd": "npm uninstall -g claude-code-templates",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "global_flag": "-g",
+          "prereqs": [
+            "npm"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "claude-code-templates",
+          "cct"
+        ],
+        "version_cmd": "claude-code-templates --version"
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/davila7/claude-code-templates/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "32719",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOPGh7XA",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/davila7/claude-code-templates/commit/161d49190aaf470077d52de4d294e30cc4cccf4f",
+        "vendor": "davila7",
+        "notes": "Installs the configuration CLI only. Run it separately to choose and review agents, hooks, settings, MCP integrations or project templates before applying them.",
+        "license": "MIT"
+      }
+    },
+    "tuicr": {
+      "id": "tuicr",
+      "name": "tuicr",
+      "description": "Terminal review interface for AI-generated diffs with structured review comments",
+      "category": "coding",
+      "tags": [
+        "code-review",
+        "diff",
+        "tui"
+      ],
+      "homepage": "https://github.com/agavra/tuicr",
+      "repository": "https://github.com/agavra/tuicr",
+      "documentation": "https://github.com/agavra/tuicr#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "tuicr",
+          "command": "brew install tuicr",
+          "update_cmd": "brew upgrade tuicr",
+          "uninstall_cmd": "brew uninstall tuicr",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "tuicr"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/agavra/tuicr/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3403",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOQ1yO_A",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/agavra/tuicr/commit/da33555aa40f0a42281e4016a42cda978b5f1764",
+        "vendor": "agavra",
+        "notes": "This entry uses the macOS/Linux Homebrew formula. Open a repository or diff explicitly to review agent-generated changes and export review feedback.",
+        "license": "MIT"
+      }
+    },
+    "spec-kit": {
+      "id": "spec-kit",
+      "name": "Spec Kit",
+      "description": "GitHub specification and workflow CLI for AI coding agent projects",
+      "category": "coding",
+      "tags": [
+        "specifications",
+        "planning",
+        "workflows"
+      ],
+      "homepage": "https://github.com/github/spec-kit",
+      "repository": "https://github.com/github/spec-kit",
+      "documentation": "https://github.com/github/spec-kit#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "specify-cli",
+          "command": "uv tool install specify-cli",
+          "update_cmd": "uv tool upgrade specify-cli",
+          "uninstall_cmd": "uv tool uninstall specify-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "specify"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/github/spec-kit/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "141709",
+        "github_stars_checked_at": "2026-10-18T07:18:54.864666+00:00",
+        "github_repository_id": "R_kgDOPiFCnQ",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/github/spec-kit/commit/c6a4c18f1d01a8bec241c618eb6dfea952508744",
+        "vendor": "github",
+        "notes": "The official PyPI package is specify-cli and its executable is specify. Requires Python 3.11+. Run specify init separately to choose an integration and add project files. Optional extensions and presets are separate choices.",
+        "license": "MIT"
       }
     }
   }
