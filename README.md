@@ -7,12 +7,12 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/kevinelliott/agentmanager.svg)](https://pkg.go.dev/github.com/kevinelliott/agentmanager)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
-[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-189-blueviolet)](#supported-agents)
+[![Agents in Catalog](https://img.shields.io/badge/agents%20in%20catalog-209-blueviolet)](#supported-agents)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
-> **Catalog:** 189 agents and counting. See the full list in [Supported Agents](#supported-agents).
+> **Catalog:** 209 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
 
@@ -234,7 +234,7 @@ agentmgr api spec                # Output OpenAPI specification
 
 ## Supported Agents
 
-The catalog ships with **189 agents**, embedded in the binary and refreshable from the
+The catalog ships with **209 agents**, embedded in the binary and refreshable from the
 remote catalog with `agentmgr catalog refresh`. Use the `ID` with the agent commands,
 e.g. `agentmgr agent install claude-code` or `agentmgr catalog show gptme`.
 
@@ -260,6 +260,7 @@ verification sources and installation/setup limits.
 | apfel | `apfel` | brew |
 | Atomic Agent | `atomic-agent` | native, powershell |
 | Auggie | `auggie` | npm |
+| Autohand | `autohand` | npm |
 | BBARIT Agent | `bbarit-agent` | native, powershell |
 | Beads | `beads` | brew, native, npm |
 | Beads Rust | `beads-rust` | brew |
@@ -290,9 +291,12 @@ verification sources and installation/setup limits.
 | Codex | `codex` | binary, brew, npm |
 | CodexBar CLI | `codexbar` | brew |
 | Command Code | `command-code` | npm |
+| Context7 CLI | `context7` | npm |
 | Continue CLI | `continue-cli` | npm |
 | CoreCoder | `corecoder` | pip, pipx, uv |
 | Cortex Code | `cortex-code` | native |
+| Crawl4AI CLI | `crawl4ai` | uv |
+| CrewAI CLI | `crewai` | uv |
 | Crush | `crush` | brew, go, npm, scoop, winget |
 | Cursor CLI | `cursor-cli` | native |
 | dao-code | `dao-code` | native, npm, npx |
@@ -306,6 +310,7 @@ verification sources and installation/setup limits.
 | Docker Agent | `docker-agent` | brew |
 | Droid | `droid` | brew, native, powershell |
 | DSCODE | `dscode` | native |
+| E2B CLI | `e2b-cli` | npm |
 | ElevenLabs CLI | `elevenlabs-cli` | npm |
 | Engram | `engram` | brew |
 | fast-agent | `fast-agent` | pip, pipx, uv |
@@ -321,6 +326,7 @@ verification sources and installation/setup limits.
 | Gas Town | `gastown` | brew |
 | Gemini CLI | `gemini-cli` | npm |
 | GitHub Copilot CLI | `copilot-cli` | brew, npm, winget |
+| GitIngest | `gitingest` | uv |
 | Google ADK CLI | `google-adk` | uv |
 | Google Workspace CLI | `gws` | npm |
 | Goose | `goose` | brew, brew-cask, native, powershell |
@@ -332,6 +338,7 @@ verification sources and installation/setup limits.
 | Hermes Agent | `hermes-agent` | native, source |
 | Hunk | `hunk` | brew, native, npm |
 | iCode | `icode` | uv |
+| Inspect AI | `inspect-ai` | uv |
 | IronClaw | `ironclaw` | native |
 | jcode | `jcode` | binary, brew, native |
 | jevgrep | `jevgrep` | npm |
@@ -344,14 +351,21 @@ verification sources and installation/setup limits.
 | KlaatCode | `klaatcode` | brew, native, npm, npx |
 | Kode CLI | `kode-cli` | npm |
 | kubectl-ai | `kubectl-ai` | krew, native, nix |
+| LangGraph CLI | `langgraph-cli` | uv |
 | late | `late-cli` | binary, brew, native |
 | Letta Code | `letta-code` | npm |
 | Leviathan | `leviathan` | cargo |
 | little-coder | `little-coder` | native, npm |
+| llama.cpp CLI | `llama-cpp` | brew |
 | LLM | `llm` | uv |
 | macOS Harness | `macos-harness` | uv |
+| MarkItDown | `markitdown` | uv |
 | Mastra Code | `mastracode` | npm |
 | MCP Inspector | `mcp-inspector` | npm |
+| MCP Proxy | `mcp-proxy` | uv |
+| MCP Publisher | `mcp-publisher` | brew |
+| MCP Remote | `mcp-remote` | npm |
+| mcp-use CLI | `mcp-use` | npm |
 | mcp2cli | `mcp2cli` | pip, uv |
 | MCPorter | `mcporter` | npm |
 | Meta Muse Code | `muse-code` | native |
@@ -367,18 +381,21 @@ verification sources and installation/setup limits.
 | Oh My ClaudeCode | `oh-my-claudecode` | npm |
 | Oh My Codex | `oh-my-codex` | npm |
 | oh-my-pi | `oh-my-pi` | bun, native, npm, powershell |
+| Ollama CLI | `ollama` | brew |
 | Omnigent | `omnigent` | brew, native, pipx, uv |
 | OmO | `omo` | npm |
 | Ona | `ona` | binary, brew |
 | Only CLI / oc | `only-cli` | npm |
 | Open Interpreter | `open-interpreter` | pip, pipx, uv |
 | open_scion | `open-scion` | native |
+| OpenAgents Launcher | `openagents-launcher` | npm |
 | openclaude | `openclaude` | npm, npx |
 | OpenClaw | `openclaw` | brew, native, npm |
 | OpenCode | `opencode` | brew, chocolatey, curl, npm, scoop |
 | OpenHands CLI | `openhands` | native, pip, pipx, uv |
 | OpenQodex | `openqodex` | npm |
 | OpenSpec | `openspec` | brew, npm |
+| OpenViking | `openviking` | uv |
 | Oracle | `oracle` | npm |
 | Ouroboros | `ouroboros` | native, pip, pipx, uv |
 | Paperclip | `paperclip` | npm, npx |
@@ -392,6 +409,7 @@ verification sources and installation/setup limits.
 | Playwright CLI | `playwright-cli` | npm |
 | Playwright MCP | `playwright-mcp` | npm |
 | Pochi | `pochi` | npm |
+| Promptfoo | `promptfoo` | npm |
 | QMD | `qmd` | npm |
 | Qoder CLI | `qoder-cli` | binary |
 | Qwen Code | `qwen-code` | brew, npm |
@@ -399,10 +417,12 @@ verification sources and installation/setup limits.
 | Rallies CLI | `rallies-cli` | pip, pipx |
 | Ralph TUI | `ralph-tui` | bun, bunx |
 | Ralphex | `ralphex` | brew |
+| Repomix | `repomix` | npm |
 | rmux | `rmux` | brew, cargo |
 | Roo Code CLI | `roo-code-cli` | native |
 | rtk | `rtk` | binary, brew, cargo, native |
 | Ruflo | `ruflo` | native, npm, npx |
+| Serena | `serena` | uv |
 | skills | `skills` | npm, npx |
 | SmallCode | `smallcode` | native, npm, npx, powershell |
 | Sno Station | `sno-station` | native |

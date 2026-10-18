@@ -1,7 +1,7 @@
 {
-  "version": "1.0.83",
+  "version": "1.0.84",
   "schema_version": 1,
-  "last_updated": "2026-10-18T08:21:15.960180+00:00",
+  "last_updated": "2026-10-18T09:03:13.354574+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -9976,6 +9976,1029 @@
         "recent_activity_url": "https://github.com/PrefectHQ/fastmcp/commit/7f3c53eadf6bb1b7194e00c42551e4db380b3f67",
         "vendor": "PrefectHQ",
         "notes": "Requires uv and Python 3.10+. FastMCP 4 is a metapackage; uv exposes the fastmcp-slim dependency executable with --with-executables-from while retaining fastmcp as the package for inventory and updates. Configure or launch MCP servers separately. Older AgentManager binaries need to be rebuilt or upgraded to support uv dependency executables (introduced with ENGIN-4).",
+        "license": "Apache-2.0"
+      }
+    },
+    "autohand": {
+      "id": "autohand",
+      "name": "Autohand",
+      "description": "Terminal coding agent with repository tools and multi-provider model support",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/autohandai/code-cli",
+      "repository": "https://github.com/autohandai/code-cli",
+      "documentation": "https://github.com/autohandai/code-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "autohand-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g autohand-cli",
+          "update_cmd": "npm update -g autohand-cli",
+          "uninstall_cmd": "npm uninstall -g autohand-cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "autohand"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/autohandai/code-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "205",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOQnMiTA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/autohandai/code-cli/commit/3b840caabd31578efc7cb93c6675be19d78da0a6",
+        "vendor": "autohandai",
+        "notes": "Requires Node 22+. Uses the published npm CLI rather than the native installer. The package also publishes agent and ah aliases, which may conflict with other CLIs; detection uses autohand. Configure model providers separately.",
+        "license": "Apache-2.0"
+      }
+    },
+    "serena": {
+      "id": "serena",
+      "name": "Serena",
+      "description": "Semantic code retrieval and editing tools for coding agents through MCP",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/oraios/serena",
+      "repository": "https://github.com/oraios/serena",
+      "documentation": "https://github.com/oraios/serena#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "serena-agent",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install serena-agent",
+          "update_cmd": "uv tool upgrade serena-agent",
+          "uninstall_cmd": "uv tool uninstall serena-agent",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "serena"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/oraios/serena/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "30351",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOONgOeg",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/oraios/serena/commit/d9e4c796fae0207ba6848d1df4b331122a5567b5",
+        "vendor": "oraios",
+        "notes": "Requires Python 3.11 through 3.14. Set UV_PYTHON=3.13 in the environment when installing to follow the upstream Python 3.13 quick start. Run serena init and choose a language-server or JetBrains backend separately. Language-specific dependencies and MCP client configuration are separate setup steps."
+      }
+    },
+    "openviking": {
+      "id": "openviking",
+      "name": "OpenViking",
+      "description": "Agent context database with memory, retrieval and resource-management CLIs",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/volcengine/OpenViking",
+      "repository": "https://github.com/volcengine/OpenViking",
+      "documentation": "https://github.com/volcengine/OpenViking#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "openviking",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install openviking",
+          "update_cmd": "uv tool upgrade openviking",
+          "uninstall_cmd": "uv tool uninstall openviking",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ov"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/volcengine/OpenViking/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "40211",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOQz3Myg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/volcengine/OpenViking/commit/0fcc1663811914484163993735dfbef2c3ca2080",
+        "vendor": "volcengine",
+        "notes": "Requires Python 3.10+. Published 0.5.0 wheels support macOS arm64 14+/x64 15+, glibc 2.31+ Linux x64/arm64 and Windows x64. This installs the ov client and server tools; initialize a server, configure models and choose agent integrations separately.",
+        "license": "AGPL-3.0"
+      }
+    },
+    "context7": {
+      "id": "context7",
+      "name": "Context7 CLI",
+      "description": "Retrieves library documentation and configures Context7 access for coding agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/upstash/context7",
+      "repository": "https://github.com/upstash/context7",
+      "documentation": "https://github.com/upstash/context7#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "ctx7",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g ctx7",
+          "update_cmd": "npm update -g ctx7",
+          "uninstall_cmd": "npm uninstall -g ctx7",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ctx7"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/upstash/context7/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "63225",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOOPWeNQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/upstash/context7/commit/6b636d3c35e051a1a653a236afb7f612c02a1ad3",
+        "vendor": "upstash",
+        "notes": "Requires Node 22.13+. The official CLI package and executable are ctx7; this entry does not install the separate @upstash/context7-mcp server. Run ctx7 setup and configure account or agent integrations explicitly.",
+        "license": "MIT"
+      }
+    },
+    "repomix": {
+      "id": "repomix",
+      "name": "Repomix",
+      "description": "Packs selected repository content into context files for coding agents",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/yamadashy/repomix",
+      "repository": "https://github.com/yamadashy/repomix",
+      "documentation": "https://github.com/yamadashy/repomix#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "repomix",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g repomix",
+          "update_cmd": "npm update -g repomix",
+          "uninstall_cmd": "npm uninstall -g repomix",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "repomix"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/yamadashy/repomix/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "28881",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOMVwZRw",
+        "recent_activity_date": "2026-10-11",
+        "recent_activity_url": "https://github.com/yamadashy/repomix/commit/55c6de6aebde4c38877fbcaf005c4cc396bf6e2d",
+        "vendor": "yamadashy",
+        "notes": "Requires Node 22+. Run repomix explicitly in a chosen repository and review its include/exclude configuration before producing or sharing context output. MCP or skill setup is separate.",
+        "license": "MIT"
+      }
+    },
+    "gitingest": {
+      "id": "gitingest",
+      "name": "GitIngest",
+      "description": "Converts repositories into text digests for language model context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/coderamp-labs/gitingest",
+      "repository": "https://github.com/coderamp-labs/gitingest",
+      "documentation": "https://github.com/coderamp-labs/gitingest#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "gitingest",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install gitingest",
+          "update_cmd": "uv tool upgrade gitingest",
+          "uninstall_cmd": "uv tool uninstall gitingest",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "gitingest"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/coderamp-labs/gitingest/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "15946",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDONWcBHQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://api.github.com/repos/coderamp-labs/gitingest",
+        "vendor": "coderamp-labs",
+        "notes": "Requires Python 3.8+. The canonical repository moved to coderamp-labs/gitingest. Select a local path or repository URL and review filters/output before sharing a digest.",
+        "license": "MIT"
+      }
+    },
+    "crewai": {
+      "id": "crewai",
+      "name": "CrewAI CLI",
+      "description": "Creates, runs and manages multi-agent crews and workflow projects",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/crewAIInc/crewAI",
+      "repository": "https://github.com/crewAIInc/crewAI",
+      "documentation": "https://github.com/crewAIInc/crewAI#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "crewai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install crewai",
+          "update_cmd": "uv tool upgrade crewai",
+          "uninstall_cmd": "uv tool uninstall crewai",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "crewai"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/crewAIInc/crewAI/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "59822",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOKlrpgA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/crewAIInc/crewAI/commit/40bb2d3b586e8367d206090cc62df5242206008f",
+        "vendor": "crewAIInc",
+        "notes": "Requires Python 3.10 through 3.13. Create projects and configure providers separately. Windows source dependency builds may require Visual Studio C++ Build Tools; follow upstream installation guidance.",
+        "license": "MIT"
+      }
+    },
+    "langgraph-cli": {
+      "id": "langgraph-cli",
+      "name": "LangGraph CLI",
+      "description": "Scaffolds and operates LangGraph agent applications from the terminal",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/langchain-ai/langgraph",
+      "repository": "https://github.com/langchain-ai/langgraph",
+      "documentation": "https://github.com/langchain-ai/langgraph#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "langgraph-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install langgraph-cli",
+          "update_cmd": "uv tool upgrade langgraph-cli",
+          "uninstall_cmd": "uv tool uninstall langgraph-cli",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "langgraph"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/langchain-ai/langgraph/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "43435",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOKFU0lQ",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/langchain-ai/langgraph/commit/0870f5efcec9d486046ae8abce0735aa7d1f3b79",
+        "vendor": "langchain-ai",
+        "notes": "Requires Python 3.10+. This entry installs the base CLI for project creation and container workflows. Docker is needed for container workflows; langgraph dev requires the optional inmem extra and Python 3.11+ configured separately.",
+        "license": "MIT"
+      }
+    },
+    "promptfoo": {
+      "id": "promptfoo",
+      "name": "Promptfoo",
+      "description": "Evaluates prompts and agent behavior with configurable model and security tests",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/promptfoo/promptfoo",
+      "repository": "https://github.com/promptfoo/promptfoo",
+      "documentation": "https://github.com/promptfoo/promptfoo#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "promptfoo",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g promptfoo",
+          "update_cmd": "npm update -g promptfoo",
+          "uninstall_cmd": "npm uninstall -g promptfoo",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "promptfoo"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/promptfoo/promptfoo/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "26102",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOJcj3uQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/promptfoo/promptfoo/commit/ea8b3d073a63769f7be243ac3c3460f72881a930",
+        "vendor": "promptfoo",
+        "notes": "Requires Node 22.22+. Choose evaluation configurations, model providers and any red-team or hosted integrations explicitly. Installing the CLI does not run evaluations or submit prompts.",
+        "license": "MIT"
+      }
+    },
+    "inspect-ai": {
+      "id": "inspect-ai",
+      "name": "Inspect AI",
+      "description": "Runs tool-using agent and language model evaluations from the terminal",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/UKGovernmentBEIS/inspect_ai",
+      "repository": "https://github.com/UKGovernmentBEIS/inspect_ai",
+      "documentation": "https://github.com/UKGovernmentBEIS/inspect_ai#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "inspect-ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install inspect-ai",
+          "update_cmd": "uv tool upgrade inspect-ai",
+          "uninstall_cmd": "uv tool uninstall inspect-ai",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "inspect"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/UKGovernmentBEIS/inspect_ai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3030",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOKtX1Ow",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/UKGovernmentBEIS/inspect_ai/commit/a699376315c95b6410f5aec01af37c8dec452aea",
+        "vendor": "UKGovernmentBEIS",
+        "notes": "Requires Python 3.11+. The inspect-ai distribution supplies the inspect CLI. Choose evaluation tasks, model providers and sandbox/container environments separately.",
+        "license": "MIT"
+      }
+    },
+    "e2b-cli": {
+      "id": "e2b-cli",
+      "name": "E2B CLI",
+      "description": "Manages sandbox templates and environments used to run agent-generated code",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/e2b-dev/E2B",
+      "repository": "https://github.com/e2b-dev/E2B",
+      "documentation": "https://github.com/e2b-dev/E2B#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@e2b/cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @e2b/cli",
+          "update_cmd": "npm update -g @e2b/cli",
+          "uninstall_cmd": "npm uninstall -g @e2b/cli",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "e2b"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/e2b-dev/E2B/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "14422",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOJFTWgw",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://github.com/e2b-dev/E2B/commit/62a17dfc3f11439d1d06bfb9bb515eadc5adfcd3",
+        "vendor": "e2b-dev",
+        "notes": "Requires Node 22.19+. The CLI package is @e2b/cli, distinct from the e2b SDK. Authenticate and explicitly create or start sandbox resources separately; installation does not provision cloud resources.",
+        "license": "Apache-2.0"
+      }
+    },
+    "openagents-launcher": {
+      "id": "openagents-launcher",
+      "name": "OpenAgents Launcher",
+      "description": "Terminal launcher and dashboard for managing and connecting coding agents",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/openagents-org/openagents",
+      "repository": "https://github.com/openagents-org/openagents",
+      "documentation": "https://github.com/openagents-org/openagents#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@openagents-org/agent-launcher",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @openagents-org/agent-launcher",
+          "update_cmd": "npm update -g @openagents-org/agent-launcher",
+          "uninstall_cmd": "npm uninstall -g @openagents-org/agent-launcher",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agn"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/openagents-org/openagents/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "4227",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOOGcQrA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/openagents-org/openagents/commit/3de4425ae8b42b43bbdfd0deb517a7d5ef094504",
+        "vendor": "openagents-org",
+        "notes": "Requires Node 18+. This entry installs the agn launcher from @openagents-org/agent-launcher, rather than the Python network SDK. Create agent configurations, install runtimes, set credentials and start the daemon explicitly.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcp-use": {
+      "id": "mcp-use",
+      "name": "mcp-use CLI",
+      "description": "Develops, inspects and calls MCP servers and interactive agent tools",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/mcp-use/mcp-use",
+      "repository": "https://github.com/mcp-use/mcp-use",
+      "documentation": "https://github.com/mcp-use/mcp-use#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mcp-use",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g mcp-use",
+          "update_cmd": "npm update -g mcp-use",
+          "uninstall_cmd": "npm uninstall -g mcp-use",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-use"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/mcp-use/mcp-use/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "10779",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOOQKbDA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/mcp-use/mcp-use/commit/eec124caf602d6717c0aad11bb2fa661945cab19",
+        "vendor": "mcp-use",
+        "notes": "Requires Node 22.22.2+. Uses the TypeScript mcp-use package and its CLI dependency, not the similarly named Python SDK. Create projects and configure server connections, authentication or deployment separately.",
+        "license": "MIT"
+      }
+    },
+    "mcp-publisher": {
+      "id": "mcp-publisher",
+      "name": "MCP Publisher",
+      "description": "Validates and publishes MCP server metadata to the official registry",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/modelcontextprotocol/registry",
+      "repository": "https://github.com/modelcontextprotocol/registry",
+      "documentation": "https://github.com/modelcontextprotocol/registry#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "mcp-publisher",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install mcp-publisher",
+          "update_cmd": "brew upgrade mcp-publisher",
+          "uninstall_cmd": "brew uninstall mcp-publisher",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-publisher"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/modelcontextprotocol/registry/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "7372",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDON056nA",
+        "recent_activity_date": "2026-10-11",
+        "recent_activity_url": "https://github.com/modelcontextprotocol/registry/commit/11b7b0e274d518b6f449c5ee3518a6151d9848b9",
+        "vendor": "modelcontextprotocol",
+        "notes": "Uses the macOS/Linux Homebrew formula. Initialize server metadata and authenticate separately. Publishing is an explicit command; installation does not submit or register a server."
+      }
+    },
+    "mcp-proxy": {
+      "id": "mcp-proxy",
+      "name": "MCP Proxy",
+      "description": "Bridges local stdio and remote HTTP/SSE transports for agent MCP clients",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/sparfenyuk/mcp-proxy",
+      "repository": "https://github.com/sparfenyuk/mcp-proxy",
+      "documentation": "https://github.com/sparfenyuk/mcp-proxy#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "mcp-proxy",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install mcp-proxy",
+          "update_cmd": "uv tool upgrade mcp-proxy",
+          "uninstall_cmd": "uv tool uninstall mcp-proxy",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-proxy"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/sparfenyuk/mcp-proxy/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2794",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDONiow4g",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/sparfenyuk/mcp-proxy/commit/701a0453487d1b28c8f9806ee4863674c70210dd",
+        "vendor": "sparfenyuk",
+        "notes": "Requires Python 3.10+. Choose server commands or URLs, authentication and transport/listener settings explicitly. Installation does not start a proxy or connect an MCP server.",
+        "license": "MIT"
+      }
+    },
+    "mcp-remote": {
+      "id": "mcp-remote",
+      "name": "MCP Remote",
+      "description": "Connects local MCP clients to remote servers with OAuth support",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/punkpeye/mcp-remote",
+      "repository": "https://github.com/punkpeye/mcp-remote",
+      "documentation": "https://github.com/punkpeye/mcp-remote#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "mcp-remote",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g mcp-remote",
+          "update_cmd": "npm update -g mcp-remote",
+          "uninstall_cmd": "npm uninstall -g mcp-remote",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcp-remote"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/punkpeye/mcp-remote/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1632",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOOLhIIw",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/punkpeye/mcp-remote/commit/71cadf3aaa935608d5e14d472a59e9583ebb9505",
+        "vendor": "punkpeye",
+        "notes": "Requires Node 20.18.1+ for its Undici 7 dependency; the upstream README still describes Node 18+. The canonical repository is punkpeye/mcp-remote. Configure server URLs and OAuth/client settings separately; installation does not start a connection.",
+        "license": "MIT"
+      }
+    },
+    "ollama": {
+      "id": "ollama",
+      "name": "Ollama CLI",
+      "description": "Runs and serves local language models for coding agents and developer tools",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/ollama/ollama",
+      "repository": "https://github.com/ollama/ollama",
+      "documentation": "https://github.com/ollama/ollama#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "ollama",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install ollama",
+          "update_cmd": "brew upgrade ollama",
+          "uninstall_cmd": "brew uninstall ollama",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ollama"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ollama/ollama/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "183683",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOJ0Z1Pg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/ollama/ollama/commit/36a6e994d2f6c4ab94b3555185154d069e5dba87",
+        "vendor": "ollama",
+        "notes": "Uses the macOS/Linux Homebrew CLI formula. Start the local server and download/select models explicitly. Installing this entry does not enable a background service or download models; hardware support varies by backend.",
+        "license": "MIT"
+      }
+    },
+    "llama-cpp": {
+      "id": "llama-cpp",
+      "name": "llama.cpp CLI",
+      "description": "Local model inference and OpenAI-compatible serving tools for agent workflows",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/ggml-org/llama.cpp",
+      "repository": "https://github.com/ggml-org/llama.cpp",
+      "documentation": "https://github.com/ggml-org/llama.cpp#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "llama.cpp",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install llama.cpp",
+          "update_cmd": "brew upgrade llama.cpp",
+          "uninstall_cmd": "brew uninstall llama.cpp",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "llama-cli"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/ggml-org/llama.cpp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "131558",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOJH_K4A",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/ggml-org/llama.cpp/commit/5aeac37a35b44fde4bdffaec9159f2fcb253b622",
+        "vendor": "ggml-org",
+        "notes": "Uses the macOS/Linux Homebrew formula, including llama-cli and llama-server. Choose compatible GGUF models and start inference or serving explicitly. GPU/backend availability depends on platform and hardware.",
+        "license": "MIT"
+      }
+    },
+    "markitdown": {
+      "id": "markitdown",
+      "name": "MarkItDown",
+      "description": "Converts documents and structured files into Markdown for agent context",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/microsoft/markitdown",
+      "repository": "https://github.com/microsoft/markitdown",
+      "documentation": "https://github.com/microsoft/markitdown#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "markitdown",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install markitdown",
+          "update_cmd": "uv tool upgrade markitdown",
+          "uninstall_cmd": "uv tool uninstall markitdown",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "markitdown"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/markitdown/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "190820",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDONO810w",
+        "recent_activity_date": "2026-10-04",
+        "recent_activity_url": "https://github.com/microsoft/markitdown/commit/4cc9fa17653d695d64fb9eee5b33d4de55ff84e8",
+        "vendor": "microsoft",
+        "notes": "Requires Python 3.10 through 3.14. Installs the base CLI. Additional file formats require optional extras and sometimes system converters; configure those separately per upstream guidance. Choose input files and output explicitly.",
+        "license": "MIT"
+      }
+    },
+    "crawl4ai": {
+      "id": "crawl4ai",
+      "name": "Crawl4AI CLI",
+      "description": "Crawls web content into structured text and Markdown for agent retrieval",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/unclecode/crawl4ai",
+      "repository": "https://github.com/unclecode/crawl4ai",
+      "documentation": "https://github.com/unclecode/crawl4ai#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "crawl4ai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install crawl4ai",
+          "update_cmd": "uv tool upgrade crawl4ai",
+          "uninstall_cmd": "uv tool uninstall crawl4ai",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "crwl"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/unclecode/crawl4ai/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "85744",
+        "github_stars_checked_at": "2026-10-18T09:03:13.354574+00:00",
+        "github_repository_id": "R_kgDOL5OWWw",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://github.com/unclecode/crawl4ai/commit/94b67888ca8b335ff2121423a50e06dd27661922",
+        "vendor": "unclecode",
+        "notes": "Requires Python 3.10+. The crawl4ai package supplies crwl. Browser downloads, system libraries and crawl4ai-setup are separate explicit steps; review upstream prerequisites for each platform before crawling.",
         "license": "Apache-2.0"
       }
     }
