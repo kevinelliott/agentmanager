@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty additional agent tools (209 total), including Autohand, Serena,
+  OpenViking, Context7 CLI, Repomix, GitIngest, CrewAI CLI, LangGraph CLI,
+  Promptfoo, Inspect AI and MCP/runtime utilities (ENGIN-5). Catalog 1.0.84
+  preserves prior entries and records verified package/executable identities,
+  runtime and platform limits in `docs/catalog/research-2026-10-18-engin-5.csv`.
+  README counts/table and the research index are synchronized. Account setup,
+  model/browser downloads, project changes and service startup are explicit steps.
 - Twenty more agent tools (189 total), including Pochi, Amplifier, Playwright
   CLI/MCP, MCP Inspector, FastMCP CLI, QMD, CASS, NTM, Oracle and Google ADK
   (ENGIN-4). Catalog 1.0.83 records verified upstream repositories, executable
