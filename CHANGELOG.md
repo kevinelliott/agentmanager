@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Twenty additional agent tools (309 total), including DeepCode, Codeflash,
+  BMad Method, Apify MCP Client, AWS AgentCore, Modal, OpenSandbox, Agent Stack,
+  GPUStack, RamaLama, dstack, Vast.ai, RunPod, ZenML, PromptFlow, Trigger.dev,
+  Cognee and the Docling conversion/service/MCP tools (ENGIN-10). Catalog 1.0.89
+  preserves all previous entries. Both catalogs, README listings and setup
+  documentation are synchronized; research evidence appears in
+  `docs/catalog/research-2026-10-18-engin-10.csv`. Notes cover package/executable
+  identities, PromptFlow's dependency CLI, interpreter/native runtime limits,
+  telemetry preferences and explicit workflow, service and compute setup.
+
 - Twenty additional tools (289 total), including Harbor, SWE-ReX, BrowserTools
   MCP, MCP for Blender, MCP Toolbox, Neo4j, ClickHouse, MotherDuck, MCP Atlassian,
   Airtable, Resend, Jupyter MCP, ContextForge, LitServe, Open WebUI, Logfire,

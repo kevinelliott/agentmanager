@@ -1,7 +1,7 @@
 {
-  "version": "1.0.88",
+  "version": "1.0.89",
   "schema_version": 1,
-  "last_updated": "2026-10-18T11:13:48.618011+00:00",
+  "last_updated": "2026-10-18T11:40:16.041352+00:00",
   "agents": {
     "openclaude": {
       "id": "openclaude",
@@ -15083,6 +15083,1026 @@
         "vendor": "wandb",
         "notes": "Requires Python 3.10+ and compatible platform wheels. The wandb distribution supplies wandb and the wb alias. Configure login or offline mode, project scope and artifact destinations separately. Application instrumentation, sweeps and synchronization are explicit operations; selected runs/artifacts can be uploaded to the configured service. Installation does not start experiments or upload data.",
         "license": "MIT"
+      }
+    },
+    "modal": {
+      "id": "modal",
+      "name": "Modal CLI",
+      "description": "Runs and deploys agent functions and sandbox workloads on Modal",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/modal-labs/modal-client",
+      "repository": "https://github.com/modal-labs/modal-client",
+      "documentation": "https://github.com/modal-labs/modal-client#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "modal",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install modal",
+          "update_cmd": "uv tool upgrade modal",
+          "uninstall_cmd": "uv tool uninstall modal",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "modal"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/modal-labs/modal-client/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "525",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOIQOEIA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/modal-labs/modal-client/commit/47cbc08b809a4a6efd5e5f0f271ec67276fb8e56",
+        "vendor": "modal-labs",
+        "notes": "Requires Python 3.10 through 3.15 and compatible platform dependencies. The modal distribution includes its CLI. Configure authentication, project/environment scope, secrets and workload code explicitly. Agent skills installation, sandbox creation, remote execution and deployment are separate operations that can consume account resources.",
+        "license": "Apache-2.0"
+      }
+    },
+    "vastai": {
+      "id": "vastai",
+      "name": "Vast.ai CLI",
+      "description": "Manages GPU instances and serverless compute for agent model workloads",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/vast-ai/vast-cli",
+      "repository": "https://github.com/vast-ai/vast-cli",
+      "documentation": "https://github.com/vast-ai/vast-cli#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "vastai",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install vastai",
+          "update_cmd": "uv tool upgrade vastai",
+          "uninstall_cmd": "uv tool uninstall vastai",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "vastai"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/vast-ai/vast-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "223",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkxNjgwNjI0Nzk=",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/vast-ai/vast-cli/commit/e529c359e6aae6c1bd8bc386d90262157c00e22f",
+        "vendor": "vast-ai",
+        "notes": "Requires Python 3.10+. The canonical upstream is vast-ai/vast-cli and the published package is vastai; it also installs serve-vast-deployment. Configure API credentials, instance selection, storage and workload images separately. Renting instances, serverless deployment, data transfers and billing actions are explicit operations; installation provisions nothing.",
+        "license": "MIT"
+      }
+    },
+    "gpustack": {
+      "id": "gpustack",
+      "name": "GPUStack CLI",
+      "description": "Serves and manages model inference infrastructure used by agent applications",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/gpustack/gpustack",
+      "repository": "https://github.com/gpustack/gpustack",
+      "documentation": "https://github.com/gpustack/gpustack#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "gpustack",
+          "platforms": [
+            "linux"
+          ],
+          "command": "uv tool install gpustack",
+          "update_cmd": "uv tool upgrade gpustack",
+          "uninstall_cmd": "uv tool uninstall gpustack",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "gpustack"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/gpustack/gpustack/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5844",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOL6CG3A",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/gpustack/gpustack/commit/bac363f6b59f883c5f0538be0be608fe1317aedb",
+        "vendor": "gpustack",
+        "notes": "Requires Python 3.10 through 3.12; select UV_PYTHON=3.12 when installing. This method targets Linux, matching current worker support; Windows workers require WSL2 and macOS workers are unsupported upstream. Configure Docker, suitable GPU drivers/container toolkit, server storage/authentication, workers and model backends separately. Installation does not start the service or download models.",
+        "license": "Apache-2.0"
+      }
+    },
+    "ramalama": {
+      "id": "ramalama",
+      "name": "RamaLama CLI",
+      "description": "Runs and serves local model backends for agent workflows",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/containers/ramalama",
+      "repository": "https://github.com/containers/ramalama",
+      "documentation": "https://github.com/containers/ramalama#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "ramalama",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install ramalama",
+          "update_cmd": "brew upgrade ramalama",
+          "uninstall_cmd": "brew uninstall ramalama",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "ramalama"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/containers/ramalama/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "3087",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOMas-fw",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/containers/ramalama/commit/a9080556d91cf8e8775487b690a60008cbe632fb",
+        "vendor": "containers",
+        "notes": "Uses the macOS/Linux Homebrew formula, which manages Python and installs llama.cpp on macOS. Current bottles cover Apple silicon macOS and x64/arm64 Linux; other supported hosts may require source builds. Configure the chosen native or Podman/Docker runtime separately. Model pulls, container setup and inference/server startup are explicit operations.",
+        "license": "MIT"
+      }
+    },
+    "zenml": {
+      "id": "zenml",
+      "name": "ZenML CLI",
+      "description": "Builds and deploys reproducible model and agent application pipelines",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/zenml-io/zenml",
+      "repository": "https://github.com/zenml-io/zenml",
+      "documentation": "https://github.com/zenml-io/zenml#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "zenml",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install zenml",
+          "update_cmd": "uv tool upgrade zenml",
+          "uninstall_cmd": "uv tool uninstall zenml",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "zenml"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/zenml-io/zenml/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "5619",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "MDEwOlJlcG9zaXRvcnkzMTQxOTc2NDU=",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/zenml-io/zenml/commit/f3824dfebc4b45e6eebc17fe1f535382070df05f",
+        "vendor": "zenml-io",
+        "notes": "Requires Python 3.10 through 3.14. The base zenml package supplies its CLI; integrations and pipeline-specific dependencies are separate. Initialize a chosen repository and configure server authentication, artifact stores, stacks and deployment credentials explicitly. Installing the CLI does not create a stack, run a pipeline or provision infrastructure.",
+        "license": "Apache-2.0"
+      }
+    },
+    "dstack": {
+      "id": "dstack",
+      "name": "dstack CLI",
+      "description": "Schedules model development and inference workloads on configured compute",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/dstackai/dstack",
+      "repository": "https://github.com/dstackai/dstack",
+      "documentation": "https://github.com/dstackai/dstack#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "dstack",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install dstack",
+          "update_cmd": "brew upgrade dstack",
+          "uninstall_cmd": "brew uninstall dstack",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "dstack"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/dstackai/dstack/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "2284",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOGnypAg",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/dstackai/dstack/commit/fe6fe22e4f426bdbb82d48cbaed69033dffa141a",
+        "vendor": "dstackai",
+        "notes": "Uses the macOS/Linux Homebrew formula, including its managed Python environment and provider integrations. Current bottles cover Apple silicon macOS and x64/arm64 Linux; other supported hosts may need source builds. Configure or connect to a dstack server, project, backend credentials and workload files separately. Runs, fleets and deployments can allocate billable compute; installation does not start them.",
+        "license": "MPL-2.0"
+      }
+    },
+    "promptflow": {
+      "id": "promptflow",
+      "name": "PromptFlow CLI",
+      "description": "Builds, runs and evaluates prompt and tool workflows for agent applications",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/microsoft/promptflow",
+      "repository": "https://github.com/microsoft/promptflow",
+      "documentation": "https://github.com/microsoft/promptflow#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "promptflow",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install --with-executables-from promptflow-devkit promptflow",
+          "update_cmd": "uv tool upgrade promptflow",
+          "uninstall_cmd": "uv tool uninstall promptflow",
+          "prereqs": [
+            "uv"
+          ],
+          "metadata": {
+            "with_executables_from": "promptflow-devkit"
+          }
+        }
+      },
+      "detection": {
+        "executables": [
+          "pf"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/microsoft/promptflow/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "11254",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOJ15Eog",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://api.github.com/repos/microsoft/promptflow",
+        "vendor": "microsoft",
+        "notes": "The published package supports Python 3.9+; use Python 3.12 for current dependencies. Promptflow is a metapackage: expose its promptflow-devkit dependency executable with uv with_executables_from while retaining promptflow for inventory, upgrades and removal. Older AgentManager binaries need the ENGIN-4 uv metadata support. Configure flow dependencies, provider connections and optional promptflow-tools/Azure integrations separately; installation does not run a flow.",
+        "license": "MIT"
+      }
+    },
+    "deepcode": {
+      "id": "deepcode",
+      "name": "DeepCode CLI",
+      "description": "Runs durable coding-agent sessions through DeepCode terminal and local service tools",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/HKUDS/DeepCode",
+      "repository": "https://github.com/HKUDS/DeepCode",
+      "documentation": "https://github.com/HKUDS/DeepCode#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "deepcode-hku",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install deepcode-hku",
+          "update_cmd": "uv tool upgrade deepcode-hku",
+          "uninstall_cmd": "uv tool uninstall deepcode-hku",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "deepcode"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/HKUDS/DeepCode/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "16726",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOOpsm6A",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/HKUDS/DeepCode/commit/f183965f59a47cd1d437ee871a0d32b956dc9cdb",
+        "vendor": "HKUDS",
+        "notes": "Requires Python 3.12+. Use deepcode-hku from HKUDS/DeepCode, which supplies deepcode and deepcode-app-server. Initialize storage and configure model providers, project trust and optional clients explicitly. Starting a client can launch its persistent local service; accepted work can continue after the client closes. Package installation does not initialize a project or start agent work.",
+        "license": "MIT"
+      }
+    },
+    "codeflash": {
+      "id": "codeflash",
+      "name": "Codeflash CLI",
+      "description": "Optimizes Python code with agent-generated changes and benchmark verification",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/codeflash-ai/codeflash",
+      "repository": "https://github.com/codeflash-ai/codeflash",
+      "documentation": "https://github.com/codeflash-ai/codeflash#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "codeflash",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install codeflash",
+          "update_cmd": "uv tool upgrade codeflash",
+          "uninstall_cmd": "uv tool uninstall codeflash",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "codeflash"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/codeflash-ai/codeflash/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "248",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDON4wsFw",
+        "recent_activity_date": "2026-10-15",
+        "recent_activity_url": "https://api.github.com/repos/codeflash-ai/codeflash",
+        "vendor": "codeflash-ai",
+        "notes": "The published package declares Python 3.9+; use a current compatible Python runtime. Configure Codeflash authentication, project paths, tests and benchmark environment separately. Optimization commands can generate tests, edit code, run subprocesses and submit selected code to the configured service; installation does not initialize or optimize a repository."
+      }
+    },
+    "aws-agentcore": {
+      "id": "aws-agentcore",
+      "name": "AWS AgentCore CLI",
+      "description": "Scaffolds, observes and deploys agent applications on AWS AgentCore",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/aws/agentcore-cli",
+      "repository": "https://github.com/aws/agentcore-cli",
+      "documentation": "https://github.com/aws/agentcore-cli#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@aws/agentcore",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @aws/agentcore",
+          "update_cmd": "npm update -g @aws/agentcore",
+          "uninstall_cmd": "npm uninstall -g @aws/agentcore",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agentcore"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/aws/agentcore-cli/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "305",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDORBy5gg",
+        "recent_activity_date": "2026-10-05",
+        "recent_activity_url": "https://github.com/aws/agentcore-cli/commit/dd6304eef85dac8135acb01579a1cf41313148e5",
+        "vendor": "aws",
+        "notes": "Requires Node 20+; use a current Node LTS runtime. This is the official @aws/agentcore CLI, distinct from the older Python starter toolkit. Its postinstall detects older toolkit installations and can warn about conflicts. Configure AWS credentials/region, permissions and project-specific Python, uv or deployment dependencies separately. Installation does not migrate a project or deploy AWS resources.",
+        "license": "Apache-2.0"
+      }
+    },
+    "mcpc": {
+      "id": "mcpc",
+      "name": "Apify MCP Client",
+      "description": "Inspects and invokes MCP tools through a scriptable terminal client",
+      "category": "terminal",
+      "tags": [
+        "agents",
+        "terminal"
+      ],
+      "homepage": "https://github.com/apify/mcpc",
+      "repository": "https://github.com/apify/mcpc",
+      "documentation": "https://github.com/apify/mcpc#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "@apify/mcpc",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g @apify/mcpc",
+          "update_cmd": "npm update -g @apify/mcpc",
+          "uninstall_cmd": "npm uninstall -g @apify/mcpc",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "mcpc"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/apify/mcpc/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1049",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOQlL4yA",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/apify/mcpc/commit/e7fc9f7cac74534e8f11d76b8e3703f73e07834c",
+        "vendor": "apify",
+        "notes": "Requires Node 22.12+. Use @apify/mcpc from apify/mcpc, renamed from the mcp-cli repository; it supplies mcpc and mcpc-bridge. Configure server endpoints, transport and authentication explicitly. Connections can start selected stdio server commands and tool calls can modify connected services. Installation does not connect, authenticate or invoke tools.",
+        "license": "Apache-2.0"
+      }
+    },
+    "bmad-method": {
+      "id": "bmad-method",
+      "name": "BMad Method CLI",
+      "description": "Installs structured agent skills and software delivery workflows into projects",
+      "category": "coding",
+      "tags": [
+        "agents",
+        "coding"
+      ],
+      "homepage": "https://github.com/bmad-code-org/BMAD-METHOD",
+      "repository": "https://github.com/bmad-code-org/BMAD-METHOD",
+      "documentation": "https://github.com/bmad-code-org/BMAD-METHOD#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "bmad-method",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g bmad-method",
+          "update_cmd": "npm update -g bmad-method",
+          "uninstall_cmd": "npm uninstall -g bmad-method",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "bmad"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/bmad-code-org/BMAD-METHOD/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "54284",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOOY4eVg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/bmad-code-org/BMAD-METHOD/commit/85186edf6b5918152af9f99101a13307865ec7b8",
+        "vendor": "bmad-code-org",
+        "notes": "Uses the stable 6.12 npm release line, distinct from the upstream v7 preview branch. Requires Node 20.12+, Python 3.10+ and uv for workflow setup/scripts; use a current Node LTS runtime. The package supplies bmad and bmad-method. Run project installation and choose agent integrations explicitly; these commands write project skills/configuration. Installing the global wrapper does not configure a repository."
+      }
+    },
+    "docling": {
+      "id": "docling",
+      "name": "Docling CLI",
+      "description": "Converts documents into structured context for agent retrieval and analysis",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/docling-project/docling",
+      "repository": "https://github.com/docling-project/docling",
+      "documentation": "https://github.com/docling-project/docling#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "docling",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install docling",
+          "update_cmd": "uv tool upgrade docling",
+          "uninstall_cmd": "uv tool uninstall docling",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "docling"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/docling-project/docling/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "69047",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOMT5TYA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/docling-project/docling/commit/0e54294231b69bc2cf7a39873235495788f76b57",
+        "vendor": "docling-project",
+        "notes": "Requires Python 3.10+ and compatible native/model dependencies. The published docling metapackage exposes docling and docling-tools itself and installs docling-slim with standard conversion features; no dependency-executable override is needed. Choose document inputs, OCR/model backends and optional formats explicitly. First use can download model weights; installation does not convert documents.",
+        "license": "MIT"
+      }
+    },
+    "docling-serve": {
+      "id": "docling-serve",
+      "name": "Docling Serve CLI",
+      "description": "Serves document conversion APIs for agent ingestion and retrieval pipelines",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/docling-project/docling-serve",
+      "repository": "https://github.com/docling-project/docling-serve",
+      "documentation": "https://github.com/docling-project/docling-serve#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "docling-serve",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install docling-serve",
+          "update_cmd": "uv tool upgrade docling-serve",
+          "uninstall_cmd": "uv tool uninstall docling-serve",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "docling-serve"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/docling-project/docling-serve/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1866",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOMtrqIw",
+        "recent_activity_date": "2026-10-14",
+        "recent_activity_url": "https://github.com/docling-project/docling-serve/commit/8e0cdd14958cf98641c25e0e940a29a368c73c25",
+        "vendor": "docling-project",
+        "notes": "Requires Python 3.10+ and compatible Docling/native model dependencies. This installs the Python service CLI, separate from Docling container images. Configure bind address, authentication, storage, conversion backends and any UI options before starting it. First conversion may download model weights; installation does not expose a service or process documents.",
+        "license": "MIT"
+      }
+    },
+    "docling-mcp": {
+      "id": "docling-mcp",
+      "name": "Docling MCP Server",
+      "description": "Provides document conversion and structured document tools to agent MCP clients",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/docling-project/docling-mcp",
+      "repository": "https://github.com/docling-project/docling-mcp",
+      "documentation": "https://github.com/docling-project/docling-mcp#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "docling-mcp",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install docling-mcp",
+          "update_cmd": "uv tool upgrade docling-mcp",
+          "uninstall_cmd": "uv tool uninstall docling-mcp",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "docling-mcp-server"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/docling-project/docling-mcp/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "775",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOOIdQBw",
+        "recent_activity_date": "2026-10-06",
+        "recent_activity_url": "https://github.com/docling-project/docling-mcp/commit/5e1551a9b984f9a26349de6d23d02eccf5a69db2",
+        "vendor": "docling-project",
+        "notes": "Requires Python 3.10+ and compatible native/model dependencies. The package is docling-mcp and its executable is docling-mcp-server. Choose local conversion or a configured remote Docling service, allowed inputs, optional retrieval/embedding backends and MCP client explicitly. Model downloads and server startup are separate steps; installation does not read or convert documents.",
+        "license": "MIT"
+      }
+    },
+    "agentstack": {
+      "id": "agentstack",
+      "name": "Agent Stack CLI",
+      "description": "Installs and manages a local platform for deploying agent applications",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/i-am-bee/agentstack",
+      "repository": "https://github.com/i-am-bee/agentstack",
+      "documentation": "https://github.com/i-am-bee/agentstack#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "agentstack-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install agentstack-cli",
+          "update_cmd": "uv tool upgrade agentstack-cli",
+          "uninstall_cmd": "uv tool uninstall agentstack-cli",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "agentstack"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/i-am-bee/agentstack/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "1173",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDONwW57Q",
+        "recent_activity_date": "2026-10-13",
+        "recent_activity_url": "https://api.github.com/repos/i-am-bee/agentstack",
+        "vendor": "i-am-bee",
+        "notes": "Requires Python 3.14; set UV_PYTHON=3.14 to select it. Use agentstack-cli from i-am-bee/agentstack, not the unrelated agentstack PyPI package. The CLI also supplies agentstack-cli. Run agentstack self install separately to set up its Lima VM/Kubernetes platform; Linux needs QEMU. Windows needs WSL2 but the CLI must run natively in PowerShell, not inside WSL. Installation alone does not create the VM or deploy agents.",
+        "license": "Apache-2.0"
+      }
+    },
+    "cognee": {
+      "id": "cognee",
+      "name": "Cognee CLI",
+      "description": "Builds and queries knowledge and graph memory for agent applications",
+      "category": "research",
+      "tags": [
+        "agents",
+        "research"
+      ],
+      "homepage": "https://github.com/topoteretes/cognee",
+      "repository": "https://github.com/topoteretes/cognee",
+      "documentation": "https://github.com/topoteretes/cognee#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "cognee",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install cognee",
+          "update_cmd": "uv tool upgrade cognee",
+          "uninstall_cmd": "uv tool uninstall cognee",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "cognee-cli"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/topoteretes/cognee/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "32467",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOKH31kA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/topoteretes/cognee/commit/37f788bd287750e10d7610173e5332b3843f6ebd",
+        "vendor": "topoteretes",
+        "notes": "Requires Python 3.10 through 3.14 and compatible storage/embedding dependencies. The base cognee package supplies cognee-cli; select storage, datasets, embedding/model providers and credentials explicitly. Ingestion, graph construction and model downloads are separate operations. The optional UI needs Node/npm and its MCP service needs Docker; installing the CLI does not start them.",
+        "license": "Apache-2.0"
+      }
+    },
+    "runpodctl": {
+      "id": "runpodctl",
+      "name": "RunPod CLI",
+      "description": "Manages GPU pods and serverless endpoints for agent model workloads",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/runpod/runpodctl",
+      "repository": "https://github.com/runpod/runpodctl",
+      "documentation": "https://github.com/runpod/runpodctl#readme",
+      "install_methods": {
+        "brew": {
+          "method": "brew",
+          "package": "runpod/runpodctl/runpodctl",
+          "platforms": [
+            "darwin",
+            "linux"
+          ],
+          "command": "brew install runpod/runpodctl/runpodctl",
+          "update_cmd": "brew upgrade runpod/runpodctl/runpodctl",
+          "uninstall_cmd": "brew uninstall runpod/runpodctl/runpodctl",
+          "prereqs": [
+            "brew"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "runpodctl"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/runpod/runpodctl/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "459",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOHHW5XA",
+        "recent_activity_date": "2026-10-16",
+        "recent_activity_url": "https://github.com/runpod/runpodctl/commit/e12397351fa126394ad04910ec6551351d164f01",
+        "vendor": "runpod",
+        "notes": "Uses the official runpod/runpodctl Homebrew tap with universal macOS and x64/arm64 Linux release binaries. Configure API credentials, project scope, workload images and storage explicitly. Resource creation, endpoint invocation and transfers can consume account resources. The upstream CLI checks for updates during normal use; RUNPOD_NO_UPDATE_CHECK=1 disables that check. Installation does not provision workloads.",
+        "license": "GPL-3.0"
+      }
+    },
+    "opensandbox-cli": {
+      "id": "opensandbox-cli",
+      "name": "OpenSandbox CLI",
+      "description": "Manages sandbox lifecycles and command execution for agent workloads",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/opensandbox-group/OpenSandbox",
+      "repository": "https://github.com/opensandbox-group/OpenSandbox",
+      "documentation": "https://github.com/opensandbox-group/OpenSandbox#readme",
+      "install_methods": {
+        "uv": {
+          "method": "uv",
+          "package": "opensandbox-cli",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "uv tool install opensandbox-cli",
+          "update_cmd": "uv tool upgrade opensandbox-cli",
+          "uninstall_cmd": "uv tool uninstall opensandbox-cli",
+          "prereqs": [
+            "uv"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "osb"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/opensandbox-group/OpenSandbox/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "15938",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOQqSjUg",
+        "recent_activity_date": "2026-10-18",
+        "recent_activity_url": "https://github.com/opensandbox-group/OpenSandbox/commit/89f8451095204cacc0458fd9fde37e36412299de",
+        "vendor": "opensandbox-group",
+        "notes": "Requires Python 3.10+. The opensandbox-cli distribution supplies osb and opensandbox, separate from opensandbox-server and the SDK package. Configure an existing OpenSandbox server endpoint, API key and runtime/egress policy explicitly; server deployment needs its own Docker/Kubernetes environment. Installation does not start a server, create a sandbox or execute commands.",
+        "license": "Apache-2.0"
+      }
+    },
+    "trigger-dev": {
+      "id": "trigger-dev",
+      "name": "Trigger.dev CLI",
+      "description": "Develops and deploys background tasks and durable agent workflows",
+      "category": "devops",
+      "tags": [
+        "agents",
+        "devops"
+      ],
+      "homepage": "https://github.com/triggerdotdev/trigger.dev",
+      "repository": "https://github.com/triggerdotdev/trigger.dev",
+      "documentation": "https://github.com/triggerdotdev/trigger.dev#readme",
+      "install_methods": {
+        "npm": {
+          "method": "npm",
+          "package": "trigger.dev",
+          "platforms": [
+            "darwin",
+            "linux",
+            "windows"
+          ],
+          "command": "npm install -g trigger.dev",
+          "update_cmd": "npm update -g trigger.dev",
+          "uninstall_cmd": "npm uninstall -g trigger.dev",
+          "global_flag": "-g",
+          "prereqs": [
+            "node"
+          ]
+        }
+      },
+      "detection": {
+        "executables": [
+          "trigger"
+        ],
+        "version_cmd": ""
+      },
+      "changelog": {
+        "type": "github_releases",
+        "url": "https://api.github.com/repos/triggerdotdev/trigger.dev/releases",
+        "file_format": "markdown"
+      },
+      "metadata": {
+        "github_stars": "16567",
+        "github_stars_checked_at": "2026-10-18T11:40:16.041352+00:00",
+        "github_repository_id": "R_kgDOIiC6AQ",
+        "recent_activity_date": "2026-10-17",
+        "recent_activity_url": "https://github.com/triggerdotdev/trigger.dev/commit/9f8cc32b327d16a840327e53c607d0dbf92f6294",
+        "vendor": "triggerdotdev",
+        "notes": "The published wrapper declares Node 18.20+, but its posthog-node dependency requires Node 20.20+ on 20.x or 22.22+; use a current Node LTS runtime. The package trigger.dev supplies trigger. Configure project tasks, provider secrets and cloud/self-hosted access separately. Development workers and deployments can run tasks or allocate resources. Set TRIGGER_TELEMETRY_DISABLED to disable upstream telemetry; installation does not initialize or deploy a project.",
+        "license": "Apache-2.0"
       }
     }
   }
