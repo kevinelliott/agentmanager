@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kevinelliott/agentmanager/internal/buildinfo"
 	"github.com/kevinelliott/agentmanager/internal/systray"
 	"github.com/kevinelliott/agentmanager/pkg/catalog"
 	"github.com/kevinelliott/agentmanager/pkg/config"
@@ -35,6 +36,9 @@ func main() {
 }
 
 func run() error {
+	// `go install` builds carry no ldflags; fall back to the module version.
+	version, commit, date = buildinfo.Resolve(version, commit, date)
+
 	// Get current platform
 	plat := platform.Current()
 
