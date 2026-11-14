@@ -164,7 +164,9 @@ brews:
     description: "CLI tool for managing AI development agents"
     license: "MIT"
     # Publish for stable tags only; prereleases (v1.6.0-rc.1) are skipped.
-    skip_upload: auto
+    # Without the token the formula is still generated but not pushed, so a
+    # missing secret does not fail the whole release.
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_TOKEN" }}auto{{ else }}true{{ end }}'
     test: |
       assert_match version.to_s, shell_output("#{bin}/agentmgr version")
     install: |
