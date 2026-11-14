@@ -80,6 +80,21 @@ archives for macOS (Intel and Apple silicon), Linux (amd64 and arm64), and Windo
 (amd64), plus `.deb`, `.rpm`, and `.apk` packages and a `checksums.txt`. On Windows,
 download the `.zip` and put `agentmgr.exe` on your `PATH`.
 
+### Desktop app
+
+AgentManager also has a desktop app: a tray icon plus a window for browsing the
+catalog and installing, updating and removing agents.
+
+- **macOS**: download `AgentManager-<version>-macos-universal.dmg` from the release
+  and drag AgentManager to Applications. It includes the `agentmgr` CLI, which you
+  can install from Settings.
+- **Windows**: the release `.zip` includes `agentmgr-helper.exe`. Run it to get the
+  tray icon; the window opens in Edge or Chrome.
+- **Linux**: the amd64 release archive includes `agentmgr-helper`. The window opens
+  in Chrome or Chromium when installed, otherwise in your default browser.
+
+With the app running, `agentmgr helper open` opens the window from a terminal.
+
 ### From Source
 
 Requires Go 1.25+ and `make`. The system tray helper (`agentmgr-helper`) also needs
@@ -219,6 +234,7 @@ agentmgr config path             # Show config file path
 ```bash
 agentmgr helper start            # Start systray helper
 agentmgr helper stop             # Stop systray helper
+agentmgr helper open             # Open the desktop window
 agentmgr helper status           # Check helper status
 ```
 
@@ -600,7 +616,7 @@ in an interactive terminal with the required privileges.
 AgentManager consists of two binaries:
 
 1. **`agentmgr`** - Main CLI/TUI application for interactive use
-2. **`agentmgr-helper`** - Background systray helper with notifications
+2. **`agentmgr-helper`** - Background systray helper with a desktop window and notifications
 
 ### Library Usage
 
@@ -684,6 +700,20 @@ make check
 # Run tests with coverage
 make test-coverage
 ```
+
+To build the macOS app locally:
+
+```bash
+make build-macos-app          # bin/AgentManager.app for this Mac
+./scripts/package-macos.sh    # universal app + dist/*.dmg
+go run ./scripts/genicons     # regenerate the app, tray and window icons
+```
+
+`package-macos.sh` signs with the Developer ID named in `MACOS_SIGN_IDENTITY` and
+notarizes when `APPLE_ID`, `APPLE_APP_PASSWORD` and `APPLE_TEAM_ID` are also set;
+without them it produces an ad-hoc signed build for local use. The release
+workflow reads the same values, plus `MACOS_CERTIFICATE_P12` (the base64 of the
+exported certificate) and `MACOS_CERTIFICATE_PASSWORD`, from repository secrets.
 
 ### Performance checks
 

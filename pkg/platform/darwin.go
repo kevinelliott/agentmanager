@@ -115,6 +115,8 @@ func (d *darwinPlatform) getLaunchAgentPath() string {
 
 func (d *darwinPlatform) generateLaunchAgentPlist() string {
 	logDir := d.GetLogDir()
+	// KeepAlive is deliberately off: with it, launchd restarts the app the
+	// moment the person chooses Quit.
 	return fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -123,18 +125,63 @@ func (d *darwinPlatform) generateLaunchAgentPlist() string {
     <string>com.agentmgr.helper</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/agentmgr-helper</string>
+        <string>%s</string>
     </array>
     <key>RunAtLoad</key>
-    <true/>
-    <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
     <string>%s/helper.log</string>
     <key>StandardErrorPath</key>
     <string>%s/helper.error.log</string>
 </dict>
-</plist>`, logDir, logDir)
+</plist>`, xmlEscape(d.helperExecutablePath()), xmlEscape(logDir), xmlEscape(logDir))
+}
+
+// helperExecutablePath finds the helper binary that should start at login.
+// When the helper itself asks (Start at Login in its menu or window), that
+// is the running binary, wherever the app was installed. When the CLI asks,
+// look in the usual install locations.
+func (d *darwinPlatform) helperExecutablePath() string {
+	const name = "agentmgr-helper"
+
+	if exe, err := os.Executable(); err == nil {
+		if resolved, err := filepath.EvalSymlinks(exe); err == nil {
+			exe = resolved
+		}
+		if filepath.Base(exe) == name {
+			return exe
+		}
+		if sibling := filepath.Join(filepath.Dir(exe), name); isRegularFile(sibling) {
+			return sibling
+		}
+	}
+
+	candidates := []string{
+		"/Applications/AgentManager.app/Contents/MacOS/" + name,
+		filepath.Join(d.homeDir(), "Applications", "AgentManager.app", "Contents", "MacOS", name),
+		"/Applications/AgentManager Helper.app/Contents/MacOS/" + name,
+		"/usr/local/bin/" + name,
+		"/opt/homebrew/bin/" + name,
+		filepath.Join(d.homeDir(), ".local", "bin", name),
+	}
+	for _, c := range candidates {
+		if isRegularFile(c) {
+			return c
+		}
+	}
+	if path, err := exec.LookPath(name); err == nil {
+		return path
+	}
+	return "/usr/local/bin/" + name
+}
+
+func isRegularFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.Mode().IsRegular()
+}
+
+func xmlEscape(s string) string {
+	return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;").Replace(s)
 }
 
 func (d *darwinPlatform) FindExecutable(name string) (string, error) {

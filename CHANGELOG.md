@@ -7,8 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-13
+
 ### Added
 
+- **Desktop window for the helper, on every platform.** The tray helper now
+  has one web-based interface, embedded in the binary and served only on
+  loopback: installed agents, available updates, a searchable catalog with
+  category filters, per-agent pages, an activity log that shows why an
+  operation failed, and settings. macOS shows it in a native window; Windows
+  and Linux open it in a chromeless Edge/Chrome/Chromium window, or the
+  default browser. It replaces the macOS-only AppKit windows and the
+  message-box dialogs used elsewhere. `agentmgr helper open` opens it from a
+  terminal.
+- **macOS app and Windows helper in releases.** The release workflow now
+  builds a universal `AgentManager.app`, signs it with a Developer ID,
+  notarizes it and attaches a DMG, and the Windows archive gains
+  `agentmgr-helper.exe`. `scripts/package-macos.sh` does the same locally.
+- **App and tray icons**, drawn by `scripts/genicons`.
 - **One-line installer.** `curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh`
   downloads the release archive for the current OS and architecture, verifies
   its SHA-256 against `checksums.txt`, and installs `agentmgr` to
@@ -121,6 +137,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`agentmgr upgrade` works again.** It looked for a bare binary that
+  releases do not publish, so every upgrade failed with a 404. It now
+  downloads the release archive for the current platform, verifies its
+  SHA-256 against `checksums.txt`, and installs the CLI from it. A build made
+  after a tag is no longer offered a "upgrade" to the older release, and
+  Homebrew and app-bundle installs are pointed at the right way to update.
+- The Windows tray icon was PNG data, which the Windows tray cannot load, so
+  no icon was shown. It is now a real `.ico`.
+- macOS "Start at Login" always pointed at `/usr/local/bin/agentmgr-helper`,
+  so it did nothing for the app bundle, and its `KeepAlive` setting relaunched
+  the app immediately after Quit. It now starts the installed app and stays
+  quit.
+- The macOS app bundle did not contain the `agentmgr` CLI, so installing the
+  command line tool from Settings always failed.
 - **Prebuilt macOS and Windows binaries could not open their database.** They
   are built with `CGO_ENABLED=0`, but storage used the cgo-only
   `mattn/go-sqlite3`, so `agent list`, `catalog list`, and every other
@@ -154,6 +184,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Homebrew cask version detection no longer reports `0.0.0` or leaks the cask
   `,<build-id>` suffix; cask versions are normalized to the clean value (for
   example `1.0.16`) at every install and detection site.
+
+### Changed
+
+- The macOS app is now `AgentManager.app` (bundle ID
+  `net.kevinelliott.agentmanager`) instead of `AgentManager Helper.app`. The
+  CLI still finds an app installed under the old name.
+
 
 ## [1.5.0] - 2026-06-08
 
@@ -660,7 +697,8 @@ consolidated detect pipeline. Ships a critical gRPC CVE fix.
 - Configuration management
 - Makefile for common development tasks
 
-[Unreleased]: https://github.com/kevinelliott/agentmanager/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/kevinelliott/agentmanager/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/kevinelliott/agentmanager/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/kevinelliott/agentmanager/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/kevinelliott/agentmanager/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/kevinelliott/agentmanager/compare/v1.3.0...v1.3.1

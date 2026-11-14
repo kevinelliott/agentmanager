@@ -22,6 +22,7 @@ const (
 	MessageTypeCheckUpdates   MessageType = "check_updates"
 	MessageTypeGetStatus      MessageType = "get_status"
 	MessageTypeShutdown       MessageType = "shutdown"
+	MessageTypeShowWindow     MessageType = "show_window"
 
 	// Response types
 	MessageTypeSuccess  MessageType = "success"
@@ -34,6 +35,12 @@ const (
 	MessageTypeAgentUpdated    MessageType = "agent_updated"
 	MessageTypeAgentRemoved    MessageType = "agent_removed"
 )
+
+// ShowWindowRequest asks the helper to open its window. Route is an optional
+// view to show, such as "/settings" or "/agent/claude-code".
+type ShowWindowRequest struct {
+	Route string `json:"route,omitempty"`
+}
 
 // Message represents an IPC message between CLI and helper.
 type Message struct {

@@ -7,23 +7,29 @@ import (
 	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 func TestGetIcon(t *testing.T) {
 	icon := getIcon()
 
-	// Icon should not be empty
 	if len(icon) == 0 {
-		t.Error("getIcon() returned empty slice")
+		t.Fatal("getIcon() returned empty slice")
 	}
 
-	// Icon should be valid PNG (starts with PNG signature)
+	// The Windows tray only loads .ico data; everywhere else it is a PNG.
+	if platform.IsWindows() {
+		if !bytes.HasPrefix(icon, []byte{0x00, 0x00, 0x01, 0x00}) {
+			t.Error("getIcon() did not return .ico data on Windows")
+		}
+		return
+	}
+
 	pngSignature := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A}
 	if !bytes.HasPrefix(icon, pngSignature) {
 		t.Error("getIcon() did not return valid PNG data")
 	}
 
-	// PNG should end with IEND chunk
 	iendSignature := []byte{0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82}
 	if !bytes.HasSuffix(icon, iendSignature) {
 		t.Error("getIcon() PNG data missing IEND chunk")

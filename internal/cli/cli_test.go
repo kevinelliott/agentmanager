@@ -582,7 +582,7 @@ func TestHelperCommandSubcommandCount(t *testing.T) {
 	cfg := &config.Config{}
 	cmd := NewHelperCommand(cfg)
 
-	expectedCount := 4 // start, stop, status, autostart
+	expectedCount := 5 // start, stop, open, status, autostart
 	actualCount := len(cmd.Commands())
 
 	if actualCount != expectedCount {

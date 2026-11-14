@@ -35,6 +35,14 @@ jobs:
       - name: Run tests
         run: go test -race ./...
 
+      - name: Check Homebrew tap token
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          if [ -z "$HOMEBREW_TAP_TOKEN" ]; then
+            echo "::warning::HOMEBREW_TAP_TOKEN is not set; the Homebrew formula will not be published for this release."
+          fi
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7
         with:
@@ -45,6 +53,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Lets GoReleaser push Formula/agentmanager.rb to kevinelliott/homebrew-tap.
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  macos-app:
+    name: macOS app
+    needs: release
+    uses: ./.github/workflows/macos-app.yml
+    with:
+      version: ${{ github.ref_name }}
+      attach_to_release: true
+    secrets: inherit
 
   docker:
     name: Docker

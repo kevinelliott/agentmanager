@@ -2,7 +2,6 @@ package systray
 
 import (
 	"context"
-	"os/exec"
 	"strings"
 	"sync"
 	"testing"
@@ -274,41 +273,4 @@ func TestRequestShutdown_ConcurrentSafe(t *testing.T) {
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("shutdownCh was not closed after concurrent requestShutdown")
 	}
-}
-
-func TestDialogTracking(t *testing.T) {
-	a := mkTestApp()
-
-	// trackDialog/untrackDialog only inspect pointer identity, so bare
-	// *exec.Cmd values are sufficient. Using exec.Command("true") would
-	// trigger a PATH lookup (no `true` on Windows CI) without improving
-	// the test.
-	cmd1 := &exec.Cmd{}
-	cmd2 := &exec.Cmd{}
-
-	a.trackDialog(cmd1)
-	a.trackDialog(cmd2)
-
-	a.dialogProcsMu.Lock()
-	if len(a.dialogProcs) != 2 {
-		t.Errorf("dialogProcs len = %d, want 2", len(a.dialogProcs))
-	}
-	a.dialogProcsMu.Unlock()
-
-	// Untrack one → length drops to 1 and remaining is cmd2.
-	a.untrackDialog(cmd1)
-
-	a.dialogProcsMu.Lock()
-	if len(a.dialogProcs) != 1 || a.dialogProcs[0] != cmd2 {
-		t.Errorf("after untrack: dialogProcs = %v", a.dialogProcs)
-	}
-	a.dialogProcsMu.Unlock()
-
-	// Untrack something not tracked is a no-op (exercise the loop miss).
-	a.untrackDialog(cmd1)
-	a.dialogProcsMu.Lock()
-	if len(a.dialogProcs) != 1 {
-		t.Errorf("untrack of missing cmd changed length: %d", len(a.dialogProcs))
-	}
-	a.dialogProcsMu.Unlock()
 }

@@ -2,7 +2,13 @@
 package cli
 
 import (
+	"archive/tar"
+	"archive/zip"
+	"bufio"
+	"compress/gzip"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -22,10 +29,27 @@ import (
 	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
+// githubReleasesURL is a variable so tests can point it at a local server.
+var githubReleasesURL = "https://api.github.com/repos/kevinelliott/agentmanager/releases/latest"
+
 const (
-	githubReleasesURL = "https://api.github.com/repos/kevinelliott/agentmanager/releases/latest"
-	downloadBaseURL   = "https://github.com/kevinelliott/agentmanager/releases/download"
+	checksumsAssetName = "checksums.txt"
+	// maxBinarySize bounds what is extracted from a release archive.
+	maxBinarySize = 512 << 20
 )
+
+// gitDescribeSuffix matches what "git describe" appends to a build made
+// after a tag, such as "-34-gb10cffc" or "-34-gb10cffc-dirty".
+var gitDescribeSuffix = regexp.MustCompile(`-\d+-g[0-9a-f]+(-dirty)?$`)
+
+// releaseVersion reduces a build version to the release it was built from
+// or after. A build made 34 commits after v1.5.0 is not older than 1.5.0,
+// even though "1.5.0-34-gabc" reads as a prerelease of it.
+func releaseVersion(v string) string {
+	v = strings.TrimPrefix(v, "v")
+	v = strings.TrimSuffix(v, "-dirty")
+	return gitDescribeSuffix.ReplaceAllString(v, "")
+}
 
 // GitHubRelease represents a GitHub release.
 type GitHubRelease struct {
@@ -66,7 +90,7 @@ Examples:
   agentmgr upgrade --force   # Force reinstall even if up to date`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			printer := output.NewPrinter(cfg, output.NoColor(cfg, noColor))
-			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 			defer cancel()
 
 			// Get current version
@@ -89,7 +113,7 @@ Examples:
 			latestVer := strings.TrimPrefix(release.TagName, "v")
 
 			// Parse and compare versions
-			current, err := agent.ParseVersion(currentVer)
+			current, err := agent.ParseVersion(releaseVersion(currentVer))
 			if err != nil && !force {
 				printer.Warning("Could not parse current version: %s", currentVer)
 			}
@@ -130,31 +154,6 @@ Examples:
 				return nil
 			}
 
-			// Find the right asset for this platform
-			assetName := getAssetName()
-			var downloadURL string
-			for _, asset := range release.Assets {
-				if asset.Name == assetName {
-					downloadURL = asset.BrowserDownloadURL
-					break
-				}
-			}
-
-			if downloadURL == "" {
-				// Try constructed URL
-				downloadURL = fmt.Sprintf("%s/%s/%s", downloadBaseURL, release.TagName, assetName)
-				printer.Warning("Asset not found in release, trying: %s", assetName)
-			}
-
-			printer.Info("Downloading %s...", assetName)
-
-			// Download the new binary
-			tmpFile, err := downloadFile(ctx, downloadURL)
-			if err != nil {
-				return fmt.Errorf("failed to download update: %w", err)
-			}
-			defer os.Remove(tmpFile)
-
 			// Get current executable path
 			execPath, err := os.Executable()
 			if err != nil {
@@ -164,11 +163,23 @@ Examples:
 			if err != nil {
 				return fmt.Errorf("failed to resolve executable path: %w", err)
 			}
+			if hint := managedInstallHint(execPath); hint != "" {
+				return errors.New(hint)
+			}
+
+			tmpFile, err := fetchReleaseBinary(ctx, printer, release, latestVer)
+			if err != nil {
+				return err
+			}
+			defer os.Remove(tmpFile)
 
 			printer.Info("Installing to %s...", execPath)
 
 			// Replace the binary
 			if err := replaceExecutable(tmpFile, execPath); err != nil {
+				if errors.Is(err, os.ErrPermission) {
+					return fmt.Errorf("no permission to write %s; run 'sudo agentmgr upgrade'", filepath.Dir(execPath))
+				}
 				return fmt.Errorf("failed to install update: %w", err)
 			}
 
@@ -184,6 +195,55 @@ Examples:
 	cmd.Flags().BoolVar(&noColor, "no-color", false, "disable colored output")
 
 	return cmd
+}
+
+// fetchReleaseBinary downloads this platform's archive from the release,
+// verifies it against the release checksums, and returns the path of the
+// extracted CLI binary. The caller removes that file.
+func fetchReleaseBinary(ctx context.Context, printer *output.Printer, release *GitHubRelease, latestVer string) (string, error) {
+	// Find the archive for this platform, and the checksum list.
+	assetName := getAssetName(latestVer)
+	var downloadURL, checksumsURL string
+	for _, asset := range release.Assets {
+		switch asset.Name {
+		case assetName:
+			downloadURL = asset.BrowserDownloadURL
+		case checksumsAssetName:
+			checksumsURL = asset.BrowserDownloadURL
+		}
+	}
+	if downloadURL == "" {
+		return "", fmt.Errorf("release %s has no build for %s/%s (looked for %s); see %s",
+			release.TagName, runtime.GOOS, runtime.GOARCH, assetName, release.HTMLURL)
+	}
+	if checksumsURL == "" {
+		return "", fmt.Errorf("release %s has no %s, so the download cannot be verified", release.TagName, checksumsAssetName)
+	}
+
+	printer.Info("Downloading %s...", assetName)
+
+	archivePath, err := downloadFile(ctx, downloadURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to download update: %w", err)
+	}
+	defer os.Remove(archivePath)
+
+	checksumsPath, err := downloadFile(ctx, checksumsURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to download checksums: %w", err)
+	}
+	defer os.Remove(checksumsPath)
+
+	if err := verifyChecksum(archivePath, checksumsPath, assetName); err != nil {
+		return "", fmt.Errorf("failed to verify update: %w", err)
+	}
+	printer.Info("Checksum verified")
+
+	tmpFile, err := extractBinary(archivePath, assetName)
+	if err != nil {
+		return "", fmt.Errorf("failed to unpack update: %w", err)
+	}
+	return tmpFile, nil
 }
 
 func fetchLatestRelease(ctx context.Context) (*GitHubRelease, error) {
@@ -212,16 +272,152 @@ func fetchLatestRelease(ctx context.Context) (*GitHubRelease, error) {
 	return &release, nil
 }
 
-func getAssetName() string {
-	os := runtime.GOOS
-	arch := runtime.GOARCH
+// getAssetName is the release archive for this platform, as named by the
+// archives section of .goreleaser.yml.
+func getAssetName(version string) string {
+	ext := ".tar.gz"
+	if runtime.GOOS == "windows" {
+		ext = ".zip"
+	}
+	return fmt.Sprintf("agentmanager_%s_%s_%s%s", version, runtime.GOOS, runtime.GOARCH, ext)
+}
 
-	ext := ""
-	if os == "windows" {
-		ext = ".exe"
+// binaryName is the CLI's file name inside a release archive.
+func binaryName() string {
+	if runtime.GOOS == "windows" {
+		return "agentmgr.exe"
+	}
+	return "agentmgr"
+}
+
+// managedInstallHint returns advice when the running binary belongs to
+// something else that should do the upgrade, or "" when it can be replaced.
+func managedInstallHint(execPath string) string {
+	slashed := filepath.ToSlash(execPath)
+	switch {
+	case strings.Contains(slashed, "/Cellar/"):
+		return "this agentmgr was installed with Homebrew; run 'brew upgrade agentmanager' instead"
+	case strings.Contains(slashed, ".app/Contents/MacOS/"):
+		return "this agentmgr is part of AgentManager.app; download the new app from https://github.com/kevinelliott/agentmanager/releases/latest instead"
+	}
+	return ""
+}
+
+// verifyChecksum checks the archive's SHA-256 against the release's
+// checksums file, which has "<hex digest>  <file name>" lines.
+func verifyChecksum(archivePath, checksumsPath, assetName string) error {
+	// #nosec G304 -- Private temporary file produced by the upgrade flow.
+	sums, err := os.Open(checksumsPath)
+	if err != nil {
+		return err
+	}
+	defer sums.Close()
+
+	want := ""
+	scanner := bufio.NewScanner(sums)
+	for scanner.Scan() {
+		fields := strings.Fields(scanner.Text())
+		if len(fields) == 2 && strings.TrimPrefix(fields[1], "*") == assetName {
+			want = strings.ToLower(fields[0])
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	if want == "" {
+		return fmt.Errorf("%s is not listed in %s", assetName, checksumsAssetName)
 	}
 
-	return fmt.Sprintf("agentmgr_%s_%s%s", os, arch, ext)
+	// #nosec G304 -- Private temporary file produced by the upgrade flow.
+	archive, err := os.Open(archivePath)
+	if err != nil {
+		return err
+	}
+	defer archive.Close()
+	hash := sha256.New()
+	if _, err := io.Copy(hash, archive); err != nil {
+		return err
+	}
+	if got := hex.EncodeToString(hash.Sum(nil)); got != want {
+		return fmt.Errorf("checksum mismatch for %s: got %s, want %s", assetName, got, want)
+	}
+	return nil
+}
+
+// extractBinary pulls the CLI out of a release archive into a temporary
+// file and returns its path.
+func extractBinary(archivePath, assetName string) (string, error) {
+	var (
+		src     io.Reader
+		closers []io.Closer
+	)
+	defer func() {
+		for _, c := range closers {
+			_ = c.Close()
+		}
+	}()
+
+	if strings.HasSuffix(assetName, ".zip") {
+		zr, err := zip.OpenReader(archivePath)
+		if err != nil {
+			return "", err
+		}
+		closers = append(closers, zr)
+		for _, f := range zr.File {
+			if f.Name == binaryName() && f.FileInfo().Mode().IsRegular() {
+				rc, err := f.Open()
+				if err != nil {
+					return "", err
+				}
+				closers = append(closers, rc)
+				src = rc
+				break
+			}
+		}
+	} else {
+		// #nosec G304 -- Private temporary file produced by the upgrade flow.
+		f, err := os.Open(archivePath)
+		if err != nil {
+			return "", err
+		}
+		closers = append(closers, f)
+		gz, err := gzip.NewReader(f)
+		if err != nil {
+			return "", err
+		}
+		closers = append(closers, gz)
+		tr := tar.NewReader(gz)
+		for {
+			hdr, err := tr.Next()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			if err != nil {
+				return "", err
+			}
+			if hdr.Name == binaryName() && hdr.Typeflag == tar.TypeReg {
+				src = tr
+				break
+			}
+		}
+	}
+	if src == nil {
+		return "", fmt.Errorf("%s not found in %s", binaryName(), assetName)
+	}
+
+	out, err := os.CreateTemp("", "agentmgr-upgrade-bin-*")
+	if err != nil {
+		return "", err
+	}
+	n, copyErr := io.Copy(out, io.LimitReader(src, maxBinarySize+1))
+	if n > maxBinarySize {
+		copyErr = errors.Join(copyErr, fmt.Errorf("%s in %s is larger than expected", binaryName(), assetName))
+	}
+	if err := errors.Join(copyErr, out.Close()); err != nil {
+		return "", errors.Join(err, os.Remove(out.Name()))
+	}
+	return out.Name(), nil
 }
 
 func downloadFile(ctx context.Context, url string) (string, error) {

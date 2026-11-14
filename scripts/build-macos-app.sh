@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build macOS .app bundle for AgentManager Helper
+# Build the macOS AgentManager.app bundle (tray helper, window and CLI)
 set -e
 
 # Get script directory
@@ -7,10 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Configuration
-APP_NAME="AgentManager Helper"
+APP_NAME="AgentManager"
 APP_BUNDLE="${APP_NAME}.app"
 BINARY_NAME="agentmgr-helper"
-BUNDLE_ID="net.kevinelliott.agentmgr-helper"
+CLI_NAME="agentmgr"
+BUNDLE_ID="net.kevinelliott.agentmanager"
 
 # Directories
 BUILD_DIR="${PROJECT_ROOT}/bin"
@@ -21,6 +22,9 @@ RESOURCES_DIR="${CONTENTS_DIR}/Resources"
 
 # Version info (passed as arguments or defaults)
 VERSION="${1:-dev}"
+# CFBundleShortVersionString must be plain numbers: v1.5.0-3-gabc -> 1.5.0
+PLIST_VERSION="$(echo "${VERSION#v}" | sed -E 's/^([0-9]+(\.[0-9]+){0,2}).*/\1/')"
+case "${PLIST_VERSION}" in [0-9]*) ;; *) PLIST_VERSION="0.0.0" ;; esac
 COMMIT="${2:-none}"
 DATE="${3:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}"
 
@@ -46,6 +50,17 @@ mkdir -p "${RESOURCES_DIR}"
 echo "Copying binary..."
 cp "${BUILD_DIR}/${BINARY_NAME}" "${MACOS_DIR}/"
 
+# Bundle the CLI next to the helper. Settings > Install looks for it there
+# (findBundledAgentMgr), so without it the Install button always fails.
+if [ ! -f "${BUILD_DIR}/${CLI_NAME}" ]; then
+    echo "Building ${CLI_NAME} binary..."
+    cd "${PROJECT_ROOT}"
+    go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" \
+        -o "${BUILD_DIR}/${CLI_NAME}" ./cmd/agentmgr
+fi
+echo "Copying CLI..."
+cp "${BUILD_DIR}/${CLI_NAME}" "${MACOS_DIR}/"
+
 # Create Info.plist with version info
 echo "Creating Info.plist..."
 cat > "${CONTENTS_DIR}/Info.plist" << EOF
@@ -68,11 +83,13 @@ cat > "${CONTENTS_DIR}/Info.plist" << EOF
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>${VERSION}</string>
+    <string>${PLIST_VERSION}</string>
     <key>CFBundleVersion</key>
     <string>${COMMIT}</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
     <key>LSMinimumSystemVersion</key>
-    <string>10.13</string>
+    <string>11.0</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHighResolutionCapable</key>

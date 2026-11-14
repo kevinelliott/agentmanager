@@ -7,13 +7,13 @@
     <key>CFBundleExecutable</key>
     <string>agentmgr-helper</string>
     <key>CFBundleIdentifier</key>
-    <string>net.kevinelliott.agentmgr-helper</string>
+    <string>net.kevinelliott.agentmanager</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>AgentManager Helper</string>
+    <string>AgentManager</string>
     <key>CFBundleDisplayName</key>
-    <string>AgentManager Helper</string>
+    <string>AgentManager</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
