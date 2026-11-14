@@ -1,4 +1,4 @@
-// AgentManager Helper - System tray helper for managing AI development agents
+// AgentManager desktop app - tray icon and window for managing AI development agents
 package main
 
 import (

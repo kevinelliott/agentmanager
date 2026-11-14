@@ -115,7 +115,7 @@ func (l *linuxPlatform) enableSystemdAutoStart(ctx context.Context) error {
 
 	servicePath := filepath.Join(serviceDir, "agentmgr-helper.service")
 	serviceContent := `[Unit]
-Description=AgentManager Helper
+Description=AgentManager
 After=network.target
 
 [Service]
@@ -192,7 +192,7 @@ func (l *linuxPlatform) enableXDGAutoStart() error {
 
 	desktopEntry := `[Desktop Entry]
 Type=Application
-Name=AgentManager Helper
+Name=AgentManager
 Exec=/usr/local/bin/agentmgr-helper
 Hidden=false
 NoDisplay=true

@@ -328,6 +328,10 @@ func isHelperRunning() bool {
 	return true
 }
 
+// macAppNames are the bundle names to look for, newest first. The app was
+// called "AgentManager Helper" before it had a window of its own.
+var macAppNames = []string{"AgentManager.app", "AgentManager Helper.app"}
+
 // findHelperBinary locates the agentmgr-helper binary or .app bundle.
 // On macOS, it prefers the .app bundle for proper systray support.
 func findHelperBinary() (string, error) {
@@ -341,9 +345,11 @@ func findHelperBinary() (string, error) {
 
 		// On macOS, prefer .app bundle
 		if isMacOS {
-			appPath := filepath.Join(dir, "AgentManager Helper.app")
-			if _, err := os.Stat(appPath); err == nil {
-				return appPath, nil
+			for _, name := range macAppNames {
+				appPath := filepath.Join(dir, name)
+				if _, err := os.Stat(appPath); err == nil {
+					return appPath, nil
+				}
 			}
 		}
 
@@ -358,10 +364,12 @@ func findHelperBinary() (string, error) {
 
 	if isMacOS {
 		// Check for .app bundle in Applications and common locations
-		paths = append(paths,
-			"/Applications/AgentManager Helper.app",
-			filepath.Join(os.Getenv("HOME"), "Applications", "AgentManager Helper.app"),
-		)
+		for _, name := range macAppNames {
+			paths = append(paths,
+				filepath.Join("/Applications", name),
+				filepath.Join(os.Getenv("HOME"), "Applications", name),
+			)
+		}
 	}
 
 	paths = append(paths,
@@ -372,9 +380,9 @@ func findHelperBinary() (string, error) {
 	// Add home directory paths
 	if home, err := os.UserHomeDir(); err == nil {
 		if isMacOS {
-			paths = append(paths,
-				filepath.Join(home, ".local", "bin", "AgentManager Helper.app"),
-			)
+			for _, name := range macAppNames {
+				paths = append(paths, filepath.Join(home, ".local", "bin", name))
+			}
 		}
 		paths = append(paths,
 			filepath.Join(home, ".local", "bin", "agentmgr-helper"),

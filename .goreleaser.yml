@@ -48,8 +48,27 @@ builds:
       - -X main.commit={{.Commit}}
       - -X main.date={{.Date}}
 
-  # Note: agentmgr-helper is not cross-compiled - it requires darwinkit and CGO
-  # For Darwin and Windows, users should build from source or use native builds
+  # Helper binary - Windows. The tray library is pure Go on Windows, so this
+  # cross-compiles without CGO. -H=windowsgui keeps a console window from
+  # opening alongside the tray icon.
+  - id: agentmgr-helper-windows
+    main: ./cmd/agentmgr-helper
+    binary: agentmgr-helper
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -H=windowsgui
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+  # The macOS app needs AppKit, WebKit and a signing identity, so it is built
+  # on a macOS runner by scripts/package-macos.sh (see the macos-app job in
+  # .github/workflows/release.yml) and attached to the release as a DMG.
 
 archives:
   - id: default

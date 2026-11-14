@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   default browser. It replaces the macOS-only AppKit windows and the
   message-box dialogs used elsewhere. `agentmgr helper open` opens it from a
   terminal.
+- **macOS app and Windows helper in releases.** The release workflow now
+  builds a universal `AgentManager.app`, signs it with a Developer ID,
+  notarizes it and attaches a DMG, and the Windows archive gains
+  `agentmgr-helper.exe`. `scripts/package-macos.sh` does the same locally.
+- **App and tray icons**, drawn by `scripts/genicons`.
 - **One-line installer.** `curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh`
   downloads the release archive for the current OS and architecture, verifies
   its SHA-256 against `checksums.txt`, and installs `agentmgr` to
@@ -130,6 +135,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The Windows tray icon was PNG data, which the Windows tray cannot load, so
+  no icon was shown. It is now a real `.ico`.
+- macOS "Start at Login" always pointed at `/usr/local/bin/agentmgr-helper`,
+  so it did nothing for the app bundle, and its `KeepAlive` setting relaunched
+  the app immediately after Quit. It now starts the installed app and stays
+  quit.
+- The macOS app bundle did not contain the `agentmgr` CLI, so installing the
+  command line tool from Settings always failed.
 - **Prebuilt macOS and Windows binaries could not open their database.** They
   are built with `CGO_ENABLED=0`, but storage used the cgo-only
   `mattn/go-sqlite3`, so `agent list`, `catalog list`, and every other
@@ -163,6 +176,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Homebrew cask version detection no longer reports `0.0.0` or leaks the cask
   `,<build-id>` suffix; cask versions are normalized to the clean value (for
   example `1.0.16`) at every install and detection site.
+
+### Changed
+
+- The macOS app is now `AgentManager.app` (bundle ID
+  `net.kevinelliott.agentmanager`) instead of `AgentManager Helper.app`. The
+  CLI still finds an app installed under the old name.
+
 
 ## [1.5.0] - 2026-06-08
 

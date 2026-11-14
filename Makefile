@@ -53,7 +53,7 @@ build-helper:
 	@echo "Building agentmgr-helper..."
 	go build $(LDFLAGS) -o bin/agentmgr-helper ./cmd/agentmgr-helper
 
-# Build macOS app bundle for helper (systray support)
+# Build the macOS AgentManager.app bundle (tray icon, window and CLI)
 build-macos-app: build-cli build-helper
 	@echo "Building macOS app bundle..."
 	@./scripts/build-macos-app.sh "$(VERSION)" "$(COMMIT)" "$(DATE)"
@@ -175,7 +175,7 @@ help:
 	@echo "  build            Build agentmgr and agentmgr-helper"
 	@echo "  build-cli        Build agentmgr only"
 	@echo "  build-helper     Build agentmgr-helper only"
-	@echo "  build-macos-app  Build macOS .app bundle for helper (systray)"
+	@echo "  build-macos-app  Build bin/AgentManager.app (tray icon, window, CLI)"
 	@echo "  build-all        Build for all platforms"
 	@echo "  clean            Remove build artifacts"
 	@echo ""
