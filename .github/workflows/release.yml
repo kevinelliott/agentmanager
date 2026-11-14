@@ -49,63 +49,11 @@ jobs:
   macos-app:
     name: macOS app
     needs: release
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Set up Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: ${{ env.GO_VERSION }}
-
-      # Signing is optional so forks and dry runs still produce a DMG. With
-      # no certificate the app is ad-hoc signed and the step below says so.
-      - name: Import signing certificate
-        id: cert
-        env:
-          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
-        run: |
-          if [ -z "$MACOS_CERTIFICATE_P12" ]; then
-            echo "::warning::MACOS_CERTIFICATE_P12 is not set; the macOS app will be ad-hoc signed and Gatekeeper will block it."
-            exit 0
-          fi
-          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
-          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
-          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
-          security import "$RUNNER_TEMP/cert.p12" -P "$MACOS_CERTIFICATE_PASSWORD" \
-            -A -t cert -f pkcs12 -k "$KEYCHAIN"
-          rm -f "$RUNNER_TEMP/cert.p12"
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
-          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
-          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | grep 'Developer ID Application' | head -1 | sed -E 's/.*"(.*)"/\1/')"
-          if [ -z "$IDENTITY" ]; then
-            echo "::error::The certificate does not contain a Developer ID Application identity."
-            exit 1
-          fi
-          echo "identity=$IDENTITY" >> "$GITHUB_OUTPUT"
-
-      - name: Build, sign and notarize
-        env:
-          MACOS_SIGN_IDENTITY: ${{ steps.cert.outputs.identity }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: ./scripts/package-macos.sh "${GITHUB_REF_NAME}"
-
-      - name: Attach DMG to the release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd dist
-          for f in *.dmg; do shasum -a 256 "$f" > "$f.sha256"; done
-          gh release upload "${GITHUB_REF_NAME}" *.dmg *.dmg.sha256 --clobber
+    uses: ./.github/workflows/macos-app.yml
+    with:
+      version: ${{ github.ref_name }}
+      attach_to_release: true
+    secrets: inherit
 
   docker:
     name: Docker

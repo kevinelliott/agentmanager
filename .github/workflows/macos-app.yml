@@ -1,0 +1,107 @@
+name: macOS app
+
+# Builds, signs and notarizes AgentManager.app and packages it as a DMG.
+# Called by the release workflow, and runnable by hand to check signing
+# without cutting a release: the DMG is then a downloadable workflow artifact.
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version to stamp into the app (a tag such as v1.6.0)
+        type: string
+        required: false
+      attach_to_release:
+        description: Attach the DMG to the GitHub release named by version
+        type: boolean
+        default: false
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to stamp into the app (defaults to git describe)
+        type: string
+        required: false
+      attach_to_release:
+        description: Attach the DMG to the GitHub release named by version
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: '1.25'
+
+jobs:
+  package:
+    name: Package
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # Signing is optional so forks and dry runs still produce a DMG. With
+      # no certificate the app is ad-hoc signed and the step below says so.
+      - name: Import signing certificate
+        id: cert
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -z "$MACOS_CERTIFICATE_P12" ]; then
+            echo "::warning::MACOS_CERTIFICATE_P12 is not set; the macOS app will be ad-hoc signed and Gatekeeper will block it."
+            exit 0
+          fi
+          KEYCHAIN="$RUNNER_TEMP/signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "$MACOS_CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -P "$MACOS_CERTIFICATE_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          rm -f "$RUNNER_TEMP/cert.p12"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          IDENTITY="$(security find-identity -v -p codesigning "$KEYCHAIN" | grep 'Developer ID Application' | grep "(${APPLE_TEAM_ID:-.*})" | head -1 | sed -E 's/.*"(.*)"/\1/')"
+          if [ -z "$IDENTITY" ]; then
+            echo "::error::The certificate does not contain a Developer ID Application identity for team APPLE_TEAM_ID."
+            exit 1
+          fi
+          echo "identity=$IDENTITY" >> "$GITHUB_OUTPUT"
+
+      - name: Build, sign and notarize
+        env:
+          MACOS_SIGN_IDENTITY: ${{ steps.cert.outputs.identity }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          VERSION: ${{ inputs.version }}
+        run: ./scripts/package-macos.sh "${VERSION:-$(git describe --tags --always)}"
+
+      - name: Checksum
+        run: |
+          cd dist
+          for f in *.dmg; do shasum -a 256 "$f" > "$f.sha256"; done
+
+      - name: Upload DMG as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AgentManager-macos
+          path: dist/*.dmg*
+          if-no-files-found: error
+
+      - name: Attach DMG to the release
+        if: ${{ inputs.attach_to_release }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: gh release upload "$VERSION" dist/*.dmg dist/*.dmg.sha256 --clobber
