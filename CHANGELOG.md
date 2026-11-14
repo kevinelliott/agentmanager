@@ -137,6 +137,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`agentmgr upgrade` works again.** It looked for a bare binary that
+  releases do not publish, so every upgrade failed with a 404. It now
+  downloads the release archive for the current platform, verifies its
+  SHA-256 against `checksums.txt`, and installs the CLI from it. A build made
+  after a tag is no longer offered a "upgrade" to the older release, and
+  Homebrew and app-bundle installs are pointed at the right way to update.
 - The Windows tray icon was PNG data, which the Windows tray cannot load, so
   no icon was shown. It is now a real `.ico`.
 - macOS "Start at Login" always pointed at `/usr/local/bin/agentmgr-helper`,
