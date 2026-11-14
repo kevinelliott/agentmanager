@@ -25,6 +25,7 @@ func NewHelperCommand(cfg *config.Config) *cobra.Command {
 
 The helper runs in the background and provides:
 - System tray icon with quick access to agent status
+- A desktop window for browsing, installing and updating agents
 - Desktop notifications for available updates
 - Background catalog refresh`,
 	}
@@ -32,6 +33,7 @@ The helper runs in the background and provides:
 	cmd.AddCommand(
 		newHelperStartCommand(cfg),
 		newHelperStopCommand(cfg),
+		newHelperOpenCommand(cfg),
 		newHelperStatusCommand(cfg),
 		newHelperAutoStartCommand(cfg),
 	)
@@ -154,6 +156,46 @@ func newHelperStopCommand(cfg *config.Config) *cobra.Command {
 			}
 
 			printSuccess("Helper stopped")
+			return nil
+		},
+	}
+}
+
+func newHelperOpenCommand(_ *config.Config) *cobra.Command {
+	return &cobra.Command{
+		Use:   "open",
+		Short: "Open the AgentManager window",
+		Long:  `Open the desktop window of the running AgentManager systray helper.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !isHelperRunning() {
+				return fmt.Errorf("helper is not running; start it with 'agentmgr helper start'")
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			client := ipc.NewClient("")
+			if err := client.Connect(ctx); err != nil {
+				return fmt.Errorf("failed to connect to helper: %w", err)
+			}
+			defer func() { _ = client.Disconnect() }()
+
+			msg, err := ipc.NewMessage(ipc.MessageTypeShowWindow, ipc.ShowWindowRequest{})
+			if err != nil {
+				return fmt.Errorf("failed to create message: %w", err)
+			}
+
+			resp, err := client.Send(ctx, msg)
+			if err != nil {
+				return fmt.Errorf("failed to reach helper: %w", err)
+			}
+			if resp != nil && resp.Type == ipc.MessageTypeError {
+				var e ipc.ErrorResponse
+				if err := resp.DecodePayload(&e); err == nil && e.Message != "" {
+					return fmt.Errorf("helper could not open the window: %s", e.Message)
+				}
+				return fmt.Errorf("helper could not open the window")
+			}
 			return nil
 		},
 	}

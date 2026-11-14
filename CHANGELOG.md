@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Desktop window for the helper, on every platform.** The tray helper now
+  has one web-based interface, embedded in the binary and served only on
+  loopback: installed agents, available updates, a searchable catalog with
+  category filters, per-agent pages, an activity log that shows why an
+  operation failed, and settings. macOS shows it in a native window; Windows
+  and Linux open it in a chromeless Edge/Chrome/Chromium window, or the
+  default browser. It replaces the macOS-only AppKit windows and the
+  message-box dialogs used elsewhere. `agentmgr helper open` opens it from a
+  terminal.
 - **One-line installer.** `curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh`
   downloads the release archive for the current OS and architecture, verifies
   its SHA-256 against `checksums.txt`, and installs `agentmgr` to

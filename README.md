@@ -219,6 +219,7 @@ agentmgr config path             # Show config file path
 ```bash
 agentmgr helper start            # Start systray helper
 agentmgr helper stop             # Stop systray helper
+agentmgr helper open             # Open the desktop window
 agentmgr helper status           # Check helper status
 ```
 
@@ -600,7 +601,7 @@ in an interactive terminal with the required privileges.
 AgentManager consists of two binaries:
 
 1. **`agentmgr`** - Main CLI/TUI application for interactive use
-2. **`agentmgr-helper`** - Background systray helper with notifications
+2. **`agentmgr-helper`** - Background systray helper with a desktop window and notifications
 
 ### Library Usage
 
