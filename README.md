@@ -710,10 +710,14 @@ go run ./scripts/genicons     # regenerate the app, tray and window icons
 ```
 
 `package-macos.sh` signs with the Developer ID named in `MACOS_SIGN_IDENTITY` and
-notarizes when `APPLE_ID`, `APPLE_APP_PASSWORD` and `APPLE_TEAM_ID` are also set;
-without them it produces an ad-hoc signed build for local use. The release
-workflow reads the same values, plus `MACOS_CERTIFICATE_P12` (the base64 of the
-exported certificate) and `MACOS_CERTIFICATE_PASSWORD`, from repository secrets.
+notarizes with an App Store Connect API key when `APPLE_API_KEY_PATH` (the
+`.p8` file), `APPLE_API_KEY_ID` and `APPLE_API_ISSUER_ID` are also set; without
+them it produces an ad-hoc signed build for local use. The release workflow
+reads `MACOS_CERTIFICATE_P12` (the base64 of the exported certificate),
+`MACOS_CERTIFICATE_PASSWORD`, `APPLE_TEAM_ID`, `APPLE_API_KEY_P8` (the base64 of
+the `.p8` file), `APPLE_API_KEY_ID` and `APPLE_API_ISSUER_ID` from repository
+secrets. `scripts/set-notarization-secrets.sh` stores the three API key
+secrets. A release fails rather than publish an app that is not notarized.
 
 ### Performance checks
 

@@ -10,11 +10,13 @@
 #   MACOS_SIGN_IDENTITY   "Developer ID Application: Name (TEAMID)". When
 #                         unset the app is ad-hoc signed: it runs on the Mac
 #                         that built it, but Gatekeeper blocks it elsewhere.
-#   APPLE_ID              Apple ID used for notarization.
-#   APPLE_APP_PASSWORD    App-specific password for that Apple ID.
-#   APPLE_TEAM_ID         Developer team ID.
+#   APPLE_API_KEY_PATH    App Store Connect API key (.p8 file) for notarization.
+#   APPLE_API_KEY_ID      That key's Key ID.
+#   APPLE_API_ISSUER_ID   The team's Issuer ID.
+#   REQUIRE_NOTARIZATION  "true" fails the build instead of skipping
+#                         notarization when any of the above is missing.
 #
-# Notarization runs only when a signing identity and all three APPLE_*
+# Notarization runs only when a signing identity and all three APPLE_API_*
 # values are set. Output: dist/AgentManager-<version>-macos-universal.dmg
 set -euo pipefail
 
@@ -72,15 +74,20 @@ if [ -n "${MACOS_SIGN_IDENTITY:-}" ]; then
     codesign --force --timestamp --sign "${MACOS_SIGN_IDENTITY}" "${DMG}"
 fi
 
-if [ -n "${MACOS_SIGN_IDENTITY:-}" ] && [ -n "${APPLE_ID:-}" ] && [ -n "${APPLE_APP_PASSWORD:-}" ] && [ -n "${APPLE_TEAM_ID:-}" ]; then
+# Notarization uses an App Store Connect API key, so no Apple ID password is
+# involved. APPLE_API_KEY_PATH is the .p8 file.
+if [ -n "${MACOS_SIGN_IDENTITY:-}" ] && [ -n "${APPLE_API_KEY_PATH:-}" ] && [ -n "${APPLE_API_KEY_ID:-}" ] && [ -n "${APPLE_API_ISSUER_ID:-}" ]; then
     echo "==> Notarizing (this can take a few minutes)"
     xcrun notarytool submit "${DMG}" \
-        --apple-id "${APPLE_ID}" --password "${APPLE_APP_PASSWORD}" --team-id "${APPLE_TEAM_ID}" \
+        --key "${APPLE_API_KEY_PATH}" --key-id "${APPLE_API_KEY_ID}" --issuer "${APPLE_API_ISSUER_ID}" \
         --wait
     xcrun stapler staple "${DMG}"
     spctl --assess --type open --context context:primary-signature --verbose "${DMG}"
+elif [ "${REQUIRE_NOTARIZATION:-}" = "true" ]; then
+    echo "error: notarization is required but MACOS_SIGN_IDENTITY, APPLE_API_KEY_PATH, APPLE_API_KEY_ID or APPLE_API_ISSUER_ID is missing" >&2
+    exit 1
 else
-    echo "==> Skipping notarization (needs MACOS_SIGN_IDENTITY, APPLE_ID, APPLE_APP_PASSWORD, APPLE_TEAM_ID)"
+    echo "==> Skipping notarization (needs MACOS_SIGN_IDENTITY, APPLE_API_KEY_PATH, APPLE_API_KEY_ID, APPLE_API_ISSUER_ID)"
 fi
 
 echo "Done: ${DMG}"
