@@ -54,7 +54,7 @@ build-helper:
 	go build $(LDFLAGS) -o bin/agentmgr-helper ./cmd/agentmgr-helper
 
 # Build macOS app bundle for helper (systray support)
-build-macos-app: build-helper
+build-macos-app: build-cli build-helper
 	@echo "Building macOS app bundle..."
 	@./scripts/build-macos-app.sh "$(VERSION)" "$(COMMIT)" "$(DATE)"
 

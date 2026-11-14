@@ -10,6 +10,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 APP_NAME="AgentManager Helper"
 APP_BUNDLE="${APP_NAME}.app"
 BINARY_NAME="agentmgr-helper"
+CLI_NAME="agentmgr"
 BUNDLE_ID="net.kevinelliott.agentmgr-helper"
 
 # Directories
@@ -45,6 +46,17 @@ mkdir -p "${RESOURCES_DIR}"
 # Copy binary
 echo "Copying binary..."
 cp "${BUILD_DIR}/${BINARY_NAME}" "${MACOS_DIR}/"
+
+# Bundle the CLI next to the helper. Settings > Install looks for it there
+# (findBundledAgentMgr), so without it the Install button always fails.
+if [ ! -f "${BUILD_DIR}/${CLI_NAME}" ]; then
+    echo "Building ${CLI_NAME} binary..."
+    cd "${PROJECT_ROOT}"
+    go build -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}" \
+        -o "${BUILD_DIR}/${CLI_NAME}" ./cmd/agentmgr
+fi
+echo "Copying CLI..."
+cp "${BUILD_DIR}/${CLI_NAME}" "${MACOS_DIR}/"
 
 # Create Info.plist with version info
 echo "Creating Info.plist..."
