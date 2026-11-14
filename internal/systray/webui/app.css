@@ -98,10 +98,6 @@ button, input, select { font: inherit; color: inherit; }
 .brand-mark {
   width: 22px;
   height: 22px;
-  border-radius: 7px;
-  background:
-    radial-gradient(circle at 50% 50%, var(--sidebar) 0 3.5px, transparent 4px),
-    conic-gradient(from 210deg, #7c6cff, #4f8cff, #36c2a6, #7c6cff);
   flex: none;
 }
 
