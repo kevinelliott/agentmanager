@@ -124,9 +124,12 @@ async function post(path, body, okMessage) {
 async function loadState() {
   try {
     state.data = await api("/api/state");
+    state.failures = 0;
     state.offline = false;
   } catch (err) {
-    state.offline = true;
+    // One missed poll can be a hiccup; two in a row means the helper is gone.
+    state.failures = (state.failures || 0) + 1;
+    state.offline = state.failures >= 2;
   }
   state.ready = true;
 
@@ -322,7 +325,7 @@ function filtersHTML() {
 
 function bodyHTML(r) {
   if (!state.ready) return `<div class="empty"><span class="spinner"></span></div>`;
-  if (!state.data) {
+  if (!state.data || state.offline) {
     return `<div class="empty"><h2>AgentManager is not responding</h2><p>The background helper may have quit. Reopen AgentManager from your applications to continue.</p></div>`;
   }
   switch (r.view) {

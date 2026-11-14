@@ -970,9 +970,7 @@ func (a *App) installOrUpdateCLI() bool {
 		return a.installCLIToPath(bundledPath, targetPath)
 
 	case platform.Windows:
-		targetPath = filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "agentmgr", "agentmgr.exe")
-		a.installCLIToPathWindows(bundledPath, targetPath)
-		return true // Windows version doesn't return status yet
+		return a.installCLIToPathWindows(bundledPath, windowsCLIInstallPath())
 
 	default:
 		a.notify("Install CLI", "Unsupported platform")
@@ -1044,10 +1042,17 @@ func (a *App) installCLIToPath(sourcePath, targetPath string) bool {
 }
 
 // installCLIToPathWindows installs the CLI binary on Windows.
-func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
+// windowsCLIInstallPath is where the CLI is copied on Windows.
+func windowsCLIInstallPath() string {
+	return filepath.Join(os.Getenv("LOCALAPPDATA"), "Programs", "agentmgr", "agentmgr.exe")
+}
+
+// installCLIToPathWindows copies the CLI into the user's programs folder.
+// It reports whether the copy succeeded.
+func (a *App) installCLIToPathWindows(sourcePath, targetPath string) bool {
 	if err := copyCLIForWindows(sourcePath, targetPath); err != nil {
 		a.notify("Install Failed", fmt.Sprintf("Could not install CLI: %v", err))
-		return
+		return false
 	}
 
 	a.notify("Install Complete", fmt.Sprintf("agentmgr installed to %s\n\nAdd this to your PATH to use from command line.", targetPath))
@@ -1056,6 +1061,7 @@ func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
 	a.reportError("save CLI path", a.saveSetting("helper.cli_path", targetPath, func(c *config.Config) {
 		c.Helper.CLIPath = targetPath
 	}))
+	return true
 }
 
 // getIcon returns the tray icon for this platform. The images are drawn by

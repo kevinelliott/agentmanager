@@ -22,6 +22,7 @@ import (
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // The desktop window is a web UI embedded in the helper and served only to
@@ -383,8 +384,8 @@ func (u *uiServer) settings(ctx context.Context) uiSettings {
 	if path, err := exec.LookPath("agentmgr"); err == nil {
 		s.CLIPath = path
 		s.CLIInstalled = true
-	} else if _, err := os.Stat(cliInstallPath); err == nil {
-		s.CLIPath = cliInstallPath
+	} else if installed := installedCLIPath(); installed != "" {
+		s.CLIPath = installed
 		s.CLIInstalled = true
 	}
 	_, bundledErr := findBundledAgentMgr()
@@ -416,6 +417,21 @@ type uiCatalogAgent struct {
 	Vendor        string     `json:"vendor,omitempty"`
 	License       string     `json:"license,omitempty"`
 	Methods       []uiMethod `json:"methods"`
+}
+
+// installedCLIPath returns where this app installs the CLI if a copy is
+// there, or "" if not. It covers a CLI that is installed but not on PATH,
+// which is the normal case on Windows.
+func installedCLIPath() string {
+	path := cliInstallPath
+	if platform.IsWindows() {
+		path = windowsCLIInstallPath()
+	}
+	// #nosec G703 -- Only checks a fixed install location with Stat.
+	if info, err := os.Stat(path); err == nil && !info.IsDir() {
+		return path
+	}
+	return ""
 }
 
 func (u *uiServer) handleCatalog(w http.ResponseWriter, r *http.Request) {
