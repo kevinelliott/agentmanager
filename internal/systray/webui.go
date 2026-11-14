@@ -60,8 +60,10 @@ type uiJob struct {
 
 // uiServer serves the embedded web UI and its JSON API on loopback.
 type uiServer struct {
-	app      *App
-	token    string
+	app *App
+	// session is the cookie value that authorizes API calls. It never
+	// appears in a URL or a process argument.
+	session  string
 	listener net.Listener
 	server   *http.Server
 
@@ -70,14 +72,34 @@ type uiServer struct {
 	jobSeq int
 	jobCh  chan *uiJob
 
+	// tickets are single-use, short-lived codes that an entry URL trades
+	// for the session cookie.
+	ticketsMu sync.Mutex
+	tickets   map[string]time.Time
+
+	// refreshMu lets only one detection run at a time; refreshing mirrors
+	// it for the UI.
+	refreshMu  sync.Mutex
 	refreshing atomic.Bool
+}
+
+// uiTicketTTL is how long an entry URL stays usable. It only has to cover
+// the time a window takes to open.
+const uiTicketTTL = time.Minute
+
+func randomHex(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 
 // newUIServer binds a random loopback port for the UI without serving yet.
 func newUIServer(a *App) (*uiServer, error) {
-	tokenBytes := make([]byte, 32)
-	if _, err := rand.Read(tokenBytes); err != nil {
-		return nil, fmt.Errorf("generate UI token: %w", err)
+	session, err := randomHex(32)
+	if err != nil {
+		return nil, fmt.Errorf("generate UI session: %w", err)
 	}
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -87,8 +109,9 @@ func newUIServer(a *App) (*uiServer, error) {
 
 	u := &uiServer{
 		app:      a,
-		token:    hex.EncodeToString(tokenBytes),
+		session:  session,
 		listener: ln,
+		tickets:  make(map[string]time.Time),
 		jobCh:    make(chan *uiJob, uiMaxJobs),
 	}
 	u.server = &http.Server{
@@ -129,15 +152,50 @@ func (u *uiServer) origin() string {
 	return "http://" + u.listener.Addr().String()
 }
 
-// entryURL is the address a window opens. The one-time token in it is traded
-// for a cookie on first load, so it never stays in the address bar. route is
-// a UI route such as "/settings" or "/agent/claude-code".
+// entryURL is the address a window opens. It carries a ticket that works
+// once and expires after uiTicketTTL, so a copy seen in a process list or
+// browser history cannot be reused. The ticket is traded for the session
+// cookie on first load. route is a UI route such as "/settings" or
+// "/agent/claude-code".
 func (u *uiServer) entryURL(route string) string {
-	url := u.origin() + "/?t=" + u.token
+	url := u.origin() + "/"
+	if ticket, err := u.newTicket(); err == nil {
+		url += "?t=" + ticket
+	}
 	if route != "" {
 		url += "#" + route
 	}
 	return url
+}
+
+// newTicket issues a single-use entry ticket.
+func (u *uiServer) newTicket() (string, error) {
+	ticket, err := randomHex(32)
+	if err != nil {
+		return "", err
+	}
+	now := time.Now()
+	u.ticketsMu.Lock()
+	defer u.ticketsMu.Unlock()
+	for t, expires := range u.tickets {
+		if now.After(expires) {
+			delete(u.tickets, t)
+		}
+	}
+	u.tickets[ticket] = now.Add(uiTicketTTL)
+	return ticket, nil
+}
+
+// redeemTicket reports whether t is a live ticket, and consumes it.
+func (u *uiServer) redeemTicket(t string) bool {
+	u.ticketsMu.Lock()
+	defer u.ticketsMu.Unlock()
+	expires, ok := u.tickets[t]
+	if !ok {
+		return false
+	}
+	delete(u.tickets, t)
+	return time.Now().Before(expires)
 }
 
 func (u *uiServer) routes() http.Handler {
@@ -152,13 +210,19 @@ func (u *uiServer) routes() http.Handler {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			if t := r.URL.Query().Get("t"); t != "" {
-				if !u.tokenMatches(t) {
+				if !u.redeemTicket(t) {
+					// A spent ticket in a window that already has the
+					// session (a reload, a restored tab) is harmless.
+					if c, err := r.Cookie(uiCookieName); err == nil && u.sessionMatches(c.Value) {
+						http.Redirect(w, r, "/", http.StatusSeeOther)
+						return
+					}
 					http.Error(w, "forbidden", http.StatusForbidden)
 					return
 				}
 				http.SetCookie(w, &http.Cookie{
 					Name:     uiCookieName,
-					Value:    u.token,
+					Value:    u.session,
 					Path:     "/",
 					HttpOnly: true,
 					SameSite: http.SameSiteStrictMode,
@@ -188,8 +252,8 @@ func (u *uiServer) routes() http.Handler {
 	return u.guard(mux)
 }
 
-func (u *uiServer) tokenMatches(t string) bool {
-	return subtle.ConstantTimeCompare([]byte(t), []byte(u.token)) == 1
+func (u *uiServer) sessionMatches(v string) bool {
+	return subtle.ConstantTimeCompare([]byte(v), []byte(u.session)) == 1
 }
 
 // guard keeps other sites and other machines out: the Host must be our
@@ -207,7 +271,7 @@ func (u *uiServer) guard(next http.Handler) http.Handler {
 		}
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			c, err := r.Cookie(uiCookieName)
-			if err != nil || !u.tokenMatches(c.Value) {
+			if err != nil || !u.sessionMatches(c.Value) {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -425,15 +489,17 @@ func (u *uiServer) handleRefresh(w http.ResponseWriter, _ *http.Request) {
 }
 
 // refreshInBackground re-detects agents without blocking the caller. Only
-// one refresh runs at a time.
+// one refresh runs at a time; a request made while one is running is dropped.
 func (u *uiServer) refreshInBackground(force bool) {
-	if !u.refreshing.CompareAndSwap(false, true) {
+	if !u.refreshMu.TryLock() {
 		return
 	}
+	u.refreshing.Store(true)
 	a := u.app
 	a.bgWG.Add(1)
 	go func() {
 		defer a.bgWG.Done()
+		defer u.refreshMu.Unlock()
 		defer u.refreshing.Store(false)
 		if force {
 			_ = a.store.ClearDetectionCache(a.ctx)
@@ -595,13 +661,23 @@ func (u *uiServer) jobWorker() {
 			// Re-detect once the queue drains so the list reflects reality,
 			// including after a failure that may have half-applied.
 			if len(u.jobCh) == 0 {
-				_ = a.store.ClearDetectionCache(a.ctx)
-				u.refreshing.Store(true)
-				a.reportError("refresh agents", a.refreshAgents(a.ctx))
-				u.refreshing.Store(false)
+				u.refreshAfterJobs()
 			}
 		}
 	}
+}
+
+// refreshAfterJobs re-detects agents once jobs have finished. It waits for
+// any refresh already running, because that one may have started before the
+// job changed anything and would otherwise leave a stale list.
+func (u *uiServer) refreshAfterJobs() {
+	a := u.app
+	u.refreshMu.Lock()
+	defer u.refreshMu.Unlock()
+	u.refreshing.Store(true)
+	defer u.refreshing.Store(false)
+	_ = a.store.ClearDetectionCache(a.ctx)
+	a.reportError("refresh agents", a.refreshAgents(a.ctx))
 }
 
 func (u *uiServer) setJob(job *uiJob, mutate func(*uiJob)) {

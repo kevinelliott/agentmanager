@@ -6,6 +6,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/config"
 )
@@ -56,7 +57,7 @@ func TestUIGuardRejectsForeignHostAndOrigin(t *testing.T) {
 
 	rec = uiRequest(u, http.MethodPost, "/api/refresh", func(r *http.Request) {
 		r.Header.Set("Origin", "https://evil.example")
-		r.AddCookie(&http.Cookie{Name: uiCookieName, Value: u.token})
+		r.AddCookie(&http.Cookie{Name: uiCookieName, Value: u.session})
 	})
 	if rec.Code != http.StatusForbidden {
 		t.Errorf("foreign Origin: got %d, want 403", rec.Code)
@@ -79,32 +80,67 @@ func TestUIAPIRequiresSession(t *testing.T) {
 	}
 
 	rec = uiRequest(u, http.MethodPost, "/api/jobs/clear", func(r *http.Request) {
-		r.AddCookie(&http.Cookie{Name: uiCookieName, Value: u.token})
+		r.AddCookie(&http.Cookie{Name: uiCookieName, Value: u.session})
 	})
 	if rec.Code != http.StatusOK {
 		t.Errorf("valid cookie: got %d, want 200", rec.Code)
 	}
 }
 
-func TestUITokenExchange(t *testing.T) {
+func TestUITicketExchange(t *testing.T) {
 	u := mkTestUI(t, mkTestApp())
 
 	rec := uiRequest(u, http.MethodGet, "/?t=nope", nil)
 	if rec.Code != http.StatusForbidden {
-		t.Errorf("bad token: got %d, want 403", rec.Code)
+		t.Errorf("bad ticket: got %d, want 403", rec.Code)
 	}
 
-	rec = uiRequest(u, http.MethodGet, "/?t="+u.token, nil)
+	// The session secret itself must not work as a ticket.
+	rec = uiRequest(u, http.MethodGet, "/?t="+u.session, nil)
+	if rec.Code != http.StatusForbidden {
+		t.Errorf("session as ticket: got %d, want 403", rec.Code)
+	}
+
+	entry := u.entryURL("/settings")
+	if !strings.HasSuffix(entry, "#/settings") || strings.Contains(entry, u.session) {
+		t.Fatalf("entryURL = %q", entry)
+	}
+	ticket := strings.TrimSuffix(entry[strings.Index(entry, "?t=")+3:], "#/settings")
+
+	rec = uiRequest(u, http.MethodGet, "/?t="+ticket, nil)
 	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/" {
-		t.Fatalf("good token: got %d to %q, want 303 to /", rec.Code, rec.Header().Get("Location"))
+		t.Fatalf("good ticket: got %d to %q, want 303 to /", rec.Code, rec.Header().Get("Location"))
 	}
 	cookies := rec.Result().Cookies()
-	if len(cookies) != 1 || cookies[0].Value != u.token || !cookies[0].HttpOnly {
+	if len(cookies) != 1 || cookies[0].Value != u.session || !cookies[0].HttpOnly {
 		t.Errorf("session cookie not set as expected: %+v", cookies)
 	}
 
-	if got := u.entryURL("/settings"); !strings.HasSuffix(got, "/?t="+u.token+"#/settings") {
-		t.Errorf("entryURL = %q", got)
+	// A ticket works once.
+	rec = uiRequest(u, http.MethodGet, "/?t="+ticket, nil)
+	if rec.Code != http.StatusForbidden {
+		t.Errorf("reused ticket: got %d, want 403", rec.Code)
+	}
+
+	// Unless the window already holds the session, where it is a no-op.
+	rec = uiRequest(u, http.MethodGet, "/?t="+ticket, func(r *http.Request) {
+		r.AddCookie(&http.Cookie{Name: uiCookieName, Value: u.session})
+	})
+	if rec.Code != http.StatusSeeOther {
+		t.Errorf("reused ticket with session: got %d, want 303", rec.Code)
+	}
+
+	// An expired ticket is refused.
+	old, err := u.newTicket()
+	if err != nil {
+		t.Fatal(err)
+	}
+	u.ticketsMu.Lock()
+	u.tickets[old] = time.Now().Add(-time.Second)
+	u.ticketsMu.Unlock()
+	rec = uiRequest(u, http.MethodGet, "/?t="+old, nil)
+	if rec.Code != http.StatusForbidden {
+		t.Errorf("expired ticket: got %d, want 403", rec.Code)
 	}
 }
 
