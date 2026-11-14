@@ -9,29 +9,15 @@ before:
     - go generate ./...
 
 builds:
-  # CLI binary - Linux only (CGO required for systray)
-  - id: agentmgr-linux
-    main: ./cmd/agentmgr
-    binary: agentmgr
-    env:
-      - CGO_ENABLED=1
-    goos:
-      - linux
-    goarch:
-      - amd64
-    ldflags:
-      - -s -w
-      - -X main.version={{.Version}}
-      - -X main.commit={{.Commit}}
-      - -X main.date={{.Date}}
-
-  # CLI binary - cross-compile without CGO for Darwin/Windows
-  - id: agentmgr-nocgo
+  # CLI binary - pure Go (the SQLite driver is modernc.org/sqlite), so every
+  # platform cross-compiles from one runner with CGO disabled.
+  - id: agentmgr
     main: ./cmd/agentmgr
     binary: agentmgr
     env:
       - CGO_ENABLED=0
     goos:
+      - linux
       - darwin
       - windows
     goarch:
@@ -67,7 +53,7 @@ builds:
 
 archives:
   - id: default
-    format: tar.gz
+    formats: [tar.gz]
     name_template: >-
       {{ .ProjectName }}_
       {{- .Version }}_
@@ -75,7 +61,7 @@ archives:
       {{- .Arch }}
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
     allow_different_binary_count: true
     files:
       - LICENSE*
@@ -124,7 +110,12 @@ release:
 
     ### Installation
 
-    **macOS (Homebrew)**
+    **Install script (macOS / Linux)**
+    ```bash
+    curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh
+    ```
+
+    **Homebrew (macOS / Linux)**
     ```bash
     brew install kevinelliott/tap/agentmanager
     ```
@@ -142,19 +133,24 @@ brews:
     repository:
       owner: kevinelliott
       name: homebrew-tap
+      # Fine-grained PAT with contents:write on kevinelliott/homebrew-tap,
+      # stored as the HOMEBREW_TAP_TOKEN secret on this repository.
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
+    commit_msg_template: "Update agentmanager to {{ .Tag }}"
     directory: Formula
-    homepage: "https://github.com/kevinelliott/agentmanager"
+    homepage: "https://kevinelliott.github.io/agentmanager/"
     description: "CLI tool for managing AI development agents"
     license: "MIT"
-    skip_upload: true
+    # Publish for stable tags only; prereleases (v1.6.0-rc.1) are skipped.
+    skip_upload: auto
     test: |
-      system "#{bin}/agentmgr", "version"
+      assert_match version.to_s, shell_output("#{bin}/agentmgr version")
     install: |
       bin.install "agentmgr"
+      generate_completions_from_executable(bin/"agentmgr", "completion")
 
 nfpms:
   - id: packages

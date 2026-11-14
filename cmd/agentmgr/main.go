@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kevinelliott/agentmanager/internal/buildinfo"
 	"github.com/kevinelliott/agentmanager/internal/cli"
 	"github.com/kevinelliott/agentmanager/pkg/config"
 	"github.com/kevinelliott/agentmanager/pkg/logging"
@@ -19,6 +20,9 @@ var (
 )
 
 func main() {
+	// `go install` builds carry no ldflags; fall back to the module version.
+	version, commit, date = buildinfo.Resolve(version, commit, date)
+
 	// Load configuration
 	loader := config.NewLoader()
 	cfg, err := loader.Load("")

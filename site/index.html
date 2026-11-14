@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-ground="sand" data-buttons="solid" data-motion>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AgentManager: install and update AI coding agents from one CLI</title>
+<meta name="description" content="AgentManager (agentmgr) detects, installs, updates and manages 309 AI development CLI agents, including Claude Code, Codex, Amp and Aider, on macOS, Linux and Windows.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AgentManager: install and update AI coding agents from one CLI">
+<meta property="og:description" content="A CLI, TUI and Go library that finds the agent CLIs on your machine, checks their versions and installs or updates any of the 309 in its catalog.">
+<meta property="og:url" content="https://kevinelliott.github.io/agentmanager/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#ffffff">
+<link rel="canonical" href="https://kevinelliott.github.io/agentmanager/">
+<meta name="site-kind" content="software">
+<meta name="page-type" content="software">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Funnel+Display:wght@400..700&family=Funnel+Sans:wght@400..600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/system.css">
+<link rel="stylesheet" href="./assets/ui/cards.css">
+<link rel="stylesheet" href="./assets/motion/motion.css">
+<link rel="stylesheet" href="./assets/backgrounds/backgrounds.css">
+<link rel="stylesheet" href="./assets/layout/layout.css">
+<link rel="stylesheet" href="./assets/icons/icon.css">
+<style>
+:root {
+  --p-bg: #ffffff; --p-surface: #f4f4f4; --p-ink: #111111; --p-muted: #6b6b6b;
+  --p-accent: #1a4be0; --p-accent-ink: #ffffff; --p-action: #1a4be0; --p-action-ink: #ffffff;
+  --p-inv-bg: #111111; --p-inv-surface: #1e1e1e; --p-inv-ink: #ffffff; --p-inv-muted: #9a9a9a;
+  --p-inv-accent: #ffffff; --p-inv-accent-ink: #111111; --p-inv-action: #ffffff; --p-inv-action-ink: #111111;
+  --font-display: "Funnel Display", system-ui, sans-serif;
+  --font-text: "Funnel Sans", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --display-weight: 400;
+  --display-tracking: -0.03em;
+  --display-tracking-xl: -0.04em;
+  --ly-scale: 0.98;
+}
+</style>
+<link rel="stylesheet" href="./assets/ui/base.css">
+<link rel="stylesheet" href="./assets/ui/terminal-run/fragment.css">
+<script>document.documentElement.classList.add('m-enter');setTimeout(()=>document.documentElement.classList.add('m-enter-done'),700)</script>
+<script src="./assets/backgrounds/backgrounds.js"></script>
+<script>document.documentElement.classList.add('mo-js');setTimeout(()=>document.documentElement.classList.add('mo-safe'),2500)</script>
+<link rel="modulepreload" href="./assets/moments/moments.js">
+<link rel="modulepreload" href="./assets/moments/lib.js">
+<link rel="modulepreload" href="./assets/moments/letters-assemble/moment.js">
+<!-- page CSS: only what sits inside a visual (the terminal's real output, the catalog window, the
+     install commands) and one --p-h per card group -->
+<style>
+  /* terminal output, verbatim from agentmgr: one <pre> on the kit terminal's 20px row grid */
+  .t-out { margin: 0; padding: 0 16px; font: inherit; color: var(--u-text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .app__pane--list .t-out, .t-wide .t-out { white-space: pre; }
+  @media (max-width: 639px) { .t-wide .t-out { white-space: pre-wrap; } }
+  .t-out b { font-weight: 500; color: var(--u-ink); }
+  .t-out .dim { color: var(--u-muted); }
+  .ui-term__caret.is-still { animation: none; }
+  .term { width: 100%; }
+
+  /* the hero's table: agentmgr agent list, its columns as written (the ID column left out) */
+  .t-row { gap: 0; }
+  .t-row > .c-a { width: 18ch; } .t-row > .c-m { width: 8ch; } .t-row > .c-v { width: 12ch; } .t-row > .c-l { width: 12ch; } .t-row > .c-s { width: 8ch; }
+  .t-row > * { padding-right: 1ch; }
+  .t-head { color: var(--u-muted); }
+  .t-row .c-a { color: var(--u-ink); }
+  @container ui-term (max-width: 440px) {
+    .ui-term .t-row > .c-m { display: none; }
+    .ui-term .t-row > .c-a { width: 18ch; } .ui-term .t-row > .c-v { width: 9ch; } .ui-term .t-row > .c-l { width: 9ch; } .ui-term .t-row > .c-s { width: 3ch; }
+    .ui-term .t-head > .c-s { visibility: hidden; }
+    .ui-term .t-row.t-more { display: none; }
+    .ui-term .ui-term__track { font-size: 11.5px; }
+  }
+
+  /* the catalog window (app-frame): the search result beside one open entry, one terminal across the .wrap */
+  .app.ui { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); margin-top: var(--s-7); background: var(--u-bg); border: 1px solid var(--u-border); border-radius: var(--u-r); box-shadow: var(--u-shadow); }
+  .app > .app__pane { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+  .app > .app__pane + .app__pane { border-left: 1px solid var(--u-line); }
+  .app > .app__pane > .ui-panel { width: 100%; border: 0; border-radius: 0; box-shadow: none; }
+  .app > .app__pane::after { content: ""; position: absolute; inset: auto 0 0 0; height: 64px; background: linear-gradient(transparent, var(--u-bg)); pointer-events: none; }
+  .app .ui-term__track { font-size: 12px; }
+  @media (max-width: 1279px) {
+    .app.ui { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .app > .app__pane--list { max-height: 252px; }
+    .app > .app__pane + .app__pane { border-left: 0; border-top: 1px solid var(--u-line); }
+    .app .ui-term__track { font-size: 11px; }
+  }
+  @media (max-width: 639px) {
+    .app.ui { grid-template-rows: minmax(0, 1fr); }
+    .app > .app__pane--list { display: none; }
+    .app > .app__pane + .app__pane { border-top: 0; }
+  }
+
+  /* feature cards: one panel height for the group */
+  #features .panel { --p-h: 336px; }
+  @media (max-width: 639px) { #features .panel { --p-h: 180px; } }
+  /* the install methods: each tool's real mark beside a real command from the catalog */
+  .methods { width: 100%; padding: 6px 0; }
+  .methods li { display: flex; align-items: center; gap: 12px; padding: 10px 16px; min-width: 0; }
+  .methods li + li { border-top: 1px solid var(--u-line); }
+  .methods__text { display: grid; min-width: 0; }
+  .methods__name { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--u-ink); }
+  .methods__cmd { font: 12px/18px var(--font-mono); color: var(--u-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* the install commands: one window, three commands, a copy button on each */
+  .install { width: 100%; }
+  #install .panel { --p-h: 520px; }
+  @media (max-width: 639px) { #install .panel { --p-h: 560px; } }
+  @media (min-width: 640px) and (max-width: 1023px) { #questions .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } #questions .grid > .faq { grid-column: auto; } }
+  .install .cmd { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 16px; padding: 14px 16px 16px; }
+  .install .cmd + .cmd { border-top: 1px solid var(--u-line); }
+  .install .cmd__label { font-size: 13px; font-weight: 500; line-height: 20px; color: var(--u-ink); }
+  .install .cmd__copy { min-width: 68px; min-height: 32px; cursor: pointer; }
+  .install .cmd__code { grid-column: 1 / -1; margin: 0; font: 13px/20px var(--font-mono); color: var(--u-text-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .install .cmd__code::before { content: "$ "; color: var(--u-muted); }
+  @media (max-width: 639px), (pointer: coarse) { .install .cmd__copy { min-height: 44px; min-width: 76px; } }
+  .quick .rows__name { font: 500 14px/24px var(--font-mono); letter-spacing: 0; }
+  .section-head code, .faq code, .card code { font: 0.9em var(--font-mono); }
+  .inline-link { text-decoration: underline; text-underline-offset: 4px; }
+  #count .mo-la__sub { color: var(--ink); }
+</style>
+</head>
+<body>
+<!-- type: software (a developer tool: a CLI that manages AI coding agents)
+     deal: hero split, nav nav-centre (dealt nav-mega; re-dealt: a one-page site has no product map to put in a panel),
+           close close-type, footer footer-dark, rhythm dark-band (#count), buttons solid, mark dots, radius sharp,
+           palette white-link-blue (a white sheet and one biro blue: the page reads like the terminal's own manual),
+           type funnel (Funnel Display / Funnel Sans + DM Mono), ground sand, effect grain-gradient in the hero frame
+     moments: letters-assemble in #count (its own statement section) -->
+
+<header class="nav nav--centre">
+  <div class="wrap nav__bar">
+    <a class="skip-link" href="#top">Skip to content</a>
+    <a class="nav__logo" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>AgentManager</a>
+    <nav class="nav__links" aria-label="Main">
+      <div class="nav__item"><a class="nav__link" href="#catalog">Catalog</a></div>
+      <div class="nav__item"><a class="nav__link" href="#features">Features</a></div>
+      <div class="nav__item"><a class="nav__link" href="#install">Install</a></div>
+      <div class="nav__item"><a class="nav__link" href="#questions">Questions</a></div>
+    </nav>
+    <div class="nav__actions">
+      <a class="nav__link" href="https://github.com/kevinelliott/agentmanager">GitHub</a>
+      <a class="btn btn--primary" href="#install">Install AgentManager</a>
+    </div>
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-label="Menu">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+  <!-- HERO (split): the words left, one terminal right running agentmgr agent list (real output) -->
+  <section class="hero hero--split" data-enter aria-labelledby="hero-h">
+    <div class="wrap"><div class="hero-text grid hero__grid">
+      <div class="hero__text span-5">
+        <p class="hero__kicker"><span class="dot" aria-hidden="true"></span>Open source under the MIT licence</p>
+        <h1 id="hero-h">AI coding agent manager for the terminal</h1>
+        <p class="hero__lead">AgentManager finds the agent CLIs on your machine, checks each against npm, PyPI and Homebrew, and installs or updates any of the 309 in its catalog. Runs on macOS, Linux and Windows.</p>
+        <div class="btn-row"><a class="btn btn--primary" href="#install">Install AgentManager</a><a class="btn btn--secondary" href="#catalog">See the catalog</a></div>
+      </div>
+      <div class="hero__media span-6 start-7" data-fx="grain-gradient" data-fx-seed="7" role="img" aria-label="A terminal running agentmgr agent list: fifteen detected agents with their install method, installed version, latest version and update status" >
+        <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:520px;--ax:40px;--ay:64px;--ay-sm:16px" >
+          <div class="ui ui-panel ui-term" data-ui="terminal-run" data-ui-still>
+            <div class="ui-term__head">
+              <span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="ui-term__title">agentmgr</span>
+              <span class="ui-meta">zsh</span>
+              <span class="ui-spacer"></span>
+            </div>
+            <div class="ui-term__screen" data-term-screen>
+              <div class="ui-term__track" data-term-track>
+                <div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed" data-term-cmd>agentmgr agent list</span></div>
+                <div class="ui-term__ln t-row t-head" data-term-out><span class="c-a">AGENT</span><span class="c-m">METHOD</span><span class="c-v">VERSION</span><span class="c-l">LATEST</span><span class="c-s">STATUS</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Agent of Empires</span><span class="c-m">brew</span><span class="c-v">0.12.3</span><span class="c-l">1.23.0</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Claude Code</span><span class="c-m">npm</span><span class="c-v">2.1.325</span><span class="c-l">2.1.325</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Codex</span><span class="c-m">npm</span><span class="c-v">0.58.0</span><span class="c-l">0.169.0</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Continue CLI</span><span class="c-m">npm</span><span class="c-v">1.5.12</span><span class="c-l">1.5.47</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">Cursor CLI</span><span class="c-m">native</span><span class="c-v">2025.11.06</span><span class="c-l">-</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">Droid</span><span class="c-m">native</span><span class="c-v">0</span><span class="c-l">-</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Herdr</span><span class="c-m">brew</span><span class="c-v">0.9.5</span><span class="c-l">0.9.5</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Kimi Code</span><span class="c-m">uv</span><span class="c-v">0.54</span><span class="c-l">1.52.0</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row" data-term-out><span class="c-a">Kimi Code</span><span class="c-m">native</span><span class="c-v">0.54</span><span class="c-l">-</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">Ollama CLI</span><span class="c-m">brew</span><span class="c-v">0.15.2</span><span class="c-l">0.40.16</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">OpenCode</span><span class="c-m">npm</span><span class="c-v">1.0.72</span><span class="c-l">1.19.5</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">Qwen Code</span><span class="c-m">npm</span><span class="c-v">0.2.1</span><span class="c-l">0.27.3</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">rtk</span><span class="c-m">native</span><span class="c-v">0.50.0</span><span class="c-l">-</span><span class="c-s">&#x25CF;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">rtk</span><span class="c-m">brew</span><span class="c-v">0.22.1</span><span class="c-l">1.2.0</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln t-row t-more" data-term-out><span class="c-a">Spec Kit</span><span class="c-m">uv</span><span class="c-v">0.0.20</span><span class="c-l">1.4.0</span><span class="c-s">&#x2B06;&#xFE0E;</span></div>
+                <div class="ui-term__ln ui-term__cmd" data-term-next><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed"></span></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </div></div>
+  </section>
+
+  <!-- CATALOG (app-frame): the product big, as one terminal across the .wrap: a catalog search beside one open entry -->
+  <section class="section" id="catalog" aria-labelledby="catalog-h">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <h2 class="span-5" id="catalog-h">One catalog of 309 agents and tools</h2>
+        <div class="span-6 start-7 stack-4"><p class="t-lead">Search the catalog by name, then open an entry to see how it installs on each platform and how AgentManager detects it.</p><p><a class="link" href="https://github.com/kevinelliott/agentmanager#supported-agents">Read the full list on GitHub</a></p></div>
+      </div>
+      <div class="ui app fill" role="img" aria-label="Two terminal panes: agentmgr catalog search claude listing twenty matching agents, and agentmgr catalog show claude-code with its npm and native install commands">
+        <div class="app__pane app__pane--list">
+          <div class="ui ui-panel ui-term term">
+            <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">catalog search</span><span class="ui-spacer"></span></div>
+            <div class="ui-term__screen"><div class="ui-term__track">
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr catalog search claude</span></div>
+<pre class="t-out"><span class="dim">ID                     NAME                   METHODS    DESCRIPTION
+---------------------  ---------------------  ---------  ----------------------------------------</span>
+ccmanager              CCManager              npm        Terminal session manager for Claude C...
+ccstatusline           ccstatusline           npm        Customizable Claude Code status line ...
+<b>claude-code            Claude Code            npm +1     Anthropic's official CLI for Claude A...</b>
+claude-code-log        Claude Code Log        uv         Converts coding-agent session transcr...
+claude-code-router     Claude Code Router     npm +2     Local control plane that routes agent...
+claude-code-templates  Claude Code Templates  npm        CLI for managing Claude Code agents, ...
+claude-replay          Claude Replay          npm        Turns coding-agent JSONL sessions int...
+claude-squad           Claude Squad           brew +1    Terminal application for managing mul...
+claude-codex-bridge    Claude-Codex Bridge    npm +1     Multi-agent CLI workspace mixing Code...
+claw-orchestrator      Claw Orchestrator      npm +1     Unified runtime to run Claude Code, C...
+clawcodex              ClawCodex              native     Token-efficient Claude Code rebuild i...
+forge-cli              Forge CLI              npm        Multi-agent TDD orchestrator that dri...
+happy                  Happy                  npm        Terminal wrapper for continuing Claud...
+jcode                  jcode                  brew +2    Terminal AI coding agent with semanti...
+oh-my-claudecode       Oh My ClaudeCode       npm        Multi-agent orchestration and workflo...
+omnigent               Omnigent               pipx +3    Meta-harness orchestrating Claude Cod...
+openclaude             openclaude             npm +1     Portable Claude Code-compatible codin...
+paperclip              Paperclip              npm +1     CLI to orchestrate AI agent teams as ...
+ruflo                  Ruflo                  npm +2     Agent meta-harness for Claude — mul...
+vibemux                VibeMux                binary +1  TUI for orchestrating parallel Claude...
+
+20 agents available
+</pre>
+            </div></div>
+          </div>
+        </div>
+        <div class="app__pane app__pane--open">
+          <div class="ui ui-panel ui-term term">
+            <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">catalog show</span><span class="ui-spacer"></span></div>
+            <div class="ui-term__screen"><div class="ui-term__track">
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr catalog show claude-code</span></div>
+<pre class="t-out"><b>Agent: Claude Code</b>
+ID: claude-code
+Description: Anthropic's official CLI for Claude AI pair programming
+Homepage: https://claude.ai/claude-code
+Repository: https://github.com/anthropics/claude-code
+
+<b>Installation Methods:</b>
+  npm:
+    Command: npm install -g @anthropic-ai/claude-code
+    Package: @anthropic-ai/claude-code
+    Platforms: <span>[</span>darwin linux windows]
+  native:
+    Command: curl -fsSL https://claude.ai/install.sh | sh
+    Platforms: <span>[</span>darwin linux]
+
+<b>Detection:</b>
+  Executables: <span>[</span>claude claude-code]
+  Version Command: claude --version
+</pre>
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr catalog show aider</span></div>
+<pre class="t-out"><b>Agent: Aider</b>
+ID: aider
+Description: AI pair programming in your terminal
+Homepage: https://aider.chat
+Repository: https://github.com/Aider-AI/aider
+
+<b>Installation Methods:</b>
+  pipx:
+    Command: pipx install aider-chat
+    Package: aider-chat
+    Platforms: <span>[</span>darwin linux windows]
+</pre>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES (features-2x2, two screens): four parts of the product, each a real piece of its output -->
+  <section class="section g2" id="features" aria-labelledby="features-h">
+    <div class="wrap">
+      <div class="group">
+        <div class="section-head">
+          <h2 id="features-h">Features of the agentmgr CLI</h2>
+        </div>
+        <div class="grid">
+          <article class="card card--row card--open span-6 m-nolift">
+            <h3>Installs agents by npm, pip or Homebrew</h3>
+            <p>Also pipx, uv, cargo, go and native installers. Add <code>-v</code> to watch the live output.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit" style="--fit-max:420px;--ax:max(24px, 50% - 210px);--ay:48px;--ay-sm:16px">
+                <div class="ui ui-panel" role="img" aria-label="Install methods with a real command from the catalog for each: npm, Homebrew, pip, cargo and go">
+                  <ul class="methods">
+                    <li><span class="ic-tile ic-tile--32"><img class="ic" src="./assets/icons/npm.svg" alt="" data-icon="npm"></span><span class="methods__text"><span class="methods__name">npm</span><span class="methods__cmd">npm install -g @sourcegraph/amp</span></span></li>
+                    <li><span class="ic-tile ic-tile--32"><img class="ic ic-tall" src="./assets/icons/homebrew.svg" alt="" data-icon="homebrew"></span><span class="methods__text"><span class="methods__name">Homebrew</span><span class="methods__cmd">brew install sourcegraph/amp-cli/amp</span></span></li>
+                    <li><span class="ic-tile ic-tile--32"><img class="ic" src="./assets/icons/python.svg" alt="" data-icon="python"></span><span class="methods__text"><span class="methods__name">pip, pipx and uv</span><span class="methods__cmd">uv tool install aider-chat</span></span></li>
+                    <li><span class="ic-tile ic-tile--32"><img class="ic ic-ink" src="./assets/icons/rust.svg" alt="" data-icon="rust"></span><span class="methods__text"><span class="methods__name">cargo</span><span class="methods__cmd">cargo install abtop</span></span></li>
+                    <li><span class="ic-tile ic-tile--32"><img class="ic ic-wide" src="./assets/icons/go.svg" alt="" data-icon="go"></span><span class="methods__text"><span class="methods__name">go</span><span class="methods__cmd">go install github.com/charmbracelet/crush@latest</span></span></li>
+                  </ul>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row card--open span-6 m-nolift">
+            <h3>Prints agent data as JSON or YAML</h3>
+            <p>Every command takes <code>--format</code>. REST and gRPC APIs and a Go library do the rest.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-corner fit to-edge" style="--fit-max:460px;--ax:32px;--ay:32px;--ay-sm:16px">
+                <div class="ui ui-panel ui-term term" role="img" aria-label="agentmgr agent list -f json printing each agent's id, method, version, latest version and status">
+                  <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">json</span><span class="ui-spacer"></span></div>
+                  <div class="ui-term__screen"><div class="ui-term__track">
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr agent list -f json</span></div>
+<pre class="t-out">[
+  {
+    "id": "agent-of-empires",
+    "name": "Agent of Empires",
+    "method": "brew",
+    "version": "0.12.3",
+    "latest_version": "1.23.0",
+    <b>"has_update": true,</b>
+    "path": "/opt/homebrew/bin/aoe",
+    "status": "outdated"
+  },
+  {
+    "id": "amp",
+    "name": "Amp",
+    "method": "npm",
+</pre>
+                  </div></div>
+                </div>
+              </div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div class="grid">
+          <article class="card card--row card--open span-6 m-nolift">
+            <h3>Checks your CLI setup with doctor</h3>
+            <p>Tests the runtime, package managers, storage and config, with a fix for each warning.</p>
+            <div class="panel">
+              <div class="stage stage--fade-b"><div class="at-rise fit to-edge" style="--fit-max:460px;--ax:max(24px, 50% - 230px);--ay:40px;--ay-sm:16px">
+                <div class="ui ui-panel ui-term term" role="img" aria-label="agentmgr doctor listing npm, pip, uv and brew as found, and pipx as not installed with the fix pip install pipx">
+                  <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">doctor</span><span class="ui-spacer"></span></div>
+                  <div class="ui-term__screen"><div class="ui-term__track">
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr doctor</span></div>
+<pre class="t-out">
+<b>Package Managers</b>
+<span class="dim">----------------</span>
+✓ npm: 10.9.4
+✓ pip: pip 25.3 from /opt/homebrew/lib/python3.14/site-pa...
+<b>⚠ pipx: not installed</b>
+         Fix: pip install pipx
+✓ uv: uv 0.9.27 (Homebrew 2026-01-26)
+✓ brew: Homebrew 7.0.13
+⚠ go: not installed
+         Fix: Install Go from https://go.dev/
+⚠ cargo: not installed
+         Fix: Install Rust from https://rustup.rs/
+</pre>
+                  </div></div>
+                </div>
+              </div></div>
+            </div>
+          </article>
+          <article class="card card--row card--open span-6 m-nolift">
+            <h3>Reads the agent catalog offline</h3>
+            <p>The catalog ships in the binary. <code>catalog refresh</code> updates it.</p>
+            <div class="panel">
+              <div class="stage stage--fade-br"><div class="at-corner to-edge" style="--ax:32px;--ay:40px;--ay-sm:16px">
+                <div class="ui ui-panel ui-term term t-wide" style="width:680px" role="img" aria-label="agentmgr catalog help listing its four commands: list, refresh, search and show">
+                  <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">catalog</span><span class="ui-spacer"></span></div>
+                  <div class="ui-term__screen"><div class="ui-term__track">
+<div class="ui-term__ln ui-term__cmd"><span class="ui-term__cwd">~</span><span class="ui-term__sig">$</span><span class="ui-term__typed">agentmgr catalog --help</span></div>
+<pre class="t-out">List available agents from the catalog, refresh the catalog from GitHub,
+and search for specific agents.
+
+Usage:
+  agentmgr catalog <span>[</span>command]
+
+<b>Available Commands:</b>
+  list        List all available agents in the catalog
+  refresh     Refresh the catalog from GitHub
+  search      Search the catalog
+  show        Show detailed catalog entry for an agent
+
+Flags:
+  -h, --help   help for catalog
+</pre>
+                  </div></div>
+                </div>
+              </div></div>
+            </div>
+          </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATEMENT: the page's one moment (letters-assemble), in its own section -->
+  <section class="section ground-inverse" id="count" data-moment="letters-assemble" aria-labelledby="count-h">
+    <div class="wrap">
+      <h2 class="mo-la__type" id="count-h">309 agents, one CLI</h2>
+      <p class="mo-la__sub">Claude Code, Codex, Amp, Aider, Gemini CLI and GitHub Copilot CLI are in the catalog, beside 303 more agents and tools. AgentManager runs as a CLI, a full-screen TUI and a tray helper that notifies you about updates.</p>
+    </div>
+  </section>
+
+  <!-- QUESTIONS (faq): every answer open, in two columns -->
+  <section class="section" id="questions" aria-labelledby="questions-h" style="--h: 1; --hm: 2">
+    <div class="wrap">
+      <div class="section-head section-head--row">
+        <div><h2 id="questions-h">Questions about AgentManager</h2><p>Short answers on platforms, updates and scripting. The README on GitHub holds the full command reference.</p></div>
+        <a class="link" href="https://github.com/kevinelliott/agentmanager/issues">Ask a question on GitHub</a>
+      </div>
+      <div class="grid">
+        <div class="faq span-6">
+          <div class="faq__item"><h3>Which systems does AgentManager run on?</h3><p>macOS on Intel and Apple silicon, Linux on amd64 and arm64, and Windows on amd64. Releases also carry .deb, .rpm and .apk packages.</p></div>
+          <div class="faq__item"><h3>Does the CLI need a network connection?</h3><p>Not to start. The catalog is embedded in the binary, so <code>agent list</code> and <code>catalog list</code> work before the first remote refresh.</p></div>
+          <div class="faq__item"><h3>Does AgentManager find duplicate installs?</h3><p>Yes. Each install gets its own row with its method, so an npm copy and a Homebrew copy are listed and updated separately.</p></div>
+          <div class="faq__item"><h3>Can the CLI show an installer's output?</h3><p>Yes. Add <code>-v</code> to <code>agent install</code> or <code>agent update</code> to stream the live output of brew, npm, pip or a native installer.</p></div>
+        </div>
+        <div class="faq span-6">
+          <div class="faq__item"><h3>Does AgentManager tell me about updates?</h3><p>Yes. The background helper sits in the system tray and notifies you when an agent has a newer release.</p></div>
+          <div class="faq__item"><h3>Can other programs call AgentManager?</h3><p>Yes. Commands print JSON or YAML with <code>--format</code>, and REST and gRPC APIs and a Go library are included.</p></div>
+          <div class="faq__item"><h3>How do I update AgentManager itself?</h3><p>Run <code>agentmgr upgrade</code>, or re-run the install script. With Homebrew, use <code>brew upgrade agentmanager</code>.</p></div>
+          <div class="faq__item"><h3>What does AgentManager cost?</h3><p>Nothing. AgentManager is free and open source under the MIT licence, with its source on GitHub.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSTALL: the words and the first commands left, the three install commands with their copy buttons right -->
+  <section class="section" id="install" aria-labelledby="install-h" style="--h: 1; --hm: 2">
+    <div class="wrap">
+      <div class="grid grid--top">
+        <div class="span-5">
+          <div class="section-head">
+            <h2 id="install-h">Install AgentManager with one command</h2>
+            <p>The script downloads the release for your system, verifies its SHA-256 and installs <code>agentmgr</code> without sudo. On Windows, take the .zip from the <a class="inline-link" href="https://github.com/kevinelliott/agentmanager/releases/latest">latest release</a>.</p>
+          </div>
+          <ul class="rows quick">
+            <li><span class="rows__name">agentmgr agent list</span><p>Lists detected agents with installed and latest versions.</p></li>
+            <li><span class="rows__name">agentmgr agent install claude-code</span><p>Installs an agent from the catalog.</p></li>
+            <li><span class="rows__name">agentmgr agent update --all</span><p>Updates every agent that has a newer release.</p></li>
+            <li><span class="rows__name">agentmgr tui</span><p>Opens the interactive terminal interface.</p></li>
+            <li><span class="rows__name">agentmgr doctor</span><p>Checks system health and configuration.</p></li>
+          </ul>
+        </div>
+        <div class="panel span-6 start-7">
+          <div class="stage"><div class="at-rise fit to-edge" style="--fit-max:560px;--ax:max(24px, 50% - 280px);--ay:48px;--ay-sm:16px">
+          <div class="ui ui-panel ui-term term install">
+            <div class="ui-term__head"><span class="ui-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="ui-term__title">Install agentmgr</span><span class="ui-spacer"></span><span class="ui-meta" role="status" aria-live="polite" data-copy-status></span></div>
+            <div class="cmd">
+              <span class="cmd__label">Install script, macOS and Linux</span>
+              <button class="ui-btn ui-btn--ghost ui-btn--sm cmd__copy" type="button" data-copy="curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh" aria-label="Copy the install script command">Copy</button>
+              <pre class="cmd__code">curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh</pre>
+            </div>
+            <div class="cmd">
+              <span class="cmd__label">Homebrew</span>
+              <button class="ui-btn ui-btn--ghost ui-btn--sm cmd__copy" type="button" data-copy="brew install kevinelliott/tap/agentmanager" aria-label="Copy the Homebrew command">Copy</button>
+              <pre class="cmd__code">brew install kevinelliott/tap/agentmanager</pre>
+            </div>
+            <div class="cmd">
+              <span class="cmd__label">Go</span>
+              <button class="ui-btn ui-btn--ghost ui-btn--sm cmd__copy" type="button" data-copy="go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest" aria-label="Copy the go install command">Copy</button>
+              <pre class="cmd__code">go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest</pre>
+            </div>
+          </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER.CLOSING: close-type over footer-dark -->
+<footer class="footer closing g2m footer--dark ground-inverse" id="contact" aria-labelledby="close-h">
+  <div class="wrap">
+    <div class="closing__cta close--type">
+      <div class="section-head">
+        <h2 id="close-h">Manage every agent CLI from one place</h2>
+        <p class="t-small muted">Free and open source. One binary, no account.</p>
+      </div>
+      <a class="btn btn--primary btn--xl btn--wide" href="#install">Install AgentManager<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
+    </div>
+    <div class="closing__links">
+      <div class="grid">
+        <div class="span-4 stack-4">
+          <a class="nav__logo footer__mark" href="#top"><span class="mark" data-mark="dots" aria-hidden="true"></span>AgentManager</a>
+        </div>
+        <div class="span-2 footer__col"><h3>Product</h3><ul><li><a href="#catalog">Catalog</a></li><li><a href="#features">Features</a></li><li><a href="#questions">Questions</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Project</h3><ul><li><a href="https://github.com/kevinelliott/agentmanager">Source on GitHub</a></li><li><a href="https://github.com/kevinelliott/agentmanager/releases">Releases</a></li><li><a href="https://github.com/kevinelliott/agentmanager/blob/main/CHANGELOG.md">Changelog</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Docs</h3><ul><li><a href="https://github.com/kevinelliott/agentmanager#commands">Commands</a></li><li><a href="https://github.com/kevinelliott/agentmanager#configuration">Configuration</a></li><li><a href="https://pkg.go.dev/github.com/kevinelliott/agentmanager">Go reference</a></li></ul></div>
+        <div class="span-2 footer__col"><h3>Community</h3><ul><li><a href="https://github.com/kevinelliott/agentmanager/blob/main/CONTRIBUTING.md">Contributing</a></li><li><a href="https://github.com/kevinelliott/agentmanager/issues">Issues</a></li><li><a href="https://github.com/kevinelliott/agentmanager/blob/main/SECURITY.md">Security</a></li></ul></div>
+      </div>
+      <div class="footer__legal">
+        <span>&copy; 2026 Kevin Elliott &nbsp; <a href="https://github.com/kevinelliott/agentmanager/blob/main/LICENSE">MIT licence</a></span>
+        <span class="credits">Product names and logos are trademarks of their owners</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<nav class="actionbar" aria-label="Quick actions">
+  <a class="btn btn--primary" href="#install">Install AgentManager</a>
+</nav>
+
+<script type="module" src="./assets/system.js"></script>
+<script type="module" src="./assets/motion/motion.js"></script>
+<script type="module" src="./assets/layout/layout.js"></script>
+<!-- page script: the copy buttons on the install commands (the kit has no copy control) -->
+<script>
+(function () {
+  var status = document.querySelector('[data-copy-status]');
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta); return ok;
+  }
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    var label = btn.textContent, timer;
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var done = function (ok) {
+        btn.textContent = ok ? 'Copied' : 'Press Ctrl+C';
+        if (status) status.textContent = ok ? 'Copied to the clipboard' : 'Select the command to copy it';
+        clearTimeout(timer);
+        timer = setTimeout(function () { btn.textContent = label; if (status) status.textContent = ''; }, 1800);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallback(text)); });
+      } else { done(fallback(text)); }
+    });
+  });
+})();
+</script>
+</body>
+</html>

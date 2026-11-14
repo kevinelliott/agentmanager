@@ -12,6 +12,8 @@
 
 A comprehensive CLI/TUI/Library application for detecting, managing, installing, and updating AI development CLI agents across macOS, Linux, and Windows.
 
+**Website:** [kevinelliott.github.io/agentmanager](https://kevinelliott.github.io/agentmanager/)
+
 > **Catalog:** 309 agents and counting. See the full list in [Supported Agents](#supported-agents).
 
 ## Features
@@ -33,23 +35,55 @@ A comprehensive CLI/TUI/Library application for detecting, managing, installing,
 
 Pick whichever method fits your setup. After installing, verify with `agentmgr doctor`.
 
+### Install script (macOS / Linux)
+
+```bash
+curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh
+```
+
+The script downloads the release archive for your OS and architecture, verifies its
+SHA-256 against the release's `checksums.txt`, and installs `agentmgr` to
+`/usr/local/bin` when that is writable, or `~/.local/bin` otherwise. It never calls
+`sudo`. Re-run it at any time to move to the latest release.
+
+```bash
+# Install a specific release, or into a directory of your choice
+curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh -s -- --version v1.6.0
+curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh -s -- --dir ~/bin
+```
+
+Prefer to read it first? The script is [`install.sh`](install.sh) in this repository.
+
 ### Homebrew (macOS / Linux)
 
 ```bash
 brew install kevinelliott/tap/agentmanager
 ```
 
+Installs the prebuilt binary and shell completions. Upgrade with `brew upgrade agentmanager`.
+
 ### Go Install
 
-Requires Go 1.25+. Installs the latest tagged release into `$(go env GOPATH)/bin`:
+Requires Go 1.25+. Installs the latest tagged release into `$(go env GOPATH)/bin`
+(make sure that directory is on your `PATH`):
 
 ```bash
 go install github.com/kevinelliott/agentmanager/cmd/agentmgr@latest
 ```
 
+The CLI is pure Go, so no C compiler is needed.
+
+### Prebuilt binaries and packages
+
+Every [release](https://github.com/kevinelliott/agentmanager/releases/latest) ships
+archives for macOS (Intel and Apple silicon), Linux (amd64 and arm64), and Windows
+(amd64), plus `.deb`, `.rpm`, and `.apk` packages and a `checksums.txt`. On Windows,
+download the `.zip` and put `agentmgr.exe` on your `PATH`.
+
 ### From Source
 
-Requires Go 1.25+ and `make`:
+Requires Go 1.25+ and `make`. The system tray helper (`agentmgr-helper`) also needs
+cgo, and on Linux the `libayatana-appindicator3-dev` package:
 
 ```bash
 # Clone the repository (creates ./agentmanager)

@@ -19,7 +19,9 @@ import (
 	"path/filepath"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	// Pure-Go SQLite driver: no cgo, so release binaries cross-compile for
+	// every platform and `go install` works without a C toolchain.
+	_ "modernc.org/sqlite"
 
 	"github.com/kevinelliott/agentmanager/pkg/agent"
 )
@@ -59,12 +61,17 @@ func (s *SQLiteStore) Initialize(ctx context.Context) error {
 		return fmt.Errorf("secure database file: %w", err)
 	}
 
-	// DSN tuning:
-	//   _journal_mode=WAL    — concurrent readers while a single writer commits.
-	//   _busy_timeout=5000   — wait up to 5s on a locked DB instead of immediate SQLITE_BUSY.
-	//   _synchronous=NORMAL  — safe with WAL; ~2-3x faster writes vs FULL.
-	//   _foreign_keys=ON     — enforce FK constraints.
-	db, err := sql.Open("sqlite3", s.dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_foreign_keys=ON")
+	// DSN tuning (modernc.org/sqlite applies each _pragma on every new connection):
+	//   busy_timeout=5000    — wait up to 5s on a locked DB instead of immediate SQLITE_BUSY.
+	//                          Listed first so the pragmas after it also wait on a lock.
+	//   journal_mode=WAL     — concurrent readers while a single writer commits.
+	//   synchronous=NORMAL   — safe with WAL; ~2-3x faster writes vs FULL.
+	//   foreign_keys=ON      — enforce FK constraints.
+	//   _time_format=sqlite  — store time.Time in SQLite's own text format, which is
+	//                          what databases created by earlier releases contain.
+	dsn := s.dbPath + "?_pragma=busy_timeout(5000)&_pragma=journal_mode(WAL)" +
+		"&_pragma=synchronous(NORMAL)&_pragma=foreign_keys(ON)&_time_format=sqlite"
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return fmt.Errorf("failed to open database: %w", err)
 	}

@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **One-line installer.** `curl -fsSL https://kevinelliott.github.io/agentmanager/install.sh | sh`
+  downloads the release archive for the current OS and architecture, verifies
+  its SHA-256 against `checksums.txt`, and installs `agentmgr` to
+  `/usr/local/bin` when writable or `~/.local/bin` otherwise, without `sudo`.
+  `--version` and `--dir` (or `AGENTMGR_VERSION` / `AGENTMGR_INSTALL_DIR`)
+  override the defaults.
+- **Project website** at https://kevinelliott.github.io/agentmanager/, built
+  from `site/` and deployed by the new `Pages` workflow, which also publishes
+  `install.sh`.
+- **Linux arm64 release builds** of the CLI (archive, `.deb`, `.rpm`, `.apk`).
+
 - Twenty additional agent tools (309 total), including DeepCode, Codeflash,
   BMad Method, Apify MCP Client, AWS AgentCore, Modal, OpenSandbox, Agent Stack,
   GPUStack, RamaLama, dstack, Vast.ai, RunPod, ZenML, PromptFlow, Trigger.dev,
@@ -109,6 +120,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   inventory, SQLite cache, and rendering benchmarks with CI artifacts.
 
 ### Fixed
+
+- **Prebuilt macOS and Windows binaries could not open their database.** They
+  are built with `CGO_ENABLED=0`, but storage used the cgo-only
+  `mattn/go-sqlite3`, so `agent list`, `catalog list`, and every other
+  storage-backed command failed with "go-sqlite3 requires cgo to work".
+  Storage now uses the pure-Go `modernc.org/sqlite` driver; existing
+  databases are read as-is. `go install` no longer needs a C compiler.
+- **`brew install kevinelliott/tap/agentmanager` found no formula.** The
+  release workflow never published one (`skip_upload: true`, no tap token).
+  Stable releases now push `Formula/agentmanager.rb`, with shell completions,
+  to `kevinelliott/homebrew-tap`; this needs the `HOMEBREW_TAP_TOKEN`
+  repository secret.
+- **`go install ...@latest` builds reported version `dev`**, which also made
+  `agentmgr upgrade` refuse to check for updates. Builds without release
+  ldflags now report the module version and VCS stamp recorded by the Go
+  toolchain.
 
 - uv tool installs can expose dependency executables while retaining the main
   package identity for inventory, update checks, upgrades and removal. FastMCP

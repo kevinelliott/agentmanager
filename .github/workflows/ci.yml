@@ -114,6 +114,17 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: go build -v -o bin/agentmgr-helper.exe ./cmd/agentmgr-helper
 
+      # Release binaries are built with CGO_ENABLED=0 (see .goreleaser.yml).
+      # Build the CLI that way and open the database, so a cgo-only dependency
+      # fails here instead of in a published release.
+      - name: Check CLI works without cgo
+        shell: bash
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          go build -o "$RUNNER_TEMP/agentmgr-nocgo" ./cmd/agentmgr
+          "$RUNNER_TEMP/agentmgr-nocgo" catalog list > /dev/null
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
