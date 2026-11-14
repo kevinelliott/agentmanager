@@ -4,7 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 func mkTestUI(t *testing.T, a *App) *uiServer {
@@ -133,6 +136,34 @@ func TestUIEnqueueAllUpdates(t *testing.T) {
 	}
 	if got := u.enqueueAllUpdates(); got != 0 {
 		t.Errorf("re-queued %d updates while the first are pending, want 0", got)
+	}
+}
+
+func TestSaveSettingIsSafeForConcurrentUse(t *testing.T) {
+	a := mkTestApp()
+	a.config = &config.Config{}
+
+	// Run with -race: overlapping saves and reads must not race.
+	var wg sync.WaitGroup
+	for i := 0; i < 20; i++ {
+		wg.Add(2)
+		go func(on bool) {
+			defer wg.Done()
+			_ = a.saveSetting("updates.notify", on, func(c *config.Config) { c.Updates.Notify = on })
+		}(i%2 == 0)
+		go func() {
+			defer wg.Done()
+			_ = a.notifyEnabled()
+			_ = a.autoCheckEnabled()
+		}()
+	}
+	wg.Wait()
+
+	if err := a.saveSetting("updates.auto_check", true, func(c *config.Config) { c.Updates.AutoCheck = true }); err != nil {
+		t.Fatalf("saveSetting: %v", err)
+	}
+	if !a.autoCheckEnabled() {
+		t.Error("saveSetting did not apply the value")
 	}
 }
 

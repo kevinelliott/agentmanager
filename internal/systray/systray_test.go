@@ -3,11 +3,11 @@ package systray
 import (
 	"bytes"
 	"context"
-	"runtime"
 	"testing"
 	"time"
 
 	"github.com/kevinelliott/agentmanager/pkg/config"
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 func TestGetIcon(t *testing.T) {
@@ -18,7 +18,7 @@ func TestGetIcon(t *testing.T) {
 	}
 
 	// The Windows tray only loads .ico data; everywhere else it is a PNG.
-	if runtime.GOOS == "windows" {
+	if platform.IsWindows() {
 		if !bytes.HasPrefix(icon, []byte{0x00, 0x00, 0x01, 0x00}) {
 			t.Error("getIcon() did not return .ico data on Windows")
 		}

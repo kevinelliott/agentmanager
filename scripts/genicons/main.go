@@ -30,17 +30,17 @@ var gradient = [3][3]float64{
 
 const samples = 4 // supersampling per axis
 
-// shade returns the premultiplied colour of the icon at (x, y) in the unit
+// shade returns the premultiplied color of the icon at (x, y) in the unit
 // square. margin is the empty border around the rounded square.
 type shade func(x, y float64) (r, g, b, a float64)
 
-// mark is the glyph: a ring with a dot at its centre.
+// mark is the glyph: a ring with a dot at its center.
 func mark(x, y float64) bool {
 	d := math.Hypot(x-0.5, y-0.5)
 	return (d >= 0.20 && d <= 0.30) || d <= 0.085
 }
 
-// appIcon is the full-colour icon: the mark in white on a gradient tile.
+// appIcon is the full-color icon: the mark in white on a gradient tile.
 func appIcon(margin float64) shade {
 	return func(x, y float64) (float64, float64, float64, float64) {
 		// Map into the tile's own unit square.
@@ -122,55 +122,86 @@ func writePNG(path string, img image.Image) error {
 	if err := png.Encode(&buf, img); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	return writeFile(path, buf.Bytes())
+}
+
+// writeFile writes a generated asset, creating its directory if needed.
+func writeFile(path string, data []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return err
 	}
-	return os.WriteFile(path, buf.Bytes(), 0o644)
+	return os.WriteFile(path, data, 0o600)
 }
 
 // writeICO writes a Windows icon with one 32-bit BMP image per size. BMP
-// entries load everywhere, unlike PNG entries at small sizes.
-func writeICO(path string, sizes []int, fn shade) error {
-	type entry struct {
-		size int
-		data []byte
-	}
-	var entries []entry
+// entries load everywhere, unlike PNG entries at small sizes. Sizes are
+// uint8 because an .ico directory entry stores each dimension in one byte.
+func writeICO(path string, sizes []uint8, fn shade) error {
+	le := binary.LittleEndian
+
+	var images [][]byte
 	for _, size := range sizes {
-		img := render(size, fn)
-		var b bytes.Buffer
-		maskRow := ((size + 31) / 32) * 4
-		// BITMAPINFOHEADER; height is doubled to cover the AND mask.
-		hdr := []any{
-			uint32(40), int32(size), int32(size * 2), uint16(1), uint16(32),
-			uint32(0), uint32(size*size*4 + maskRow*size), int32(0), int32(0), uint32(0), uint32(0),
-		}
-		for _, v := range hdr {
-			_ = binary.Write(&b, binary.LittleEndian, v)
-		}
-		for y := size - 1; y >= 0; y-- { // bottom-up BGRA
-			for x := 0; x < size; x++ {
+		n := int(size)
+		img := render(n, fn)
+		maskRow := (uint32(size) + 31) / 32 * 4
+		pixels := uint32(size) * uint32(size) * 4
+		mask := maskRow * uint32(size)
+
+		// BITMAPINFOHEADER. The height is doubled to cover the AND mask.
+		b := make([]byte, 0, 40+pixels+mask)
+		b = le.AppendUint32(b, 40)
+		b = le.AppendUint32(b, uint32(size))
+		b = le.AppendUint32(b, uint32(size)*2)
+		b = le.AppendUint16(b, 1)  // planes
+		b = le.AppendUint16(b, 32) // bits per pixel
+		b = le.AppendUint32(b, 0)  // no compression
+		b = le.AppendUint32(b, pixels+mask)
+		b = append(b, make([]byte, 16)...) // resolution and palette: unused
+
+		for y := n - 1; y >= 0; y-- { // bottom-up BGRA
+			for x := 0; x < n; x++ {
 				c := img.NRGBAAt(x, y)
-				b.Write([]byte{c.B, c.G, c.R, c.A})
+				b = append(b, c.B, c.G, c.R, c.A)
 			}
 		}
-		b.Write(make([]byte, maskRow*size)) // AND mask: alpha channel is used instead
-		entries = append(entries, entry{size, b.Bytes()})
+		b = append(b, make([]byte, mask)...) // AND mask: the alpha channel is used instead
+		images = append(images, b)
 	}
 
-	var out bytes.Buffer
-	_ = binary.Write(&out, binary.LittleEndian, []uint16{0, 1, uint16(len(entries))})
-	offset := 6 + 16*len(entries)
-	for _, e := range entries {
-		out.Write([]byte{byte(e.size), byte(e.size), 0, 0})
-		_ = binary.Write(&out, binary.LittleEndian, []uint16{1, 32})
-		_ = binary.Write(&out, binary.LittleEndian, []uint32{uint32(len(e.data)), uint32(offset)})
-		offset += len(e.data)
+	// ICONDIR, then one 16-byte ICONDIRENTRY per image, then the images.
+	var count uint16
+	var total uint32
+	for _, img := range images {
+		count++
+		total += imageLen(img)
 	}
-	for _, e := range entries {
-		out.Write(e.data)
+	offset := 6 + 16*uint32(count)
+
+	out := make([]byte, 0, offset+total)
+	out = le.AppendUint16(out, 0)
+	out = le.AppendUint16(out, 1)
+	out = le.AppendUint16(out, count)
+	for i, img := range images {
+		out = append(out, sizes[i], sizes[i], 0, 0)
+		out = le.AppendUint16(out, 1)
+		out = le.AppendUint16(out, 32)
+		out = le.AppendUint32(out, imageLen(img))
+		out = le.AppendUint32(out, offset)
+		offset += imageLen(img)
 	}
-	return os.WriteFile(path, out.Bytes(), 0o644)
+	for _, img := range images {
+		out = append(out, img...)
+	}
+	return writeFile(path, out)
+}
+
+// imageLen is the byte length of an icon image, which is at most a few
+// kilobytes for the sizes written here.
+func imageLen(img []byte) uint32 {
+	if len(img) > math.MaxUint32 {
+		panic("icon image too large")
+	}
+	return uint32(len(img)) // #nosec G115 -- bounded by the check above
 }
 
 func writeICNS(path string) error {
@@ -191,9 +222,10 @@ func writeICNS(path string) error {
 			return err
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
 		return err
 	}
+	// #nosec G204 -- Fixed program; both paths are built in this file, not taken from input.
 	out, err := exec.Command("iconutil", "-c", "icns", "-o", path, set).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("iconutil: %w: %s", err, out)
@@ -209,7 +241,7 @@ func main() {
 	}{
 		{"macOS menu bar icon", func() error { return writePNG(filepath.Join(icons, "tray_template.png"), render(64, templateIcon)) }},
 		{"Linux tray icon", func() error { return writePNG(filepath.Join(icons, "tray.png"), render(64, appIcon(0))) }},
-		{"Windows tray icon", func() error { return writeICO(filepath.Join(icons, "tray.ico"), []int{16, 24, 32, 48}, appIcon(0)) }},
+		{"Windows tray icon", func() error { return writeICO(filepath.Join(icons, "tray.ico"), []uint8{16, 24, 32, 48}, appIcon(0)) }},
 		{"window favicon", func() error {
 			return writePNG(filepath.Join("internal", "systray", "webui", "icon.png"), render(128, appIcon(0)))
 		}},

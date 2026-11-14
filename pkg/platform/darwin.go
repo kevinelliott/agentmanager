@@ -157,11 +157,11 @@ func (d *darwinPlatform) helperExecutablePath() string {
 	}
 
 	candidates := []string{
-		filepath.Join("/Applications", "AgentManager.app", "Contents", "MacOS", name),
+		"/Applications/AgentManager.app/Contents/MacOS/" + name,
 		filepath.Join(d.homeDir(), "Applications", "AgentManager.app", "Contents", "MacOS", name),
-		filepath.Join("/Applications", "AgentManager Helper.app", "Contents", "MacOS", name),
-		filepath.Join("/usr/local/bin", name),
-		filepath.Join("/opt/homebrew/bin", name),
+		"/Applications/AgentManager Helper.app/Contents/MacOS/" + name,
+		"/usr/local/bin/" + name,
+		"/opt/homebrew/bin/" + name,
 		filepath.Join(d.homeDir(), ".local", "bin", name),
 	}
 	for _, c := range candidates {
@@ -172,7 +172,7 @@ func (d *darwinPlatform) helperExecutablePath() string {
 	if path, err := exec.LookPath(name); err == nil {
 		return path
 	}
-	return filepath.Join("/usr/local/bin", name)
+	return "/usr/local/bin/" + name
 }
 
 func isRegularFile(path string) bool {

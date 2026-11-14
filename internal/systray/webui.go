@@ -306,8 +306,8 @@ func (u *uiServer) handleState(w http.ResponseWriter, r *http.Request) {
 func (u *uiServer) settings(ctx context.Context) uiSettings {
 	a := u.app
 	s := uiSettings{
-		Notify:          a.config.Updates.Notify,
-		AutoCheck:       a.config.Updates.AutoCheck,
+		Notify:          a.notifyEnabled(),
+		AutoCheck:       a.autoCheckEnabled(),
 		CLICanUninstall: canUninstallCLI,
 		ConfigPath:      config.GetConfigPath(),
 	}
@@ -688,26 +688,19 @@ func (u *uiServer) handleSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	save := func(key string, value any) error {
-		if a.configLoader == nil {
-			return nil
-		}
-		return a.configLoader.SetAndSave(key, value)
-	}
-
 	if req.Notify != nil {
-		if err := save("updates.notify", *req.Notify); err != nil {
+		v := *req.Notify
+		if err := a.saveSetting("updates.notify", v, func(c *config.Config) { c.Updates.Notify = v }); err != nil {
 			writeError(w, http.StatusInternalServerError, "Could not save the setting: "+err.Error())
 			return
 		}
-		a.config.Updates.Notify = *req.Notify
 	}
 	if req.AutoCheck != nil {
-		if err := save("updates.auto_check", *req.AutoCheck); err != nil {
+		v := *req.AutoCheck
+		if err := a.saveSetting("updates.auto_check", v, func(c *config.Config) { c.Updates.AutoCheck = v }); err != nil {
 			writeError(w, http.StatusInternalServerError, "Could not save the setting: "+err.Error())
 			return
 		}
-		a.config.Updates.AutoCheck = *req.AutoCheck
 	}
 	if req.AutoStart != nil {
 		var err error

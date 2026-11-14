@@ -5,6 +5,8 @@ package systray
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/kevinelliott/agentmanager/pkg/config"
 )
 
 // uninstallCLI removes the CLI binary from the system path on darwin.
@@ -25,9 +27,8 @@ do shell script "rm -f '%s'" with administrator privileges
 	}
 
 	// Clear config path.
-	a.config.Helper.CLIPath = ""
-	if a.configLoader != nil {
-		_ = a.configLoader.SetAndSave("helper.cli_path", "")
-	}
+	a.reportError("clear CLI path", a.saveSetting("helper.cli_path", "", func(c *config.Config) {
+		c.Helper.CLIPath = ""
+	}))
 	return true
 }

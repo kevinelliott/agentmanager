@@ -56,6 +56,11 @@ type App struct {
 	// IPC server
 	ipcServer ipc.Server
 
+	// configMu guards a.config and saves through configLoader. Settings are
+	// changed from HTTP handlers, the tray and the CLI installer, and the
+	// loader's Viper instance is not safe for concurrent use.
+	configMu sync.RWMutex
+
 	// Web UI server backing the desktop window
 	ui *uiServer
 
@@ -539,7 +544,7 @@ func (a *App) backgroundLoop() {
 		case <-refreshTicker.C:
 			a.reportError("refresh agents", a.refreshAgents(a.ctx))
 		case <-checkTicker.C:
-			if a.config.Updates.AutoCheck {
+			if a.autoCheckEnabled() {
 				a.reportError("check updates", a.checkUpdates(a.ctx))
 			}
 		}
@@ -599,7 +604,7 @@ func (a *App) checkUpdates(ctx context.Context) error {
 	a.lastCheck = time.Now()
 	a.agentsMu.Unlock()
 
-	if a.config.Updates.AutoCheck {
+	if a.autoCheckEnabled() {
 		// Snapshot current agents under the read lock so we can mutate copies
 		// off-lock while the parallel fetcher runs.
 		a.agentsMu.RLock()
@@ -640,7 +645,7 @@ func (a *App) checkUpdates(ctx context.Context) error {
 	}
 	a.agentsMu.RUnlock()
 
-	if updatesAvailable > 0 && a.config.Updates.Notify {
+	if updatesAvailable > 0 && a.notifyEnabled() {
 		a.notify(
 			"Updates Available",
 			fmt.Sprintf("%d agent update(s) available", updatesAvailable),
@@ -1032,10 +1037,9 @@ func (a *App) installCLIToPath(sourcePath, targetPath string) bool {
 	}
 
 	// Update config with the new path
-	a.config.Helper.CLIPath = targetPath
-	if a.configLoader != nil {
-		a.reportError("save CLI path", a.configLoader.SetAndSave("helper.cli_path", targetPath))
-	}
+	a.reportError("save CLI path", a.saveSetting("helper.cli_path", targetPath, func(c *config.Config) {
+		c.Helper.CLIPath = targetPath
+	}))
 	return true
 }
 
@@ -1049,10 +1053,9 @@ func (a *App) installCLIToPathWindows(sourcePath, targetPath string) {
 	a.notify("Install Complete", fmt.Sprintf("agentmgr installed to %s\n\nAdd this to your PATH to use from command line.", targetPath))
 
 	// Update config
-	a.config.Helper.CLIPath = targetPath
-	if a.configLoader != nil {
-		a.reportError("save CLI path", a.configLoader.SetAndSave("helper.cli_path", targetPath))
-	}
+	a.reportError("save CLI path", a.saveSetting("helper.cli_path", targetPath, func(c *config.Config) {
+		c.Helper.CLIPath = targetPath
+	}))
 }
 
 // getIcon returns the tray icon for this platform. The images are drawn by
@@ -1079,4 +1082,30 @@ func updateAllTitle(updates int) string {
 		return "Update 1 Agent"
 	}
 	return fmt.Sprintf("Update %d Agents", updates)
+}
+
+// saveSetting persists one setting and applies it to the in-memory config,
+// one caller at a time. The in-memory value changes only if the save works.
+func (a *App) saveSetting(key string, value any, apply func(*config.Config)) error {
+	a.configMu.Lock()
+	defer a.configMu.Unlock()
+	if a.configLoader != nil {
+		if err := a.configLoader.SetAndSave(key, value); err != nil {
+			return err
+		}
+	}
+	apply(a.config)
+	return nil
+}
+
+func (a *App) notifyEnabled() bool {
+	a.configMu.RLock()
+	defer a.configMu.RUnlock()
+	return a.config.Updates.Notify
+}
+
+func (a *App) autoCheckEnabled() bool {
+	a.configMu.RLock()
+	defer a.configMu.RUnlock()
+	return a.config.Updates.AutoCheck
 }

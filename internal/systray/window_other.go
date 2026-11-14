@@ -6,7 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
+
+	"github.com/kevinelliott/agentmanager/pkg/platform"
 )
 
 // canUninstallCLI reports whether this platform can remove the CLI it installed.
@@ -39,7 +40,7 @@ func (a *App) showMainWindow(route string) {
 // findAppModeBrowser returns a Chromium-family browser that supports --app
 // windows, or "" if none is installed.
 func findAppModeBrowser() string {
-	if runtime.GOOS == "windows" {
+	if platform.IsWindows() {
 		var roots []string
 		for _, env := range []string{"ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA"} {
 			if dir := os.Getenv(env); dir != "" {
@@ -52,6 +53,7 @@ func findAppModeBrowser() string {
 		} {
 			for _, root := range roots {
 				candidate := filepath.Join(root, rel)
+				// #nosec G703 -- Only probes fixed browser install locations with Stat; nothing is read or written.
 				if _, err := os.Stat(candidate); err == nil {
 					return candidate
 				}

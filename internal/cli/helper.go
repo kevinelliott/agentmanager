@@ -366,7 +366,7 @@ func findHelperBinary() (string, error) {
 		// Check for .app bundle in Applications and common locations
 		for _, name := range macAppNames {
 			paths = append(paths,
-				filepath.Join("/Applications", name),
+				"/Applications/"+name,
 				filepath.Join(os.Getenv("HOME"), "Applications", name),
 			)
 		}

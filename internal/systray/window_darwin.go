@@ -20,11 +20,14 @@ const canUninstallCLI = true
 // only hides it, so reopening is instant and keeps whatever the person was
 // looking at.
 var (
-	mainWinMu       sync.Mutex
-	mainWin         appkit.Window
-	mainWebView     webkit.WebView
-	mainWinDelegate *appkit.WindowDelegate
-	mainWinCreated  bool
+	mainWinMu      sync.Mutex
+	mainWin        appkit.Window
+	mainWebView    webkit.WebView
+	mainWinCreated bool
+
+	// mainWinKeep holds Go objects that AppKit refers to but does not retain,
+	// such as the window delegate, so they are not garbage collected.
+	mainWinKeep []any
 )
 
 // showMainWindow opens the AgentManager window, or brings it forward if it is
@@ -99,7 +102,7 @@ func (a *App) createMainWindow(route string) {
 
 	mainWin = win
 	mainWebView = webView
-	mainWinDelegate = delegate
+	mainWinKeep = append(mainWinKeep, delegate)
 	mainWinCreated = true
 }
 
